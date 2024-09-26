@@ -17,9 +17,22 @@ __published:	// IDE-managed Components
 	TProgressBar *ProgressBar1;
 	TStatusBar *StatusBar1;
 	TPageControl *PageControl1;
-	TTabSheet *TabSheet1;
-	TTabSheet *TabSheet2;
+	TTabSheet *grid;
+	TTabSheet *Налаштування;
 	TMemo *Memo1;
+	TGridPanel *GridPanel2;
+	TGridPanel *GridPanelMain;
+	TGroupBox *GroupBox1;
+	TGroupBox *GroupBox2;
+	TButton *Button1;
+	TButton *Button2;
+	TGridPanel *GridPanel3;
+	TGridPanel *GridPanel4;
+	TCheckBox *CheckBox1;
+	TEdit *Edit1;
+	TButton *Button3;
+	TButton *Button4;
+	TButton *Button5;
 private:	// User declarations
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
