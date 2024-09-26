@@ -69,10 +69,8 @@ object Form1: TForm1
       Height = 60
       Align = alClient
       TabOrder = 0
-      ExplicitLeft = 224
-      ExplicitTop = 592
-      ExplicitWidth = 150
-      ExplicitHeight = 21
+      ExplicitTop = 548
+      ExplicitWidth = 898
     end
     object StatusBar1: TStatusBar
       Left = 1
@@ -94,8 +92,8 @@ object Form1: TForm1
           Style = psOwnerDraw
           Width = 50
         end>
-      ExplicitTop = 622
-      ExplicitHeight = 34
+      ExplicitTop = 608
+      ExplicitWidth = 898
     end
     object PageControl1: TPageControl
       Left = 1
@@ -105,10 +103,8 @@ object Form1: TForm1
       ActivePage = TabSheet2
       Align = alClient
       TabOrder = 2
-      ExplicitLeft = 81
-      ExplicitTop = 202
-      ExplicitWidth = 289
-      ExplicitHeight = 193
+      ExplicitWidth = 449
+      ExplicitHeight = 547
       object TabSheet1: TTabSheet
         Caption = 'TabSheet1'
       end
@@ -126,10 +122,9 @@ object Form1: TForm1
       Lines.Strings = (
         'Memo1')
       TabOrder = 3
-      ExplicitLeft = 656
-      ExplicitTop = 152
-      ExplicitWidth = 185
-      ExplicitHeight = 89
+      ExplicitLeft = 450
+      ExplicitWidth = 449
+      ExplicitHeight = 547
     end
   end
 end
