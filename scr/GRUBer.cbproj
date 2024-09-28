@@ -186,6 +186,10 @@
             <BuildOrder>1</BuildOrder>
             <PCH>true</PCH>
         </PCHCompile>
+        <CppCompile Include="HelpTool.cpp">
+            <DependentOn>HelpTool.h</DependentOn>
+            <BuildOrder>3</BuildOrder>
+        </CppCompile>
         <CppCompile Include="MainForm.cpp">
             <Form>Form1</Form>
             <FormType>dfm</FormType>

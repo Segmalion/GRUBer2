@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.323,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer2.cbproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.569,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.369,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Project1.cbproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.323,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer2.cbproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.775,=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.651,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\MainForm.dfm=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.307,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1PCH2.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer2PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.869,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\MainForm.dfm=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\MainForm.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.569,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1.cbproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.337,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1PCH2.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.307,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Project1PCH2.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer2PCH1.h</Transaction>
     <Transaction>1899.12.30 00:00:00.000.820,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer2.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer.cbproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.429,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Project1.cbproj=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Project1.cbproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.651,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\MainForm.cpp=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.cpp</Transaction>
@@ -16,10 +17,12 @@
     <Transaction>1899.12.30 00:00:00.000.869,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\MainForm.cpp=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\MainForm.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.h</Transaction>
     <Transaction>1899.12.30 00:00:00.000.816,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBer2PCH1.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\GRUBerPCH1.h</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.869,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\MainForm.dfm=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\MainForm.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.cpp=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.869,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\MainForm.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\MainForm.h</Transaction>
     <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.dfm=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.dfm</Transaction>
     <Transaction>1899.12.30 00:00:00.000.366,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Project1PCH1.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Project1PCH1.h</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.cpp=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.cpp</Transaction>
+    <Transaction>2024.09.28 12:01:33.092,=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Unit1.cpp</Transaction>
+    <Transaction>2024.09.28 12:02:05.216,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\HelpTool.cpp=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Unit1.cpp</Transaction>
+    <Transaction>2024.09.28 12:02:05.216,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\HelpTool.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\scr\Unit1.h</Transaction>
   </Transactions>
 </BorlandProject>
