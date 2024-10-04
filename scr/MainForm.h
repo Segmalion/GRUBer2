@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 
 #ifndef MainFormH
 #define MainFormH
@@ -11,6 +11,8 @@
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.NumberBox.hpp>
 //---------------------------------------------------------------------------
+#include <vector>
+//---------------------------------------------------------------------------
 class TForm1 : public TForm
 {
 __published:	// IDE-managed Components
@@ -19,7 +21,7 @@ __published:	// IDE-managed Components
 	TStatusBar *StatusBar1;
 	TPageControl *PageControl1;
 	TTabSheet *grid;
-	TTabSheet *������������;
+	TTabSheet *Налаштування;
 	TMemo *MemoLOG;
 	TGridPanel *GridPanel2;
 	TGridPanel *GridPanelMain;
@@ -73,16 +75,22 @@ public:		// User declarations
 extern PACKAGE TForm1 *Form1;
 //---------------------------------------------------------------------------
 struct edit {
-	int number;
-	UnicodeString  partitionName;
-	short partitionId;
-	UnicodeString  categoryName;
-	short categoryId;
-	UnicodeString  armClassName;
-	short armClassId;
-	UnicodeString respon;
-	UnicodeString coment;
-	UnicodeString DirGrubName;
+	int number = 0;
+	UnicodeString  partitionName = "Без Відділу";
+	short partitionId = -1;
+	UnicodeString  categoryName = "Без Категорії";
+	short categoryId = -1;
+	UnicodeString  armClassName = "Без Класу";
+	short armClassId = -1;
+	UnicodeString respon = "";
+	UnicodeString coment = "";
+	UnicodeString DirGrubName = "[--][DATE]Partition#Serial#Category";
+};
+struct config {
+	bool debug = 0;
+	std::vector<UnicodeString> partition;
+	std::vector<UnicodeString> armClass;
+	std::vector<UnicodeString> category;
 };
 //---------------------------------------------------------------------------
 #endif

@@ -10,20 +10,28 @@
 #pragma resource "*.dfm"
 TForm1 *Form1;
 //---------------------------------------------------------------------------
-const UnicodeString versionApp = "v.0.2.0.1";
-bool chDeb = false;
 edit ed;
+config cfg;
+//---------------------------------------------------------------------------
+const UnicodeString versionApp = "v.0.2.0.1";
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
 	printLog("[>]Запушенно GRUBer " + versionApp);
+	// ЧТение параметров
+	if(paramReadAndSet()) {
+		printLogDebug("Settings Read!");
+	}
+	else {
+		printLog("[!]Не знайденно GRUBer.ini!");
+	}
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::CheckBoxDebugClick(TObject *Sender)
 {
-	chDeb = CheckBoxDebug->Checked;
+	cfg.debug = CheckBoxDebug->Checked;
 }
 //---------------------------------------------------------------------------
 
@@ -75,4 +83,3 @@ void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 	printLogDebug("SET{ed.DirGrubName}=" + UnicodeString(ed.DirGrubName));
 }
 //---------------------------------------------------------------------------
-
