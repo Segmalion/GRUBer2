@@ -1,9 +1,10 @@
 ﻿object Form1: TForm1
   Left = 0
   Top = 0
+  BorderStyle = bsSingle
   Caption = 'Form1'
   ClientHeight = 567
-  ClientWidth = 864
+  ClientWidth = 1008
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,7 +15,7 @@
   object GridPanelMain: TGridPanel
     Left = 0
     Top = 0
-    Width = 864
+    Width = 1008
     Height = 567
     Align = alClient
     ColumnCollection = <
@@ -41,12 +42,12 @@
         Value = 30.000000000000000000
       end>
     TabOrder = 0
-    ExplicitWidth = 862
+    ExplicitWidth = 1006
     ExplicitHeight = 559
     object GridPanel1: TGridPanel
       Left = 1
       Top = 1
-      Width = 862
+      Width = 1006
       Height = 535
       Align = alClient
       Anchors = []
@@ -89,17 +90,17 @@
           Value = 50.000000000000000000
         end>
       TabOrder = 0
-      ExplicitWidth = 860
+      ExplicitWidth = 1004
       ExplicitHeight = 527
       object ProgressBar1: TProgressBar
         Left = 6
         Top = 485
-        Width = 850
+        Width = 994
         Height = 44
         Align = alClient
         TabOrder = 0
         ExplicitTop = 477
-        ExplicitWidth = 848
+        ExplicitWidth = 992
       end
       object PageControl1: TPageControl
         Left = 6
@@ -265,6 +266,26 @@
                     Column = 1
                     Control = EditArmClass
                     Row = 2
+                  end
+                  item
+                    Column = 0
+                    Control = Label9
+                    Row = 4
+                  end
+                  item
+                    Column = 1
+                    Control = EditLicWin
+                    Row = 4
+                  end
+                  item
+                    Column = 0
+                    Control = Label10
+                    Row = 5
+                  end
+                  item
+                    Column = 1
+                    Control = EditLicOffice
+                    Row = 5
                   end>
                 Padding.Left = 1
                 Padding.Top = 1
@@ -388,7 +409,6 @@
                   Height = 23
                   Anchors = [akLeft, akTop, akRight, akBottom]
                   TabOrder = 3
-                  Text = #1041#1077#1079' '#1074#1110#1076#1076#1110#1083#1091
                   OnChange = EditPartitionChange
                 end
                 object EditCategory: TComboBox
@@ -420,6 +440,51 @@
                   Anchors = [akLeft, akTop, akRight, akBottom]
                   TabOrder = 5
                   OnChange = EditArmClassChange
+                end
+                object Label9: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 129
+                  Width = 73
+                  Height = 15
+                  Anchors = [akLeft]
+                  Caption = #1051#1110#1094'. Windows'
+                end
+                object EditLicWin: TComboBox
+                  Left = 82
+                  Top = 125
+                  Width = 130
+                  Height = 23
+                  Style = csDropDownList
+                  Anchors = [akLeft, akTop, akRight, akBottom]
+                  TabOrder = 6
+                  Items.Strings = (
+                    #1040#1082#1090#1080#1074#1086#1074#1072#1085#1072
+                    #1053#1077' '#1072#1082#1090#1080#1074#1086#1074#1072#1085#1072
+                    'KMS')
+                end
+                object Label10: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 159
+                  Width = 56
+                  Height = 15
+                  Anchors = [akLeft]
+                  Caption = #1051#1110#1094'. Office'
+                end
+                object EditLicOffice: TComboBox
+                  Left = 82
+                  Top = 155
+                  Width = 130
+                  Height = 23
+                  Style = csDropDownList
+                  Anchors = [akLeft, akTop, akRight, akBottom]
+                  TabOrder = 7
+                  Items.Strings = (
+                    #1040#1082#1090#1080#1074#1086#1074#1072#1085#1072
+                    #1053#1077' '#1072#1082#1090#1080#1074#1086#1074#1072#1085#1072
+                    'KMS'
+                    #1055#1054' '#1074#1110#1076#1089#1091#1090#1085#1077)
                 end
               end
             end
@@ -743,12 +808,21 @@
             TabOrder = 0
             OnClick = CheckBoxDebugClick
           end
+          object CheckBoxShowLog: TCheckBox
+            Left = 3
+            Top = 400
+            Width = 97
+            Height = 17
+            Caption = 'Show LOG'
+            TabOrder = 1
+            OnClick = CheckBoxShowLogClick
+          end
         end
       end
       object MemoLOG: TMemo
         Left = 406
         Top = 6
-        Width = 450
+        Width = 594
         Height = 473
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
@@ -760,14 +834,14 @@
         ReadOnly = True
         ScrollBars = ssBoth
         TabOrder = 2
-        ExplicitWidth = 448
+        ExplicitWidth = 592
         ExplicitHeight = 465
       end
     end
     object StatusBar1: TStatusBar
       Left = 1
       Top = 536
-      Width = 862
+      Width = 1006
       Height = 30
       Align = alClient
       Anchors = []
@@ -786,7 +860,7 @@
           Width = 50
         end>
       ExplicitTop = 528
-      ExplicitWidth = 860
+      ExplicitWidth = 1004
     end
   end
 end

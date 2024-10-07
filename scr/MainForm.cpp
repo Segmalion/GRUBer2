@@ -18,6 +18,7 @@ const UnicodeString versionApp = "v.0.2.0.1";
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+   PageControl1->TabIndex = 0;
 	printLog("[>]Запушенно GRUBer " + versionApp);
 	// ЧТение параметров
 	if(paramReadAndSet()) {
@@ -29,10 +30,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::CheckBoxDebugClick(TObject *Sender)
-{
-	cfg.debug = CheckBoxDebug->Checked;
-}
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender)
@@ -83,3 +80,16 @@ void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 	printLogDebug("SET{ed.DirGrubName}=" + UnicodeString(ed.DirGrubName));
 }
 //---------------------------------------------------------------------------
+void __fastcall TForm1::CheckBoxShowLogClick(TObject *Sender)
+{
+	cfg.showLog = CheckBoxShowLog->Checked;
+	MemoLOG->Visible = cfg.showLog;
+	if (cfg.showLog) Form1->Width = 1024*Form1->ScaleFactor;
+	else Form1->Width = 421*Form1->ScaleFactor;
+}
+void __fastcall TForm1::CheckBoxDebugClick(TObject *Sender)
+{
+	cfg.debug = CheckBoxDebug->Checked;
+}
+//---------------------------------------------------------------------------
+

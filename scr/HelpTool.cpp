@@ -50,6 +50,9 @@ bool paramReadAndSet() {
 		//Параметр debug
 		fStr = findParam(ini, "[settings]", "debug");
 		if(fStr == 0 || fStr == 1) cfg.debug = fStr.ToInt();
+		//Параметр showLog
+		fStr = findParam(ini, "[settings]", "showLog");
+		if(fStr == 0 || fStr == 1) cfg.showLog = fStr.ToInt();
 		//Параметр partition
 		fStr = findParam(ini, "[arm]", "partition");
 		if(fStr != "ERROR") cfg.partition = strParamParsing(fStr);
@@ -60,11 +63,20 @@ bool paramReadAndSet() {
 		fStr = findParam(ini, "[arm]", "category");
 		if(fStr != "ERROR") cfg.category = strParamParsing(fStr);
 	} else return 0;
+	//Параметр debug
 	Form1->CheckBoxDebug->Checked = cfg.debug;
+	//Параметр showLog
+	Form1->CheckBoxShowLog->Checked = cfg.showLog;
+	Form1->MemoLOG->Visible = cfg.showLog;
+	if (cfg.showLog) Form1->Width = 1024*Form1->ScaleFactor;
+	else Form1->Width = 421*Form1->ScaleFactor;
+	//Параметр partition
 	for(auto i : cfg.partition)
 		Form1->EditPartition->AddItem(i, NULL);
+	//Параметр armClass
 	for(auto i : cfg.armClass)
 		Form1->EditArmClass->AddItem(i, NULL);
+   //Параметр category
 	for(auto i : cfg.category)
 		Form1->EditCategory->AddItem(i, NULL);
    return 1;

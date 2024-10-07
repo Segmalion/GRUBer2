@@ -58,6 +58,11 @@ __published:	// IDE-managed Components
 	TEdit *ShowName;
 	TButton *BtnLicense;
 	TCheckBox *CheckBoxDebug;
+	TLabel *Label9;
+	TComboBox *EditLicWin;
+	TLabel *Label10;
+	TComboBox *EditLicOffice;
+	TCheckBox *CheckBoxShowLog;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -67,6 +72,7 @@ __published:	// IDE-managed Components
 	void __fastcall EditResponChange(TObject *Sender);
 	void __fastcall EditComentChange(TObject *Sender);
 	void __fastcall EditDirGrubNameChange(TObject *Sender);
+	void __fastcall CheckBoxShowLogClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
@@ -82,12 +88,17 @@ struct edit {
 	short categoryId = -1;
 	UnicodeString  armClassName = "Без Класу";
 	short armClassId = -1;
+	UnicodeString  licWindowsName = "Не вказано";
+	short licWindowsId = -1;
+	UnicodeString  licOfficeName = "Не вказано";
+	short licOfficeId = -1;
 	UnicodeString respon = "";
 	UnicodeString coment = "";
 	UnicodeString DirGrubName = "[--][DATE]Partition#Serial#Category";
 };
 struct config {
-	bool debug = 0;
+	bool debug = false;
+	bool showLog = false;
 	std::vector<UnicodeString> partition;
 	std::vector<UnicodeString> armClass;
 	std::vector<UnicodeString> category;
