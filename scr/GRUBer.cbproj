@@ -179,6 +179,13 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
+        <CppCompile Include="CommentForm.cpp">
+            <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
+            <Form>FormComment</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>CommentForm.h</DependentOn>
+            <BuildOrder>4</BuildOrder>
+        </CppCompile>
         <CppCompile Include="GRUBer.cpp">
             <BuildOrder>0</BuildOrder>
         </CppCompile>
@@ -191,12 +198,14 @@
             <BuildOrder>3</BuildOrder>
         </CppCompile>
         <CppCompile Include="MainForm.cpp">
+            <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
             <Form>Form1</Form>
             <FormType>dfm</FormType>
             <DependentOn>MainForm.h</DependentOn>
             <BuildOrder>2</BuildOrder>
         </CppCompile>
         <FormResources Include="MainForm.dfm"/>
+        <FormResources Include="CommentForm.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -223,6 +232,9 @@
                 <Source>
                     <Source Name="MainSource">GRUBer.cpp</Source>
                 </Source>
+                <VFOLDERS>
+                    <VFOLDER ID="{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}" name="Form"/>
+                </VFOLDERS>
             </CPlusPlusBuilder.Personality>
             <Deployment Version="4">
                 <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgcrtl.dylib" Class="DependencyModule">

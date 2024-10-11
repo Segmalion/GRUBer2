@@ -12,6 +12,7 @@ TForm1 *Form1;
 //---------------------------------------------------------------------------
 edit ed;
 config cfg;
+bool stopBool = 0;
 //---------------------------------------------------------------------------
 const UnicodeString versionApp = "v.0.2.0.1";
 //---------------------------------------------------------------------------
@@ -20,18 +21,17 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 {
    PageControl1->TabIndex = 0;
 	printLog("[>]Запушенно GRUBer " + versionApp);
-	// ЧТение параметров
-	if(paramReadAndSet()) {
-		printLogDebug("Settings Read!");
-	}
-	else {
-		printLog("[!]Не знайденно GRUBer.ini!");
-	}
+	// Чтение параметров
+	if(paramReadAndSet()) {	printLogDebug("Settings Read!"); }
+		else { printLog("[!]Не знайденно GRUBer.ini!"); }
+	// Чтение сохраненной инфы
+   if(infoReadAndSet()) {	printLogDebug("Info Read!"); }
+		else { printLog("[!]Не знайденно GRUBer.ini!"); }
 }
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-
+/* Кнопки */
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender)
 {
 	printLogDebug("CLICK{BtnGruberRun}");
@@ -80,10 +80,10 @@ void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 	printLogDebug("SET{ed.DirGrubName}=" + UnicodeString(ed.DirGrubName));
 }
 //---------------------------------------------------------------------------
+/* Чекбоксы в настройках */
 void __fastcall TForm1::CheckBoxShowLogClick(TObject *Sender)
 {
 	cfg.showLog = CheckBoxShowLog->Checked;
-	MemoLOG->Visible = cfg.showLog;
 	if (cfg.showLog) Form1->Width = 1024*Form1->ScaleFactor;
 	else Form1->Width = 421*Form1->ScaleFactor;
 }

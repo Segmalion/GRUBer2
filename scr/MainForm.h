@@ -42,7 +42,6 @@ __published:	// IDE-managed Components
 	TLabel *Label4;
 	TEdit *EditRespon;
 	TLabel *Label5;
-	TEdit *EditComent;
 	TNumberBox *EditNumber;
 	TComboBox *EditPartition;
 	TComboBox *EditCategory;
@@ -63,6 +62,9 @@ __published:	// IDE-managed Components
 	TLabel *Label10;
 	TComboBox *EditLicOffice;
 	TCheckBox *CheckBoxShowLog;
+	TGridPanel *GridPanel7;
+	TButton *Button1;
+	TMemo *EditComent;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -102,6 +104,10 @@ struct config {
 	std::vector<UnicodeString> partition;
 	std::vector<UnicodeString> armClass;
 	std::vector<UnicodeString> category;
+};
+struct eC {
+	bool run=0;
+	bool exit=0;
 };
 //---------------------------------------------------------------------------
 #endif
