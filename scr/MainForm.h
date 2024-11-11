@@ -1,8 +1,7 @@
 ﻿//---------------------------------------------------------------------------
-
 #ifndef MainFormH
 #define MainFormH
-//---------------------------------------------------------------------------
+
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
@@ -10,7 +9,10 @@
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.NumberBox.hpp>
-//---------------------------------------------------------------------------
+#include <Vcl.Mask.hpp>
+#include "DosCommand.hpp"
+#include <Vcl.Grids.hpp>
+
 #include <vector>
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
@@ -65,6 +67,7 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel7;
 	TButton *Button1;
 	TMemo *EditComent;
+	TLabeledEdit *EditGrubUser;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -75,39 +78,17 @@ __published:	// IDE-managed Components
 	void __fastcall EditComentChange(TObject *Sender);
 	void __fastcall EditDirGrubNameChange(TObject *Sender);
 	void __fastcall CheckBoxShowLogClick(TObject *Sender);
+	void __fastcall Button1Click(TObject *Sender);
+	void __fastcall EditLicWinChange(TObject *Sender);
+	void __fastcall EditLicOfficeChange(TObject *Sender);
+	void __fastcall EditGrubUserChange(TObject *Sender);
+	void __fastcall BtnGruberDirOpenClick(TObject *Sender);
+	void __fastcall BtnGruberStopClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
-//---------------------------------------------------------------------------
-struct edit {
-	int number = 0;
-	UnicodeString  partitionName = "Без Відділу";
-	short partitionId = -1;
-	UnicodeString  categoryName = "Без Категорії";
-	short categoryId = -1;
-	UnicodeString  armClassName = "Без Класу";
-	short armClassId = -1;
-	UnicodeString  licWindowsName = "Не вказано";
-	short licWindowsId = -1;
-	UnicodeString  licOfficeName = "Не вказано";
-	short licOfficeId = -1;
-	UnicodeString respon = "";
-	UnicodeString coment = "";
-	UnicodeString DirGrubName = "[--][DATE]Partition#Serial#Category";
-};
-struct config {
-	bool debug = false;
-	bool showLog = false;
-	std::vector<UnicodeString> partition;
-	std::vector<UnicodeString> armClass;
-	std::vector<UnicodeString> category;
-};
-struct eC {
-	bool run=0;
-	bool exit=0;
-};
 //---------------------------------------------------------------------------
 #endif

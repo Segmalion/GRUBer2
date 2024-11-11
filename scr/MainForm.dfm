@@ -12,6 +12,7 @@
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  Position = poDesigned
   TextHeight = 15
   object GridPanelMain: TGridPanel
     Left = 0
@@ -89,6 +90,9 @@
         item
           SizeStyle = ssAbsolute
           Value = 50.000000000000000000
+        end
+        item
+          SizeStyle = ssAuto
         end>
       TabOrder = 0
       ExplicitWidth = 1004
@@ -379,7 +383,7 @@
                   Width = 130
                   Height = 23
                   Anchors = [akLeft, akTop, akRight, akBottom]
-                  MaxValue = 999.000000000000000000
+                  MaxValue = 9999.000000000000000000
                   MaxLength = 3
                   TabOrder = 0
                   SpinButtonOptions.Placement = nbspCompact
@@ -392,8 +396,12 @@
                   Width = 130
                   Height = 23
                   Anchors = [akLeft, akTop, akRight, akBottom]
+                  ItemIndex = 0
                   TabOrder = 1
+                  Text = #1041#1077#1079' '#1074#1110#1076#1076#1110#1083#1091
                   OnChange = EditPartitionChange
+                  Items.Strings = (
+                    #1041#1077#1079' '#1074#1110#1076#1076#1110#1083#1091)
                 end
                 object EditCategory: TComboBox
                   Left = 82
@@ -402,8 +410,12 @@
                   Height = 23
                   Style = csDropDownList
                   Anchors = [akLeft, akTop, akRight, akBottom]
+                  ItemIndex = 0
                   TabOrder = 2
+                  Text = #1041#1077#1079' '#1082#1072#1090#1077#1075#1086#1088#1110#1111
                   OnChange = EditCategoryChange
+                  Items.Strings = (
+                    #1041#1077#1079' '#1082#1072#1090#1077#1075#1086#1088#1110#1111)
                 end
                 object Label7: TLabel
                   AlignWithMargins = True
@@ -422,8 +434,12 @@
                   Height = 23
                   Style = csDropDownList
                   Anchors = [akLeft, akTop, akRight, akBottom]
+                  ItemIndex = 0
                   TabOrder = 3
+                  Text = #1041#1077#1079' '#1082#1083#1072#1089#1091
                   OnChange = EditArmClassChange
+                  Items.Strings = (
+                    #1041#1077#1079' '#1082#1083#1072#1089#1091)
                 end
                 object Label9: TLabel
                   AlignWithMargins = True
@@ -442,8 +458,12 @@
                   Height = 23
                   Style = csDropDownList
                   Anchors = [akLeft, akTop, akRight, akBottom]
+                  ItemIndex = 0
                   TabOrder = 4
+                  Text = #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
+                  OnChange = EditLicWinChange
                   Items.Strings = (
+                    #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
                     #1040#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     #1053#1077' '#1072#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     'KMS')
@@ -465,8 +485,12 @@
                   Height = 23
                   Style = csDropDownList
                   Anchors = [akLeft, akTop, akRight, akBottom]
+                  ItemIndex = 0
                   TabOrder = 5
+                  Text = #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
+                  OnChange = EditLicOfficeChange
                   Items.Strings = (
+                    #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
                     #1040#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     #1053#1077' '#1072#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     'KMS'
@@ -503,10 +527,8 @@
                       Value = 100.000000000000000000
                     end>
                   TabOrder = 6
-                  ExplicitLeft = 16
-                  ExplicitTop = 96
-                  ExplicitWidth = 185
-                  ExplicitHeight = 41
+                  ExplicitTop = 204
+                  ExplicitHeight = 27
                   DesignSize = (
                     138
                     28)
@@ -518,6 +540,7 @@
                     Anchors = [akLeft, akTop, akRight, akBottom]
                     Caption = '...'
                     TabOrder = 0
+                    OnClick = Button1Click
                   end
                   object EditComent: TMemo
                     Left = 4
@@ -527,6 +550,8 @@
                     Anchors = [akLeft, akTop, akRight, akBottom]
                     ScrollBars = ssVertical
                     TabOrder = 1
+                    WordWrap = False
+                    OnChange = EditComentChange
                   end
                 end
                 object EditRespon: TEdit
@@ -537,7 +562,7 @@
                   Anchors = []
                   TabOrder = 7
                   OnChange = EditResponChange
-                  ExplicitLeft = 78
+                  ExplicitTop = 177
                 end
               end
             end
@@ -551,6 +576,7 @@
               Caption = #1042#1110#1076#1082#1088#1080#1090#1080' '#1090#1077#1082#1091' '#1079' '#1075#1088#1072#1073#1086#1084
               Enabled = False
               TabOrder = 1
+              OnClick = BtnGruberDirOpenClick
               ExplicitTop = 295
             end
             object BtnParserOpen: TButton
@@ -634,6 +660,7 @@
                 Caption = #1047#1091#1087#1080#1085#1080#1090#1080' GRUBer'
                 Enabled = False
                 TabOrder = 1
+                OnClick = BtnGruberStopClick
                 ExplicitTop = 145
               end
               object BtnEsetUpdate: TButton
@@ -715,6 +742,7 @@
                 Height = 23
                 Alignment = taCenter
                 Anchors = [akLeft, akTop, akRight, akBottom]
+                ReadOnly = True
                 TabOrder = 1
                 Text = 'EditDirGrubName'
                 OnChange = EditDirGrubNameChange
@@ -872,6 +900,18 @@
             Caption = 'Show LOG'
             TabOrder = 1
             OnClick = CheckBoxShowLogClick
+          end
+          object EditGrubUser: TLabeledEdit
+            Left = 120
+            Top = 411
+            Width = 263
+            Height = 23
+            EditLabel.Width = 67
+            EditLabel.Height = 15
+            EditLabel.Caption = #1050#1086#1088#1080#1089#1090#1091#1074#1072#1095':'
+            TabOrder = 2
+            Text = ''
+            OnChange = EditGrubUserChange
           end
         end
       end

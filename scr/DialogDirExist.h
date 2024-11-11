@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 
-#ifndef CommentFormH
-#define CommentFormH
+#ifndef DialogDirExistH
+#define DialogDirExistH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
@@ -9,18 +9,23 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
 //---------------------------------------------------------------------------
-class TFormComment : public TForm
+class TFormDirExist : public TForm
 {
 __published:	// IDE-managed Components
 	TGridPanel *GridPanel1;
-	TMemo *EditComment;
+	TLabel *Label1;
+	TEdit *ShowDir;
+	TGridPanel *GridPanel2;
 	TButton *ButtonCancel;
-	TButton *ButtonSave;
+	TButton *ButtonOpen;
+	TButton *ButtonOK;
+	void __fastcall ButtonOKClick(TObject *Sender);
+	void __fastcall ButtonCancelClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
-	__fastcall TFormComment(TComponent* Owner);
+	__fastcall TFormDirExist(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormComment *FormComment;
+extern PACKAGE TFormDirExist *FormDirExist;
 //---------------------------------------------------------------------------
 #endif

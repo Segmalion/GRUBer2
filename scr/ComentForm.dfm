@@ -1,4 +1,4 @@
-object FormComment: TFormComment
+object FormComent: TFormComent
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
@@ -33,7 +33,7 @@ object FormComment: TFormComment
       item
         Column = 0
         ColumnSpan = 2
-        Control = EditComment
+        Control = EditComent
         Row = 0
       end
       item
@@ -59,7 +59,7 @@ object FormComment: TFormComment
     ExplicitTop = 160
     ExplicitWidth = 185
     ExplicitHeight = 41
-    object EditComment: TMemo
+    object EditComent: TMemo
       AlignWithMargins = True
       Left = 3
       Top = 3
@@ -67,7 +67,7 @@ object FormComment: TFormComment
       Height = 385
       Align = alClient
       Lines.Strings = (
-        'EditComment')
+        'EditComent')
       ScrollBars = ssBoth
       TabOrder = 0
     end
@@ -80,6 +80,7 @@ object FormComment: TFormComment
       Align = alClient
       Caption = #1042#1110#1076#1084#1110#1085#1080#1090#1080
       TabOrder = 1
+      OnClick = ButtonCancelClick
       ExplicitLeft = 272
       ExplicitTop = 208
       ExplicitWidth = 75
@@ -94,6 +95,7 @@ object FormComment: TFormComment
       Align = alClient
       Caption = #1047#1073#1077#1088#1077#1075#1090#1080
       TabOrder = 2
+      OnClick = ButtonSaveClick
       ExplicitLeft = 272
       ExplicitTop = 208
       ExplicitWidth = 75

@@ -78,8 +78,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
-        <DynamicRTL>true</DynamicRTL>
-        <UsePackages>true</UsePackages>
         <IntermediateOutputDir>.\$(Platform)\$(Config)</IntermediateOutputDir>
         <FinalOutputDir>.\$(Platform)\$(Config)</FinalOutputDir>
         <BCC_wpar>false</BCC_wpar>
@@ -88,15 +86,17 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <AllPackageLibs>rtl.lib;vcl.lib;vclwinx.lib;vclimg.lib;bindengine.lib</AllPackageLibs>
+        <AllPackageLibs>rtl.lib;vcl.lib;vclwinx.lib;vclimg.lib;bindengine.lib;DOSCommandCR.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
         <Icon_MainIcon>$(BDS)\bin\cbuilder_PROJECTICON.ico</Icon_MainIcon>
         <UWP_CppLogo44>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_150.png</UWP_CppLogo150>
         <SanitizedProjectName>GRUBer</SanitizedProjectName>
-        <IncludePath>..\scr\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>..\scr\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\..\..\cppbuilder\GRUBer2\;include\;..\scr\;$(IncludePath)</IncludePath>
+        <VerInfo_Locale>1058</VerInfo_Locale>
+        <ILINK_LibraryPath>..\..\..\cppbuilder\GRUBer2\;include\;..\scr\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <PackageImports>adortl;appanalytics;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindcompvclsmp;bindcompvclwinx;bindengine;CloudService;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;FireDAC;FireDACADSDriver;FireDACCommon;FireDACCommonDriver;FireDACCommonODBC;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACPgDriver;FireDACSqliteDriver;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;RESTBackendComponents;RESTComponents;rtl;Skia;soapmidas;soaprtl;soapserver;tethering;vcl;vclactnband;vcldb;vcldsnap;vcledge;vclFireDAC;vclie;vclimg;VCLRESTComponents;VclSmp;vcltouch;vclwinx;vclx;xmlrtl;$(PackageImports)</PackageImports>
@@ -154,9 +154,11 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <LinkPackageImports>rtl.bpi;vcl.bpi;vclwinx.bpi;vclimg.bpi;bindengine.bpi</LinkPackageImports>
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <LinkPackageStatics>rtl.lib;vcl.lib;vclwinx.lib;vclimg.lib;bindengine.lib;DOSCommandCR.lib</LinkPackageStatics>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -179,12 +181,33 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
-        <CppCompile Include="CommentForm.cpp">
+        <CppCompile Include="Arm.cpp">
+            <DependentOn>Arm.h</DependentOn>
+            <BuildOrder>9</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="ComentForm.cpp">
             <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
-            <Form>FormComment</Form>
+            <Form>FormComent</Form>
             <FormType>dfm</FormType>
-            <DependentOn>CommentForm.h</DependentOn>
+            <DependentOn>ComentForm.h</DependentOn>
             <BuildOrder>4</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="DialogDirExist.cpp">
+            <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
+            <Form>FormDirExist</Form>
+            <FormType>dfm</FormType>
+            <DependentOn>DialogDirExist.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Fille.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>Fille.h</DependentOn>
+            <BuildOrder>13</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="GetSMB.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>GetSMB.h</DependentOn>
+            <BuildOrder>7</BuildOrder>
         </CppCompile>
         <CppCompile Include="GRUBer.cpp">
             <BuildOrder>0</BuildOrder>
@@ -193,8 +216,9 @@
             <BuildOrder>1</BuildOrder>
             <PCH>true</PCH>
         </PCHCompile>
-        <CppCompile Include="HelpTool.cpp">
-            <DependentOn>HelpTool.h</DependentOn>
+        <CppCompile Include="Help.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>Help.h</DependentOn>
             <BuildOrder>3</BuildOrder>
         </CppCompile>
         <CppCompile Include="MainForm.cpp">
@@ -204,8 +228,14 @@
             <DependentOn>MainForm.h</DependentOn>
             <BuildOrder>2</BuildOrder>
         </CppCompile>
+        <CppCompile Include="Text.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>Text.h</DependentOn>
+            <BuildOrder>12</BuildOrder>
+        </CppCompile>
         <FormResources Include="MainForm.dfm"/>
-        <FormResources Include="CommentForm.dfm"/>
+        <FormResources Include="ComentForm.dfm"/>
+        <FormResources Include="DialogDirExist.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -234,7 +264,13 @@
                 </Source>
                 <VFOLDERS>
                     <VFOLDER ID="{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}" name="Form"/>
+                    <VFOLDER ID="{9A310DFE-C063-4294-88FF-C6C1FB9225A6}" name="tool"/>
                 </VFOLDERS>
+                <Folders/>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k290.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp290.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+                </Excluded_Packages>
             </CPlusPlusBuilder.Personality>
             <Deployment Version="4">
                 <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgcrtl.dylib" Class="DependencyModule">
