@@ -20,10 +20,10 @@ TForm1 *Form1;
 //---------------------------------------------------------------------------
 //обявление переменных типа структуры
 Arm curPC;
+Dir curDir;
 histGrub lastGrub;
 cnfgGrub curConfig;
 infoEset curEset;
-dir curDir;
 //обявление переменных
 UnicodeString cmdEXE, curentDate;
 bool stopBool;
@@ -34,28 +34,19 @@ const short vers1 = 0, vers2 = 2, vers3 = 0, vers4 = 5;
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-	if (curPC.getInfo()) {
-		Form1->ShowName->Text = curPC.desktopName;
-      Form1->ShowSerial->Text = curPC.serial;
-	}
-	else printLog("[!]Не вийшло отримати данні компютера!");
+	Form1->ShowName->Text = curPC.getDesktopName();
+	Form1->ShowSerial->Text = curPC.getSerial();
    // Проверка наличия CMD и прав на выполнение
 	cmdEXE = cmdCheck();
 	if(cmdEXE != "ERROR") printLogDebug(curConfig.debug, "Patch to CMD.EXE set!");
 		else printLog("[!]Не мае доступу чи прав на CMD!");
-	// Настройка папок
-	curDir.progPath = GetCurrentDir();
-	curDir.base = "base"; // папка базы
-	curDir.basePath = curDir.progPath + "\\" + curDir.base;
-	curDir.baseDate = "[" + curDate() + "]"; //папка даты
-	curDir.baseDatePath = curDir.basePath + "\\" + curDir.baseDate;
 	// Чтение параметров GRUBer'а
 	if(paramReadAndSet(curConfig)) printLogDebug(curConfig.debug, "Settings Read!");
 		else printLog("[!]Не знайденно GRUBer.ini!");
 	// Чтение сохраненной инфы об АРМ
 	if(infoReadAndSet(curPC)) {
 		printLogDebug(curConfig.debug, "Info Read!");
-		Form1->EditDirGrubName->Text = curPC.dirCurGrubName(curDate());;
+		Form1->EditDirGrubName->Text = curPC.dirGrubName();
 	} else printLog("[!]Не знайденно GRUBer.ini!");
 	// ---
 	PageControl1->TabIndex = 0;
@@ -64,6 +55,34 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 							  + UnicodeString(vers3) + "."
 							  + UnicodeString(vers4);
 	printLog("[>]Запушенно GRUBer v." + versionApp);
+}
+//---------------------------------------------------------------------------
+std::vector<UnicodeString> TForm1::fileInfoGrub() {
+	std::vector<UnicodeString> vStr;
+	// раздел даты и пользователя
+	vStr.push_back("[lastGrub]");
+	vStr.push_back("lastGrubDate=" + lastGrub.date);
+	vStr.push_back("lastGrubUser=" + lastGrub.user);
+	// раздел об АРМ-1
+	vStr.push_back("[infoGrubARM]");
+	for(auto str : curPC.mStrInfoArmGrub()) vStr.push_back(str);
+	// раздел об АРМ-2
+	vStr.push_back("[infoARM]");
+	for(auto str : curPC.mStrInfoArm()) vStr.push_back(str);
+	// раздел об ESET
+	vStr.push_back("[infoESET]");
+	vStr.push_back("dirMirror=" + curEset.dirMirror);
+	vStr.push_back("autoUpdate=" + UnicodeString(curEset.autoUpdate));
+	vStr.push_back("lastUpdateDate=" + curEset.lastUpdateDate);
+	vStr.push_back("lastUpdateUser=" + curEset.lastUpdateUser);
+	vStr.push_back("lastUpdateArchive=" + curEset.lastUpdateArchive);
+	// раздел коментария
+	vStr.push_back("[comment]");
+	for (auto str : curPC.getComent()) {
+		vStr.push_back(str);
+	}
+	vStr.push_back("#stop");
+	return vStr;
 }
 //---------------------------------------------------------------------------
 /* Кнопки */
@@ -84,11 +103,10 @@ void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 	/* Сохранение введеной инфы о ПК */
 	infoSetToFille(curEset, lastGrub, curPC);
 	/* Проверка и создание папок */
-	if (!DirectoryExists(curDir.basePath)) CreateDir(curDir.basePath);
-	if (!DirectoryExists(curDir.baseDatePath)) CreateDir(curDir.baseDatePath);
+	curDir.setGrubFull(curPC.dirGrubName());
 	// папка граба
-	if (DirectoryExists(curDir.baseGrubPath)) {
-		FormDirExist->ShowDir->Text=(curDir.baseGrub);
+	if (DirectoryExists(curDir.getGrubFull())) {
+		FormDirExist->ShowDir->Text=(curPC.dirGrubName());
 		FormDirExist->ShowModal();
 		printLog("Знайденно попередню теку!");
 		if (!dirGrubRewrite) {
@@ -99,50 +117,14 @@ void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 			return;
 		}
 		printLog("Видаляю попередні файли...");
-		//deleteDir(curDirGrub);
 	}
-	if (!DirectoryExists(curDir.baseGrubPath)) CreateDir(curDir.baseGrubPath);
+	curDir.check();
 	/* 1 - gruber_info.txt */
 	if (!stopBool) {
-		outFilePath = curDir.baseGrub + "\\gruber_info.txt";
+		outFilePath = curDir.getGrubFull() + "\\gruber_info.ini";
 		TStringList *infoFille = new TStringList;
-		/* формирование файла */
-		// раздел даты и пользователя
-		infoFille->Add("[lastGrub]");
-		infoFille->Add("lastGrubDate=" + lastGrub.date);
-		infoFille->Add("lastGrubUser=" + lastGrub.user);
-		// раздел об АРМ-1
-		infoFille->Add("[infoGrubARM]");
-		infoFille->Add("number=" + UnicodeString(curPC.number));
-		infoFille->Add("partition=" + curPC.partitionName);
-		infoFille->Add("armClassID=" + UnicodeString(curPC.armClassId));
-		infoFille->Add("armClasName=" + curPC.armClassName);
-		infoFille->Add("categoryID=" + UnicodeString(curPC.categoryId));
-		infoFille->Add("categoryName=" + curPC.categoryName);
-		infoFille->Add("licenseWindowsID=" + UnicodeString(curPC.licWindowsId));
-		infoFille->Add("licenseWindowsName=" + curPC.licWindowsName);
-		infoFille->Add("licenseOfficeID=" + UnicodeString(curPC.licOfficeId));
-		infoFille->Add("licenseOfficeName=" + curPC.licOfficeName);
-		infoFille->Add("respon=" + curPC.respon);
-		// раздел об АРМ-2
-		infoFille->Add("[infoARM]");
-		infoFille->Add("serialNumber=" + curPC.serial);
-		infoFille->Add("desktopName=" + curPC.desktopName);
-		// раздел об ESET
-		infoFille->Add("[infoESET]");
-		infoFille->Add("dirMirror=" + curEset.dirMirror);
-		infoFille->Add("autoUpdate=" + UnicodeString(curEset.autoUpdate));
-		infoFille->Add("lastUpdateDate=" + curEset.lastUpdateDate);
-		infoFille->Add("lastUpdateUser=" + curEset.lastUpdateUser);
-		infoFille->Add("lastUpdateArchive=" + curEset.lastUpdateArchive);
-		// раздел коментария
-		infoFille->Add("[comment]");
-		for (auto i : curPC.coment) {
-			infoFille->Add(i);
-		}
-		infoFille->Add("#stop");
-		/* конец формирования файла */
-		infoFille->SaveToFile(curDir.baseGrub, TEncoding::UTF8); // запись в файл
+		for(auto str : fileInfoGrub()) infoFille->Add (str);
+		infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 	}
 	/*  */
 	/*  */
@@ -154,8 +136,8 @@ void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 	Form1->BtnGruberRun->Enabled = true;
 	Form1->BtnGruberStop->Enabled = false;
 	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-   Form1->CheckBox1->Checked = DirectoryExists(curDir.baseGrubPath);
-	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.baseGrubPath);
+	Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
+	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 }
 // просмотр коментария
 void __fastcall TForm1::Button1Click(TObject *Sender)
@@ -166,7 +148,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 // открыть папку Граба
 void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
 {
-	ShellExecuteW(NULL, L"open", curDir.baseGrubPath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	ShellExecuteW(NULL, L"open", curDir.getGrubFull().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // остановка Граба
 void __fastcall TForm1::BtnGruberStopClick(TObject *Sender)
@@ -177,72 +159,52 @@ void __fastcall TForm1::BtnGruberStopClick(TObject *Sender)
 /* Изменение полей */
 void __fastcall TForm1::EditNumberChange(TObject *Sender)
 {
-	curPC.number = Form1->EditNumber->Value;
-	Form1->EditDirGrubName->Text = curPC.dirCurGrubName(curDate());
-	printLogDebug(curConfig.debug, "SET{cfg.number}=" + UnicodeString(curPC.number));
+	curPC.setNumber(EditNumber->Value);
+	EditDirGrubName->Text = curPC.dirGrubName();
 }
 void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
-	curPC.partitionName = Form1->EditPartition->Text;
-	Form1->EditDirGrubName->Text = curPC.dirCurGrubName(curDate());
-	printLogDebug(curConfig.debug, "SET{curPC.partitionName}=" + UnicodeString(curPC.partitionName));
+	curPC.setPartition(EditPartition->Text);
+	EditDirGrubName->Text = curPC.dirGrubName();
 }
 void __fastcall TForm1::EditArmClassChange(TObject *Sender)
 {
-	curPC.armClassId   = Form1->EditArmClass->ItemIndex;
-	curPC.armClassName = Form1->EditArmClass->Text;
-	printLogDebug(curConfig.debug, "SET{curPC.armClassId}=" + UnicodeString(curPC.armClassId));
-	printLogDebug(curConfig.debug, "SET{curPC.armClassName}=" + UnicodeString(curPC.armClassName));
+	curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
 }
 void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 {
-	curPC.categoryId   = Form1->EditCategory->ItemIndex;
-	curPC.categoryName = Form1->EditCategory->Text;
-	Form1->EditDirGrubName->Text = curPC.dirCurGrubName(curDate());
-	printLogDebug(curConfig.debug, "SET{curPC.categoryId}=" + UnicodeString(curPC.categoryId));
-	printLogDebug(curConfig.debug, "SET{curPC.categoryName}=" + UnicodeString(curPC.categoryName));
+	curPC.setCategory(EditCategory->Text, EditCategory->ItemIndex);
+	EditDirGrubName->Text = curPC.dirGrubName();
 }
 void __fastcall TForm1::EditResponChange(TObject *Sender)
 {
-	curPC.respon = Form1->EditRespon->Text;
-	Form1->EditDirGrubName->Text = curPC.dirCurGrubName(curDate());
-	printLogDebug(curConfig.debug, "SET{curPC.respon}=" + UnicodeString(curPC.respon));
+	curPC.setRespon(EditRespon->Text);
 }
 void __fastcall TForm1::EditLicWinChange(TObject *Sender)
 {
-	curPC.licWindowsId = Form1->EditLicWin->ItemIndex;
-	curPC.licWindowsName = Form1->EditLicWin->Text;
-	printLogDebug(curConfig.debug, "SET{curPC.licWindowsId}=" + UnicodeString(curPC.licWindowsId));
-	printLogDebug(curConfig.debug, "SET{curPC.licWindowsName}=" + UnicodeString(curPC.licWindowsName));
+	curPC.setLicWindows(EditLicWin->Text, EditLicWin->ItemIndex);
 }
 void __fastcall TForm1::EditLicOfficeChange(TObject *Sender)
 {
-	curPC.licOfficeId = Form1->EditLicOffice->ItemIndex;
-	curPC.licOfficeName = Form1->EditLicOffice->Text;
-	printLogDebug(curConfig.debug, "SET{curPC.licOfficeId}=" + UnicodeString(curPC.licOfficeId));
-	printLogDebug(curConfig.debug, "SET{curPC.licOfficeName}=" + UnicodeString(curPC.licOfficeName));
+	curPC.setLicOffice(EditLicOffice->Text, EditLicOffice->ItemIndex);
 }
 void __fastcall TForm1::EditComentChange(TObject *Sender)
 {
-	curPC.coment.clear();
+	std::vector<UnicodeString> vStr;
 	for (auto i : Form1->EditComent->Lines) {
-		curPC.coment.push_back(i);
+		vStr.push_back(i);
 	}
-	printLogDebug(curConfig.debug, "SET{curPC.coment}");
+	curPC.setComent(vStr);
 }
 void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 {
-	curPC.dirGrubName = Form1->EditDirGrubName->Text;
-	curDir.baseGrub = curPC.dirGrubName;
-	curDir.baseGrubPath = curDir.baseDatePath + "\\" + curDir.baseGrub;
-	Form1->CheckBox1->Checked = DirectoryExists(curDir.baseGrubPath);
-	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.baseGrubPath);
-	printLogDebug(curConfig.debug, "SET{curPC.DirGrubName}=" + UnicodeString(curPC.dirGrubName));
+	curDir.setGrubFull(curPC.dirGrubName());
+	Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
+	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 }
 void __fastcall TForm1::EditGrubUserChange(TObject *Sender)
 {
 	curConfig.grubUser = Form1->EditGrubUser->Text;
-	printLogDebug(curConfig.debug, "SET{curConfig.grubUser}=" + curConfig.grubUser);
 }
 //---------------------------------------------------------------------------
 /* Чекбоксы в настройках */

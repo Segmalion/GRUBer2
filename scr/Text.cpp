@@ -57,3 +57,47 @@ UnicodeString fixDirName(UnicodeString str)
 	return str;
 }
 //---------------------------------------------------------------------------
+/* Парсинг параметров */
+UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm)
+{
+	UnicodeString resultStr, findStr;
+	bool findCat = false;
+	for (int i = 0; i < ini->Count; i++) {
+		findStr = ini->Strings[i];
+		//printLog(str);
+		if (findCat == false && findStr == cat) {
+			findCat = true;
+			continue;
+		}
+		if (findCat == true && isBeginUStr(findStr, "[")) {
+			break;
+		}
+		if (findCat == true && isBeginUStr(findStr, prm)) {
+			resultStr = findStr.SubString(prm.Length()+2,findStr.Length());
+			return resultStr;
+		}
+	}
+	return "0";
+}
+std::vector<UnicodeString> findCategory(TStringList *ini, UnicodeString cat) {
+	std::vector<UnicodeString> findMulStr;
+	UnicodeString findStr;
+	bool findCat = false;
+	for (int i = 0; i < ini->Count; i++) {
+		findStr = ini->Strings[i];
+		if (findCat == false && findStr == cat) {
+			findCat = true;
+			continue;
+		}
+		if (findCat == true && isBeginUStr(findStr, "#stop")) {
+			return findMulStr;
+		}
+		if (findCat == true) {
+			findMulStr.push_back(findStr);
+			continue;
+		}
+	}
+	findMulStr.push_back("ERROR");
+	return findMulStr;
+}
+//---------------------------------------------------------------------------

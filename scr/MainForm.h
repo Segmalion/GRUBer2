@@ -85,10 +85,12 @@ __published:	// IDE-managed Components
 	void __fastcall BtnGruberDirOpenClick(TObject *Sender);
 	void __fastcall BtnGruberStopClick(TObject *Sender);
 private:	// User declarations
+   std::vector<UnicodeString> fileInfoGrub();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
+
 //---------------------------------------------------------------------------
 #endif

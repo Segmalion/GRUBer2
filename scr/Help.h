@@ -24,11 +24,20 @@ struct errCode {
 	bool run=0;
 	bool exit=0;
 };
-struct dir {
-	UnicodeString progPath;
-	UnicodeString base, basePath;
-	UnicodeString baseDate, baseDatePath;
-	UnicodeString baseGrub, baseGrubPath;
+//---------------------------------------------------------------------------
+class Dir {
+private:
+	UnicodeString progFull;
+	UnicodeString baseName, baseFull;
+	UnicodeString dateName, dateFull;
+	UnicodeString grubName, grubFull;
+public:
+	Dir();
+	void check();
+	//сеттеры
+	void setGrubFull(UnicodeString str);
+	//геттеры
+	UnicodeString getGrubFull();
 };
 //---------------------------------------------------------------------------
 void mainGrub();
@@ -45,11 +54,9 @@ UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
 void printLog(UnicodeString str);
 void printLogDebug(bool debug, UnicodeString str);
 //---------------------------------------------------------------------------
-UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
-std::vector<UnicodeString> findCategory(TStringList *ini, UnicodeString cat);
 bool paramReadAndSet(cnfgGrub &cfg);
 bool infoReadAndSet(Arm &curPC);
-bool infoSetToFille(const infoEset &cfgEset, const histGrub &lastGrub, const Arm &curPC);
+bool infoSetToFille(infoEset &cfgEset, histGrub &lastGrub, Arm &curPC);
 //---------------------------------------------------------------------------
 // UnicodeString dirCurGrubName (arm &curPC, UnicodeString date);
 //---------------------------------------------------------------------------

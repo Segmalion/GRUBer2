@@ -17,8 +17,25 @@
 extern UnicodeString cmdEXE;
 extern bool stopBool;
 //---------------------------------------------------------------------------
-/* Основной граб */
-
+Dir::Dir() {
+	progFull = GetCurrentDir();
+	baseName = "base";
+	dateName = "[" + curDate() + "]";
+	baseFull = progFull + "\\" + baseName;
+	dateFull = baseFull + "\\" + dateName;
+}
+void Dir::check() {
+	if (!DirectoryExists(baseFull)) CreateDir(baseFull);
+	if (!DirectoryExists(dateFull)) CreateDir(dateFull);
+	if (!DirectoryExists(grubFull)) CreateDir(grubFull);
+}
+void Dir::setGrubFull (UnicodeString str) {
+	grubName = str;
+	grubFull = dateFull + "\\" + grubName;
+}
+UnicodeString Dir::getGrubFull() {
+	return grubFull;
+}
 //---------------------------------------------------------------------------
 /* Запуск внешнего ПО с ожиданием (путь , аргументы, статус окна) */
 errCode app(UnicodeString Tool, UnicodeString ToolArg, int i)
@@ -69,27 +86,7 @@ errCode app(UnicodeString Tool, UnicodeString ToolArg, int i)
 	return retCode;
 }
 //---------------------------------------------------------------------------
-/* Сборка именни папки */
 
-/*
-UnicodeString dirCurGrubName (arm &curPC, UnicodeString date)
-{
-	UnicodeString str;
-	str = "[";
-	// number
-	if (curPC.number == 0) {
-		str = str + "--";
-	} else str = str + UnicodeString(curPC.number);
-	str = str + "][" + date + "]";
-	// partition
-	str = str + curPC.partitionName;
-	// serial
-	str = str + "#" + curPC.serial;
-	// category
-	str = str + "#" + curPC.categoryName;
-	//curPC.dirGrubName = fixDirName(str);
-	return fixDirName(str);
-} */
 //---------------------------------------------------------------------------
 /* Вывод логов */
 void printLog(UnicodeString str)
@@ -116,50 +113,7 @@ UnicodeString cmdCheck(void)
 	return "ERROR";
 }
 //---------------------------------------------------------------------------
-/* Чтение и запись файла настроек */
-UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm)
-{
-	UnicodeString resultStr, findStr;
-	bool findCat = false;
-	for (int i = 0; i < ini->Count; i++) {
-		findStr = ini->Strings[i];
-		//printLog(str);
-		if (findCat == false && findStr == cat) {
-			findCat = true;
-			continue;
-		}
-		if (findCat == true && isBeginUStr(findStr, "[")) {
-			break;
-		}
-		if (findCat == true && isBeginUStr(findStr, prm)) {
-			resultStr = findStr.SubString(prm.Length()+2,findStr.Length());
-			return resultStr;
-		}
-	}
-	return "ERROR";
-}
-std::vector<UnicodeString> findCategory(TStringList *ini, UnicodeString cat) {
-	std::vector<UnicodeString> findMulStr;
-	UnicodeString findStr;
-	bool findCat = false;
-	for (int i = 0; i < ini->Count; i++) {
-		findStr = ini->Strings[i];
-		if (findCat == false && findStr == cat) {
-			findCat = true;
-			continue;
-		}
-		if (findCat == true && isBeginUStr(findStr, "#stop")) {
-			return findMulStr;
-		}
-		if (findCat == true) {
-			findMulStr.push_back(findStr);
-			continue;
-		}
-	}
-	findMulStr.push_back("ERROR");
-	return findMulStr;
-}
-//Основные функции
+/* Чтение файла настроек */
 bool paramReadAndSet(cnfgGrub &cfg)
 {
 	UnicodeString iniFile = GetCurrentDir() + "\\GRUBer.ini";
@@ -167,87 +121,69 @@ bool paramReadAndSet(cnfgGrub &cfg)
 		UnicodeString findStr;
 		TStringList *ini = new TStringList;
 		ini->LoadFromFile(iniFile, TEncoding::UTF8);
-		int i = ini->Count;
+		//int i = ini->Count;
 		//Параметр debug
 		findStr = findParam(ini, "[settings]", "debug");
-		if(findStr == 0 || findStr == 1) cfg.debug = findStr.ToInt();
+		if(findStr == 0 || findStr == 1) {
+			cfg.debug = findStr.ToInt();
+			Form1->CheckBoxDebug->Checked = cfg.debug;
+		}
 		//Параметр showLog
 		findStr = findParam(ini, "[settings]", "showLog");
-		if(findStr == 0 || findStr == 1) cfg.showLog = findStr.ToInt();
+		if(findStr == 0 || findStr == 1) {
+			cfg.showLog = findStr.ToInt();
+         Form1->CheckBoxShowLog->Checked = cfg.showLog;
+			if (cfg.showLog) Form1->Width = 1024*Form1->ScaleFactor;
+			else Form1->Width = 421*Form1->ScaleFactor;
+		}
 		//Параметр partition
 		findStr = findParam(ini, "[arm]", "partition");
-		if(findStr != "ERROR") cfg.partition = strParamParsing(findStr);
+		if(findStr != "0") {
+			cfg.partition = strParamParsing(findStr);
+			for(auto i : cfg.partition) Form1->EditPartition->Items->Add(i);
+		}
 		//Параметр armClass
-		findStr = findParam(ini, "[arm]", "armClass");
-		if(findStr != "ERROR") cfg.armClass = strParamParsing(findStr);
+		findStr = findParam(ini, "[arm]", "class");
+		if(findStr != "0") {
+			cfg.armClass = strParamParsing(findStr);
+			for(auto i : cfg.armClass) Form1->EditArmClass->Items->Add(i);
+		}
 		//Параметр category
 		findStr = findParam(ini, "[arm]", "category");
-		if(findStr != "ERROR") cfg.category = strParamParsing(findStr);
+		if(findStr != "0") {
+			cfg.category = strParamParsing(findStr);
+			for(auto i : cfg.category) Form1->EditCategory->Items->Add(i);
+		}
 		//Параметр user
 		findStr = findParam(ini, "[settings]", "user");
-		if(findStr != "ERROR") cfg.grubUser = findStr;
+		if(findStr != "0") {
+			cfg.grubUser = findStr;
+			Form1->EditGrubUser->Text = cfg.grubUser;
+		}
+		return true;
 	} else return false;
-	/* Параметр debug */
-	Form1->CheckBoxDebug->Checked = cfg.debug;
-	/* Параметр showLog */
-	Form1->CheckBoxShowLog->Checked = cfg.showLog;
-	if (cfg.showLog) Form1->Width = 1024*Form1->ScaleFactor;
-	else Form1->Width = 421*Form1->ScaleFactor;
-	/* Параметр partition */
-	for(auto i : cfg.partition) Form1->EditPartition->Items->Add(i);
-	/* Параметр armClass */
-	for(auto i : cfg.armClass) Form1->EditArmClass->Items->Add(i);
-	/* Параметр category */
-	for(auto i : cfg.category) Form1->EditCategory->Items->Add(i);
-	/* Параметр user */
-	Form1->EditGrubUser->Text = cfg.grubUser;
-	return true;
 }
+/* Чтение файла с инфой по АРМу */
 bool infoReadAndSet(Arm &curPC)
 {
 	UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
 	if (FileExists(dir + "gruber_info.ini")) {
-		UnicodeString findStr;
-		TStringList *infoDatIm = new TStringList;
-		infoDatIm->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
-		// 1 - номер АРМ
-		findStr = findParam(infoDatIm, "[infoARM]", "number");
-		Form1->EditNumber->Value = findStr.ToInt();
-		curPC.number = findStr.ToInt();
-		// 2 - отдел
-		findStr = findParam(infoDatIm, "[infoARM]", "partition");
-		Form1->EditPartition->Text = findStr;
-		curPC.partitionName = findStr;
-		// 3 - клас АРМ
-		findStr = findParam(infoDatIm, "[infoARM]", "armClassID");
-		Form1->EditArmClass->ItemIndex = findStr.ToInt();
-		curPC.armClassId = findStr.ToInt();
-		curPC.armClassName = findParam(infoDatIm, "[infoARM]", "armClassName");
-		// 4 - категория АРМ
-		findStr = findParam(infoDatIm, "[infoARM]", "categoryID");
-		Form1->EditCategory->ItemIndex = findStr.ToInt();
-		curPC.categoryId = findStr.ToInt();
-		curPC.categoryName = findParam(infoDatIm, "[infoARM]", "categoryName");
-		// 5 - лицензия ОС
-		findStr = findParam(infoDatIm, "[infoARM]", "licenseWindowsID");
-		Form1->EditLicWin->ItemIndex = findStr.ToInt();
-		curPC.licWindowsId = findStr.ToInt();
-		curPC.licWindowsName = findParam(infoDatIm, "[infoARM]", "licenseWindowsName");
-		// 6 - лицензия оффиса
-		findStr = findParam(infoDatIm, "[infoARM]", "licenseOfficeID");
-		Form1->EditLicOffice->ItemIndex = findStr.ToInt();
-		curPC.licOfficeId = findStr.ToInt();
-		curPC.licOfficeName = findParam(infoDatIm, "[infoARM]", "licenseOfficeName");
-		// 7 - ответственый
-		findStr = findParam(infoDatIm, "[infoARM]", "respon");
-		Form1->EditRespon->Text = findStr;
-		curPC.respon = findStr;
-		// 8 - коментарий
+		Form1->EditNumber->Value = curPC.getNumber();
+		Form1->EditPartition->Text = curPC.getPartition();
+		Form1->EditArmClass->Text = curPC.getClassName();
+		Form1->EditArmClass->ItemIndex = curPC.getClassId();
+		Form1->EditCategory->Text = curPC.getCategoryName();
+		Form1->EditCategory->ItemIndex = curPC.getCategoryId();
+		Form1->EditLicWin->Text = curPC.getLicWindowsName();
+		Form1->EditLicWin->ItemIndex = curPC.getLicWindowsId();
+		Form1->EditLicOffice->Text = curPC.getLicOfficeName();
+		Form1->EditLicOffice->ItemIndex = curPC.getLicOfficeId();
+		Form1->EditRespon->Text = curPC.getRespon();
 		Form1->EditComent->Clear();
-		for (auto i : findCategory(infoDatIm, "[comment]")) {
-			Form1->EditComent->Lines->Add(i);
+		for (auto str : curPC.getComent()) {
+			Form1->EditComent->Lines->Add(str);
 		}
-      //...
+		//...
 		return true;
    }
 	if (FileExists(dir + "info_001.dat")) {
@@ -280,7 +216,8 @@ bool infoReadAndSet(Arm &curPC)
 	}
 	return false;
 }
-bool infoSetToFille(const infoEset &cfgEset, const histGrub &lastGrub, const Arm &curPC)
+/* Запись файла с инфой по АРМу */
+bool infoSetToFille(infoEset &cfgEset, histGrub &lastGrub, Arm &curPC)
 {
 	const UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
 	const UnicodeString file = "gruber_info.ini";
@@ -291,18 +228,8 @@ bool infoSetToFille(const infoEset &cfgEset, const histGrub &lastGrub, const Arm
 	infoFille->Add("lastGrubDate=" + lastGrub.date);
 	infoFille->Add("lastGrubUser=" + lastGrub.user);
 	// раздел об АРМ
-	infoFille->Add("[infoARM]");
-	infoFille->Add("number=" + UnicodeString(curPC.number));
-	infoFille->Add("partition=" + curPC.partitionName);
-	infoFille->Add("armClassID=" + UnicodeString(curPC.armClassId));
-	infoFille->Add("armClasName=" + curPC.armClassName);
-	infoFille->Add("categoryID=" + UnicodeString(curPC.categoryId));
-	infoFille->Add("categoryName=" + curPC.categoryName);
-	infoFille->Add("licenseWindowsID=" + UnicodeString(curPC.licWindowsId));
-	infoFille->Add("licenseWindowsName=" + curPC.licWindowsName);
-	infoFille->Add("licenseOfficeID=" + UnicodeString(curPC.licOfficeId));
-	infoFille->Add("licenseOfficeName=" + curPC.licOfficeName);
-	infoFille->Add("respon=" + curPC.respon);
+	infoFille->Add("[infoGrubARM]");
+	for(auto str : curPC.mStrInfoArmGrub()) infoFille->Add(str);
 	// раздел об ESET
 	infoFille->Add("[infoESET]");
 	infoFille->Add("dirMirror=" + cfgEset.dirMirror);
@@ -312,7 +239,7 @@ bool infoSetToFille(const infoEset &cfgEset, const histGrub &lastGrub, const Arm
 	infoFille->Add("lastUpdateArchive=" + cfgEset.lastUpdateArchive);
 	// раздел коментария
 	infoFille->Add("[comment]");
-	for (auto i : curPC.coment) {
+	for (auto i : curPC.getComent()) {
 		infoFille->Add(i);
 	}
 	infoFille->Add("#stop");

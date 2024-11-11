@@ -5,24 +5,54 @@
 #include <vector>
 //---------------------------------------------------------------------------
 class Arm {
-public:
+private:
+	const UnicodeString fileArmInfo = "C:\\ProgramData\\GRUBer\\gruber_info.ini";
 	int number = 0;
-	UnicodeString partitionName = "Без відділу";
-	UnicodeString armClassName = "Без класу";
-	short armClassId = 0;
-	UnicodeString categoryName = "Без категорії";
-	short categoryId = 0;
+	UnicodeString partition  = "Без відділу";
+	UnicodeString className   = "Без класу";
+	UnicodeString categoryName   = "Без категорії";
 	UnicodeString licWindowsName = "Не вказано";
-	short licWindowsId = 0;
-	UnicodeString licOfficeName = "Не вказано";
-	short licOfficeId = 0;
+	UnicodeString licOfficeName  = "Не вказано";
 	UnicodeString respon = "";
+	short classId   = 0;
+	short categoryId   = 0;
+	short licWindowsId = 0;
+	short licOfficeId  = 0;
 	std::vector<UnicodeString> coment;
-	UnicodeString dirGrubName = "[--][DATE]Partition#Serial#Category";
-	UnicodeString desktopName = "Помилка!";
-	UnicodeString serial = "Помилка!";
-
-	UnicodeString dirCurGrubName (UnicodeString date);
-	bool getInfo();
+	UnicodeString desktopName;
+	UnicodeString serial;
+   // функции
+	void readFromFile(UnicodeString filePatch);
+public:
+   // конструктор
+	Arm();
+	// функции
+	UnicodeString dirGrubName();
+	std::vector<UnicodeString> mStrInfoArm();
+	std::vector<UnicodeString> mStrInfoArmGrub();
+	// сеттери
+	void setNumber(int i);
+	void setPartition(UnicodeString str);
+	void setClass(UnicodeString str, short i);
+	void setCategory(UnicodeString str, short i);
+	void setLicWindows(UnicodeString str, short i);
+	void setLicOffice(UnicodeString str, short i);
+	void setRespon(UnicodeString str);
+	void setComent(std::vector<UnicodeString> vStr);
+	// геттери
+	int getNumber();
+	UnicodeString getPartition();
+	UnicodeString getClassName();
+	UnicodeString getCategoryName();
+	UnicodeString getLicWindowsName();
+	UnicodeString getLicOfficeName();
+	UnicodeString getRespon();
+	short getClassId();
+	short getCategoryId();
+	short getLicWindowsId();
+	short getLicOfficeId();
+	std::vector<UnicodeString> getComent();
+	UnicodeString getDesktopName();
+	UnicodeString getSerial();
 };
 #endif
