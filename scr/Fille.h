@@ -1,10 +1,9 @@
 //---------------------------------------------------------------------------
 #ifndef FilleH
 #define FilleH
-
-#include "Help.h"
 //---------------------------------------------------------------------------
 
+bool deleteDir(UnicodeString dirDelName);
 bool fileOpen(UnicodeString str);
 void cacls(UnicodeString str);
 

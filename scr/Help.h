@@ -5,24 +5,11 @@
 #include "MainForm.h"
 #include "Arm.h"
 //---------------------------------------------------------------------------
-struct histGrub {
-	UnicodeString date, user;
-};
-struct cnfgGrub {
-	bool debug;
-	bool showLog;
-	UnicodeString grubUser;
-	std::vector<UnicodeString> partition;
-	std::vector<UnicodeString> armClass;
-	std::vector<UnicodeString> category;
-};
-struct infoEset {
-	bool autoUpdate;
-	UnicodeString dirMirror, lastUpdateDate, lastUpdateUser, lastUpdateArchive;
-};
-struct errCode {
+struct eC {
 	bool run=0;
 	bool exit=0;
+	UnicodeString exitCode;
+	UnicodeString runCode;
 };
 //---------------------------------------------------------------------------
 class Dir {
@@ -38,11 +25,48 @@ public:
 	void setGrubFull(UnicodeString str);
 	//геттеры
 	UnicodeString getGrubFull();
+   UnicodeString getToolFull();
 };
-//---------------------------------------------------------------------------
-void mainGrub();
-//---------------------------------------------------------------------------
-errCode app(UnicodeString Tool, UnicodeString ToolArg, int i);
+class Config {
+private:
+	bool debug, showLog;
+	bool oldGrub, newGrub, license;
+	short audit, esetLog;
+	UnicodeString grubUser;
+	std::vector<UnicodeString> partition;
+	std::vector<UnicodeString> armClass;
+	std::vector<UnicodeString> category;
+	UnicodeString configFile;
+	// функции
+	void readFileIni();
+public:
+	Config();
+   void saveFileIni();
+	// геттеры
+   bool getDebug();
+	bool getShowLog();
+	bool getOldGrub();
+	bool getNewGrub();
+	bool getLicense();
+	short getAudit();
+	short getEsetLog();
+	UnicodeString getUser();
+	std::vector<UnicodeString> getPartition();
+	std::vector<UnicodeString> getArmClass();
+	std::vector<UnicodeString> getCategory();
+	// сеттеры
+	void setDebug(bool i);
+	void setShowLog(bool i);
+	void setAudit(short i);
+	void setEsetLog(short i);
+	void setOldGrub(bool i);
+	void setNewGrub(bool i);
+	void setLicense(bool i);
+	void setUser(UnicodeString str);
+	void setPartition(std::vector<UnicodeString> vStr);
+	void setArmClass(std::vector<UnicodeString> vStr);
+	void setCategory(std::vector<UnicodeString> vStr);
+};
 //---------------------------------------------------------------------------
 UnicodeString cmdCheck(void);
 //---------------------------------------------------------------------------
@@ -54,9 +78,12 @@ UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
 void printLog(UnicodeString str);
 void printLogDebug(bool debug, UnicodeString str);
 //---------------------------------------------------------------------------
-bool paramReadAndSet(cnfgGrub &cfg);
+bool IsAdminMode();
+//---------------------------------------------------------------------------
+void setInfoArmToForm(Arm &curPC);
+void setConfigToForm(Config &curConfig);
 bool infoReadAndSet(Arm &curPC);
-bool infoSetToFille(infoEset &cfgEset, histGrub &lastGrub, Arm &curPC);
+bool infoSetToFille(Arm &curPC);
 //---------------------------------------------------------------------------
 // UnicodeString dirCurGrubName (arm &curPC, UnicodeString date);
 //---------------------------------------------------------------------------

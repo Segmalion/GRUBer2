@@ -22,16 +22,24 @@ bool isBeginUStr(UnicodeString strOR, UnicodeString srtF)
 	return false;
 }
 //---------------------------------------------------------------------------
-/* Парсинг строки */
-std::vector<UnicodeString> strParamParsing (UnicodeString str)
-{
-	std::vector<UnicodeString> fStr;
+/* Парсинг строки в масив*/
+std::vector<UnicodeString> vStrGenFromStr (UnicodeString str) {
+	std::vector<UnicodeString> vStr;
 	while (str.Pos(";") != 0) {
-		fStr.push_back(str.SubString(1, str.Pos(";")-1));
+		vStr.push_back(str.SubString(1, str.Pos(";")-1));
 		str = str.SubString(str.Pos(";")+2, str.Length());
 	}
-	fStr.push_back(str);
-	return fStr;
+	vStr.push_back(str);
+	return vStr;
+}
+/* Обратный парсинг масива в строку */
+UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr) {
+	UnicodeString str;
+	for (auto i : vStr) {
+		if (str.IsEmpty()) str = i;
+		else str = str + "; " + i;
+	}
+	return str;
 }
 //---------------------------------------------------------------------------
 /* Дата и время */
@@ -45,7 +53,13 @@ UnicodeString curTime()
 	TDateTime* myTime = new TDateTime(Now());
 	return myTime->FormatString("hh:nn:ss");
 }
+UnicodeString curDateTime()
+{
+	TDateTime* myTime = new TDateTime(Now());
+	return myTime->FormatString("dd.mm.yy hh:nn:ss");
+}
 //---------------------------------------------------------------------------
+// Чистка строки имени папки от запрещеных символов
 UnicodeString fixDirName(UnicodeString str)
 {
 	for (int i = 1; i < str.Length()+1; i++) {
@@ -58,13 +72,12 @@ UnicodeString fixDirName(UnicodeString str)
 }
 //---------------------------------------------------------------------------
 /* Парсинг параметров */
-UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm)
+UnicodeString findParam(TStringList* ini, UnicodeString cat, UnicodeString prm)
 {
 	UnicodeString resultStr, findStr;
 	bool findCat = false;
 	for (int i = 0; i < ini->Count; i++) {
 		findStr = ini->Strings[i];
-		//printLog(str);
 		if (findCat == false && findStr == cat) {
 			findCat = true;
 			continue;
@@ -77,9 +90,9 @@ UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm)
 			return resultStr;
 		}
 	}
-	return "0";
+	return "ERROR";
 }
-std::vector<UnicodeString> findCategory(TStringList *ini, UnicodeString cat) {
+std::vector<UnicodeString> findCategory(TStringList* ini, UnicodeString cat) {
 	std::vector<UnicodeString> findMulStr;
 	UnicodeString findStr;
 	bool findCat = false;

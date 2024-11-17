@@ -6,9 +6,11 @@
 //---------------------------------------------------------------------------
 std::string unToStr(UnicodeString str);
 bool isBeginUStr(UnicodeString strOR, UnicodeString srtF);
-std::vector<UnicodeString> strParamParsing (UnicodeString str);
+std::vector<UnicodeString> vStrGenFromStr (UnicodeString str);
+UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr);
 UnicodeString curDate();
 UnicodeString curTime();
+UnicodeString curDateTime();
 UnicodeString fixDirName(UnicodeString str);
 //---------------------------------------------------------------------------
 UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);

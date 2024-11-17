@@ -1,11 +1,11 @@
-object FormComent: TFormComent
+object FormPartition: TFormPartition
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = #1050#1086#1084#1077#1085#1090#1072#1088
-  ClientHeight = 441
-  ClientWidth = 624
+  Caption = #1055#1110#1076#1088#1086#1079#1076#1110#1083#1080
+  ClientHeight = 476
+  ClientWidth = 337
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,8 +18,8 @@ object FormComent: TFormComent
   object GridPanel1: TGridPanel
     Left = 0
     Top = 0
-    Width = 624
-    Height = 441
+    Width = 337
+    Height = 476
     Align = alClient
     BevelOuter = bvNone
     ColumnCollection = <
@@ -33,7 +33,7 @@ object FormComent: TFormComent
       item
         Column = 0
         ColumnSpan = 2
-        Control = EditComent
+        Control = EditPartition
         Row = 0
       end
       item
@@ -55,39 +55,47 @@ object FormComent: TFormComent
         Value = 50.000000000000000000
       end>
     TabOrder = 0
-    object EditComent: TMemo
+    ExplicitWidth = 624
+    ExplicitHeight = 441
+    object EditPartition: TMemo
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 618
-      Height = 385
+      Width = 331
+      Height = 420
       Align = alClient
       Lines.Strings = (
-        'EditComent')
+        'EditPartition')
       ScrollBars = ssBoth
       TabOrder = 0
+      ExplicitWidth = 618
+      ExplicitHeight = 385
     end
     object ButtonCancel: TButton
       AlignWithMargins = True
       Left = 3
-      Top = 394
-      Width = 306
+      Top = 429
+      Width = 162
       Height = 44
       Align = alClient
       Caption = #1042#1110#1076#1084#1110#1085#1080#1090#1080
       TabOrder = 1
       OnClick = ButtonCancelClick
+      ExplicitWidth = 142
     end
     object ButtonSave: TButton
       AlignWithMargins = True
-      Left = 315
-      Top = 394
-      Width = 306
+      Left = 171
+      Top = 429
+      Width = 163
       Height = 44
       Align = alClient
       Caption = #1047#1073#1077#1088#1077#1075#1090#1080
       TabOrder = 2
       OnClick = ButtonSaveClick
+      ExplicitLeft = 315
+      ExplicitTop = 394
+      ExplicitWidth = 306
     end
   end
 end

@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 
-#ifndef ComentFormH
-#define ComentFormH
+#ifndef PartitionFormH
+#define PartitionFormH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
@@ -9,20 +9,20 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
 //---------------------------------------------------------------------------
-class TFormComent : public TForm
+class TFormPartition : public TForm
 {
 __published:	// IDE-managed Components
 	TGridPanel *GridPanel1;
-	TMemo *EditComent;
+	TMemo *EditPartition;
 	TButton *ButtonCancel;
 	TButton *ButtonSave;
-	void __fastcall ButtonSaveClick(TObject *Sender);
 	void __fastcall ButtonCancelClick(TObject *Sender);
+	void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
-	__fastcall TFormComent(TComponent* Owner);
+	__fastcall TFormPartition(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormComent *FormComent;
+extern PACKAGE TFormPartition *FormPartition;
 //---------------------------------------------------------------------------
 #endif

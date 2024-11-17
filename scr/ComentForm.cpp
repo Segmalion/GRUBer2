@@ -4,6 +4,7 @@
 #pragma hdrstop
 
 #include "ComentForm.h"
+#include "MainForm.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"

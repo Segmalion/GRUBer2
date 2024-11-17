@@ -7,16 +7,9 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-//обявление внешних переменных типа структуры
-//extern arm curPC;
-//extern config cfg;
-//extern grubHistor lastGrub;
-//extern configEset cfgEset;
-//extern dosCom dos;
-//обявление внешних переменных
 extern UnicodeString cmdEXE;
-extern bool stopBool;
 //---------------------------------------------------------------------------
+/* Класс Dir */
 Dir::Dir() {
 	progFull = GetCurrentDir();
 	baseName = "base";
@@ -29,64 +22,113 @@ void Dir::check() {
 	if (!DirectoryExists(dateFull)) CreateDir(dateFull);
 	if (!DirectoryExists(grubFull)) CreateDir(grubFull);
 }
+// геттеры
+UnicodeString Dir::getGrubFull() { return grubFull; }
+UnicodeString Dir::getToolFull() { return (progFull + "\\tool"); }
+// сеттеры
 void Dir::setGrubFull (UnicodeString str) {
 	grubName = str;
 	grubFull = dateFull + "\\" + grubName;
 }
-UnicodeString Dir::getGrubFull() {
-	return grubFull;
-}
 //---------------------------------------------------------------------------
-/* Запуск внешнего ПО с ожиданием (путь , аргументы, статус окна) */
-errCode app(UnicodeString Tool, UnicodeString ToolArg, int i)
-{
-	HINSTANCE errRun;
-	DWORD exitCode = 0;
-	errCode retCode;
-	SHELLEXECUTEINFOW ShExecInfo = {0};
-	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
-	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	ShExecInfo.hwnd = NULL;
-	ShExecInfo.lpVerb = NULL;
-	ShExecInfo.lpFile = Tool.c_str();
-	ShExecInfo.lpParameters = ToolArg.c_str();
-	ShExecInfo.lpDirectory = NULL;
-	ShExecInfo.nShow = i;
-	ShExecInfo.hInstApp = errRun;
-	ShellExecuteExW(&ShExecInfo);
-//	WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
-   HANDLE hHandles[] = { ShExecInfo.hProcess };
-   MSG msg;
-	while(1) {
-		DWORD dwRet = ::MsgWaitForMultipleObjects(1, hHandles, FALSE, INFINITE, QS_ALLINPUT);
-		if(dwRet == WAIT_OBJECT_0) {
-			break;
-      }
-		else
-			if(dwRet == WAIT_OBJECT_0 + 1){
-				// There is a window message available. Dispatch it.
-				while(PeekMessage(&msg,NULL,NULL,NULL,PM_REMOVE)) {
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-				if (stopBool) {
-					TerminateProcess(ShExecInfo.hProcess, 1);
-				}
-			} else break;
+/* Класс Config */
+Config::Config() {
+	configFile = GetCurrentDir() + "\\GRUBer.ini";
+	readFileIni();
+}
+void Config::readFileIni() {
+	if (FileExists(configFile))
+	{
+		UnicodeString findStr;
+		TStringList *infoFille = new TStringList;
+		infoFille->LoadFromFile(configFile, TEncoding::UTF8);
+		findStr = findParam(infoFille, "[settings]", "debug");
+		if(findStr == 0 || findStr == 1) {
+			debug = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[settings]", "showLog");
+		if(findStr == 0 || findStr == 1) {
+			showLog = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[settings]", "grubUser");
+		if(findStr != "0") {
+			grubUser = findStr;
+		}
+		findStr = findParam(infoFille, "[genfile]", "oldGrub");
+		if(findStr == 0 || findStr == 1) {
+			oldGrub = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "newGrub");
+		if(findStr == 0 || findStr == 1) {
+			newGrub = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "license");
+		if(findStr == 0 || findStr == 1) {
+			license = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "audit");
+		if(findStr == 0 || findStr == 1 || findStr == 2) {
+			audit = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "esetLog");
+		if(findStr == 0 || findStr == 1 || findStr == 2) {
+			esetLog = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[arm]", "partition");
+		if(findStr != "0") {
+			partition = vStrGenFromStr(findStr);
+		}
 	}
-	//тут проверка на запуск програмы
-	ULONG_PTR errU = reinterpret_cast<ULONG_PTR>(errRun);
-	if (errU>32) retCode.run = 1;      //good
-		else retCode.run = 0;           //error
-	//тут результат выполнения ПО
-	GetExitCodeProcess(ShExecInfo.hProcess, &exitCode);
-	if (exitCode==0) retCode.exit = 1; //good
-		else retCode.exit = 0;          //error
-	CloseHandle(ShExecInfo.hProcess);
-	return retCode;
 }
-//---------------------------------------------------------------------------
-
+void Config::saveFileIni() {
+	TStringList *infoFille = new TStringList;
+	/* формирование файла */
+	// раздел
+	infoFille->Add("[settings]");
+	infoFille->Add("debug=" + UnicodeString(debug));
+	infoFille->Add("showLog=" + UnicodeString(showLog));
+	infoFille->Add("grubUser=" + grubUser);
+	// раздел
+	infoFille->Add("[genfile]");
+	infoFille->Add("oldGrub=" + UnicodeString(oldGrub));
+	infoFille->Add("newGrub=" + UnicodeString(newGrub));
+	infoFille->Add("license=" + UnicodeString(license));
+	infoFille->Add("audit=" + UnicodeString(audit));
+	infoFille->Add("esetLog=" + UnicodeString(esetLog));
+	//for(auto str : curPC.mStrInfoArmGrub()) infoFille->Add(str);
+	// раздел
+	infoFille->Add("[arm]");
+	infoFille->Add("partition=" + strGenFromVStr(partition));
+	// infoFille->Add("class=" + strGenFromVStr(armClass));
+	// infoFille->Add("category=" + strGenFromVStr(category));
+	/* конец формирования файла */
+	infoFille->SaveToFile(configFile, TEncoding::UTF8); // запись в файл
+	cacls(configFile); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
+}
+// геттеры
+bool Config::getDebug()   { return debug; }
+bool Config::getShowLog() { return showLog; }
+bool Config::getOldGrub() { return oldGrub; }
+bool Config::getNewGrub() { return newGrub; }
+bool Config::getLicense() { return license; }
+short Config::getAudit()   { return audit; }
+short Config::getEsetLog() { return esetLog; }
+UnicodeString Config::getUser() { return grubUser; }
+std::vector<UnicodeString> Config::getPartition() { return partition; }
+std::vector<UnicodeString> Config::getArmClass()  { return armClass; }
+std::vector<UnicodeString> Config::getCategory()  { return category; }
+// сеттеры
+void Config::setDebug(bool i)   { debug = i; }
+void Config::setShowLog(bool i) { showLog = i; }
+void Config::setOldGrub(bool i) { oldGrub = i; }
+void Config::setNewGrub(bool i) { newGrub = i; }
+void Config::setLicense(bool i) { license = i; }
+void Config::setAudit(short i)   { audit = i; }
+void Config::setEsetLog(short i) { esetLog = i; }
+void Config::setUser(UnicodeString str) { grubUser = str; }
+void Config::setPartition(std::vector<UnicodeString> vStr) { partition = vStr;}
+void Config::setArmClass(std::vector<UnicodeString> vStr)  { armClass = vStr;}
+void Config::setCategory(std::vector<UnicodeString> vStr)  { category = vStr;}
 //---------------------------------------------------------------------------
 /* Вывод логов */
 void printLog(UnicodeString str)
@@ -113,132 +155,80 @@ UnicodeString cmdCheck(void)
 	return "ERROR";
 }
 //---------------------------------------------------------------------------
-/* Чтение файла настроек */
-bool paramReadAndSet(cnfgGrub &cfg)
-{
-	UnicodeString iniFile = GetCurrentDir() + "\\GRUBer.ini";
-	if (FileExists(iniFile)) {
-		UnicodeString findStr;
-		TStringList *ini = new TStringList;
-		ini->LoadFromFile(iniFile, TEncoding::UTF8);
-		//int i = ini->Count;
-		//Параметр debug
-		findStr = findParam(ini, "[settings]", "debug");
-		if(findStr == 0 || findStr == 1) {
-			cfg.debug = findStr.ToInt();
-			Form1->CheckBoxDebug->Checked = cfg.debug;
-		}
-		//Параметр showLog
-		findStr = findParam(ini, "[settings]", "showLog");
-		if(findStr == 0 || findStr == 1) {
-			cfg.showLog = findStr.ToInt();
-         Form1->CheckBoxShowLog->Checked = cfg.showLog;
-			if (cfg.showLog) Form1->Width = 1024*Form1->ScaleFactor;
-			else Form1->Width = 421*Form1->ScaleFactor;
-		}
-		//Параметр partition
-		findStr = findParam(ini, "[arm]", "partition");
-		if(findStr != "0") {
-			cfg.partition = strParamParsing(findStr);
-			for(auto i : cfg.partition) Form1->EditPartition->Items->Add(i);
-		}
-		//Параметр armClass
-		findStr = findParam(ini, "[arm]", "class");
-		if(findStr != "0") {
-			cfg.armClass = strParamParsing(findStr);
-			for(auto i : cfg.armClass) Form1->EditArmClass->Items->Add(i);
-		}
-		//Параметр category
-		findStr = findParam(ini, "[arm]", "category");
-		if(findStr != "0") {
-			cfg.category = strParamParsing(findStr);
-			for(auto i : cfg.category) Form1->EditCategory->Items->Add(i);
-		}
-		//Параметр user
-		findStr = findParam(ini, "[settings]", "user");
-		if(findStr != "0") {
-			cfg.grubUser = findStr;
-			Form1->EditGrubUser->Text = cfg.grubUser;
-		}
-		return true;
-	} else return false;
+/* Проверка прав админа */
+bool IsAdminMode() {
+	 bool fRet = false;
+	 HANDLE hToken = NULL;
+    if( OpenProcessToken( GetCurrentProcess( ),TOKEN_QUERY,&hToken ) ) {
+		  TOKEN_ELEVATION Elevation;
+        DWORD cbSize = sizeof( TOKEN_ELEVATION );
+		  if( GetTokenInformation( hToken, TokenElevation, &Elevation, sizeof( Elevation ), &cbSize ) ) {
+            fRet = Elevation.TokenIsElevated;
+		  }
+    }
+    if( hToken ) {
+        CloseHandle( hToken );
+	 }
+	 return fRet;
 }
-/* Чтение файла с инфой по АРМу */
-bool infoReadAndSet(Arm &curPC)
-{
-	UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
-	if (FileExists(dir + "gruber_info.ini")) {
-		Form1->EditNumber->Value = curPC.getNumber();
-		Form1->EditPartition->Text = curPC.getPartition();
-		Form1->EditArmClass->Text = curPC.getClassName();
-		Form1->EditArmClass->ItemIndex = curPC.getClassId();
-		Form1->EditCategory->Text = curPC.getCategoryName();
-		Form1->EditCategory->ItemIndex = curPC.getCategoryId();
-		Form1->EditLicWin->Text = curPC.getLicWindowsName();
-		Form1->EditLicWin->ItemIndex = curPC.getLicWindowsId();
-		Form1->EditLicOffice->Text = curPC.getLicOfficeName();
-		Form1->EditLicOffice->ItemIndex = curPC.getLicOfficeId();
-		Form1->EditRespon->Text = curPC.getRespon();
-		Form1->EditComent->Clear();
-		for (auto str : curPC.getComent()) {
-			Form1->EditComent->Lines->Add(str);
-		}
-		//...
-		return true;
-   }
-	if (FileExists(dir + "info_001.dat")) {
-		TStringList *infoDatIm = new TStringList;
-		infoDatIm->LoadFromFile(dir + "info_001.dat", TEncoding::UTF8);
-		Form1->EditNumber->Text = infoDatIm->Strings[1];
-		Form1->EditPartition->Text = infoDatIm->Strings[2];
-		Form1->EditCategory->ItemIndex = StrToInt(infoDatIm->Strings[3]);
-		Form1->EditComent->Text = infoDatIm->Strings[4];
-		Form1->EditRespon->Text = infoDatIm->Strings[5];
-		/* if(infoDatIm->Count==7) {
-			if (infoDatIm->Strings[6]=="auto") Form1->CheckBoxEsetUpdate->Checked=true;
-			else {
-				Form1->CheckBoxEsetUpdate->Checked=false;
-				Form1->EditDirEsetUpdateConf->Text = infoDatIm->Strings[6];
-			}
-		} */
-		printLog("Останній запуск GRUBer " + infoDatIm->Strings[0]);
-		return true;
+//---------------------------------------------------------------------------
+void setInfoArmToForm(Arm &curPC) {
+	Form1->EditNumber->Value   = curPC.getNumber();
+	Form1->EditPartition->Text = curPC.getPartition();
+   Form1->EditArmClass->ItemIndex = curPC.getClassID();
+	Form1->EditCategory->ItemIndex = curPC.getCategoryID();
+	Form1->EditLicWin->ItemIndex    = curPC.getLicWindowsID();
+	Form1->EditLicOffice->ItemIndex = curPC.getLicOfficeID();
+	Form1->EditArmClass->Text  = curPC.getClassName();
+	Form1->EditCategory->Text  = curPC.getCategoryName();
+	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
+	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
+	Form1->EditRespon->Text    = curPC.getRespon();
+	Form1->EditComent->Clear();
+	for (auto str : curPC.getComent()) {
+		Form1->EditComent->Lines->Add(str);
 	}
-	if (FileExists(dir + "info.dat") && !FileExists(dir + "info_001.dat")) {
-		TStringList *infoDatIm = new TStringList;
-		infoDatIm->LoadFromFile(dir + "info.dat", TEncoding::UTF8);
-		Form1->EditNumber->Text = infoDatIm->Strings[0]; 		//NumberPC->Text
-		Form1->EditPartition->Text = infoDatIm->Strings[1];	//ComboBoxDep->Text
-		Form1->EditCategory->ItemIndex = StrToInt(infoDatIm->Strings[2]); //ComboBoxCat->ItemIndex
-		Form1->EditComent->Text = infoDatIm->Strings[3]; 		//EditCom->Text
-		printLog("Останній запуск GRUBer " + infoDatIm->Strings[4]);
-		return true;
-	}
-	return false;
+	Form1->CheckBoxEsetAutoUpdate->Checked = curPC.getEsetAutoUpdate();
+	if (curPC.getEsetAutoUpdate())
+		Form1->StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
+   else Form1->StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
+	Form1->EditEsetMirrorDir->Text = curPC.getEsetDir();
+//...
 }
-/* Запись файла с инфой по АРМу */
-bool infoSetToFille(infoEset &cfgEset, histGrub &lastGrub, Arm &curPC)
+void setConfigToForm(Config &curConfig) {
+	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
+	Form1->CheckBoxShowLog->Checked = curConfig.getShowLog();
+	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
+	else Form1->Width = 421*Form1->ScaleFactor;
+	Form1->EditGrubUser->Text = curConfig.getUser();
+	Form1->CheckBoxOldGrub->Checked = curConfig.getOldGrub();
+	Form1->CheckBoxNewGrub->Checked = curConfig.getNewGrub();
+	Form1->CheckBoxLicense->Checked = curConfig.getLicense();
+	if (curConfig.getAudit() == 0) Form1->CheckBoxAudit->State = cbUnchecked;
+	if (curConfig.getAudit() == 2) Form1->CheckBoxAudit->State = cbGrayed;
+	if (curConfig.getAudit() == 1) Form1->CheckBoxAudit->State = cbChecked;
+	if (curConfig.getEsetLog() == 0) Form1->CheckBoxEsetLog->State = cbUnchecked;
+	if (curConfig.getEsetLog() == 2) Form1->CheckBoxEsetLog->State = cbGrayed;
+	if (curConfig.getEsetLog() == 1) Form1->CheckBoxEsetLog->State = cbChecked;
+	//Form1->CheckBoxEsetLog->State = curConfig.getEsetLog();
+	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
+	for(auto i : curConfig.getArmClass()) Form1->EditArmClass->Items->Add(i);
+	for(auto i : curConfig.getCategory()) Form1->EditCategory->Items->Add(i);
+}
+bool infoSetToFille(Arm &curPC)
 {
 	const UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
 	const UnicodeString file = "gruber_info.ini";
 	TStringList *infoFille = new TStringList;
 	/* формирование файла */
 	// раздел даты и пользователя
-	infoFille->Add("[lastGrub]");
-	infoFille->Add("lastGrubDate=" + lastGrub.date);
-	infoFille->Add("lastGrubUser=" + lastGrub.user);
+	for(auto str : curPC.mStrLastGrub()) infoFille->Add(str);
 	// раздел об АРМ
-	infoFille->Add("[infoGrubARM]");
-	for(auto str : curPC.mStrInfoArmGrub()) infoFille->Add(str);
+	for(auto str : curPC.mStrInfoArmGrubFull()) infoFille->Add(str);
 	// раздел об ESET
-	infoFille->Add("[infoESET]");
-	infoFille->Add("dirMirror=" + cfgEset.dirMirror);
-	infoFille->Add("autoUpdate=" + UnicodeString(cfgEset.autoUpdate));
-	infoFille->Add("lastUpdateDate=" + cfgEset.lastUpdateDate);
-	infoFille->Add("lastUpdateUser=" + cfgEset.lastUpdateUser);
-	infoFille->Add("lastUpdateArchive=" + cfgEset.lastUpdateArchive);
+	for(auto str : curPC.mStrInfoArmEset()) infoFille->Add(str);
 	// раздел коментария
-	infoFille->Add("[comment]");
+   infoFille->Add("[comment]");
 	for (auto i : curPC.getComent()) {
 		infoFille->Add(i);
 	}
@@ -247,7 +237,7 @@ bool infoSetToFille(infoEset &cfgEset, histGrub &lastGrub, Arm &curPC)
 	if (!DirectoryExists(dir)) CreateDir(dir); 			 // проверка наличия папки
 	infoFille->SaveToFile(dir + file, TEncoding::UTF8); // запись в файл
 	cacls(dir + file); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
-   return true;
+	return true;
 }
 //---------------------------------------------------------------------------
 

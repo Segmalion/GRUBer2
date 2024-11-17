@@ -10,8 +10,8 @@
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.NumberBox.hpp>
 #include <Vcl.Mask.hpp>
-#include "DosCommand.hpp"
 #include <Vcl.Grids.hpp>
+#include <Vcl.Dialogs.hpp>
 
 #include <vector>
 //---------------------------------------------------------------------------
@@ -22,8 +22,8 @@ __published:	// IDE-managed Components
 	TProgressBar *ProgressBar1;
 	TStatusBar *StatusBar1;
 	TPageControl *PageControl1;
-	TTabSheet *grid;
-	TTabSheet *Налаштування;
+	TTabSheet *TabGRUBer;
+	TTabSheet *TabSettings;
 	TMemo *MemoLOG;
 	TGridPanel *GridPanel2;
 	TGridPanel *GridPanelMain;
@@ -68,6 +68,20 @@ __published:	// IDE-managed Components
 	TButton *Button1;
 	TMemo *EditComent;
 	TLabeledEdit *EditGrubUser;
+	TGridPanel *GridPanel8;
+	TGroupBox *GroupBox3;
+	TCheckBox *CheckBoxAudit;
+	TCheckBox *CheckBoxEsetLog;
+	TButton *BtnSaveSetteings;
+	TCheckBox *CheckBoxOldGrub;
+	TCheckBox *CheckBoxNewGrub;
+	TCheckBox *CheckBoxLicense;
+	TButton *BtnEditPartition;
+	TGroupBox *GroupBox4;
+	TLabeledEdit *EditEsetMirrorDir;
+	TButton *BtnEditEsetMirrorDir;
+	TCheckBox *CheckBoxEsetAutoUpdate;
+	TFileOpenDialog *DirOpenEsetMirror;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -84,8 +98,26 @@ __published:	// IDE-managed Components
 	void __fastcall EditGrubUserChange(TObject *Sender);
 	void __fastcall BtnGruberDirOpenClick(TObject *Sender);
 	void __fastcall BtnGruberStopClick(TObject *Sender);
+	void __fastcall CheckBoxAuditClick(TObject *Sender);
+	void __fastcall CheckBoxEsetLogClick(TObject *Sender);
+	void __fastcall BtnEditPartitionClick(TObject *Sender);
+	void __fastcall BtnSaveSetteingsClick(TObject *Sender);
+	void __fastcall CheckBoxOldGrubClick(TObject *Sender);
+	void __fastcall CheckBoxNewGrubClick(TObject *Sender);
+	void __fastcall CheckBoxLicenseClick(TObject *Sender);
+	void __fastcall CheckBoxEsetAutoUpdateClick(TObject *Sender);
+	void __fastcall EditEsetMirrorDirChange(TObject *Sender);
+	void __fastcall BtnEsetUpdateClick(TObject *Sender);
+	void __fastcall BtnEditEsetMirrorDirClick(TObject *Sender);
+	void __fastcall DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose);
+	void __fastcall BtnParserOpenClick(TObject *Sender);
+	void __fastcall BtnKiberConsolOpenClick(TObject *Sender);
+	void __fastcall BtnLicenseClick(TObject *Sender);
+	void __fastcall BtnInfoClick(TObject *Sender);
 private:	// User declarations
-   std::vector<UnicodeString> fileInfoGrub();
+	std::vector<UnicodeString> fileInfoGrub();
+	void mainGRUBer();
+   int progressBarStep();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };
