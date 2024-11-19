@@ -31,7 +31,7 @@ bool stopBool;
 bool dirGrubRewrite;
 std::vector<UnicodeString> vStrPartition;
 //---------------------------------------------------------------------------
-const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 0;
+const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 1;
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
@@ -271,7 +271,7 @@ void TForm1::mainGRUBer() {
 		if(curConfig.getEsetLog() == 1)
 			esetLog.setArg("/accepteula /Lang:UKR /Age:0 " + outFilePath + "\"");
 		if(curConfig.getEsetLog() == 2)
-			esetLog.setArg("/accepteula /Lang:UKR /Age:0 /Targets:warn,threat,ondem,dev " + outFilePath + "\"");
+			esetLog.setArg("/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev " + outFilePath + "\"");
 		esetLog.run(false);
 		if (esetLog.error.run || esetLog.error.exit) printLog("[!]ўось п≥шло Ќ≈ так...");
 		else printLog("‘айл —“¬ќ–≈ЌЌќ!");
@@ -370,7 +370,7 @@ void __fastcall TForm1::BtnKiberConsolOpenClick(TObject *Sender)
 	RunApp console;
 	console.setApp(curDir.getToolFull() + "\\KiberConsole.msc");
 	console.setArg(NULL);
-	console.run(0);
+	console.run(0, 1);
 	if (console.error.run || console.error.run)
 		printLog("[!]ўось п≥шло Ќ≈ так...");
 }

@@ -15,14 +15,9 @@ __fastcall TFormComent::TFormComent(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormComent::ButtonSaveClick(TObject *Sender)
+void __fastcall TFormComent::FormClose(TObject *Sender, TCloseAction &Action)
 {
 	Form1->EditComent->Lines = FormComent->EditComent->Lines;
-	FormComent->Close();
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormComent::ButtonCancelClick(TObject *Sender)
-{
-   FormComent->Close();
-}
-//---------------------------------------------------------------------------
+

@@ -14,10 +14,7 @@ class TFormComent : public TForm
 __published:	// IDE-managed Components
 	TGridPanel *GridPanel1;
 	TMemo *EditComent;
-	TButton *ButtonCancel;
-	TButton *ButtonSave;
-	void __fastcall ButtonSaveClick(TObject *Sender);
-	void __fastcall ButtonCancelClick(TObject *Sender);
+	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TFormComent(TComponent* Owner);

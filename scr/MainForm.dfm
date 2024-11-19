@@ -1060,7 +1060,6 @@ object Form1: TForm1
               Caption = #1047#1073#1077#1088#1077#1075#1090#1080' '#1085#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103
               TabOrder = 1
               OnClick = BtnSaveSetteingsClick
-              ExplicitTop = 405
             end
             object GroupBox4: TGroupBox
               Left = 0
@@ -1070,7 +1069,6 @@ object Form1: TForm1
               Align = alClient
               Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' '#1086#1085#1086#1074#1083#1077#1085#1085#1103' ESET ('#1076#1083#1103' '#1087#1086#1090#1086#1095#1085#1086#1075#1086' '#1055#1050')'
               TabOrder = 2
-              ExplicitTop = 210
               object EditEsetMirrorDir: TLabeledEdit
                 Left = 14
                 Top = 40
@@ -1149,6 +1147,8 @@ object Form1: TForm1
           Text = 'v.0.0.0.0 '
           Width = 50
         end>
+      ExplicitTop = 522
+      ExplicitWidth = 1004
     end
   end
   object DirOpenEsetMirror: TFileOpenDialog
