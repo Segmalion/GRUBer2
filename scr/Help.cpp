@@ -33,6 +33,9 @@ void Dir::setGrubFull (UnicodeString str) {
 //---------------------------------------------------------------------------
 /* Класс Config */
 Config::Config() {
+	debug = false;
+	showLog = false;
+	showEsetUpd = true;
 	configFile = GetCurrentDir() + "\\GRUBer.ini";
 	readFileIni();
 }
@@ -50,13 +53,33 @@ void Config::readFileIni() {
 		if(findStr == 0 || findStr == 1) {
 			showLog = findStr.ToInt();
 		}
+		findStr = findParam(infoFille, "[settings]", "showEsetUpd");
+		if(findStr == 0 || findStr == 1) {
+			showEsetUpd = findStr.ToInt();
+		}
 		findStr = findParam(infoFille, "[settings]", "grubUser");
 		if(findStr != "0") {
 			grubUser = findStr;
 		}
 		findStr = findParam(infoFille, "[genfile]", "oldGrub");
-		if(findStr == 0 || findStr == 1) {
+		if(findStr == 0 || findStr == 1 || findStr == 2) {
 			oldGrub = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "oldGrubComent");
+		if(findStr == 0 || findStr == 1) {
+			oldGrubComent = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "oldGrubInfo");
+		if(findStr == 0 || findStr == 1) {
+			oldGrubInfo = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "oldGrubNet");
+		if(findStr == 0 || findStr == 1) {
+			oldGrubNet = findStr.ToInt();
+		}
+		findStr = findParam(infoFille, "[genfile]", "oldGrubUsb");
+		if(findStr == 0 || findStr == 1) {
+			oldGrubUsb = findStr.ToInt();
 		}
 		findStr = findParam(infoFille, "[genfile]", "newGrub");
 		if(findStr == 0 || findStr == 1) {
@@ -87,10 +110,15 @@ void Config::saveFileIni() {
 	infoFille->Add("[settings]");
 	infoFille->Add("debug=" + UnicodeString(debug));
 	infoFille->Add("showLog=" + UnicodeString(showLog));
+	infoFille->Add("showEsetUpd=" + UnicodeString(showEsetUpd));
 	infoFille->Add("grubUser=" + grubUser);
 	// раздел
 	infoFille->Add("[genfile]");
 	infoFille->Add("oldGrub=" + UnicodeString(oldGrub));
+	infoFille->Add("oldGrubComent=" + UnicodeString(oldGrubComent));
+	infoFille->Add("oldGrubInfo=" + UnicodeString(oldGrubInfo));
+	infoFille->Add("oldGrubNet=" + UnicodeString(oldGrubNet));
+	infoFille->Add("oldGrubUsb=" + UnicodeString(oldGrubUsb));
 	infoFille->Add("newGrub=" + UnicodeString(newGrub));
 	infoFille->Add("license=" + UnicodeString(license));
 	infoFille->Add("audit=" + UnicodeString(audit));
@@ -105,12 +133,31 @@ void Config::saveFileIni() {
 	infoFille->SaveToFile(configFile, TEncoding::UTF8); // запись в файл
 	cacls(configFile); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
 }
+short Config::checkOldGrubState() {
+	switch ((short)oldGrubComent + oldGrubInfo + oldGrubNet + oldGrubUsb) {
+	case 0:
+		return 0;
+	case 1:
+	case 2:
+	case 3:
+		return 2;
+	case 4:
+		return 1;
+    default:
+		return 0;
+	}
+}
 // геттеры
 bool Config::getDebug()   { return debug; }
 bool Config::getShowLog() { return showLog; }
-bool Config::getOldGrub() { return oldGrub; }
-bool Config::getNewGrub() { return newGrub; }
-bool Config::getLicense() { return license; }
+bool Config::getShowEsetUpd() { return showEsetUpd; }
+short Config::getOldGrub() { return oldGrub; }
+bool Config::getOldGrubComent() { return oldGrubComent; };
+bool Config::getOldGrubInfo()   { return oldGrubInfo; };
+bool Config::getOldGrubNet()    { return oldGrubNet; };
+bool Config::getOldGrubUsb()    { return oldGrubUsb; };
+bool Config::getNewGrub()  { return newGrub; }
+bool Config::getLicense()  { return license; }
 short Config::getAudit()   { return audit; }
 short Config::getEsetLog() { return esetLog; }
 UnicodeString Config::getUser() { return grubUser; }
@@ -120,7 +167,12 @@ std::vector<UnicodeString> Config::getCategory()  { return category; }
 // сеттеры
 void Config::setDebug(bool i)   { debug = i; }
 void Config::setShowLog(bool i) { showLog = i; }
-void Config::setOldGrub(bool i) { oldGrub = i; }
+void Config::setShowEsetUpd(bool i) { showEsetUpd = i; }
+void Config::setOldGrub(short i) { oldGrub = i; }
+void Config::setOldGrubComent(bool i) { oldGrubComent = i; }
+void Config::setOldGrubInfo(bool i)   { oldGrubInfo = i; }
+void Config::setOldGrubNet(bool i)    { oldGrubNet = i; }
+void Config::setOldGrubUsb(bool i)    { oldGrubUsb = i; }
 void Config::setNewGrub(bool i) { newGrub = i; }
 void Config::setLicense(bool i) { license = i; }
 void Config::setAudit(short i)   { audit = i; }
@@ -175,7 +227,7 @@ bool IsAdminMode() {
 void setInfoArmToForm(Arm &curPC) {
 	Form1->EditNumber->Value   = curPC.getNumber();
 	Form1->EditPartition->Text = curPC.getPartition();
-   Form1->EditArmClass->ItemIndex = curPC.getClassID();
+	Form1->EditArmClass->ItemIndex = curPC.getClassID();
 	Form1->EditCategory->ItemIndex = curPC.getCategoryID();
 	Form1->EditLicWin->ItemIndex    = curPC.getLicWindowsID();
 	Form1->EditLicOffice->ItemIndex = curPC.getLicOfficeID();
@@ -191,8 +243,9 @@ void setInfoArmToForm(Arm &curPC) {
 	Form1->CheckBoxEsetAutoUpdate->Checked = curPC.getEsetAutoUpdate();
 	if (curPC.getEsetAutoUpdate())
 		Form1->StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
-   else Form1->StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
+	else Form1->StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
 	Form1->EditEsetMirrorDir->Text = curPC.getEsetDir();
+	//infoSetToFille(curPC);
 //...
 }
 void setConfigToForm(Config &curConfig) {
@@ -200,16 +253,23 @@ void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxShowLog->Checked = curConfig.getShowLog();
 	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
 	else Form1->Width = 421*Form1->ScaleFactor;
+    Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();
 	Form1->EditGrubUser->Text = curConfig.getUser();
-	Form1->CheckBoxOldGrub->Checked = curConfig.getOldGrub();
+	Form1->CheckBoxOldGrub->State = (TCheckBoxState)curConfig.getOldGrub();
+	Form1->ComentTxt->Checked = curConfig.getOldGrubComent();
+	Form1->InfoTxt->Checked = curConfig.getOldGrubInfo();
+	Form1->NetTxt->Checked = curConfig.getOldGrubNet();
+	Form1->UsbTxt->Checked = curConfig.getOldGrubUsb();
 	Form1->CheckBoxNewGrub->Checked = curConfig.getNewGrub();
 	Form1->CheckBoxLicense->Checked = curConfig.getLicense();
-	if (curConfig.getAudit() == 0) Form1->CheckBoxAudit->State = cbUnchecked;
-	if (curConfig.getAudit() == 2) Form1->CheckBoxAudit->State = cbGrayed;
-	if (curConfig.getAudit() == 1) Form1->CheckBoxAudit->State = cbChecked;
-	if (curConfig.getEsetLog() == 0) Form1->CheckBoxEsetLog->State = cbUnchecked;
-	if (curConfig.getEsetLog() == 2) Form1->CheckBoxEsetLog->State = cbGrayed;
-	if (curConfig.getEsetLog() == 1) Form1->CheckBoxEsetLog->State = cbChecked;
+	Form1->CheckBoxAudit->State = (TCheckBoxState)curConfig.getAudit();
+	//if (curConfig.getAudit() == 0) Form1->CheckBoxAudit->State = cbUnchecked;
+	//if (curConfig.getAudit() == 2) Form1->CheckBoxAudit->State = cbGrayed;
+	//if (curConfig.getAudit() == 1) Form1->CheckBoxAudit->State = cbChecked;
+	Form1->CheckBoxEsetLog->State = (TCheckBoxState)curConfig.getEsetLog();
+	//if (curConfig.getEsetLog() == 0) Form1->CheckBoxEsetLog->State = cbUnchecked;
+	//if (curConfig.getEsetLog() == 2) Form1->CheckBoxEsetLog->State = cbGrayed;
+	//if (curConfig.getEsetLog() == 1) Form1->CheckBoxEsetLog->State = cbChecked;
 	//Form1->CheckBoxEsetLog->State = curConfig.getEsetLog();
 	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
 	for(auto i : curConfig.getArmClass()) Form1->EditArmClass->Items->Add(i);

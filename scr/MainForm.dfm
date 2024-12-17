@@ -1,4 +1,4 @@
-object Form1: TForm1
+﻿object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'GRUBer'
@@ -103,7 +103,9 @@ object Form1: TForm1
         Width = 994
         Height = 44
         Align = alClient
+        Smooth = True
         MarqueeInterval = 1
+        Step = 1
         TabOrder = 0
         ExplicitTop = 471
         ExplicitWidth = 992
@@ -113,7 +115,7 @@ object Form1: TForm1
         Top = 6
         Width = 394
         Height = 467
-        ActivePage = TabGRUBer
+        ActivePage = СПЗ
         Align = alClient
         Constraints.MaxHeight = 600
         TabOrder = 1
@@ -159,14 +161,14 @@ object Form1: TForm1
               item
                 Column = 0
                 ColumnSpan = 2
-                Control = GridPanel4
-                Row = 1
+                Control = GroupBox2
+                Row = 3
               end
               item
                 Column = 0
                 ColumnSpan = 2
-                Control = GroupBox2
-                Row = 3
+                Control = EditDirGrubName
+                Row = 1
               end>
             Padding.Left = 1
             Padding.Top = 1
@@ -186,9 +188,15 @@ object Form1: TForm1
               end
               item
                 Value = 25.000000000000000000
+              end
+              item
+                SizeStyle = ssAuto
               end>
             TabOrder = 0
             ExplicitHeight = 429
+            DesignSize = (
+              386
+              437)
             object GroupBox1: TGroupBox
               AlignWithMargins = True
               Left = 5
@@ -286,13 +294,13 @@ object Form1: TForm1
                   end
                   item
                     Column = 1
-                    Control = GridPanel7
-                    Row = 7
+                    Control = EditRespon
+                    Row = 6
                   end
                   item
                     Column = 1
-                    Control = EditRespon
-                    Row = 6
+                    Control = EditComent
+                    Row = 7
                   end>
                 Padding.Left = 1
                 Padding.Top = 1
@@ -322,6 +330,9 @@ object Form1: TForm1
                   end
                   item
                     Value = 12.500000000000000000
+                  end
+                  item
+                    SizeStyle = ssAuto
                   end>
                 TabOrder = 0
                 ExplicitHeight = 233
@@ -336,7 +347,12 @@ object Form1: TForm1
                   Height = 15
                   Anchors = [akLeft]
                   Caption = #1053#1086#1084#1077#1088
-                  ExplicitTop = 13
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -12
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
                 end
                 object Label2: TLabel
                   AlignWithMargins = True
@@ -504,73 +520,28 @@ object Form1: TForm1
                     'KMS'
                     #1055#1054' '#1074#1110#1076#1089#1091#1090#1085#1077)
                 end
-                object GridPanel7: TGridPanel
-                  Left = 78
-                  Top = 209
-                  Width = 138
-                  Height = 28
-                  Align = alClient
-                  BevelOuter = bvNone
-                  ColumnCollection = <
-                    item
-                      Value = 100.000000000000000000
-                    end
-                    item
-                      SizeStyle = ssAbsolute
-                      Value = 35.000000000000000000
-                    end>
-                  ControlCollection = <
-                    item
-                      Column = 1
-                      Control = Button1
-                      Row = 0
-                    end
-                    item
-                      Column = 0
-                      Control = EditComent
-                      Row = 0
-                    end>
-                  RowCollection = <
-                    item
-                      Value = 100.000000000000000000
-                    end>
-                  TabOrder = 6
-                  ExplicitTop = 204
-                  ExplicitHeight = 27
-                  DesignSize = (
-                    138
-                    28)
-                  object Button1: TButton
-                    Left = 108
-                    Top = 2
-                    Width = 25
-                    Height = 23
-                    Anchors = [akLeft, akTop, akRight, akBottom]
-                    Caption = '...'
-                    TabOrder = 0
-                    OnClick = Button1Click
-                  end
-                  object EditComent: TMemo
-                    Left = 4
-                    Top = 2
-                    Width = 95
-                    Height = 23
-                    Anchors = [akLeft, akTop, akRight, akBottom]
-                    ScrollBars = ssVertical
-                    TabOrder = 1
-                    WordWrap = False
-                    OnChange = EditComentChange
-                  end
-                end
                 object EditRespon: TEdit
                   Left = 82
                   Top = 182
                   Width = 130
                   Height = 23
                   Anchors = []
-                  TabOrder = 7
+                  TabOrder = 6
                   OnChange = EditResponChange
                   ExplicitTop = 177
+                end
+                object EditComent: TMemo
+                  Left = 82
+                  Top = 211
+                  Width = 130
+                  Height = 23
+                  Anchors = []
+                  ScrollBars = ssVertical
+                  TabOrder = 7
+                  WordWrap = False
+                  OnChange = EditComentChange
+                  OnDblClick = EditComentDblClick
+                  ExplicitTop = 206
                 end
               end
             end
@@ -657,7 +628,7 @@ object Form1: TForm1
                 Caption = #1047#1072#1087#1091#1089#1082' GRUBer'
                 TabOrder = 0
                 OnClick = BtnGruberRunClick
-                ExplicitHeight = 136
+                ExplicitLeft = 1
               end
               object BtnGruberStop: TButton
                 AlignWithMargins = True
@@ -666,11 +637,12 @@ object Form1: TForm1
                 Width = 146
                 Height = 33
                 Align = alClient
-                Caption = #1047#1091#1087#1080#1085#1080#1090#1080' GRUBer'
+                Caption = #1047#1091#1087#1080#1085#1080#1090#1080' GRUBer'#9662
                 Enabled = False
+                PopupMenu = PopupMenu_StopGrub
                 TabOrder = 1
                 OnClick = BtnGruberStopClick
-                ExplicitTop = 145
+                ExplicitWidth = 62
               end
               object BtnEsetUpdate: TButton
                 AlignWithMargins = True
@@ -693,76 +665,11 @@ object Form1: TForm1
                 Width = 146
                 Height = 33
                 Align = alClient
-                Caption = #1042#1110#1076#1082#1088#1080#1090#1080' '#1050#1086#1085#1089#1086#1083#1100
+                Caption = #1042#1110#1076#1082#1088#1080#1090#1080' '#1050#1086#1085#1089#1086#1083#1100#9662
+                PopupMenu = PopupMenu_SysTool
                 TabOrder = 3
                 OnClick = BtnKiberConsolOpenClick
                 ExplicitTop = 222
-              end
-            end
-            object GridPanel4: TGridPanel
-              Left = 2
-              Top = 268
-              Width = 382
-              Height = 28
-              Align = alClient
-              BevelOuter = bvNone
-              ColumnCollection = <
-                item
-                  SizeStyle = ssAbsolute
-                  Value = 25.000000000000000000
-                end
-                item
-                  Value = 100.000000000000000000
-                end>
-              ControlCollection = <
-                item
-                  Column = 0
-                  Control = CheckBox1
-                  Row = 0
-                end
-                item
-                  Column = 1
-                  Control = EditDirGrubName
-                  Row = 0
-                end>
-              RowCollection = <
-                item
-                  Value = 100.000000000000000000
-                end>
-              TabOrder = 4
-              ExplicitTop = 262
-              DesignSize = (
-                382
-                28)
-              object CheckBox1: TCheckBox
-                AlignWithMargins = True
-                Left = 3
-                Top = 3
-                Width = 19
-                Height = 22
-                Align = alClient
-                Alignment = taLeftJustify
-                DoubleBuffered = True
-                ParentDoubleBuffered = False
-                TabOrder = 0
-              end
-              object EditDirGrubName: TEdit
-                Left = 28
-                Top = 2
-                Width = 350
-                Height = 23
-                Alignment = taCenter
-                Anchors = [akLeft, akTop, akRight, akBottom]
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -13
-                Font.Name = 'Consolas'
-                Font.Style = []
-                ParentFont = False
-                ReadOnly = True
-                TabOrder = 1
-                Text = 'EditDirGrubName'
-                OnChange = EditDirGrubNameChange
               end
             end
             object GroupBox2: TGroupBox
@@ -773,7 +680,7 @@ object Form1: TForm1
               Height = 81
               Align = alClient
               Caption = #1030#1085#1092#1086' '#1087#1086' '#1040#1056#1052
-              TabOrder = 5
+              TabOrder = 4
               ExplicitTop = 345
               ExplicitHeight = 79
               object GridPanel6: TGridPanel
@@ -909,6 +816,27 @@ object Form1: TForm1
                 end
               end
             end
+            object EditDirGrubName: TEdit
+              AlignWithMargins = True
+              Left = 6
+              Top = 271
+              Width = 374
+              Height = 23
+              Alignment = taCenter
+              Anchors = [akLeft, akRight]
+              Color = clWhite
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clBlack
+              Font.Height = -13
+              Font.Name = 'Consolas'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ReadOnly = True
+              TabOrder = 5
+              Text = 'EditDirGrubName'
+              OnChange = EditDirGrubNameChange
+              ExplicitTop = 265
+            end
           end
         end
         object TabSettings: TTabSheet
@@ -1018,7 +946,8 @@ object Form1: TForm1
                 Top = 75
                 Width = 210
                 Height = 17
-                Caption = #1043#1077#1085#1077#1088#1091#1074#1072#1090#1080' '#1086#1089#1085#1086#1074#1085#1110' '#1092#1072#1081#1083#1080
+                Caption = #1043#1077#1085#1077#1088#1091#1074#1072#1090#1080' '#1086#1089#1085#1086#1074#1085#1110' '#1092#1072#1081#1083#1080#9662' '
+                PopupMenu = PopupMenu_mailGrubFile
                 TabOrder = 5
                 OnClick = CheckBoxOldGrubClick
               end
@@ -1042,12 +971,21 @@ object Form1: TForm1
               end
               object BtnEditPartition: TButton
                 Left = 227
-                Top = 163
+                Top = 167
                 Width = 142
                 Height = 25
                 Caption = #1056#1077#1076#1072#1075#1091#1074#1072#1090#1080' '#1087#1110#1076#1088#1086#1079#1076#1110#1083#1080
                 TabOrder = 8
                 OnClick = BtnEditPartitionClick
+              end
+              object CheckBox_ShowEsetUpdate: TCheckBox
+                Left = 227
+                Top = 121
+                Width = 150
+                Height = 17
+                Caption = #1054#1082#1085#1086' '#1086#1085#1086#1074#1083#1077#1085#1085#1103' ESET'
+                TabOrder = 9
+                OnClick = CheckBox_ShowEsetUpdateClick
               end
             end
             object BtnSaveSetteings: TButton
@@ -1106,6 +1044,323 @@ object Form1: TForm1
             end
           end
         end
+        object СПЗ: TTabSheet
+          Caption = #1057#1055#1047
+          ImageIndex = 2
+          object GridPanel7: TGridPanel
+            Left = 0
+            Top = 0
+            Width = 386
+            Height = 437
+            Align = alClient
+            BevelOuter = bvNone
+            ColumnCollection = <
+              item
+                Value = 100.000000000000000000
+              end>
+            ControlCollection = <
+              item
+                Column = 0
+                Control = GroupBox_AppInfo
+                Row = 0
+              end
+              item
+                Column = 0
+                Control = GroupBox_AppFille
+                Row = 1
+              end
+              item
+                Column = 0
+                Control = GroupBox_AppUSB
+                Row = 2
+              end
+              item
+                Column = 0
+                Control = CheckBox_RunAs
+                Row = 3
+              end>
+            RowCollection = <
+              item
+                SizeStyle = ssAbsolute
+                Value = 145.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 105.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 105.000000000000000000
+              end
+              item
+                Value = 100.000000000000000000
+              end>
+            TabOrder = 0
+            DesignSize = (
+              386
+              437)
+            object GroupBox_AppInfo: TGroupBox
+              AlignWithMargins = True
+              Left = 3
+              Top = 3
+              Width = 380
+              Height = 139
+              Align = alClient
+              Caption = #1030#1085#1092#1086#1088#1084#1072#1094#1110#1103' '#1086' '#1055#1050
+              TabOrder = 0
+              object GridPanel9: TGridPanel
+                Left = 2
+                Top = 17
+                Width = 376
+                Height = 120
+                Align = alClient
+                BevelOuter = bvNone
+                ColumnCollection = <
+                  item
+                    Value = 50.000000000000000000
+                  end
+                  item
+                    Value = 50.000000000000000000
+                  end>
+                ControlCollection = <
+                  item
+                    Column = 0
+                    Control = BtnApp_HWiNFO
+                    Row = 0
+                  end
+                  item
+                    Column = 1
+                    Control = BtnApp_procexp
+                    Row = 0
+                  end
+                  item
+                    Column = 0
+                    Control = BtnApp_CPUZ
+                    Row = 1
+                  end
+                  item
+                    Column = 1
+                    Control = BtnApp_autoruns
+                    Row = 1
+                  end
+                  item
+                    Column = 0
+                    Control = BtnApp_GPUZ
+                    Row = 2
+                  end
+                  item
+                    Column = 1
+                    Control = BtnApp_tcpview
+                    Row = 2
+                  end>
+                RowCollection = <
+                  item
+                    Value = 33.367017709749370000
+                  end
+                  item
+                    Value = 33.300000000000000000
+                  end
+                  item
+                    Value = 33.332982290250640000
+                  end>
+                TabOrder = 0
+                object BtnApp_HWiNFO: TButton
+                  AlignWithMargins = True
+                  Left = 3
+                  Top = 3
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'HWiNFO'
+                  TabOrder = 0
+                  OnClick = BtnApp_HWiNFOClick
+                end
+                object BtnApp_procexp: TButton
+                  AlignWithMargins = True
+                  Left = 191
+                  Top = 3
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'Process Explorer'
+                  TabOrder = 1
+                  OnClick = BtnApp_procexpClick
+                end
+                object BtnApp_CPUZ: TButton
+                  AlignWithMargins = True
+                  Left = 3
+                  Top = 43
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'CPU-Z'
+                  TabOrder = 2
+                  OnClick = BtnApp_CPUZClick
+                end
+                object BtnApp_autoruns: TButton
+                  AlignWithMargins = True
+                  Left = 191
+                  Top = 43
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'AutoRuns'
+                  TabOrder = 3
+                  OnClick = BtnApp_autorunsClick
+                end
+                object BtnApp_GPUZ: TButton
+                  AlignWithMargins = True
+                  Left = 3
+                  Top = 83
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'GPU-Z'
+                  TabOrder = 4
+                  OnClick = BtnApp_GPUZClick
+                end
+                object BtnApp_tcpview: TButton
+                  AlignWithMargins = True
+                  Left = 191
+                  Top = 83
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'TcpView'
+                  TabOrder = 5
+                  OnClick = BtnApp_tcpviewClick
+                end
+              end
+            end
+            object GroupBox_AppFille: TGroupBox
+              AlignWithMargins = True
+              Left = 3
+              Top = 148
+              Width = 380
+              Height = 99
+              Align = alClient
+              Caption = #1060#1072#1081#1083#1086#1074#1072' '#1089#1080#1089#1090#1077#1084#1072
+              TabOrder = 1
+              object GridPanel10: TGridPanel
+                Left = 2
+                Top = 17
+                Width = 376
+                Height = 80
+                Align = alClient
+                BevelOuter = bvNone
+                ColumnCollection = <
+                  item
+                    Value = 50.000000000000000000
+                  end
+                  item
+                    Value = 50.000000000000000000
+                  end>
+                ControlCollection = <
+                  item
+                    Column = 0
+                    Control = BtnApp_Total
+                    Row = 0
+                  end
+                  item
+                    Column = 1
+                    Control = BtnApp_Everything
+                    Row = 0
+                  end
+                  item
+                    Column = 0
+                    Control = BtnApp_3
+                    Row = 1
+                  end
+                  item
+                    Column = 1
+                    Control = BtnApp_4
+                    Row = 1
+                  end>
+                RowCollection = <
+                  item
+                    Value = 50.000000000000000000
+                  end
+                  item
+                    Value = 50.000000000000000000
+                  end>
+                TabOrder = 0
+                object BtnApp_Total: TButton
+                  AlignWithMargins = True
+                  Left = 3
+                  Top = 3
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'Total Commander'
+                  TabOrder = 0
+                  OnClick = BtnApp_TotalClick
+                end
+                object BtnApp_Everything: TButton
+                  AlignWithMargins = True
+                  Left = 191
+                  Top = 3
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = 'Everything'
+                  TabOrder = 1
+                  OnClick = BtnApp_EverythingClick
+                end
+                object BtnApp_3: TButton
+                  AlignWithMargins = True
+                  Left = 3
+                  Top = 43
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = '...'
+                  Enabled = False
+                  TabOrder = 2
+                end
+                object BtnApp_4: TButton
+                  AlignWithMargins = True
+                  Left = 191
+                  Top = 43
+                  Width = 182
+                  Height = 34
+                  Align = alClient
+                  Caption = '...'
+                  Enabled = False
+                  TabOrder = 3
+                end
+              end
+            end
+            object GroupBox_AppUSB: TGroupBox
+              AlignWithMargins = True
+              Left = 3
+              Top = 253
+              Width = 380
+              Height = 99
+              Align = alClient
+              Caption = 'USB '#1087#1088#1080#1089#1090#1088#1086#1111
+              TabOrder = 2
+              object Button1: TButton
+                Left = 160
+                Top = 40
+                Width = 75
+                Height = 25
+                Caption = 'Button1'
+                TabOrder = 0
+              end
+            end
+            object CheckBox_RunAs: TCheckBox
+              Left = 11
+              Top = 407
+              Width = 364
+              Height = 30
+              Anchors = [akBottom]
+              Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1080' '#1089' '#1087#1088#1072#1074#1072#1084#1080' '#1072#1076#1084#1110#1085#1110#1089#1090#1088#1072#1090#1086#1088#1072
+              Checked = True
+              State = cbChecked
+              TabOrder = 3
+            end
+          end
+        end
       end
       object MemoLOG: TMemo
         Left = 406
@@ -1133,8 +1388,15 @@ object Form1: TForm1
       Height = 30
       Align = alClient
       Anchors = []
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Segoe UI'
+      Font.Style = []
       Panels = <
         item
+          BiDiMode = bdLeftToRight
+          ParentBiDiMode = False
           Text = ' GRUBer '#1085#1077' '#1079#1072#1087#1091#1089#1082#1072#1074#1089#1103
           Width = 160
         end
@@ -1147,6 +1409,7 @@ object Form1: TForm1
           Text = 'v.0.0.0.0 '
           Width = 50
         end>
+      UseSystemFont = False
       ExplicitTop = 522
       ExplicitWidth = 1004
     end
@@ -1158,5 +1421,62 @@ object Form1: TForm1
     OnFileOkClick = DirOpenEsetMirrorFileOkClick
     Left = 465
     Top = 385
+  end
+  object PopupMenu_SysTool: TPopupMenu
+    Left = 585
+    Top = 385
+    object Perfmon: TMenuItem
+      Caption = #1052#1086#1085#1110#1090#1086#1088' '#1089#1090#1072#1073#1110#1083#1100#1085#1086#1089#1090#1110
+      OnClick = PerfmonClick
+    end
+    object MsConfig: TMenuItem
+      Caption = 'MsConfig'
+      OnClick = MsConfigClick
+    end
+    object sysdmCpl: TMenuItem
+      Caption = #1042#1083#1072#1089#1090#1080#1074#1086#1089#1090#1110' '#1089#1080#1089#1090#1077#1084#1110
+      OnClick = sysdmCplClick
+    end
+  end
+  object Taskbar1: TTaskbar
+    TaskBarButtons = <>
+    ProgressState = Normal
+    ProgressMaxValue = 100
+    TabProperties = []
+    Left = 673
+    Top = 385
+  end
+  object PopupMenu_StopGrub: TPopupMenu
+    Left = 585
+    Top = 329
+    object Рass: TMenuItem
+      Caption = #1055#1088#1086#1087#1091#1089#1090#1080#1090#1080' '#1096#1072#1075
+      OnClick = РassClick
+    end
+  end
+  object PopupMenu_mailGrubFile: TPopupMenu
+    AutoLineReduction = maManual
+    Left = 585
+    Top = 273
+    object ComentTxt: TMenuItem
+      Caption = 'coment.txt'
+      Checked = True
+      OnClick = ComentTxtClick
+    end
+    object InfoTxt: TMenuItem
+      Caption = 'info.txt'
+      Checked = True
+      OnClick = InfoTxtClick
+    end
+    object NetTxt: TMenuItem
+      Caption = 'net1.txt & net2.txt'
+      Checked = True
+      OnClick = NetTxtClick
+    end
+    object UsbTxt: TMenuItem
+      Caption = 'usb.txt'
+      Checked = True
+      OnClick = UsbTxtClick
+    end
   end
 end

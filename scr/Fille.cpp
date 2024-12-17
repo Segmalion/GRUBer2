@@ -48,11 +48,10 @@ bool fileOpen(UnicodeString str)
 // смена прав на файл через CMD
 void cacls(UnicodeString str)
 {
-	RunApp cacls;
-	cacls.setApp("C:\\Windows\\System32\\cacls.exe");
-	cacls.setArg(str + " /t /e /g Users:c\"");
-	cacls.run();
-	cacls.setArg(str + " /t /e /g Пользователи:c\"");
-	cacls.run();
+	UnicodeString setApp = "C:\\Windows\\System32\\cacls.exe";
+	UnicodeString setArg = str + " /t /e /g Users:c\"";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_HIDE);
+	setArg = str + " /t /e /g Пользователи:c\"";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_HIDE);
 }
 //---------------------------------------------------------------------------

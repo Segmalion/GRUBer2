@@ -6,6 +6,7 @@
 //---------------------------------------------------------------------------
 class Arm {
 private:
+	// инфо об ПК (ручная)
 	int number = 0;
 	UnicodeString partition  = "Без відділу";
 	UnicodeString className   = "Без класу";
@@ -18,6 +19,7 @@ private:
 	int licOfficeID  = 0;
 	UnicodeString respon = "";
 	std::vector<UnicodeString> coment;
+	// инфо из ПК
 	UnicodeString desktopName = "";
 	UnicodeString serial = "";
 	// структуры

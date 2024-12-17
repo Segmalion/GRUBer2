@@ -21,9 +21,14 @@ Arm::Arm()
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
 	if (dataSMB == NULL) {
-		serial = "Помилка!";
+		serial = "Помилка SMBIOS_DATA!";
 	}
-	serial = g.PrintBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
+	serial = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
+	UnicodeString errSer[] = { "To Be Filled By O.E.M.",
+							 "System Serial Number" };
+	for (auto errSerStr: errSer) {
+		if (serial == errSerStr) serial = "Серійний номер відсутній...";
+	}
 }
 //---------------------------------------------------------------------------
 /* функции */

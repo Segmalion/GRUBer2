@@ -6,6 +6,8 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <string>
+#include <iostream>
+#include <sstream>
 
 //Переменные для SMB
 
@@ -73,9 +75,8 @@ class GetSMB
         PSMBIOS_STRUCT_HEADER GetNextStructureOfType(PRAW_SMBIOS_DATA smbios, PSMBIOS_STRUCT_HEADER previous, DWORD type);
         PSMBIOS_STRUCT_HEADER GetStructureByHandle(PRAW_SMBIOS_DATA smbios, WORD handle);
         void GetSmbiosString(PSMBIOS_STRUCT_HEADER table, BYTE index, LPWSTR output, int cchOutput);
-        std::string PrintBiosValue(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset, DWORD size);
-        //void PrintBiosString(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset);
-        UnicodeString PrintBiosString(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset);
+		UnicodeString GetBiosValue(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset, DWORD size);
+		UnicodeString GetBiosString(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset);
 };
 #endif
 

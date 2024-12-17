@@ -83,9 +83,7 @@ void GetSMB::GetSmbiosString(PSMBIOS_STRUCT_HEADER table, BYTE index, LPWSTR out
 {
     DWORD i = 0;
     DWORD len = 0;
-//#pragma warning(disable : 4996)
-    wcscpy(output, L"");
-//#pragma warning(enable : 4996)
+	wcscpy(output, L"");
 
 
     if (0 == index) return;
@@ -100,64 +98,42 @@ void GetSMB::GetSmbiosString(PSMBIOS_STRUCT_HEADER table, BYTE index, LPWSTR out
     }
 }
 
-std::string GetSMB::PrintBiosValue(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset, DWORD size)
+UnicodeString GetSMB::GetBiosValue(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset, DWORD size)
 {
     PSMBIOS_STRUCT_HEADER head = NULL;
     PBYTE cursor = NULL;
     std::string value;
 
     head = GetNextStructureOfType(smbios, head, type);
-    if (NULL == head) { printf("PrintBiosValue Error!\n"); return value; }
+    if (NULL == head) { return "ERROR"; }
 
     cursor = ((PBYTE)head + offset);
 
-    //value
     for (int i = 0; i < size; i++) {
-        printf("%02x", (unsigned int)*cursor);
-        value.push_back((char)*cursor);
-//        value = value + cursor;
+        std::ostringstream ss;
+        ss << std::hex << (unsigned int)*cursor;
+		value = value + ss.str();
         cursor++;
-    }
-    printf("\n");
-    return value;
+	}
+	UnicodeString uValue = String(value.c_str(), value.length());
+	return uValue;
 }
 
-/*void GetSMB::PrintBiosString(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset)
+UnicodeString GetSMB::GetBiosString(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset)
 {
-    PSMBIOS_STRUCT_HEADER head;
+	PSMBIOS_STRUCT_HEADER head;
     head = NULL;
     PBYTE cursor = NULL;
     WCHAR buf[1024];
 
     head = GetNextStructureOfType(smbios, head, type);
-    if (NULL == head) { printf("PrintString Error!\n"); return; }
-    cursor = ((PBYTE)head + offset);
+	if (NULL == head) return "ERROR";
+	cursor = ((PBYTE)head + offset);
     BYTE val = *cursor;
 
-    GetSmbiosString((head), *cursor, buf, 1024);
-    //  value
-    wprintf(L"%s\n", buf);
-}*/
+	GetSmbiosString((head), *cursor, buf, 1024);
 
-UnicodeString GetSMB::PrintBiosString(PRAW_SMBIOS_DATA smbios, DWORD type, DWORD offset)
-{
-    PSMBIOS_STRUCT_HEADER head;
-    head = NULL;
-    PBYTE cursor = NULL;
-    WCHAR buf[1024];
-
-    head = GetNextStructureOfType(smbios, head, type);
-    if (NULL == head) { printf("PrintString Error!\n"); return "ERROR"; }
-    cursor = ((PBYTE)head + offset);
-    BYTE val = *cursor;
-
-    GetSmbiosString((head), *cursor, buf, 1024);
-    //  value
-	 wprintf(L"%s\n", buf);
-
-   std::wstring ws(buf);
-   // your new String
-   std::string str(ws.begin(), ws.end());
-   // Show String
-   return UnicodeString(buf);
+	//std::wstring ws(buf);
+	//std::string str(ws.begin(), ws.end());
+	return UnicodeString(buf);
 }

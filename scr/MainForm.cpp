@@ -15,7 +15,6 @@
 #include "Fille.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-#pragma link "DosCommand"
 #pragma resource "*.dfm"
 
 TForm1 *Form1;
@@ -27,11 +26,11 @@ Config curConfig;
 // infoEset curEset;
 //обявление переменных
 UnicodeString cmdEXE, curentDate;
-bool stopBool;
-bool dirGrubRewrite;
+bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
 std::vector<UnicodeString> vStrPartition;
+bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 //---------------------------------------------------------------------------
-const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 1;
+const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 4;
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
@@ -46,9 +45,16 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	cmdEXE = cmdCheck();
 	if(cmdEXE == "ERROR") printLog("[!]Не мае доступу чи прав на CMD!");
 	// выводим настройки & сохраненую инфу об АРМ
-   setConfigToForm(curConfig);
+	setConfigToForm(curConfig);
 	setInfoArmToForm(curPC);
-   EditDirGrubName->Text = curPC.dirGrubName();
+	EditDirGrubName->Text = curPC.dirGrubName();
+	if (DirectoryExists(curDir.getGrubFull())) {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
+	} else {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
+	}
 	// ---
 	PageControl1->TabIndex = 0;
 	printLog("[>]Запушенно GRUBer v." + versionApp);
@@ -56,6 +62,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	if(IsAdminMode()) printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
 	else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
+    gruberStart = 1;
 }
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> TForm1::fileInfoGrub() {
@@ -86,10 +93,19 @@ int TForm1::progressBarStep() {
 	int step = 100 / i;
 	return step;
 }
+void TForm1::progressBarGo(int i , bool err) {
+	if(stopBool == false) {
+		ProgressBar1->Position = i;
+		Taskbar1->ProgressValue = i;
+	}
+	if(stopBool == true || err == true) {
+		ProgressBar1->State = (TProgressBarState) pbsError;
+		Taskbar1->ProgressState = (TTaskBarProgressState) 4;
+	}
+}
 //---------------------------------------------------------------------------
 void TForm1::mainGRUBer() {
 	/* Преварительные процедуры */
-	ProgressBar1->Position = 0;
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Form1->BtnGruberRun->Enabled = false;
 	Form1->BtnGruberStop->Enabled = true;
@@ -100,9 +116,16 @@ void TForm1::mainGRUBer() {
 	/* Переменные */
 	int persentStep;
 	UnicodeString outFilePath;
+	UnicodeString app32, app64, arg;
 	stopBool = false;
+    passBool = false;
+	bool bigErr = true;
 	// lastGrub.user = curConfig.grubUser;
 	/* Настройка прогресбара */
+	int pos = 0;
+	ProgressBar1->State = (TProgressBarState) pbsNormal;
+	Taskbar1->ProgressState = (TTaskBarProgressState) 2;
+	progressBarGo(pos);
 	/* Сохранение введеной инфы о ПК */
 	infoSetToFille(curPC);
 	/* Проверка и создание папок */
@@ -122,6 +145,15 @@ void TForm1::mainGRUBer() {
 		printLog("Видаляю попередні файли...");
 	}
 	curDir.check();
+	//Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
+	if(DirectoryExists(curDir.getGrubFull())) {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
+	} else {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
+	}
+	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	/* 1 - gruber_info.txt */
 	if (curConfig.getNewGrub() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\gruber_info.ini";
@@ -131,7 +163,8 @@ void TForm1::mainGRUBer() {
 		for(auto str : fileInfoGrub()) infoFille->Add (str);
 		infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 		printLog("Файл СТВОРЕННО!");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		progressBarGo(pos = pos + progressBarStep());
+        printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	}
 	/* 2 - coment.txt */
 	if (curConfig.getOldGrub() && !stopBool) {
@@ -145,153 +178,145 @@ void TForm1::mainGRUBer() {
 		comTxt->Add("");
 		comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
 		printLog("Файл СТВОРЕННО!");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		progressBarGo(pos = pos + progressBarStep());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	}
 	/* 3 -  info.txt */
 	if (curConfig.getOldGrub() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\info.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування info.txt...");
-		RunApp info;
-		info.setApp(curDir.getToolFull() + "\\Info.bat");
-		info.setArg("\""+ outFilePath + "\"");
-		info.run();
-		if (info.error.run || info.error.exit)
-			printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-		printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(info.error.runCode) + ", " + UnicodeString(info.error.run) + "] "
-			+ "exit-[" + UnicodeString(info.error.exitCode) + ", " + UnicodeString(info.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		app32 = curDir.getToolFull() + "\\scripts\\Info.bat";
+		arg = "\""+ outFilePath + "\"";
+		RunApp info {app32, NULL, arg};
+		info.run(); // RUN !!!
+		printLogDebug(curConfig.getDebug(), info.errorString());
+		printLog(info.resultString());
+		progressBarGo(pos = pos + progressBarStep(), info.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !info.checkErr();
 	}
 	/* 4 - usb.txt */
 	if (curConfig.getOldGrub() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\usb.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування usb.txt...");
-		RunApp usb;
-		usb.setApp(curDir.getToolFull() + "\\USBDeview_x32.exe");
-		usb.setArg("/stext " + outFilePath + "\"");
+		app32 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
+		app64 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
+		arg = "/stext " + outFilePath + "\"";
+		RunApp usb {app32, app64, arg};
 		usb.run();
-		if (usb.error.run || usb.error.exit) printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-      printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(usb.error.runCode) + ", " + UnicodeString(usb.error.run) + "] "
-			+ "exit-[" + UnicodeString(usb.error.exitCode) + ", " + UnicodeString(usb.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		printLogDebug(curConfig.getDebug(), usb.errorString());
+		printLog(usb.resultString());
+        if (FileExists(outFilePath)) {
+			Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
+		}
+		progressBarGo(pos = pos + progressBarStep(), usb.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !usb.checkErr();
 	}
-	/* old - devctrllog.dat */
-	/*if (!stopBool) {
-		// Копируем - C:\ProgramData\ESET\ESET Security\Logs\devctrllog.dat в папку граба
-		UnicodeString devLogFileDAT = "devctrllog.dat";
-		UnicodeString copyFrom = "C:\\ProgramData\\ESET\\ESET Security\\Logs\\" + devLogFileDAT;
-		UnicodeString copyToDir = curDir.getGrubFull() + "\\eset-log";
-		UnicodeString devDAT = copyToDir + "\\" + devLogFileDAT;
-		printLog("Копіюемо devctrllog.dat...");
-		if (FileExists(copyFrom)) {
-			if (!DirectoryExists(copyToDir)) CreateDir(copyToDir);
-			if (FileExists(devDAT)) FileSetAttr(devDAT, 0) && DeleteFile(devDAT);
-			CopyFile(copyFrom.c_str(), devDAT.c_str(), false);
-			printLog("Файл СКОПІЙОВАНО!");
-		} else printLog("[!]Файлу не мае...");
-	} */
    /* 5 - net1.txt & net2.txt */
 	if (curConfig.getOldGrub() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\net1.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування net1.txt...");
-		RunApp net1;
-		net1.setApp(curDir.getToolFull() + "\\NetworkInterfacesView_x32.exe");
-		net1.setArg("/stext " + outFilePath + "\"");
+		app32 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x32.exe";
+		app64 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x64.exe";
+		arg = "/stext " + outFilePath + "\"";
+		RunApp net1 {app32, app64, arg};
 		net1.run();
-		if (net1.error.run || net1.error.exit) printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-      printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(net1.error.runCode) + ", " + UnicodeString(net1.error.run) + "] "
-			+ "exit-[" + UnicodeString(net1.error.exitCode) + ", " + UnicodeString(net1.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		printLogDebug(curConfig.getDebug(), net1.errorString());
+		printLog(net1.resultString());
+		progressBarGo(pos = pos + progressBarStep(), net1.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !net1.checkErr();
 	}
 	if (curConfig.getOldGrub() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\net2.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування net2.txt...");
-		RunApp net2;
-		net2.setApp(curDir.getToolFull() + "\\WifiHistoryView.exe");
-		net2.setArg("/stext " + outFilePath + "\"");
+		app32 = curDir.getToolFull() + "\\Network\\WifiHistoryView.exe";
+		app64 = NULL;
+		arg = "/stext " + outFilePath + "\"";
+		RunApp net2 {app32, app64, arg};
 		net2.run();
-		if (net2.error.run || net2.error.exit) printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-      printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(net2.error.runCode) + ", " + UnicodeString(net2.error.run) + "] "
-			+ "exit-[" + UnicodeString(net2.error.exitCode) + ", " + UnicodeString(net2.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		printLogDebug(curConfig.getDebug(), net2.errorString());
+		printLog(net2.resultString());
+		progressBarGo(pos = pos + progressBarStep(), net2.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !net2.checkErr();
 	}
 	/* 6 - license.txt */
 	if (curConfig.getLicense() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\license.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування license.txt...");
-		RunApp lic;
-		lic.setApp(curDir.getToolFull() + "\\Info-License-to-File.bat");
-		lic.setArg("\""+ outFilePath + "\"");
-		lic.run();
-		if (lic.error.run || lic.error.exit) printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-		printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(lic.error.runCode) + ", " + UnicodeString(lic.error.run) + "] "
-			+ "exit-[" + UnicodeString(lic.error.exitCode) + ", " + UnicodeString(lic.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		if (FileExists("C:\\Windows\\System32\\wbem\\wmic.exe")) {
+			app32 = curDir.getToolFull() + "\\scripts\\Info-License-to-File.bat";
+			app64 = NULL;
+			arg = "\""+ outFilePath + "\"";
+			RunApp lic {app32, app64, arg};
+			lic.run();
+			printLogDebug(curConfig.getDebug(), lic.errorString());
+			printLog(lic.resultString());
+			progressBarGo(pos = pos + progressBarStep(), lic.checkErr());
+			printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+			bigErr *= !lic.checkErr();
+		} else {
+			printLog("[!]ERROR!");
+            bigErr *= 0;
+        }
 	}
 	/* 7 - audit.html */
 	if (curConfig.getAudit() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\audit.html";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування audit.html...");
-		RunApp audit;
-		audit.setApp(curDir.getToolFull() + "\\WinAudit.exe");
+		app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
+		app64 = NULL;
 		if(curConfig.getAudit() == 1)
-			audit.setArg("/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"");
+			arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
 		if(curConfig.getAudit() == 2)
-			audit.setArg("/r=go /f=" + outFilePath + " /L=en\"");
+			arg = "/r=go /f=" + outFilePath + " /L=en\"";
+		RunApp audit {app32, app64, arg};
 		audit.run();
-		if (audit.error.run || audit.error.exit) printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-      printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(audit.error.runCode) + ", " + UnicodeString(audit.error.run) + "] "
-			+ "exit-[" + UnicodeString(audit.error.exitCode) + ", " + UnicodeString(audit.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		printLogDebug(curConfig.getDebug(), audit.errorString());
+		printLog(audit.resultString());
+		progressBarGo(pos = pos + progressBarStep(), audit.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !audit.checkErr();
 	}
 	/* 8 - eset-log.zip */
 	if (curConfig.getEsetLog() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\eset-log.zip";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування eset-log.zip...");
-		RunApp esetLog;
-		esetLog.setApp(curDir.getToolFull() + "\\ESETLogCollector.exe");
+		app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
+		app64 = NULL;
 		if(curConfig.getEsetLog() == 1)
-			esetLog.setArg("/accepteula /Lang:UKR /Age:0 " + outFilePath + "\"");
+			arg = "/accepteula /Lang:UKR /Age:0 " + outFilePath + "\"";
 		if(curConfig.getEsetLog() == 2)
-			esetLog.setArg("/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev " + outFilePath + "\"");
+			arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev " + outFilePath + "\"";
+		RunApp esetLog {app32, app64, arg};
 		esetLog.run(false);
-		if (esetLog.error.run || esetLog.error.exit) printLog("[!]Щось пішло НЕ так...");
-		else printLog("Файл СТВОРЕННО!");
-		printLogDebug(curConfig.getDebug(),
-			"run-[" + UnicodeString(esetLog.error.runCode) + ", " + UnicodeString(esetLog.error.run) + "] "
-			+ "exit-[" + UnicodeString(esetLog.error.exitCode) + ", " + UnicodeString(esetLog.error.exit) + "] ");
-		ProgressBar1->Position = ProgressBar1->Position + progressBarStep();
+		printLogDebug(curConfig.getDebug(), esetLog.errorString());
+		printLog(esetLog.resultString());
+		progressBarGo(pos = 100, esetLog.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !esetLog.checkErr();
+	};
+	/*  */
+	/*  */
+	if (!bigErr) {
+		printLog("[ERR]GRUBer виконано з помилками!");
+		StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
+	} else {
+		printLog("[OK]GRUBer виконано успішно!");
+		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 	}
-	/*  */
-	/*  */
-	/*  */
-	printLog("[OK]GRUBer ЗАВЕРШЕННО!");
-	StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
-	ProgressBar1->Position = 100;
 	Form1->BtnGruberRun->Enabled = true;
 	Form1->BtnGruberStop->Enabled = false;
 	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-	Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
-	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
-	Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 }
 //---------------------------------------------------------------------------
 /* Кнопки */
@@ -299,12 +324,6 @@ void TForm1::mainGRUBer() {
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 {
 	mainGRUBer();
-}
-// просмотр коментария
-void __fastcall TForm1::Button1Click(TObject *Sender)
-{
-	FormComent->EditComent->Lines = Form1->EditComent->Lines;
-	FormComent->ShowModal();
 }
 // открыть редактор подразделений
 void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
@@ -322,77 +341,101 @@ void __fastcall TForm1::BtnGruberStopClick(TObject *Sender)
 {
 	stopBool = true;
 }
+void __fastcall TForm1::РassClick(TObject *Sender)
+{
+	passBool = true;
+}
 // сохранение настроек
 void __fastcall TForm1::BtnSaveSetteingsClick(TObject *Sender)
 {
 	curConfig.saveFileIni();
 }
-// eset update
-void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
-{
-	if(FileExists(GetCurrentDir() + "\\update.7z")) {
-		printLog("[ESET-Update][>]Оновленя бази Eset...");
-		StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
-		if(FileExists(curPC.getEsetDir() + "\\dll\\update.ver")) deleteDir(curPC.getEsetDir());
-		//ShellExecuteW(NULL, L"open", fille.c_str(), param.c_str(), NULL, SW_SHOWDEFAULT);
-		RunApp esetBaseUnpack;
-		esetBaseUnpack.setApp(curDir.getToolFull() + "\\7za.exe");
-		esetBaseUnpack.setArg("x -y -o\"" + curPC.getEsetDir() + "\" \"" + GetCurrentDir() + "\\update.7z\"");
-		esetBaseUnpack.run();
-		if (esetBaseUnpack.error.run || esetBaseUnpack.error.run)
-			printLog("[ESET-Update][!]Щось пішло НЕ так...");
-		else {
-			printLog("[ESET-Update][OK]Бази оновленно!");
-			StatusBar1->Panels->Items[1]->Text = " Бази оновленно!";
-         if (FileExists("c:\\Program Files\\ESET\\ESET Security\\ermm.exe")) {
-				RunApp esetBaseUpdate;
-				esetBaseUpdate.setApp("c:\\Program Files\\ESET\\ESET Security\\ermm.exe");
-				esetBaseUpdate.setArg("start update");
-				esetBaseUpdate.run();
-			}
-		}
-	}
-	else printLog("[ESET-Update][!]Немає архіву з базами!");
-}
 // запуск парсера
 void __fastcall TForm1::BtnParserOpenClick(TObject *Sender)
 {
-	RunApp parser;
-	parser.setApp(GetCurrentDir() + "\\GRUBer-Parser.exe");
-	parser.setArg("/run /b " + curDir.getGrubFull());
-	parser.run(0);
-	if (parser.error.run || parser.error.run)
-		printLog("[!]Щось пішло НЕ так...");
+	UnicodeString setApp = GetCurrentDir() + "\\GRUBer-Parser.exe";
+	UnicodeString setArg = "/run /b " + curDir.getGrubFull();
+	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
 }
 // запуск консоли
 void __fastcall TForm1::BtnKiberConsolOpenClick(TObject *Sender)
 {
-	RunApp console;
-	console.setApp(curDir.getToolFull() + "\\KiberConsole.msc");
-	console.setArg(NULL);
-	console.run(0, 1);
-	if (console.error.run || console.error.run)
-		printLog("[!]Щось пішло НЕ так...");
+	UnicodeString setApp = curDir.getToolFull() + "\\KiberConsole.msc";
+	ShellExecuteW(NULL, L"runas", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::PerfmonClick(TObject *Sender)
+{
+	UnicodeString setApp = "perfmon.exe";
+	UnicodeString setArg = "/rel";
+	ShellExecuteW(NULL, L"runas", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::MsConfigClick(TObject *Sender)
+{
+	UnicodeString setApp = "C:\\Windows\\System32\\msconfig.exe";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::sysdmCplClick(TObject *Sender)
+{
+	UnicodeString setApp = "sysdm.cpl";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // провека лицензий
 void __fastcall TForm1::BtnLicenseClick(TObject *Sender)
 {
-	RunApp licenseShow;
-	licenseShow.setApp(curDir.getToolFull() + "\\INFO-license-run.bat");
-	licenseShow.setArg(NULL);
-	licenseShow.run(0);
-	if (licenseShow.error.run || licenseShow.error.run)
-		printLog("[!]Щось пішло НЕ так...");
+	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-license-run.bat";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // общее инфо
 void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 {
-	RunApp infoShow;
-	infoShow.setApp(curDir.getToolFull() + "\\INFO-PC-all.bat");
-	infoShow.setArg(NULL);
-	infoShow.run(0);
-	if (infoShow.error.run || infoShow.error.run)
-		printLog("[!]Щось пішло НЕ так...");
+	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-PC-all.bat";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+//---------------------------------------------------------------------------
+/* Обновление ESET */
+void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
+{
+	DirOpenEsetMirror->DefaultFolder = EditEsetMirrorDir->Text;
+	DirOpenEsetMirror->Execute();
+}
+void __fastcall TForm1::DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose)
+{
+	EditEsetMirrorDir->Text = DirOpenEsetMirror->FileName;
+}
+void __fastcall TForm1::CheckBox_ShowEsetUpdateClick(TObject *Sender)
+{
+	curConfig.setShowEsetUpd(CheckBox_ShowEsetUpdate->Checked);
+}
+void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
+{
+	if (!FileExists(GetCurrentDir() + "\\update.7z")) {
+		printLog("[ESET-Update][!]Немає архіву з базами!");
+		return;
+	}
+	printLog("[ESET-Update][>]Оновленя бази Eset...");
+	BtnEsetUpdate->Enabled = false;
+	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
+	if (FileExists(curPC.getEsetDir() + "\\dll\\update.ver"))
+		deleteDir(curPC.getEsetDir());
+
+	UnicodeString app32 = curDir.getToolFull() + "\\7zip\\7za.exe";
+	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\7zG.exe";
+	RunApp esetBaseUnpack {app32, NULL,
+		"x -y -o\"" + curPC.getEsetDir() + "\" \"" + GetCurrentDir() + "\\update.7z\""};
+	esetBaseUnpack.run(!curConfig.getShowEsetUpd());
+	if (esetBaseUnpack.checkErr()){
+		printLog("[ESET-Update][!]Щось пішло НЕ так...");
+		BtnEsetUpdate->Enabled = true;
+		return;
+	}
+	printLog("[ESET-Update][OK]Бази оновленно!");
+    BtnEsetUpdate->Enabled = true;
+	StatusBar1->Panels->Items[1]->Text = " Бази оновленно!";
+	if (FileExists("c:\\Program Files\\ESET\\ESET Security\\ermm.exe")) {
+		RunApp esetBaseUpdate {"c:\\Program Files\\ESET\\ESET Security\\ermm.exe",
+			NULL, "start update"};
+		esetBaseUpdate.run();
+	}
 }
 //---------------------------------------------------------------------------
 /* Изменение полей */
@@ -436,10 +479,22 @@ void __fastcall TForm1::EditComentChange(TObject *Sender)
 	}
 	curPC.setComent(vStr);
 }
+void __fastcall TForm1::EditComentDblClick(TObject *Sender)
+{
+	FormComent->EditComent->Lines = Form1->EditComent->Lines;
+	FormComent->ShowModal();
+}
 void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 {
 	curDir.setGrubFull(curPC.dirGrubName());
-	Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
+	//Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
+	if(DirectoryExists(curDir.getGrubFull())) {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
+	} else {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
+	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 }
@@ -450,7 +505,7 @@ void __fastcall TForm1::EditGrubUserChange(TObject *Sender)
 void __fastcall TForm1::EditEsetMirrorDirChange(TObject *Sender)
 {
 	curPC.setEsetDir(Form1->EditEsetMirrorDir->Text);
-	infoSetToFille(curPC);
+	if(gruberStart) infoSetToFille(curPC);
 }
 //---------------------------------------------------------------------------
 /* Чекбоксы в настройках */
@@ -476,7 +531,44 @@ void __fastcall TForm1::CheckBoxEsetLogClick(TObject *Sender)
 }
 void __fastcall TForm1::CheckBoxOldGrubClick(TObject *Sender)
 {
-	curConfig.setOldGrub(CheckBoxOldGrub->Checked);
+	// 0 - off, 1 - full, 2 - mini
+	curConfig.setOldGrub(CheckBoxOldGrub->State);
+	if (curConfig.getOldGrub()==0) {
+		if (ComentTxt->Checked) ComentTxt->Checked = 0;
+		if (InfoTxt->Checked) InfoTxt->Checked = 0;
+		if (NetTxt->Checked) NetTxt->Checked = 0;
+		if (UsbTxt->Checked) UsbTxt->Checked = 0;
+	}
+	if (curConfig.getOldGrub()==1) {
+		if (!ComentTxt->Checked) ComentTxt->Checked = 1;
+		if (!InfoTxt->Checked) InfoTxt->Checked = 1;
+		if (!NetTxt->Checked) NetTxt->Checked = 1;
+		if (!UsbTxt->Checked) UsbTxt->Checked = 1;
+	}
+}
+void __fastcall TForm1::ComentTxtClick(TObject *Sender)
+{
+	curConfig.setOldGrubComent(!ComentTxt->Checked);
+	ComentTxt->Checked = !ComentTxt->Checked;
+	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
+}
+void __fastcall TForm1::InfoTxtClick(TObject *Sender)
+{
+	curConfig.setOldGrubInfo(!InfoTxt->Checked);
+	InfoTxt->Checked = !InfoTxt->Checked;
+	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
+}
+void __fastcall TForm1::NetTxtClick(TObject *Sender)
+{
+	curConfig.setOldGrubNet(!NetTxt->Checked);
+	NetTxt->Checked = !NetTxt->Checked;
+	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
+}
+void __fastcall TForm1::UsbTxtClick(TObject *Sender)
+{
+	curConfig.setOldGrubUsb(!UsbTxt->Checked);
+	UsbTxt->Checked = !UsbTxt->Checked;
+	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
 }
 void __fastcall TForm1::CheckBoxNewGrubClick(TObject *Sender)
 {
@@ -496,19 +588,76 @@ void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
 	Form1->BtnEditEsetMirrorDir->Enabled = !i;
 	Form1->BtnEsetUpdate->Enabled = !i;
 	curPC.setEsetAutoUpdate(i);
-	infoSetToFille(curPC);
+	if(gruberStart) infoSetToFille(curPC);
 }
 //---------------------------------------------------------------------------
-/* Обновление ESET */
-void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
+/* Запуск ПО */
+// INFO
+void __fastcall TForm1::BtnApp_HWiNFOClick(TObject *Sender)
 {
-	DirOpenEsetMirror->DefaultFolder = EditEsetMirrorDir->Text;
-	DirOpenEsetMirror->Execute();
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO64.exe";
+	else setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO32.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-void __fastcall TForm1::DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose)
+void __fastcall TForm1::BtnApp_CPUZClick(TObject *Sender)
 {
-	EditEsetMirrorDir->Text = DirOpenEsetMirror->FileName;
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x64.exe";
+	else setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x32.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-
+void __fastcall TForm1::BtnApp_GPUZClick(TObject *Sender)
+{
+	LPCWSTR oper = L"open";
+	UnicodeString setApp = curDir.getToolFull() + "\\GPU-Z\\GPU-Z.2.60.0.exe";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::BtnApp_procexpClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp64.exe";
+	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::BtnApp_autorunsClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns64.exe";
+	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::BtnApp_tcpviewClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview64.exe";
+	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+// File system
+void __fastcall TForm1::BtnApp_TotalClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD64.EXE";
+	else setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD.EXE";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::BtnApp_EverythingClick(TObject *Sender)
+{
+	UnicodeString setApp = curDir.getToolFull() + "\\Everything\\Everything.exe";
+	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
 //---------------------------------------------------------------------------
 

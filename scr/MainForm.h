@@ -12,6 +12,10 @@
 #include <Vcl.Mask.hpp>
 #include <Vcl.Grids.hpp>
 #include <Vcl.Dialogs.hpp>
+#include <Vcl.ButtonGroup.hpp>
+#include <Vcl.Menus.hpp>
+#include <System.Win.TaskbarCore.hpp>
+#include <Vcl.Taskbar.hpp>
 
 #include <vector>
 //---------------------------------------------------------------------------
@@ -31,8 +35,6 @@ __published:	// IDE-managed Components
 	TButton *BtnGruberDirOpen;
 	TButton *BtnParserOpen;
 	TGridPanel *GridPanel3;
-	TGridPanel *GridPanel4;
-	TCheckBox *CheckBox1;
 	TEdit *EditDirGrubName;
 	TButton *BtnGruberRun;
 	TButton *BtnGruberStop;
@@ -64,8 +66,6 @@ __published:	// IDE-managed Components
 	TLabel *Label10;
 	TComboBox *EditLicOffice;
 	TCheckBox *CheckBoxShowLog;
-	TGridPanel *GridPanel7;
-	TButton *Button1;
 	TMemo *EditComent;
 	TLabeledEdit *EditGrubUser;
 	TGridPanel *GridPanel8;
@@ -82,6 +82,38 @@ __published:	// IDE-managed Components
 	TButton *BtnEditEsetMirrorDir;
 	TCheckBox *CheckBoxEsetAutoUpdate;
 	TFileOpenDialog *DirOpenEsetMirror;
+	TTabSheet *СПЗ;
+	TGridPanel *GridPanel7;
+	TGroupBox *GroupBox_AppInfo;
+	TGridPanel *GridPanel9;
+	TButton *BtnApp_HWiNFO;
+	TButton *BtnApp_procexp;
+	TButton *BtnApp_CPUZ;
+	TButton *BtnApp_autoruns;
+	TButton *BtnApp_GPUZ;
+	TButton *BtnApp_tcpview;
+	TGroupBox *GroupBox_AppFille;
+	TGridPanel *GridPanel10;
+	TButton *BtnApp_Total;
+	TButton *BtnApp_Everything;
+	TButton *BtnApp_3;
+	TButton *BtnApp_4;
+	TGroupBox *GroupBox_AppUSB;
+	TPopupMenu *PopupMenu_SysTool;
+	TMenuItem *Perfmon;
+	TCheckBox *CheckBox_ShowEsetUpdate;
+	TMenuItem *MsConfig;
+	TMenuItem *sysdmCpl;
+	TCheckBox *CheckBox_RunAs;
+	TTaskbar *Taskbar1;
+	TPopupMenu *PopupMenu_StopGrub;
+	TMenuItem *Рass;
+	TPopupMenu *PopupMenu_mailGrubFile;
+	TMenuItem *ComentTxt;
+	TMenuItem *InfoTxt;
+	TMenuItem *NetTxt;
+	TMenuItem *UsbTxt;
+	TButton *Button1;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -92,7 +124,6 @@ __published:	// IDE-managed Components
 	void __fastcall EditComentChange(TObject *Sender);
 	void __fastcall EditDirGrubNameChange(TObject *Sender);
 	void __fastcall CheckBoxShowLogClick(TObject *Sender);
-	void __fastcall Button1Click(TObject *Sender);
 	void __fastcall EditLicWinChange(TObject *Sender);
 	void __fastcall EditLicOfficeChange(TObject *Sender);
 	void __fastcall EditGrubUserChange(TObject *Sender);
@@ -114,10 +145,30 @@ __published:	// IDE-managed Components
 	void __fastcall BtnKiberConsolOpenClick(TObject *Sender);
 	void __fastcall BtnLicenseClick(TObject *Sender);
 	void __fastcall BtnInfoClick(TObject *Sender);
+	void __fastcall EditComentDblClick(TObject *Sender);
+	void __fastcall BtnApp_HWiNFOClick(TObject *Sender);
+	void __fastcall BtnApp_CPUZClick(TObject *Sender);
+	void __fastcall BtnApp_GPUZClick(TObject *Sender);
+	void __fastcall BtnApp_procexpClick(TObject *Sender);
+	void __fastcall BtnApp_autorunsClick(TObject *Sender);
+	void __fastcall BtnApp_tcpviewClick(TObject *Sender);
+	void __fastcall BtnApp_TotalClick(TObject *Sender);
+	void __fastcall BtnApp_EverythingClick(TObject *Sender);
+	void __fastcall PerfmonClick(TObject *Sender);
+	void __fastcall CheckBox_ShowEsetUpdateClick(TObject *Sender);
+	void __fastcall MsConfigClick(TObject *Sender);
+	void __fastcall sysdmCplClick(TObject *Sender);
+	void __fastcall РassClick(TObject *Sender);
+	void __fastcall ComentTxtClick(TObject *Sender);
+	void __fastcall InfoTxtClick(TObject *Sender);
+	void __fastcall NetTxtClick(TObject *Sender);
+	void __fastcall UsbTxtClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer();
    int progressBarStep();
+   void progressBarGo(int i, bool err = false);
+   void progressBarEr();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };

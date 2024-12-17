@@ -25,13 +25,14 @@ public:
 	void setGrubFull(UnicodeString str);
 	//геттеры
 	UnicodeString getGrubFull();
-   UnicodeString getToolFull();
+	UnicodeString getToolFull();
 };
 class Config {
 private:
-	bool debug, showLog;
-	bool oldGrub, newGrub, license;
-	short audit, esetLog;
+	bool debug, showLog, showEsetUpd;
+	bool newGrub, license;
+	bool oldGrubComent, oldGrubInfo, oldGrubNet, oldGrubUsb;
+	short oldGrub, audit, esetLog;
 	UnicodeString grubUser;
 	std::vector<UnicodeString> partition;
 	std::vector<UnicodeString> armClass;
@@ -41,11 +42,17 @@ private:
 	void readFileIni();
 public:
 	Config();
-   void saveFileIni();
+	void saveFileIni();
+    short checkOldGrubState();
 	// геттеры
-   bool getDebug();
+	bool getDebug();
 	bool getShowLog();
-	bool getOldGrub();
+	bool getShowEsetUpd();
+	short getOldGrub();
+	bool getOldGrubComent();
+	bool getOldGrubInfo();
+	bool getOldGrubNet();
+	bool getOldGrubUsb();
 	bool getNewGrub();
 	bool getLicense();
 	short getAudit();
@@ -57,9 +64,14 @@ public:
 	// сеттеры
 	void setDebug(bool i);
 	void setShowLog(bool i);
+	void setShowEsetUpd(bool i);
 	void setAudit(short i);
 	void setEsetLog(short i);
-	void setOldGrub(bool i);
+	void setOldGrub(short i);
+	void setOldGrubComent(bool i);
+	void setOldGrubInfo(bool i);
+	void setOldGrubNet(bool i);
+	void setOldGrubUsb(bool i);
 	void setNewGrub(bool i);
 	void setLicense(bool i);
 	void setUser(UnicodeString str);
