@@ -101,6 +101,14 @@ void Config::readFileIni() {
 		if(findStr != "0") {
 			partition = vStrGenFromStr(findStr);
 		}
+		findStr = findParam(infoFille, "[settings]", "prefixPartition");
+		if(findStr != "ERROR") {
+			prefixPartition = findStr;
+		}
+		findStr = findParam(infoFille, "[settings]", "enablePrefixPartition");
+		if(findStr == 0 || findStr == 1) {
+			enablePrefixPartition = findStr.ToInt();
+		}
 	}
 }
 void Config::saveFileIni() {
@@ -112,6 +120,8 @@ void Config::saveFileIni() {
 	infoFille->Add("showLog=" + UnicodeString(showLog));
 	infoFille->Add("showEsetUpd=" + UnicodeString(showEsetUpd));
 	infoFille->Add("grubUser=" + grubUser);
+	infoFille->Add("prefixPartition=" + prefixPartition);
+	infoFille->Add("enablePrefixPartition=" + UnicodeString(enablePrefixPartition));
 	// раздел
 	infoFille->Add("[genfile]");
 	infoFille->Add("oldGrub=" + UnicodeString(oldGrub));
@@ -134,7 +144,7 @@ void Config::saveFileIni() {
 	cacls(configFile); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
 }
 short Config::checkOldGrubState() {
-	switch ((short)oldGrubComent + oldGrubInfo + oldGrubNet + oldGrubUsb) {
+	switch ((short)oldGrubComent + (short)oldGrubInfo + (short)oldGrubNet + (short)oldGrubUsb) {
 	case 0:
 		return 0;
 	case 1:
@@ -164,6 +174,8 @@ UnicodeString Config::getUser() { return grubUser; }
 std::vector<UnicodeString> Config::getPartition() { return partition; }
 std::vector<UnicodeString> Config::getArmClass()  { return armClass; }
 std::vector<UnicodeString> Config::getCategory()  { return category; }
+UnicodeString Config::getPrefixPartition() { return prefixPartition; }
+bool Config::getEnablePrefixPartition() { return enablePrefixPartition; }
 // сеттеры
 void Config::setDebug(bool i)   { debug = i; }
 void Config::setShowLog(bool i) { showLog = i; }
@@ -178,9 +190,11 @@ void Config::setLicense(bool i) { license = i; }
 void Config::setAudit(short i)   { audit = i; }
 void Config::setEsetLog(short i) { esetLog = i; }
 void Config::setUser(UnicodeString str) { grubUser = str; }
-void Config::setPartition(std::vector<UnicodeString> vStr) { partition = vStr;}
-void Config::setArmClass(std::vector<UnicodeString> vStr)  { armClass = vStr;}
-void Config::setCategory(std::vector<UnicodeString> vStr)  { category = vStr;}
+void Config::setPartition(std::vector<UnicodeString> vStr) { partition = vStr; }
+void Config::setArmClass(std::vector<UnicodeString> vStr)  { armClass = vStr; }
+void Config::setCategory(std::vector<UnicodeString> vStr)  { category = vStr; }
+void Config::setPrefixPartition(UnicodeString str) { prefixPartition = str; }
+void Config::setEnablePrefixPartition(bool i) { enablePrefixPartition = i; }
 //---------------------------------------------------------------------------
 /* Вывод логов */
 void printLog(UnicodeString str)
@@ -274,6 +288,9 @@ void setConfigToForm(Config &curConfig) {
 	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
 	for(auto i : curConfig.getArmClass()) Form1->EditArmClass->Items->Add(i);
 	for(auto i : curConfig.getCategory()) Form1->EditCategory->Items->Add(i);
+	Form1->CheckBoxPrefixPartition->State = (TCheckBoxState)curConfig.getEnablePrefixPartition();
+    Form1->EditPrefixPartition->Text = curConfig.getPrefixPartition();
+
 }
 bool infoSetToFille(Arm &curPC)
 {

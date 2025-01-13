@@ -37,7 +37,7 @@ public:
    // конструктор
 	Arm();
 	// функции
-	UnicodeString dirGrubName();
+	UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
 	std::vector<UnicodeString> mStrInfoArm();
 	std::vector<UnicodeString> mStrInfoArmGrubMini();
 	std::vector<UnicodeString> mStrInfoArmGrubFull();

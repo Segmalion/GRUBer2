@@ -38,6 +38,8 @@ private:
 	std::vector<UnicodeString> armClass;
 	std::vector<UnicodeString> category;
 	UnicodeString configFile;
+	UnicodeString prefixPartition;
+	bool enablePrefixPartition;
 	// функции
 	void readFileIni();
 public:
@@ -61,6 +63,8 @@ public:
 	std::vector<UnicodeString> getPartition();
 	std::vector<UnicodeString> getArmClass();
 	std::vector<UnicodeString> getCategory();
+	UnicodeString getPrefixPartition();
+	bool getEnablePrefixPartition();
 	// сеттеры
 	void setDebug(bool i);
 	void setShowLog(bool i);
@@ -78,6 +82,8 @@ public:
 	void setPartition(std::vector<UnicodeString> vStr);
 	void setArmClass(std::vector<UnicodeString> vStr);
 	void setCategory(std::vector<UnicodeString> vStr);
+	void setPrefixPartition(UnicodeString str);
+	void setEnablePrefixPartition(bool i);
 };
 //---------------------------------------------------------------------------
 UnicodeString cmdCheck(void);

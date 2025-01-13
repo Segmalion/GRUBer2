@@ -82,7 +82,7 @@ __published:	// IDE-managed Components
 	TButton *BtnEditEsetMirrorDir;
 	TCheckBox *CheckBoxEsetAutoUpdate;
 	TFileOpenDialog *DirOpenEsetMirror;
-	TTabSheet *СПЗ;
+	TTabSheet *Tool;
 	TGridPanel *GridPanel7;
 	TGroupBox *GroupBox_AppInfo;
 	TGridPanel *GridPanel9;
@@ -114,6 +114,9 @@ __published:	// IDE-managed Components
 	TMenuItem *NetTxt;
 	TMenuItem *UsbTxt;
 	TButton *Button1;
+	TEdit *EditPrefixPartition;
+	TCheckBox *CheckBoxPrefixPartition;
+	TButton *BtnAboutGruber;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -163,6 +166,9 @@ __published:	// IDE-managed Components
 	void __fastcall InfoTxtClick(TObject *Sender);
 	void __fastcall NetTxtClick(TObject *Sender);
 	void __fastcall UsbTxtClick(TObject *Sender);
+	void __fastcall EditPrefixPartitionChange(TObject *Sender);
+	void __fastcall CheckBoxPrefixPartitionClick(TObject *Sender);
+	void __fastcall BtnAboutGruberClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer();

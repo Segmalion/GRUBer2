@@ -7,6 +7,7 @@
 #include "ComentForm.h"
 #include "PartitionForm.h"
 #include "DialogDirExist.h"
+#include "About.h"
 
 #include "Arm.h"
 #include "RunApp.h"
@@ -29,16 +30,17 @@ UnicodeString cmdEXE, curentDate;
 bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
 std::vector<UnicodeString> vStrPartition;
 bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
+bool grubActive = 0;
 //---------------------------------------------------------------------------
-const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 4;
+extern const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 6;
+extern const UnicodeString versionApp = UnicodeString(vers1) + "."
+							  + UnicodeString(vers2) + "."
+							  + UnicodeString(vers3) + "."
+							  + UnicodeString(vers4);
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-	const UnicodeString versionApp = UnicodeString(vers1) + "."
-							  + UnicodeString(vers2) + "."
-							  + UnicodeString(vers3) + "."
-							  + UnicodeString(vers4);
 	Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
 	// Проверка наличия CMD и прав на выполнение
@@ -47,7 +49,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	// выводим настройки & сохраненую инфу об АРМ
 	setConfigToForm(curConfig);
 	setInfoArmToForm(curPC);
-	EditDirGrubName->Text = curPC.dirGrubName();
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 	if (DirectoryExists(curDir.getGrubFull())) {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
@@ -111,14 +113,15 @@ void TForm1::mainGRUBer() {
 	Form1->BtnGruberStop->Enabled = true;
 	Form1->BtnGruberRun->Caption = "Зачекай...";
 	printLog("[>]GRUBer запущено...");
-	printLog("Поточна тека: " + curPC.dirGrubName());
+	printLog("Поточна тека: " + curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 	StatusBar1->Panels->Items[0]->Text = " GRUBer запущено...";
 	/* Переменные */
+	grubActive = true;
 	int persentStep;
 	UnicodeString outFilePath;
 	UnicodeString app32, app64, arg;
 	stopBool = false;
-    passBool = false;
+	passBool = false;
 	bool bigErr = true;
 	// lastGrub.user = curConfig.grubUser;
 	/* Настройка прогресбара */
@@ -129,10 +132,10 @@ void TForm1::mainGRUBer() {
 	/* Сохранение введеной инфы о ПК */
 	infoSetToFille(curPC);
 	/* Проверка и создание папок */
-	curDir.setGrubFull(curPC.dirGrubName());
+	curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 	// папки
 	if (DirectoryExists(curDir.getGrubFull())) {
-		FormDirExist->ShowDir->Text=(curPC.dirGrubName());
+		FormDirExist->ShowDir->Text=(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 		FormDirExist->ShowModal();
 		printLog("Знайденно попередню теку!");
 		if (!dirGrubRewrite) {
@@ -164,17 +167,17 @@ void TForm1::mainGRUBer() {
 		infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 		printLog("Файл СТВОРЕННО!");
 		progressBarGo(pos = pos + progressBarStep());
-        printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	}
 	/* 2 - coment.txt */
-	if (curConfig.getOldGrub() && !stopBool) {
+	if (curConfig.getOldGrubComent() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\coment.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування coment.txt...");
 		TStringList *comTxt = new TStringList;
 		comTxt->Add(curPC.getComentStr());
 		comTxt->Add(curPC.getRespon());
-		comTxt->Add(curPC.dirGrubName());
+		comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 		comTxt->Add("");
 		comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
 		printLog("Файл СТВОРЕННО!");
@@ -182,7 +185,7 @@ void TForm1::mainGRUBer() {
 		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	}
 	/* 3 -  info.txt */
-	if (curConfig.getOldGrub() && !stopBool) {
+	if (curConfig.getOldGrubInfo() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\info.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування info.txt...");
@@ -197,7 +200,7 @@ void TForm1::mainGRUBer() {
 		bigErr *= !info.checkErr();
 	}
 	/* 4 - usb.txt */
-	if (curConfig.getOldGrub() && !stopBool) {
+	if (curConfig.getOldGrubUsb() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\usb.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування usb.txt...");
@@ -208,7 +211,7 @@ void TForm1::mainGRUBer() {
 		usb.run();
 		printLogDebug(curConfig.getDebug(), usb.errorString());
 		printLog(usb.resultString());
-        if (FileExists(outFilePath)) {
+		if (FileExists(outFilePath)) {
 			Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 		}
 		progressBarGo(pos = pos + progressBarStep(), usb.checkErr());
@@ -216,7 +219,7 @@ void TForm1::mainGRUBer() {
 		bigErr *= !usb.checkErr();
 	}
    /* 5 - net1.txt & net2.txt */
-	if (curConfig.getOldGrub() && !stopBool) {
+	if (curConfig.getOldGrubNet() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\net1.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування net1.txt...");
@@ -231,7 +234,7 @@ void TForm1::mainGRUBer() {
 		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 		bigErr *= !net1.checkErr();
 	}
-	if (curConfig.getOldGrub() && !stopBool) {
+	if (curConfig.getOldGrubNet() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\net2.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування net2.txt...");
@@ -264,8 +267,8 @@ void TForm1::mainGRUBer() {
 			bigErr *= !lic.checkErr();
 		} else {
 			printLog("[!]ERROR!");
-            bigErr *= 0;
-        }
+			bigErr *= 0;
+		}
 	}
 	/* 7 - audit.html */
 	if (curConfig.getAudit() && !stopBool) {
@@ -314,6 +317,7 @@ void TForm1::mainGRUBer() {
 		printLog("[OK]GRUBer виконано успішно!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 	}
+	grubActive = false;
 	Form1->BtnGruberRun->Enabled = true;
 	Form1->BtnGruberStop->Enabled = false;
 	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
@@ -391,6 +395,11 @@ void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-PC-all.bat";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
+// about form
+void __fastcall TForm1::BtnAboutGruberClick(TObject *Sender)
+{
+	FormAbout->ShowModal();
+}
 //---------------------------------------------------------------------------
 /* Обновление ESET */
 void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
@@ -417,13 +426,17 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
 	if (FileExists(curPC.getEsetDir() + "\\dll\\update.ver"))
 		deleteDir(curPC.getEsetDir());
-
-	UnicodeString app32 = curDir.getToolFull() + "\\7zip\\7za.exe";
-	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\7zG.exe";
-	RunApp esetBaseUnpack {app32, NULL,
+	//запуск обновления
+	UnicodeString app32 = curDir.getToolFull() + "\\7zip\\32\\7za.exe";
+	UnicodeString app64 = curDir.getToolFull() + "\\7zip\\64\\7za.exe";
+	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\32\\7zG.exe";
+	if (curConfig.getShowEsetUpd()) app64 = curDir.getToolFull() + "\\7zip\\64\\7zG.exe";
+	RunApp esetBaseUnpack {app32, app64,
 		"x -y -o\"" + curPC.getEsetDir() + "\" \"" + GetCurrentDir() + "\\update.7z\""};
 	esetBaseUnpack.run(!curConfig.getShowEsetUpd());
+	//------
 	if (esetBaseUnpack.checkErr()){
+		//ошибочка вышла...
 		printLog("[ESET-Update][!]Щось пішло НЕ так...");
 		BtnEsetUpdate->Enabled = true;
 		return;
@@ -442,12 +455,12 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 void __fastcall TForm1::EditNumberChange(TObject *Sender)
 {
 	curPC.setNumber(EditNumber->Value);
-	EditDirGrubName->Text = curPC.dirGrubName();
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
 	curPC.setPartition(EditPartition->Text);
-	EditDirGrubName->Text = curPC.dirGrubName();
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 void __fastcall TForm1::EditArmClassChange(TObject *Sender)
 {
@@ -457,7 +470,7 @@ void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 {
 	short indx = EditCategory->ItemIndex;
 	curPC.setCategory(EditCategory->Items->Strings[indx], indx);
-	EditDirGrubName->Text = curPC.dirGrubName();
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 void __fastcall TForm1::EditResponChange(TObject *Sender)
 {
@@ -486,14 +499,16 @@ void __fastcall TForm1::EditComentDblClick(TObject *Sender)
 }
 void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 {
-	curDir.setGrubFull(curPC.dirGrubName());
+	curDir.setGrubFull(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 	//Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
 	if(DirectoryExists(curDir.getGrubFull())) {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
+		EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		EditDirGrubName->Color = (TColor) 0xEAFFEA;
+		if (!grubActive) StatusBar1->Panels->Items[0]->Text = " GRUBer вже зібрано!";
 	} else {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
+		EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		EditDirGrubName->Color = (TColor) 0xEAEAFF;
+		StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
 	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
@@ -533,41 +548,43 @@ void __fastcall TForm1::CheckBoxOldGrubClick(TObject *Sender)
 {
 	// 0 - off, 1 - full, 2 - mini
 	curConfig.setOldGrub(CheckBoxOldGrub->State);
-	if (curConfig.getOldGrub()==0) {
-		if (ComentTxt->Checked) ComentTxt->Checked = 0;
-		if (InfoTxt->Checked) InfoTxt->Checked = 0;
-		if (NetTxt->Checked) NetTxt->Checked = 0;
-		if (UsbTxt->Checked) UsbTxt->Checked = 0;
-	}
-	if (curConfig.getOldGrub()==1) {
-		if (!ComentTxt->Checked) ComentTxt->Checked = 1;
-		if (!InfoTxt->Checked) InfoTxt->Checked = 1;
-		if (!NetTxt->Checked) NetTxt->Checked = 1;
-		if (!UsbTxt->Checked) UsbTxt->Checked = 1;
+	if (CheckBoxOldGrub->State!=2) {
+		if (curConfig.getOldGrub()==0) {
+			if (ComentTxt->Checked) {ComentTxt->Checked = 0; curConfig.setOldGrubComent(ComentTxt->Checked);}
+			if (InfoTxt->Checked) {InfoTxt->Checked = 0; curConfig.setOldGrubInfo(InfoTxt->Checked);}
+			if (NetTxt->Checked) {NetTxt->Checked = 0; curConfig.setOldGrubNet(NetTxt->Checked);}
+			if (UsbTxt->Checked) {UsbTxt->Checked = 0; curConfig.setOldGrubUsb(UsbTxt->Checked);}
+		}
+		if (curConfig.getOldGrub()==1) {
+			if (!ComentTxt->Checked) {ComentTxt->Checked = 1; curConfig.setOldGrubComent(ComentTxt->Checked);}
+			if (!InfoTxt->Checked) {InfoTxt->Checked = 1; curConfig.setOldGrubInfo(InfoTxt->Checked);}
+			if (!NetTxt->Checked) {NetTxt->Checked = 1; curConfig.setOldGrubNet(NetTxt->Checked);}
+			if (!UsbTxt->Checked) {UsbTxt->Checked = 1; curConfig.setOldGrubUsb(UsbTxt->Checked);}
+		}
 	}
 }
 void __fastcall TForm1::ComentTxtClick(TObject *Sender)
 {
-	curConfig.setOldGrubComent(!ComentTxt->Checked);
 	ComentTxt->Checked = !ComentTxt->Checked;
+	curConfig.setOldGrubComent(ComentTxt->Checked);
 	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
 }
 void __fastcall TForm1::InfoTxtClick(TObject *Sender)
 {
-	curConfig.setOldGrubInfo(!InfoTxt->Checked);
 	InfoTxt->Checked = !InfoTxt->Checked;
+	curConfig.setOldGrubInfo(InfoTxt->Checked);
 	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
 }
 void __fastcall TForm1::NetTxtClick(TObject *Sender)
 {
-	curConfig.setOldGrubNet(!NetTxt->Checked);
 	NetTxt->Checked = !NetTxt->Checked;
+	curConfig.setOldGrubNet(NetTxt->Checked);
 	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
 }
 void __fastcall TForm1::UsbTxtClick(TObject *Sender)
 {
-	curConfig.setOldGrubUsb(!UsbTxt->Checked);
 	UsbTxt->Checked = !UsbTxt->Checked;
+	curConfig.setOldGrubUsb(UsbTxt->Checked);
 	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
 }
 void __fastcall TForm1::CheckBoxNewGrubClick(TObject *Sender)
@@ -659,5 +676,23 @@ void __fastcall TForm1::BtnApp_EverythingClick(TObject *Sender)
 	UnicodeString setApp = curDir.getToolFull() + "\\Everything\\Everything.exe";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::EditPrefixPartitionChange(TObject *Sender)
+{
+	curConfig.setPrefixPartition(EditPrefixPartition->Text);
+    EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
+{
+	EditPrefixPartition->Enabled=CheckBoxPrefixPartition->State;
+	curConfig.setEnablePrefixPartition(CheckBoxPrefixPartition->State);
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+
+}
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 

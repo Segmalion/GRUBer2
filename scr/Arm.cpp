@@ -32,7 +32,7 @@ Arm::Arm()
 }
 //---------------------------------------------------------------------------
 /* функции */
-UnicodeString Arm::dirGrubName()
+UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 {
 	UnicodeString str;
 	str = "[";
@@ -42,9 +42,14 @@ UnicodeString Arm::dirGrubName()
 	} else str = str + UnicodeString(number);
 	str = str + "][" + curDate() + "]";
 	// partition
-	str = str + partition;
+	if (prfPart.IsEmpty() || !enPrfPart) {
+		str = str + partition;
+	} else str = str + prfPart + "_" + partition;
 	// serial
-	str = str + "#" + serial;
+	if (serial == "Серійний номер відсутній...") {
+		str = str + "#БезСН";
+	}
+	else str = str + "#" + serial;
 	// category
 	if (categoryID == 0) str = str + "#ОС";
 	if (categoryID == 1) str = str + "#НТ-БП";
