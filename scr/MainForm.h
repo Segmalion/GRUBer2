@@ -117,6 +117,7 @@ __published:	// IDE-managed Components
 	TEdit *EditPrefixPartition;
 	TCheckBox *CheckBoxPrefixPartition;
 	TButton *BtnAboutGruber;
+	TButton *BtnClearPC;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);

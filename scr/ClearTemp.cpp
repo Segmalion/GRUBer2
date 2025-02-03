@@ -14,3 +14,4 @@ __fastcall TFormClearTempDir::TFormClearTempDir(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
+

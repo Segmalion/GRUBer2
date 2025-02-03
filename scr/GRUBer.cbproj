@@ -286,10 +286,10 @@
         <FormResources Include="MainForm.dfm"/>
         <FormResources Include="PartitionForm.dfm"/>
         <FormResources Include="Serial.dfm"/>
-        <FormResources Include="ComentForm.dfm"/>
         <FormResources Include="ClearTemp.dfm"/>
-        <FormResources Include="DialogDirExist.dfm"/>
         <FormResources Include="About.dfm"/>
+        <FormResources Include="ComentForm.dfm"/>
+        <FormResources Include="DialogDirExist.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
