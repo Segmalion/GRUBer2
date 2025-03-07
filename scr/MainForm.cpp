@@ -32,7 +32,7 @@ std::vector<UnicodeString> vStrPartition;
 bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 6;
+extern const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 7;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -64,7 +64,14 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	if(IsAdminMode()) printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
 	else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
-    gruberStart = 1;
+	double height = 621*Form1->ScaleFactor;
+	double width  = 420*Form1->ScaleFactor;
+	Form1->Height = height;
+	Form1->Width  = width;
+	Form1->Constraints->MinHeight = height;
+	Form1->Constraints->MinWidth  = width;
+	gruberStart = 1;
+
 }
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> TForm1::fileInfoGrub() {
@@ -90,7 +97,7 @@ int TForm1::progressBarStep() {
 	if (curConfig.getNewGrub()) i++;
 	if (curConfig.getOldGrub()) i = i + 5;
 	if (curConfig.getLicense()) i++;
-	if (curConfig.getAudit()) i++;
+	if (curConfig.getAudit()) i = i + 2;
 	if (curConfig.getEsetLog()) i++;
 	int step = 100 / i;
 	return step;
@@ -272,15 +279,18 @@ void TForm1::mainGRUBer() {
 	}
 	/* 7 - audit.html */
 	if (curConfig.getAudit() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\audit.html";
+		if(curConfig.getAudit() == 1) {
+			outFilePath = curDir.getGrubFull() + "\\auditMax.html";
+			arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
+		}
+		if(curConfig.getAudit() == 2) {
+			outFilePath = curDir.getGrubFull() + "\\auditMin.html";
+			arg = "/r=go /f=" + outFilePath + " /L=en\"";
+		}
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування audit.html...");
 		app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
 		app64 = NULL;
-		if(curConfig.getAudit() == 1)
-			arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
-		if(curConfig.getAudit() == 2)
-			arg = "/r=go /f=" + outFilePath + " /L=en\"";
 		RunApp audit {app32, app64, arg};
 		audit.run();
 		printLogDebug(curConfig.getDebug(), audit.errorString());
@@ -289,7 +299,25 @@ void TForm1::mainGRUBer() {
 		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 		bigErr *= !audit.checkErr();
 	}
-	/* 8 - eset-log.zip */
+	/* 8 - CDI.txt */
+	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) { //111
+		outFilePath = curDir.getGrubFull() + "\\diskInfo.txt";
+		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+		printLog("Генерування diskInfo.txt...");
+		app32 = NULL;
+		app64 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo64.exe";
+		arg = "/CopyExit :";
+		RunApp cdi {app32, app64, arg};
+		cdi.run();
+		UnicodeString f1 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo.txt";
+		MoveFile(f1.c_str(), outFilePath.c_str());
+		printLogDebug(curConfig.getDebug(), cdi.errorString());
+		printLog(cdi.resultString());
+		progressBarGo(pos = pos + progressBarStep(), cdi.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		bigErr *= !cdi.checkErr();
+	}
+	/* 9 - eset-log.zip */
 	if (curConfig.getEsetLog() && !stopBool) {
 		outFilePath = curDir.getGrubFull() + "\\eset-log.zip";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
@@ -522,13 +550,62 @@ void __fastcall TForm1::EditEsetMirrorDirChange(TObject *Sender)
 	curPC.setEsetDir(Form1->EditEsetMirrorDir->Text);
 	if(gruberStart) infoSetToFille(curPC);
 }
+/* Изменение полей на GRUBer+*/
+void __fastcall TForm1::Edit_InNumberARMChange(TObject *Sender)
+{
+	curPC.setInNumberARM(Edit_InNumberARM->Text);
+}
+void __fastcall TForm1::Edit_InNumberHDDChange(TObject *Sender)
+{
+	curPC.setInNumberHDD(Edit_InNumberHDD->Text);
+}
+void __fastcall TForm1::Edit_InNumberDeclrChange(TObject *Sender)
+{
+	curPC.setInNumberDeclr(Edit_InNumberDeclr->Text);
+}
+void __fastcall TForm1::Edit_InNumberFormulyarChange(TObject *Sender)
+{
+	curPC.setInNumberFormulyar(Edit_InNumberFormulyar->Text);
+}
+void __fastcall TForm1::Edit_InNumberWorkChange(TObject *Sender)
+{
+	curPC.setInNumberWork(Edit_InNumberWork->Text);
+}
+void __fastcall TForm1::Edit_InNumberPersonChange(TObject *Sender)
+{
+	curPC.setInNumberPerson(Edit_InNumberPerson->Text);
+}
+void __fastcall TForm1::Edit_ComPoliticInstallChange(TObject *Sender)
+{
+	curPC.setComPoliticInstall(Edit_ComPoliticInstall->Text);
+}
+void __fastcall TForm1::Edit_ComContrUSBChange(TObject *Sender)
+{
+	curPC.setComContrUSB(Edit_ComContrUSB->Text);
+}
+void __fastcall TForm1::Edit_ComMultiUSERSChange(TObject *Sender)
+{
+   curPC.setComMultiUSERS(Edit_ComMultiUSERS->Text);
+}
+void __fastcall TForm1::CheckBox_PoliticInstallClick(TObject *Sender)
+{
+   curPC.setPoliticInstall(CheckBox_PoliticInstall->Checked);
+}
+void __fastcall TForm1::CheckBox_ContrUSBClick(TObject *Sender)
+{
+   curPC.setContrUSB(CheckBox_ContrUSB->Checked);
+}
+void __fastcall TForm1::CheckBox_MultiUSERSClick(TObject *Sender)
+{
+   curPC.setMultiUSERS(CheckBox_MultiUSERS->Checked);
+}
 //---------------------------------------------------------------------------
 /* Чекбоксы в настройках */
 void __fastcall TForm1::CheckBoxShowLogClick(TObject *Sender)
 {
 	curConfig.setShowLog(CheckBoxShowLog->Checked);
 	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
-	else Form1->Width = 421*Form1->ScaleFactor;
+	else Form1->Width = 420*Form1->ScaleFactor;
 }
 void __fastcall TForm1::CheckBoxDebugClick(TObject *Sender)
 {
@@ -693,6 +770,9 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 
 }
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 

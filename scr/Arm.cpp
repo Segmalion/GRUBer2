@@ -78,6 +78,18 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrubMini() {
 	mStr.push_back("licWindowsName=" + licWindowsName);
 	mStr.push_back("licOfficeName=" + licOfficeName);
 	mStr.push_back("respon=" + respon);
+	mStr.push_back("inNumberARM=" + inNumberARM);
+	mStr.push_back("inNumberHDD=" + inNumberHDD);
+	mStr.push_back("inNumberDeclr=" + inNumberDeclr);
+	mStr.push_back("inNumberFormulyar=" + inNumberFormulyar);
+	mStr.push_back("inNumberWork=" + inNumberWork);
+	mStr.push_back("inNumberPerson=" + inNumberPerson);
+	mStr.push_back("comPoliticInstall=" + comPoliticInstall);
+	mStr.push_back("comContrUSB=" + comContrUSB);
+	mStr.push_back("comMultiUSERS=" + comMultiUSERS);
+	mStr.push_back("politicInstall=" + UnicodeString(politicInstall));
+	mStr.push_back("contrUSB=" + UnicodeString(contrUSB));
+	mStr.push_back("multiUSERS=" + UnicodeString(multiUSERS));
 	return mStr;
 }
 std::vector<UnicodeString> Arm::mStrInfoArmGrubFull() {
@@ -94,6 +106,18 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrubFull() {
 	mStr.push_back("licOfficeName=" + licOfficeName);
 	mStr.push_back("licOfficeID=" + UnicodeString(licOfficeID));
 	mStr.push_back("respon=" + respon);
+	mStr.push_back("inNumberARM=" + inNumberARM);
+	mStr.push_back("inNumberHDD=" + inNumberHDD);
+	mStr.push_back("inNumberDeclr=" + inNumberDeclr);
+	mStr.push_back("inNumberFormulyar=" + inNumberFormulyar);
+	mStr.push_back("inNumberWork=" + inNumberWork);
+	mStr.push_back("inNumberPerson=" + inNumberPerson);
+	mStr.push_back("comPoliticInstall=" + comPoliticInstall);
+	mStr.push_back("comContrUSB=" + comContrUSB);
+	mStr.push_back("comMultiUSERS=" + comMultiUSERS);
+	mStr.push_back("politicInstall=" + UnicodeString(politicInstall));
+	mStr.push_back("contrUSB=" + UnicodeString(contrUSB));
+	mStr.push_back("multiUSERS=" + UnicodeString(multiUSERS));
 	return mStr;
 }
 std::vector<UnicodeString> Arm::mStrLastGrub() {
@@ -138,6 +162,18 @@ bool Arm::readFromFile() {
 		licWindowsName = findParam(file, "[infoGrubARM]", "licWindowsName");
 		licOfficeName = findParam(file, "[infoGrubARM]", "licOfficeName");
 		respon = findParam(file, "[infoGrubARM]", "respon");
+		inNumberARM = findParam(file, "[infoGrubARM]", "inNumberARM");
+		inNumberHDD = findParam(file, "[infoGrubARM]", "inNumberHDD");
+		inNumberDeclr = findParam(file, "[infoGrubARM]", "inNumberDeclr");
+		inNumberFormulyar = findParam(file, "[infoGrubARM]", "inNumberFormulyar");
+		inNumberWork = findParam(file, "[infoGrubARM]", "inNumberWork");
+		inNumberPerson = findParam(file, "[infoGrubARM]", "inNumberPerson");
+		comPoliticInstall = findParam(file, "[infoGrubARM]", "comPoliticInstall");
+		comContrUSB = findParam(file, "[infoGrubARM]", "comContrUSB");
+		comMultiUSERS = findParam(file, "[infoGrubARM]", "comMultiUSERS");
+		politicInstall = findParam(file, "[infoGrubARM]", "politicInstall").ToIntDef(0);
+		contrUSB = findParam(file, "[infoGrubARM]", "contrUSB").ToIntDef(0);
+		multiUSERS = findParam(file, "[infoGrubARM]", "multiUSERS").ToIntDef(0);
 		eset.autoUpdate = findParam(file, "[infoESET]", "autoUpdate").ToIntDef(1);
 		eset.dirMirror = findParam(file, "[infoESET]", "dirMirror");
 		coment = findCategory(file, "[comment]");
@@ -184,6 +220,18 @@ void Arm::setComent(std::vector<UnicodeString> vStr) { coment = vStr; }
 void Arm::setEsetDir(UnicodeString str) { eset.dirMirror = str; }
 void Arm::setEsetAutoUpdate(bool i) { eset.autoUpdate = i; }
 void Arm::setLastGrub(UnicodeString user, UnicodeString date) { histGr.date = date; histGr.user = user; }
+void Arm::setInNumberARM (UnicodeString str) { inNumberARM=str; }
+void Arm::setInNumberHDD (UnicodeString str) { inNumberHDD=str; }
+void Arm::setInNumberDeclr (UnicodeString str) { inNumberDeclr=str; }
+void Arm::setInNumberFormulyar (UnicodeString str) { inNumberFormulyar=str; }
+void Arm::setInNumberWork (UnicodeString str) { inNumberWork=str; }
+void Arm::setInNumberPerson (UnicodeString str) { inNumberPerson=str; }
+void Arm::setComPoliticInstall (UnicodeString str) { comPoliticInstall=str; }
+void Arm::setComContrUSB (UnicodeString str) { comContrUSB=str; }
+void Arm::setComMultiUSERS (UnicodeString str) { comMultiUSERS=str; }
+void Arm::setPoliticInstall (bool i) { politicInstall = i; }
+void Arm::setContrUSB (bool i) { contrUSB = i; }
+void Arm::setMultiUSERS (bool i) { multiUSERS = i; }
 //---------------------------------------------------------------------------
 /* геттери */
 int Arm::getNumber() { return number; }
@@ -206,4 +254,34 @@ UnicodeString Arm::getDesktopName() { return desktopName; }
 UnicodeString Arm::getSerial() { return serial; }
 UnicodeString Arm::getEsetDir() { return eset.dirMirror; }
 bool Arm::getEsetAutoUpdate() { return eset.autoUpdate; }
+UnicodeString Arm::getInNumberARM() {
+	if (inNumberARM == "ERROR") return "";
+	return inNumberARM; }
+UnicodeString Arm::getInNumberHDD() {
+	if (inNumberHDD == "ERROR") return "";
+	return inNumberHDD; }
+UnicodeString Arm::getInNumberDeclr() {
+	if (inNumberDeclr == "ERROR") return "";
+	return inNumberDeclr; }
+UnicodeString Arm::getInNumberFormulyar() {
+	if (inNumberFormulyar == "ERROR") return "";
+	return inNumberFormulyar; }
+UnicodeString Arm::getInNumberWork() {
+	if (inNumberWork == "ERROR") return "";
+	return inNumberWork; }
+UnicodeString Arm::getInNumberPerson() {
+	if (inNumberPerson == "ERROR") return "";
+	return inNumberPerson; }
+UnicodeString Arm::getComPoliticInstall() {
+	if (comPoliticInstall == "ERROR") return "";
+	return comPoliticInstall; }
+UnicodeString Arm::getComContrUSB() {
+	if (comContrUSB == "ERROR") return "";
+	return comContrUSB; }
+UnicodeString Arm::getComMultiUSERS() {
+	if (comMultiUSERS == "ERROR") return "";
+	return comMultiUSERS; }
+bool Arm::getPoliticInstall() { return politicInstall; }
+bool Arm::getContrUSB() { return contrUSB; }
+bool Arm::getMultiUSERS() { return multiUSERS; }
 //---------------------------------------------------------------------------

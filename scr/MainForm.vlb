@@ -122,9 +122,6 @@ Coordinates=611,348,104,58
 [Label8]
 Coordinates=922,348,53,58
 
-[Label10]
-Coordinates=877,144,60,58
-
 [ShowName]
 Coordinates=787,144,80,58
 
@@ -224,9 +221,6 @@ Coordinates=628,10,93,58
 [CheckBoxDebug]
 Coordinates=869,10,114,58
 
-[Label5]
-Coordinates=633,280,53,58
-
 [EditRespon]
 Coordinates=520,348,81,58
 
@@ -257,12 +251,6 @@ Coordinates=601,798,69,36
 [GridPanel1]
 Coordinates=913,416,79,58
 
-[Button1]
-Coordinates=209,348,59,58
-
-[EditLicOffice]
-Coordinates=121,10,101,124
-
 [EditArmClass]
 Coordinates=10,10,101,124
 
@@ -276,5 +264,5 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=502,798,91,36
+Coordinates=209,348,59,58
 

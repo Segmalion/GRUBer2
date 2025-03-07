@@ -6,6 +6,13 @@
 //---------------------------------------------------------------------------
 class Arm {
 private:
+	/* ПЕРЕМЕННЫЕ */
+	/* При добавлении перемепных:
+	** 1 - добавить переменную в приватный раздел
+	** 2 - добавить сеттеры и геттеры
+	** 3 - добавить чтение и запись в файл
+	** 4 - добавить установку прочитаных значений в форму
+	*/
 	// инфо об ПК (ручная)
 	int number = 0;
 	UnicodeString partition  = "Без відділу";
@@ -19,6 +26,12 @@ private:
 	int licOfficeID  = 0;
 	UnicodeString respon = "";
 	std::vector<UnicodeString> coment;
+	// инфо об ПК (ручная) - по документам
+	UnicodeString inNumberARM, inNumberHDD, inNumberDeclr;
+	UnicodeString inNumberFormulyar, inNumberWork, inNumberPerson;
+	// инфо об ПК (ручная) - по настройкам
+	UnicodeString comPoliticInstall, comContrUSB, comMultiUSERS;
+	bool politicInstall=0, contrUSB=0, multiUSERS=0;
 	// инфо из ПК
 	UnicodeString desktopName = "";
 	UnicodeString serial = "";
@@ -56,6 +69,18 @@ public:
 	void setEsetDir(UnicodeString str);
 	void setEsetAutoUpdate(bool i);
 	void setLastGrub(UnicodeString date, UnicodeString user);
+	void setInNumberARM (UnicodeString str);
+	void setInNumberHDD (UnicodeString str);
+	void setInNumberDeclr (UnicodeString str);
+	void setInNumberFormulyar (UnicodeString str);
+	void setInNumberWork (UnicodeString str);
+	void setInNumberPerson (UnicodeString str);
+	void setComPoliticInstall (UnicodeString str);
+	void setComContrUSB (UnicodeString str);
+	void setComMultiUSERS (UnicodeString str);
+	void setPoliticInstall (bool i);
+	void setContrUSB (bool i);
+	void setMultiUSERS (bool i);
 	// геттери
 	int getNumber();
 	UnicodeString getPartition();
@@ -74,5 +99,18 @@ public:
 	UnicodeString getSerial();
 	UnicodeString getEsetDir();
 	bool getEsetAutoUpdate();
+
+	UnicodeString getInNumberARM();
+	UnicodeString getInNumberHDD();
+	UnicodeString getInNumberDeclr();
+	UnicodeString getInNumberFormulyar();
+	UnicodeString getInNumberWork();
+	UnicodeString getInNumberPerson();
+	UnicodeString getComPoliticInstall();
+	UnicodeString getComContrUSB();
+	UnicodeString getComMultiUSERS();
+	bool getPoliticInstall();
+	bool getContrUSB();
+	bool getMultiUSERS();
 };
 #endif

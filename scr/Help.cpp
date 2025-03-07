@@ -250,6 +250,23 @@ void setInfoArmToForm(Arm &curPC) {
 	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
 	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
 	Form1->EditRespon->Text    = curPC.getRespon();
+
+	Form1->Edit_InNumberARM->Text = curPC.getInNumberARM();
+	Form1->Edit_InNumberHDD->Text = curPC.getInNumberHDD();
+	Form1->Edit_InNumberDeclr->Text = curPC.getInNumberDeclr();
+	Form1->Edit_InNumberFormulyar->Text = curPC.getInNumberFormulyar();
+	Form1->Edit_InNumberWork->Text = curPC.getInNumberWork();
+	Form1->Edit_InNumberPerson->Text = curPC.getInNumberPerson();
+	Form1->Edit_ComPoliticInstall->Text = curPC.getComPoliticInstall();
+	Form1->Edit_ComContrUSB->Text = curPC.getComContrUSB();
+	Form1->Edit_ComMultiUSERS->Text = curPC.getComMultiUSERS();
+	Form1->CheckBox_PoliticInstall->Checked = curPC.getPoliticInstall();
+	Form1->CheckBox_ContrUSB->Checked = curPC.getContrUSB();
+	Form1->CheckBox_MultiUSERS->Checked = curPC.getMultiUSERS();
+	//Form1->Edit_ComPoliticInstall->Enabled = curPC.getPoliticInstall();
+	//Form1->Edit_ComContrUSB->Enabled = curPC.getContrUSB();
+	//Form1->Edit_ComMultiUSERS->Enabled = curPC.getMultiUSERS();
+
 	Form1->EditComent->Clear();
 	for (auto str : curPC.getComent()) {
 		Form1->EditComent->Lines->Add(str);

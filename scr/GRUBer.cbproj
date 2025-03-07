@@ -185,9 +185,10 @@
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>2</VerInfo_MinorVer>
         <VerInfo_Release>1</VerInfo_Release>
-        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.2.1.6;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.2.1.7;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Build>6</VerInfo_Build>
+        <VerInfo_Build>7</VerInfo_Build>
+        <Icon_MainIcon>GRUBer_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
