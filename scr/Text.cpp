@@ -2,6 +2,7 @@
 #pragma hdrstop
 
 #include "Text.h"
+#include <math.h>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -112,5 +113,27 @@ std::vector<UnicodeString> findCategory(TStringList* ini, UnicodeString cat) {
 	}
 	findMulStr.push_back("ERROR");
 	return findMulStr;
+}
+//---------------------------------------------------------------------------
+UnicodeString byteToStr(long long i) {
+	UnicodeString str;
+	if (i < 1024) {
+		str = FloatToStrF((double)i, ffFixed, 4, 1) + "b";
+		return str;
+	}
+	if (i < pow(1024,2)) {
+		str = FloatToStrF((double)i/1024, ffFixed, 4, 1) + "Kb";
+		return str;
+	}
+	if (i < pow(1024,3)) {
+		str = FloatToStrF((double)i/(pow(1024,2)), ffFixed, 4, 1) + "Mb";
+		return str;
+	}
+	if (i < pow(1024,4)) {
+		str = FloatToStrF((double)i/(pow(1024,3)), ffFixed, 4, 1) + "Gb";
+		return str;
+	}
+	str = FloatToStrF((double)i/(pow(1024,4)), ffFixed, 4, 1) + "Òb";
+	return str;
 }
 //---------------------------------------------------------------------------

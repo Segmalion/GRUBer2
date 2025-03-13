@@ -4,6 +4,7 @@
 #include "Help.h"
 #include "Text.h"
 #include "Fille.h"
+#include "MainForm.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -250,6 +251,7 @@ void setInfoArmToForm(Arm &curPC) {
 	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
 	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
 	Form1->EditRespon->Text    = curPC.getRespon();
+	Form1->EditPurpose->Text   = curPC.getPurpose();
 
 	Form1->Edit_InNumberARM->Text = curPC.getInNumberARM();
 	Form1->Edit_InNumberHDD->Text = curPC.getInNumberHDD();
@@ -332,6 +334,13 @@ bool infoSetToFille(Arm &curPC)
 	infoFille->SaveToFile(dir + file, TEncoding::UTF8); // запись в файл
 	cacls(dir + file); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
 	return true;
+}
+//---------------------------------------------------------------------------
+bool compareVectorAndString(UnicodeString str, std::vector<UnicodeString> vct) {
+	for(auto &a: vct) {
+		if (str == a) return true;
+	}
+	return false;
 }
 //---------------------------------------------------------------------------
 

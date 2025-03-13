@@ -8,6 +8,7 @@
 #include "PartitionForm.h"
 #include "DialogDirExist.h"
 #include "About.h"
+#include "ClearTemp.h"
 
 #include "Arm.h"
 #include "RunApp.h"
@@ -32,7 +33,7 @@ std::vector<UnicodeString> vStrPartition;
 bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 1, vers4 = 7;
+extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 0;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -61,8 +62,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	PageControl1->TabIndex = 0;
 	printLog("[>]Запушенно GRUBer v." + versionApp);
 	printLog("[>]Останій граб: " + curPC.lastGrub());
-	if(IsAdminMode()) printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
-	else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
+	if(IsAdminMode()) {
+		printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
+        BtnClearPC->Enabled = true;
+	} else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
 	double height = 621*Form1->ScaleFactor;
 	double width  = 420*Form1->ScaleFactor;
@@ -426,7 +429,13 @@ void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 // about form
 void __fastcall TForm1::BtnAboutGruberClick(TObject *Sender)
 {
+	FormAbout->Position = (TPosition)7;
 	FormAbout->ShowModal();
+}
+void __fastcall TForm1::BtnClearPCClick(TObject *Sender)
+{
+	FormClearTempDir->Position = (TPosition)7;
+	FormClearTempDir->ShowModal();
 }
 //---------------------------------------------------------------------------
 /* Обновление ESET */
@@ -503,6 +512,10 @@ void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 void __fastcall TForm1::EditResponChange(TObject *Sender)
 {
 	curPC.setRespon(EditRespon->Text);
+}
+void __fastcall TForm1::EditPurposeChange(TObject *Sender)
+{
+    curPC.setPurpose(EditPurpose->Text);
 }
 void __fastcall TForm1::EditLicWinChange(TObject *Sender)
 {
@@ -769,8 +782,6 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 
 }
-//---------------------------------------------------------------------------
-
 //---------------------------------------------------------------------------
 
 

@@ -61,6 +61,7 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 	if (categoryID == 6) str = str + "#ЦТ";
 	return fixDirName(str);
 }
+//генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrInfoArm() {
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[infoARM]");
@@ -78,6 +79,7 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrubMini() {
 	mStr.push_back("licWindowsName=" + licWindowsName);
 	mStr.push_back("licOfficeName=" + licOfficeName);
 	mStr.push_back("respon=" + respon);
+	mStr.push_back("purpose=" + purpose); //***
 	mStr.push_back("inNumberARM=" + inNumberARM);
 	mStr.push_back("inNumberHDD=" + inNumberHDD);
 	mStr.push_back("inNumberDeclr=" + inNumberDeclr);
@@ -106,6 +108,7 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrubFull() {
 	mStr.push_back("licOfficeName=" + licOfficeName);
 	mStr.push_back("licOfficeID=" + UnicodeString(licOfficeID));
 	mStr.push_back("respon=" + respon);
+    mStr.push_back("purpose=" + purpose); //***
 	mStr.push_back("inNumberARM=" + inNumberARM);
 	mStr.push_back("inNumberHDD=" + inNumberHDD);
 	mStr.push_back("inNumberDeclr=" + inNumberDeclr);
@@ -137,6 +140,7 @@ std::vector<UnicodeString> Arm::mStrInfoArmEset() {
 	mStr.push_back("lastUpdateArchive=");
 	return mStr;
 }
+//генерация строки с датой последнего Граба
 UnicodeString Arm::lastGrub() {
 	UnicodeString str = histGr.date;
 	if (histGr.user.IsEmpty() == false) {
@@ -144,8 +148,10 @@ UnicodeString Arm::lastGrub() {
 	}
 	return str;
 }
+//чтение даных из файла
 bool Arm::readFromFile() {
 	UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
+	//новый файл
 	if (FileExists(dir + "gruber_info.ini")) {
 		TStringList *file = new TStringList;
 		file->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
@@ -162,6 +168,7 @@ bool Arm::readFromFile() {
 		licWindowsName = findParam(file, "[infoGrubARM]", "licWindowsName");
 		licOfficeName = findParam(file, "[infoGrubARM]", "licOfficeName");
 		respon = findParam(file, "[infoGrubARM]", "respon");
+		purpose = findParam(file, "[infoGrubARM]", "purpose"); // ***
 		inNumberARM = findParam(file, "[infoGrubARM]", "inNumberARM");
 		inNumberHDD = findParam(file, "[infoGrubARM]", "inNumberHDD");
 		inNumberDeclr = findParam(file, "[infoGrubARM]", "inNumberDeclr");
@@ -179,6 +186,7 @@ bool Arm::readFromFile() {
 		coment = findCategory(file, "[comment]");
 		return true;
 	}
+	//старые файлы
 	if (FileExists(dir + "info_001.dat")) {
 		TStringList *infoDatIm = new TStringList;
 		infoDatIm->LoadFromFile(dir + "info_001.dat", TEncoding::UTF8);
@@ -216,6 +224,7 @@ void Arm::setCategory(UnicodeString str, int i) { categoryName = str; categoryID
 void Arm::setLicWindows(UnicodeString str, int i) { licWindowsName = str; licWindowsID = i; }
 void Arm::setLicOffice(UnicodeString str, int i) { licOfficeName = str; licOfficeID = i; }
 void Arm::setRespon(UnicodeString str) { respon = str; }
+void Arm::setPurpose(UnicodeString str) { purpose = str; } // ***
 void Arm::setComent(std::vector<UnicodeString> vStr) { coment = vStr; }
 void Arm::setEsetDir(UnicodeString str) { eset.dirMirror = str; }
 void Arm::setEsetAutoUpdate(bool i) { eset.autoUpdate = i; }
@@ -244,7 +253,12 @@ int Arm::getClassID() { return classID; }
 int Arm::getCategoryID() { return categoryID; }
 int Arm::getLicWindowsID() { return licWindowsID; }
 int Arm::getLicOfficeID() { return licOfficeID; }
-UnicodeString Arm::getRespon() { return respon; }
+UnicodeString Arm::getRespon() {
+	if (respon == "ERROR") return "";
+	return respon; }
+UnicodeString Arm::getPurpose() {
+	if (purpose == "ERROR") return "";
+	return purpose; }  // ***
 std::vector<UnicodeString> Arm::getComent() { return coment; }
 UnicodeString Arm::getComentStr() {
    if (coment.empty()) return "";

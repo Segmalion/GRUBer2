@@ -2,7 +2,8 @@
 #ifndef HelpH
 #define HelpH
 
-#include "MainForm.h"
+#include <vector>
+
 #include "Arm.h"
 //---------------------------------------------------------------------------
 struct eC {
@@ -104,5 +105,7 @@ bool infoReadAndSet(Arm &curPC);
 bool infoSetToFille(Arm &curPC);
 //---------------------------------------------------------------------------
 // UnicodeString dirCurGrubName (arm &curPC, UnicodeString date);
+//---------------------------------------------------------------------------
+bool compareVectorAndString(UnicodeString str, std::vector<UnicodeString> vct);
 //---------------------------------------------------------------------------
 #endif

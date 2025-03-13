@@ -24,3 +24,4 @@ void __fastcall TFormAbout::LinkLabel_ThreemaIDLinkClick(TObject *Sender, const 
     ShellExecute(NULL, L"open", Link.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 //---------------------------------------------------------------------------
+

@@ -144,7 +144,7 @@ __published:	// IDE-managed Components
 	TLabel *Label10;
 	TComboBox *EditLicOffice;
 	TLabel *Label18;
-	TEdit *Edit10;
+	TEdit *EditPurpose;
 	TGridPanel *GridPanel14;
 	TButton *Button1;
 	TButton *Button2;
@@ -214,6 +214,8 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBox_PoliticInstallClick(TObject *Sender);
 	void __fastcall CheckBox_ContrUSBClick(TObject *Sender);
 	void __fastcall CheckBox_MultiUSERSClick(TObject *Sender);
+	void __fastcall EditPurposeChange(TObject *Sender);
+	void __fastcall BtnClearPCClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer();

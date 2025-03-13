@@ -5,6 +5,8 @@ object FormClearTempDir: TFormClearTempDir
   Margins.Top = 5
   Margins.Right = 5
   Margins.Bottom = 5
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'MicroClean'
   ClientHeight = 424
   ClientWidth = 636
@@ -14,19 +16,10 @@ object FormClearTempDir: TFormClearTempDir
   Font.Height = -21
   Font.Name = 'Segoe UI'
   Font.Style = []
+  Position = poOwnerFormCenter
+  OnShow = FormShow
   PixelsPerInch = 168
   TextHeight = 30
-  object Label1: TLabel
-    Left = 10
-    Top = 10
-    Width = 193
-    Height = 30
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
-    Caption = #1058#1077#1082#1080' '#1076#1083#1103' '#1086#1095#1080#1097#1077#1085#1085#1103':'
-  end
   object Label2: TLabel
     Left = 10
     Top = 339
@@ -52,7 +45,7 @@ object FormClearTempDir: TFormClearTempDir
   object Label4: TLabel
     Left = 221
     Top = 339
-    Width = 105
+    Width = 60
     Height = 30
     Margins.Left = 5
     Margins.Top = 5
@@ -63,7 +56,7 @@ object FormClearTempDir: TFormClearTempDir
   object Label5: TLabel
     Left = 221
     Top = 379
-    Width = 105
+    Width = 60
     Height = 30
     Margins.Left = 5
     Margins.Top = 5
@@ -71,30 +64,31 @@ object FormClearTempDir: TFormClearTempDir
     Margins.Bottom = 5
     Caption = 'Label5'
   end
-  object CheckListBox1: TCheckListBox
-    Left = 10
-    Top = 50
-    Width = 616
-    Height = 279
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
-    ItemHeight = 30
-    Items.Strings = (
-      'c:\Temp\')
-    TabOrder = 0
-  end
-  object Button1: TButton
-    Left = 336
+  object Button_Clean: TButton
+    Left = 322
     Top = 339
-    Width = 290
+    Width = 304
     Height = 70
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
-    Caption = 'Button1'
+    Caption = #1054#1095#1080#1089#1090#1080#1090#1080' '#1090#1080#1084#1095#1072#1089#1086#1074#1110' '#1092#1072#1081#1083#1080
+    TabOrder = 0
+    OnClick = Button_CleanClick
+  end
+  object Memo_LOG: TMemo
+    Left = 10
+    Top = 10
+    Width = 616
+    Height = 319
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
+    ReadOnly = True
+    ScrollBars = ssVertical
     TabOrder = 1
+    WordWrap = False
   end
 end

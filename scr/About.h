@@ -18,7 +18,7 @@ __published:	// IDE-managed Components
 	TPanel *Panel1;
 	TLinkLabel *LinkLabel_ThreemaID;
 	void __fastcall LinkLabel_ThreemaIDLinkClick(TObject *Sender, const UnicodeString Link,
-          TSysLinkType LinkType);
+		  TSysLinkType LinkType);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TFormAbout(TComponent* Owner);

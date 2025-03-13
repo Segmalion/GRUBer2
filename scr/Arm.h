@@ -25,6 +25,7 @@ private:
 	int licWindowsID = 0;
 	int licOfficeID  = 0;
 	UnicodeString respon = "";
+	UnicodeString purpose = "";
 	std::vector<UnicodeString> coment;
 	// инфо об ПК (ручная) - по документам
 	UnicodeString inNumberARM, inNumberHDD, inNumberDeclr;
@@ -56,7 +57,7 @@ public:
 	std::vector<UnicodeString> mStrInfoArmGrubFull();
 	std::vector<UnicodeString> mStrInfoArmEset();
 	std::vector<UnicodeString> mStrLastGrub();
-   UnicodeString lastGrub();
+	UnicodeString lastGrub();
 	// сеттери
 	void setNumber(int i);
 	void setPartition(UnicodeString str);
@@ -65,6 +66,7 @@ public:
 	void setLicWindows(UnicodeString str, int i);
 	void setLicOffice(UnicodeString str, int i);
 	void setRespon(UnicodeString str);
+	void setPurpose(UnicodeString str); // ***
 	void setComent(std::vector<UnicodeString> vStr);
 	void setEsetDir(UnicodeString str);
 	void setEsetAutoUpdate(bool i);
@@ -93,6 +95,7 @@ public:
 	int getLicWindowsID();
 	int getLicOfficeID();
 	UnicodeString getRespon();
+	UnicodeString getPurpose(); // ***
 	std::vector<UnicodeString> getComent();
 	UnicodeString getComentStr();
 	UnicodeString getDesktopName();

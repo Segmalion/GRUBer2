@@ -328,7 +328,7 @@
                   end
                   item
                     Column = 1
-                    Control = Edit10
+                    Control = EditPurpose
                     Row = 4
                   end>
                 Padding.Left = 2
@@ -565,7 +565,7 @@
                   Caption = #1055#1088#1080#1079#1085#1072#1095#1077#1085#1103
                   ExplicitTop = 258
                 end
-                object Edit10: TEdit
+                object EditPurpose: TEdit
                   Left = 150
                   Top = 237
                   Width = 226
@@ -575,8 +575,8 @@
                   Margins.Right = 5
                   Margins.Bottom = 5
                   Anchors = []
-                  Enabled = False
                   TabOrder = 6
+                  OnChange = EditPurposeChange
                 end
               end
             end
@@ -751,6 +751,7 @@
                 Caption = #1054#1095#1080#1089#1090#1082#1072' '#1090#1080#1084'.'#1092#1072#1081#1083#1110#1074
                 Enabled = False
                 TabOrder = 4
+                OnClick = BtnClearPCClick
               end
             end
             object GroupBox2: TGroupBox

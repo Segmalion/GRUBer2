@@ -59,8 +59,6 @@ object FormAbout: TFormAbout
         Value = 100.000000000000000000
       end>
     TabOrder = 0
-    ExplicitWidth = 481
-    ExplicitHeight = 355
     object Image1: TImage
       Left = 0
       Top = 0
@@ -1936,9 +1934,6 @@ object FormAbout: TFormAbout
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitTop = 178
-      ExplicitWidth = 481
-      ExplicitHeight = 177
       object LinkLabel_ThreemaID: TLinkLabel
         AlignWithMargins = True
         Left = 5
