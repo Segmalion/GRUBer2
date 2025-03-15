@@ -284,8 +284,6 @@ void setInfoArmToForm(Arm &curPC) {
 void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
 	Form1->CheckBoxShowLog->Checked = curConfig.getShowLog();
-	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
-	else Form1->Width = 421*Form1->ScaleFactor;
     Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();
 	Form1->EditGrubUser->Text = curConfig.getUser();
 	Form1->CheckBoxOldGrub->State = (TCheckBoxState)curConfig.getOldGrub();

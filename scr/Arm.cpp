@@ -2,6 +2,8 @@
 
 #pragma hdrstop
 
+#include "MainForm.h"
+#include "Help.h"
 #include "Arm.h"
 #include "Text.h"
 #include "GetSMB.h"

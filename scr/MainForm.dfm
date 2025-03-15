@@ -683,6 +683,8 @@
                 Margins.Bottom = 5
                 Align = alClient
                 Caption = #1047#1072#1087#1091#1089#1082' GRUBer'
+                DropDownMenu = PopupMenu_GrubButton
+                Style = bsSplitButton
                 TabOrder = 0
                 OnClick = BtnGruberRunClick
               end
@@ -945,7 +947,6 @@
               Font.Name = 'Consolas'
               Font.Style = [fsBold]
               ParentFont = False
-              ReadOnly = True
               TabOrder = 5
               Text = 'EditDirGrubName'
               OnChange = EditDirGrubNameChange
@@ -2534,6 +2535,14 @@
       Caption = 'usb.txt'
       Checked = True
       OnClick = UsbTxtClick
+    end
+  end
+  object PopupMenu_GrubButton: TPopupMenu
+    Left = 869
+    Top = 379
+    object MiniGrub: TMenuItem
+      Caption = #1054#1085#1086#1074#1080#1090#1080' '#1076#1072#1085#1085#1110' ('#1084#1110#1085#1110#1084#1072#1083#1100#1085#1080#1081' '#1075#1088#1072#1073')'
+      OnClick = MiniGrubClick
     end
   end
 end

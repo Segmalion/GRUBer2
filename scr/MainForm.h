@@ -150,6 +150,8 @@ __published:	// IDE-managed Components
 	TButton *Button2;
 	TButton *Button3;
 	TButton *Button4;
+	TPopupMenu *PopupMenu_GrubButton;
+	TMenuItem *MiniGrub;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -216,17 +218,30 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBox_MultiUSERSClick(TObject *Sender);
 	void __fastcall EditPurposeChange(TObject *Sender);
 	void __fastcall BtnClearPCClick(TObject *Sender);
+	void __fastcall MiniGrubClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
-	void mainGRUBer();
-   int progressBarStep();
-   void progressBarGo(int i, bool err = false);
-   void progressBarEr();
+	void mainGRUBer(bool i = true);
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
 
+std::vector<UnicodeString> fileInfoGrub();
+double progressBarStep();
+void progressBarGo(int i , bool err = false);
+void changeEditDirColor();
+
+bool job_infoFille();
+bool job_comTxt();
+bool job_info();
+bool job_usb();
+bool job_net1();
+bool job_net2();
+bool job_license();
+bool job_audit();
+bool job_diskInfo();
+bool job_esetLog();
 //---------------------------------------------------------------------------
 #endif

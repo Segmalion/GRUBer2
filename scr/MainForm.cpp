@@ -32,8 +32,9 @@ bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
 std::vector<UnicodeString> vStrPartition;
 bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
+double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 0;
+extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 1;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -42,6 +43,14 @@ extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	// ---
+	Form1->Height = 621*Form1->ScaleFactor;
+	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
+	else Form1->Width = 420*Form1->ScaleFactor;
+
+	Form1->Constraints->MinHeight = 621*Form1->ScaleFactor;
+	Form1->Constraints->MinWidth  = 420*Form1->ScaleFactor;
+	//
 	Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
 	// Проверка наличия CMD и прав на выполнение
@@ -50,6 +59,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	// выводим настройки & сохраненую инфу об АРМ
 	setConfigToForm(curConfig);
 	setInfoArmToForm(curPC);
+	// ---
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 	if (DirectoryExists(curDir.getGrubFull())) {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
@@ -67,17 +77,11 @@ __fastcall TForm1::TForm1(TComponent* Owner)
         BtnClearPC->Enabled = true;
 	} else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
-	double height = 621*Form1->ScaleFactor;
-	double width  = 420*Form1->ScaleFactor;
-	Form1->Height = height;
-	Form1->Width  = width;
-	Form1->Constraints->MinHeight = height;
-	Form1->Constraints->MinWidth  = width;
 	gruberStart = 1;
 
 }
 //---------------------------------------------------------------------------
-std::vector<UnicodeString> TForm1::fileInfoGrub() {
+std::vector<UnicodeString> fileInfoGrub() {
 	std::vector<UnicodeString> vStr;
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
@@ -95,252 +99,292 @@ std::vector<UnicodeString> TForm1::fileInfoGrub() {
 	vStr.push_back("#stop");
 	return vStr;
 }
-int TForm1::progressBarStep() {
+double progressBarStep() {
 	short i = 0;
 	if (curConfig.getNewGrub()) i++;
-	if (curConfig.getOldGrub()) i = i + 5;
+	if (curConfig.getOldGrubComent()) i++;
+	if (curConfig.getOldGrubInfo()) i++;
+	if (curConfig.getOldGrubUsb()) i++;
+	if (curConfig.getOldGrubNet()) i += 2;
 	if (curConfig.getLicense()) i++;
-	if (curConfig.getAudit()) i = i + 2;
+	if (curConfig.getAudit()) i ++;
+	if (curConfig.getAudit() && x64 && IsAdminMode()) i ++;
 	if (curConfig.getEsetLog()) i++;
-	int step = 100 / i;
-	return step;
+	printLogDebug(curConfig.getDebug(), "{count}=" + UnicodeString(i));
+	return 100/(double)i;
 }
-void TForm1::progressBarGo(int i , bool err) {
-	if(stopBool == false) {
-		ProgressBar1->Position = i;
-		Taskbar1->ProgressValue = i;
+void progressBarGo(int i , bool err) {
+    if(stopBool == false) {
+		Form1->ProgressBar1->Position = i;
+		Form1->Taskbar1->ProgressValue = i;
 	}
 	if(stopBool == true || err == true) {
-		ProgressBar1->State = (TProgressBarState) pbsError;
-		Taskbar1->ProgressState = (TTaskBarProgressState) 4;
+		Form1->ProgressBar1->State = (TProgressBarState) pbsError;
+		Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 4;
 	}
 }
+void changeEditDirColor() {
+	if(DirectoryExists(curDir.getGrubFull())) {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
+		if (!grubActive) Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer вже зібрано!";
+	} else {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
+		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
+	}
+	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
+	Form1->BtnParserOpen->Enabled = FileExists(curDir.getGrubFull() + "\\usb.txt");
+}
 //---------------------------------------------------------------------------
-void TForm1::mainGRUBer() {
-	/* Преварительные процедуры */
+bool job_infoFille() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\gruber_info.ini";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування gruber_info.ini...");
+	TStringList *infoFille = new TStringList;
+	for(auto str : fileInfoGrub()) infoFille->Add (str);
+	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
+	printLog("Файл СТВОРЕННО!");
+	progressBarGo(pos += step);
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return true;
+}
+bool job_comTxt() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\coment.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування coment.txt...");
+	TStringList *comTxt = new TStringList;
+	comTxt->Add(curPC.getComentStr());
+	comTxt->Add(curPC.getRespon());
+	comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
+	comTxt->Add("");
+	comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
+	printLog("Файл СТВОРЕННО!");
+	progressBarGo(pos += step);
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return true;
+}
+bool job_info() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\info.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування info.txt...");
+	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info.bat";
+	UnicodeString arg = "\""+ outFilePath + "\"";
+	RunApp info {app32, NULL, arg};
+	info.run(); // RUN !!!
+	printLogDebug(curConfig.getDebug(), info.errorString());
+	printLog(info.resultString());
+	progressBarGo(pos += step, info.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !info.checkErr();
+}
+bool job_usb() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\usb.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування usb.txt...");
+	UnicodeString app32 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
+	UnicodeString app64 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
+	UnicodeString arg = "/stext " + outFilePath + "\"";
+	RunApp usb {app32, app64, arg};
+	usb.run();
+	printLogDebug(curConfig.getDebug(), usb.errorString());
+	printLog(usb.resultString());
+	if (FileExists(outFilePath)) {
+		Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
+	}
+	progressBarGo(pos += step, usb.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !usb.checkErr();
+}
+bool job_net1() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\net1.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування net1.txt...");
+	UnicodeString app32 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x32.exe";
+	UnicodeString app64 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x64.exe";
+	UnicodeString arg = "/stext " + outFilePath + "\"";
+	RunApp net1 {app32, app64, arg};
+	net1.run();
+	printLogDebug(curConfig.getDebug(), net1.errorString());
+	printLog(net1.resultString());
+	progressBarGo(pos += step, net1.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !net1.checkErr();
+}
+bool job_net2() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\net2.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування net2.txt...");
+	UnicodeString app32 = curDir.getToolFull() + "\\Network\\WifiHistoryView.exe";
+	UnicodeString app64 = NULL;
+	UnicodeString arg = "/stext " + outFilePath + "\"";
+	RunApp net2 {app32, app64, arg};
+	net2.run();
+	printLogDebug(curConfig.getDebug(), net2.errorString());
+	printLog(net2.resultString());
+	progressBarGo(pos += step, net2.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !net2.checkErr();
+}
+bool job_license() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\license.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування license.txt...");
+	if (FileExists("C:\\Windows\\System32\\wbem\\wmic.exe")) {
+		UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info-License-to-File.bat";
+		UnicodeString app64 = NULL;
+		UnicodeString arg = "\""+ outFilePath + "\"";
+		RunApp lic {app32, app64, arg};
+		lic.run();
+		printLogDebug(curConfig.getDebug(), lic.errorString());
+		printLog(lic.resultString());
+		progressBarGo(pos += step, lic.checkErr());
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		return !lic.checkErr();
+	} else {
+		progressBarGo(pos += step, true);
+		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+		printLog("[!]ERROR!");
+		return 0;
+	}
+}
+bool job_audit() {
+	UnicodeString outFilePath, arg;
+	if(curConfig.getAudit() == 1) {
+		outFilePath = curDir.getGrubFull() + "\\auditMax.html";
+		arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
+	}
+	if(curConfig.getAudit() == 2) {
+		outFilePath = curDir.getGrubFull() + "\\auditMin.html";
+		arg = "/r=go /f=" + outFilePath + " /L=en\"";
+	}
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування audit.html...");
+	UnicodeString app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
+	UnicodeString app64 = NULL;
+	RunApp audit {app32, app64, arg};
+	audit.run();
+	printLogDebug(curConfig.getDebug(), audit.errorString());
+	printLog(audit.resultString());
+	progressBarGo(pos += step, audit.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !audit.checkErr();
+}
+bool job_diskInfo() {
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\diskInfo.txt";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування diskInfo.txt...");
+	UnicodeString app32 = NULL;
+	UnicodeString app64 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo64.exe";
+	UnicodeString arg = "/CopyExit :";
+	RunApp cdi {app32, app64, arg};
+	cdi.run();
+	UnicodeString f1 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo.txt";
+	MoveFile(f1.c_str(), outFilePath.c_str());
+	printLogDebug(curConfig.getDebug(), cdi.errorString());
+	printLog(cdi.resultString());
+	progressBarGo(pos += progressBarStep(), cdi.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !cdi.checkErr();
+}
+bool job_esetLog() {
+	UnicodeString outFilePath, arg;
+	if(curConfig.getEsetLog() == 1) {
+		arg = "/accepteula /Lang:UKR /Age:0 " + outFilePath + "\"";
+		outFilePath = curDir.getGrubFull() + "\\eset-log_small.zip";
+	}
+	if(curConfig.getEsetLog() == 2) {
+		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev " + outFilePath + "\"";
+		outFilePath = curDir.getGrubFull() + "\\eset-log_full.zip";
+	}
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування eset-log.zip...");
+	UnicodeString app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
+	UnicodeString app64 = NULL;
+	RunApp esetLog {app32, app64, arg};
+	esetLog.run(false);
+	printLogDebug(curConfig.getDebug(), esetLog.errorString());
+	printLog(esetLog.resultString());
+	progressBarGo(pos += progressBarStep(), esetLog.checkErr());
+	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
+	return !esetLog.checkErr();
+}
+//---------------------------------------------------------------------------
+void TForm1::mainGRUBer(bool i) {
+	// -> переменные
+	grubActive = true;
+	int persentStep;
+	stopBool = false;
+	passBool = false;
+	bool bigErr = true;
+	UnicodeString dirGrubStr = EditDirGrubName->Text;
+	printLogDebug(curConfig.getDebug(), "{dirGrubStr}=" + dirGrubStr);
+	// -> преварительные процедуры
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Form1->BtnGruberRun->Enabled = false;
 	Form1->BtnGruberStop->Enabled = true;
 	Form1->BtnGruberRun->Caption = "Зачекай...";
 	printLog("[>]GRUBer запущено...");
-	printLog("Поточна тека: " + curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
+	printLog("Поточна тека: " + dirGrubStr);
 	StatusBar1->Panels->Items[0]->Text = " GRUBer запущено...";
-	/* Переменные */
-	grubActive = true;
-	int persentStep;
-	UnicodeString outFilePath;
-	UnicodeString app32, app64, arg;
-	stopBool = false;
-	passBool = false;
-	bool bigErr = true;
-	// lastGrub.user = curConfig.grubUser;
-	/* Настройка прогресбара */
-	int pos = 0;
+	// -> настройка прогресбара
+	pos = 0;
+	step = progressBarStep();
 	ProgressBar1->State = (TProgressBarState) pbsNormal;
 	Taskbar1->ProgressState = (TTaskBarProgressState) 2;
 	progressBarGo(pos);
-	/* Сохранение введеной инфы о ПК */
+	// -> вывод дебаг инфы
+	printLogDebug(curConfig.getDebug(), "{step}=" + UnicodeString(step));
+	printLogDebug(curConfig.getDebug(), "{NewGrub}=" + UnicodeString(curConfig.getNewGrub()));
+	printLogDebug(curConfig.getDebug(), "{OldGrubComent}=" + UnicodeString(curConfig.getOldGrubComent()));
+	printLogDebug(curConfig.getDebug(), "{OldGrubInfo}=" + UnicodeString(curConfig.getOldGrubInfo()));
+	printLogDebug(curConfig.getDebug(), "{OldGrubUsb}=" + UnicodeString(curConfig.getOldGrubUsb()));
+	printLogDebug(curConfig.getDebug(), "{OldGrubNet}=" + UnicodeString(curConfig.getOldGrubNet()));
+	printLogDebug(curConfig.getDebug(), "{License}=" + UnicodeString(curConfig.getLicense()));
+	printLogDebug(curConfig.getDebug(), "{Audit}=" + UnicodeString(curConfig.getAudit()));
+	printLogDebug(curConfig.getDebug(), "{EsetLog}=" + UnicodeString(curConfig.getEsetLog()));
+	// -> сохранение введеной инфы о ПК
 	infoSetToFille(curPC);
-	/* Проверка и создание папок */
-	curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-	// папки
-	if (DirectoryExists(curDir.getGrubFull())) {
-		FormDirExist->ShowDir->Text=(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
+	// -> проверка имени папки граба
+	for (int i = 1; i < dirGrubStr.Length()+1; i++) {
+		if (dirGrubStr.IsDelimiter("<>:\"/\\|?* ", i)) {
+            Form1->BtnGruberRun->Enabled = true;
+			Form1->BtnGruberStop->Enabled = false;
+			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
+			printLog("[!]Назва папки містить недопустимі символи!!! :'(");
+            progressBarGo(100, true);
+			return;
+		}
+	}
+	// -> предупреждение о существующей папке
+	if (DirectoryExists(curDir.getGrubFull()) && i) {
+		FormDirExist->ShowDir->Text=(dirGrubStr);
 		FormDirExist->ShowModal();
 		printLog("Знайденно попередню теку!");
-		if (!dirGrubRewrite) {
+		if (!dirGrubRewrite) { //отказ от перезаписи
 			Form1->BtnGruberRun->Enabled = true;
 			Form1->BtnGruberStop->Enabled = false;
 			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
 			printLog("[!]GRUBer зупинено :'(");
 			return;
 		}
-		printLog("Видаляю попередні файли...");
+		printLog("Наявні файли буде перезаписанно!");
 	}
-	curDir.check();
-	//Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
-	if(DirectoryExists(curDir.getGrubFull())) {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
-	} else {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
-	}
-	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
-	/* 1 - gruber_info.txt */
-	if (curConfig.getNewGrub() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\gruber_info.ini";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування gruber_info.ini...");
-		TStringList *infoFille = new TStringList;
-		for(auto str : fileInfoGrub()) infoFille->Add (str);
-		infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
-		printLog("Файл СТВОРЕННО!");
-		progressBarGo(pos = pos + progressBarStep());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-	}
-	/* 2 - coment.txt */
-	if (curConfig.getOldGrubComent() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\coment.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування coment.txt...");
-		TStringList *comTxt = new TStringList;
-		comTxt->Add(curPC.getComentStr());
-		comTxt->Add(curPC.getRespon());
-		comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
-		comTxt->Add("");
-		comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
-		printLog("Файл СТВОРЕННО!");
-		progressBarGo(pos = pos + progressBarStep());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-	}
-	/* 3 -  info.txt */
-	if (curConfig.getOldGrubInfo() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\info.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування info.txt...");
-		app32 = curDir.getToolFull() + "\\scripts\\Info.bat";
-		arg = "\""+ outFilePath + "\"";
-		RunApp info {app32, NULL, arg};
-		info.run(); // RUN !!!
-		printLogDebug(curConfig.getDebug(), info.errorString());
-		printLog(info.resultString());
-		progressBarGo(pos = pos + progressBarStep(), info.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !info.checkErr();
-	}
-	/* 4 - usb.txt */
-	if (curConfig.getOldGrubUsb() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\usb.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування usb.txt...");
-		app32 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
-		app64 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
-		arg = "/stext " + outFilePath + "\"";
-		RunApp usb {app32, app64, arg};
-		usb.run();
-		printLogDebug(curConfig.getDebug(), usb.errorString());
-		printLog(usb.resultString());
-		if (FileExists(outFilePath)) {
-			Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
-		}
-		progressBarGo(pos = pos + progressBarStep(), usb.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !usb.checkErr();
-	}
-   /* 5 - net1.txt & net2.txt */
-	if (curConfig.getOldGrubNet() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\net1.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування net1.txt...");
-		app32 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x32.exe";
-		app64 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x64.exe";
-		arg = "/stext " + outFilePath + "\"";
-		RunApp net1 {app32, app64, arg};
-		net1.run();
-		printLogDebug(curConfig.getDebug(), net1.errorString());
-		printLog(net1.resultString());
-		progressBarGo(pos = pos + progressBarStep(), net1.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !net1.checkErr();
-	}
-	if (curConfig.getOldGrubNet() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\net2.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування net2.txt...");
-		app32 = curDir.getToolFull() + "\\Network\\WifiHistoryView.exe";
-		app64 = NULL;
-		arg = "/stext " + outFilePath + "\"";
-		RunApp net2 {app32, app64, arg};
-		net2.run();
-		printLogDebug(curConfig.getDebug(), net2.errorString());
-		printLog(net2.resultString());
-		progressBarGo(pos = pos + progressBarStep(), net2.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !net2.checkErr();
-	}
-	/* 6 - license.txt */
-	if (curConfig.getLicense() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\license.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування license.txt...");
-		if (FileExists("C:\\Windows\\System32\\wbem\\wmic.exe")) {
-			app32 = curDir.getToolFull() + "\\scripts\\Info-License-to-File.bat";
-			app64 = NULL;
-			arg = "\""+ outFilePath + "\"";
-			RunApp lic {app32, app64, arg};
-			lic.run();
-			printLogDebug(curConfig.getDebug(), lic.errorString());
-			printLog(lic.resultString());
-			progressBarGo(pos = pos + progressBarStep(), lic.checkErr());
-			printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-			bigErr *= !lic.checkErr();
-		} else {
-			printLog("[!]ERROR!");
-			bigErr *= 0;
-		}
-	}
-	/* 7 - audit.html */
-	if (curConfig.getAudit() && !stopBool) {
-		if(curConfig.getAudit() == 1) {
-			outFilePath = curDir.getGrubFull() + "\\auditMax.html";
-			arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
-		}
-		if(curConfig.getAudit() == 2) {
-			outFilePath = curDir.getGrubFull() + "\\auditMin.html";
-			arg = "/r=go /f=" + outFilePath + " /L=en\"";
-		}
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування audit.html...");
-		app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
-		app64 = NULL;
-		RunApp audit {app32, app64, arg};
-		audit.run();
-		printLogDebug(curConfig.getDebug(), audit.errorString());
-		printLog(audit.resultString());
-		progressBarGo(pos = pos + progressBarStep(), audit.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !audit.checkErr();
-	}
-	/* 8 - CDI.txt */
-	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) { //111
-		outFilePath = curDir.getGrubFull() + "\\diskInfo.txt";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування diskInfo.txt...");
-		app32 = NULL;
-		app64 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo64.exe";
-		arg = "/CopyExit :";
-		RunApp cdi {app32, app64, arg};
-		cdi.run();
-		UnicodeString f1 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo.txt";
-		MoveFile(f1.c_str(), outFilePath.c_str());
-		printLogDebug(curConfig.getDebug(), cdi.errorString());
-		printLog(cdi.resultString());
-		progressBarGo(pos = pos + progressBarStep(), cdi.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !cdi.checkErr();
-	}
-	/* 9 - eset-log.zip */
-	if (curConfig.getEsetLog() && !stopBool) {
-		outFilePath = curDir.getGrubFull() + "\\eset-log.zip";
-		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування eset-log.zip...");
-		app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
-		app64 = NULL;
-		if(curConfig.getEsetLog() == 1)
-			arg = "/accepteula /Lang:UKR /Age:0 " + outFilePath + "\"";
-		if(curConfig.getEsetLog() == 2)
-			arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev " + outFilePath + "\"";
-		RunApp esetLog {app32, app64, arg};
-		esetLog.run(false);
-		printLogDebug(curConfig.getDebug(), esetLog.errorString());
-		printLog(esetLog.resultString());
-		progressBarGo(pos = 100, esetLog.checkErr());
-		printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
-		bigErr *= !esetLog.checkErr();
-	};
-	/*  */
-	/*  */
+	// -> создание папок
+    curDir.check();
+	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
+	// -> генерация файлов
+	if (curConfig.getNewGrub() && !stopBool) job_infoFille();			//gruber_info.txt
+	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(); 		//coment.txt
+	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(); 	//info.txt
+	if (curConfig.getOldGrubUsb() && !stopBool) bigErr *= job_usb();    //usb.txt
+	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net1(); 	//net1.txt
+	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net2(); 	//net2.txt
+	if (curConfig.getLicense() && !stopBool) bigErr *= job_license(); 	//license.txt
+	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(); 		//audit.html
+	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) bigErr *= job_diskInfo(); //CDI.txt
+	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog();   //eset-log.zip
+	// -> обработка ошибок
 	if (!bigErr) {
 		printLog("[ERR]GRUBer виконано з помилками!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
@@ -348,6 +392,7 @@ void TForm1::mainGRUBer() {
 		printLog("[OK]GRUBer виконано успішно!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 	}
+	// -> конец граба
 	grubActive = false;
 	Form1->BtnGruberRun->Enabled = true;
 	Form1->BtnGruberStop->Enabled = false;
@@ -358,7 +403,36 @@ void TForm1::mainGRUBer() {
 // запуск Граба
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 {
-	mainGRUBer();
+	mainGRUBer(true);
+}
+void __fastcall TForm1::MiniGrubClick(TObject *Sender)
+{
+	bool tm1, tm2, tm3, tm4, tm5, tm6, tm7, tm8;
+	tm1 = curConfig.getNewGrub();
+	tm2 = curConfig.getOldGrubComent();
+	tm3 = curConfig.getOldGrubInfo();
+	tm4 = curConfig.getOldGrubUsb();
+	tm5 = curConfig.getOldGrubNet();
+	tm6 = curConfig.getLicense();
+	tm7 = curConfig.getAudit();
+	tm8 = curConfig.getEsetLog();
+	curConfig.setNewGrub(1);
+	curConfig.setOldGrubComent(0);
+	curConfig.setOldGrubInfo(0);
+	curConfig.setOldGrubUsb(0);
+	curConfig.setOldGrubNet(0);
+	curConfig.setLicense(0);
+	curConfig.setAudit(0);
+	curConfig.setEsetLog(0);
+	mainGRUBer(false);
+	curConfig.setNewGrub(tm1);
+	curConfig.setOldGrubComent(tm2);
+	curConfig.setOldGrubInfo(tm3);
+	curConfig.setOldGrubUsb(tm4);
+	curConfig.setOldGrubNet(tm5);
+	curConfig.setLicense(tm6);
+	curConfig.setAudit(tm7);
+	curConfig.setEsetLog(tm8);
 }
 // открыть редактор подразделений
 void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
@@ -540,19 +614,11 @@ void __fastcall TForm1::EditComentDblClick(TObject *Sender)
 }
 void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 {
-	curDir.setGrubFull(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
-	//Form1->CheckBox1->Checked = DirectoryExists(curDir.getGrubFull());
-	if(DirectoryExists(curDir.getGrubFull())) {
-		EditDirGrubName->Font->Color = (TColor) 0x006E00;
-		EditDirGrubName->Color = (TColor) 0xEAFFEA;
-		if (!grubActive) StatusBar1->Panels->Items[0]->Text = " GRUBer вже зібрано!";
-	} else {
-		EditDirGrubName->Font->Color = (TColor) 0x00006E;
-		EditDirGrubName->Color = (TColor) 0xEAEAFF;
-		StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
-	}
-	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
-	Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
+	UnicodeString dirGrub = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+	UnicodeString dirEdit = EditDirGrubName->Text;
+	if (dirGrub != dirEdit) curDir.setGrubFull(dirEdit);
+	else curDir.setGrubFull(dirGrub);
+	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
 }
 void __fastcall TForm1::EditGrubUserChange(TObject *Sender)
 {
@@ -780,10 +846,6 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	EditPrefixPartition->Enabled=CheckBoxPrefixPartition->State;
 	curConfig.setEnablePrefixPartition(CheckBoxPrefixPartition->State);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-
 }
-//---------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------
 
