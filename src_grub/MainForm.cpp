@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #include <vcl.h>
 #pragma hdrstop
@@ -21,12 +21,12 @@
 
 TForm1 *Form1;
 //---------------------------------------------------------------------------
-//обявление переменных типа структуры
+//РѕР±СЏРІР»РµРЅРёРµ РїРµСЂРµРјРµРЅРЅС‹С… С‚РёРїР° СЃС‚СЂСѓРєС‚СѓСЂС‹
 Arm curPC;
 Dir curDir;
 Config curConfig;
 // infoEset curEset;
-//обявление переменных
+//РѕР±СЏРІР»РµРЅРёРµ РїРµСЂРµРјРµРЅРЅС‹С…
 UnicodeString cmdEXE, curentDate;
 bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
 std::vector<UnicodeString> vStrPartition;
@@ -53,10 +53,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	//
 	Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
-	// Проверка наличия CMD и прав на выполнение
+	// РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ CMD Рё РїСЂР°РІ РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ
 	cmdEXE = cmdCheck();
-	if(cmdEXE == "ERROR") printLog("[!]Не мае доступу чи прав на CMD!");
-	// выводим настройки & сохраненую инфу об АРМ
+	if(cmdEXE == "ERROR") printLog("[!]РќРµ РјР°Рµ РґРѕСЃС‚СѓРїСѓ С‡Рё РїСЂР°РІ РЅР° CMD!");
+	// РІС‹РІРѕРґРёРј РЅР°СЃС‚СЂРѕР№РєРё & СЃРѕС…СЂР°РЅРµРЅСѓСЋ РёРЅС„Сѓ РѕР± РђР Рњ
 	setConfigToForm(curConfig);
 	setInfoArmToForm(curPC);
 	// ---
@@ -70,12 +70,12 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	}
 	// ---
 	PageControl1->TabIndex = 0;
-	printLog("[>]Запушенно GRUBer v." + versionApp);
-	printLog("[>]Останій граб: " + curPC.lastGrub());
+	printLog("[>]Р—Р°РїСѓС€РµРЅРЅРѕ GRUBer v." + versionApp);
+	printLog("[>]РћСЃС‚Р°РЅС–Р№ РіСЂР°Р±: " + curPC.lastGrub());
 	if(IsAdminMode()) {
-		printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
+		printLogDebug(curConfig.getDebug(), "Р—Р°РїСѓС‰РµРЅРѕ Р· РїСЂР°РІР°РјРё РђРґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂР°!");
         BtnClearPC->Enabled = true;
-	} else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
+	} else printLogDebug(curConfig.getDebug(), "Р—Р°РїСѓС‰РµРЅРѕ Р±РµР· РїСЂР°РІ РђРґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂР°!");
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
 	gruberStart = 1;
 
@@ -83,15 +83,15 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
 	std::vector<UnicodeString> vStr;
-	// раздел даты и пользователя
+	// СЂР°Р·РґРµР» РґР°С‚С‹ Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
-	// раздел об АРМ-1
+	// СЂР°Р·РґРµР» РѕР± РђР Рњ-1
 	for(auto str : curPC.mStrInfoArmGrubMini()) vStr.push_back(str);
-	// раздел об АРМ-2
+	// СЂР°Р·РґРµР» РѕР± РђР Рњ-2
 	for(auto str : curPC.mStrInfoArm()) vStr.push_back(str);
-	// раздел об ESET
+	// СЂР°Р·РґРµР» РѕР± ESET
 	for(auto str : curPC.mStrInfoArmEset()) vStr.push_back(str);
-	// раздел коментария
+	// СЂР°Р·РґРµР» РєРѕРјРµРЅС‚Р°СЂРёСЏ
 	vStr.push_back("[comment]");
 	for (auto str : curPC.getComent()) {
 		vStr.push_back(str);
@@ -127,11 +127,11 @@ void changeEditDirColor() {
 	if(DirectoryExists(curDir.getGrubFull())) {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
-		if (!grubActive) Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer вже зібрано!";
+		if (!grubActive) Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer РІР¶Рµ Р·С–Р±СЂР°РЅРѕ!";
 	} else {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
-		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
+		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer РЅРµ Р·С–Р±СЂР°РЅРѕ:(";
 	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	Form1->BtnParserOpen->Enabled = FileExists(curDir.getGrubFull() + "\\usb.txt");
@@ -140,11 +140,11 @@ void changeEditDirColor() {
 bool job_infoFille() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\gruber_info.ini";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування gruber_info.ini...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ gruber_info.ini...");
 	TStringList *infoFille = new TStringList;
 	for(auto str : fileInfoGrub()) infoFille->Add (str);
-	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
-	printLog("Файл СТВОРЕННО!");
+	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // Р·Р°РїРёСЃСЊ РІ С„Р°Р№Р»
+	printLog("Р¤Р°Р№Р» РЎРўР’РћР Р•РќРќРћ!");
 	progressBarGo(pos += step);
 	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	return true;
@@ -152,14 +152,14 @@ bool job_infoFille() {
 bool job_comTxt() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\coment.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування coment.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ coment.txt...");
 	TStringList *comTxt = new TStringList;
 	comTxt->Add(curPC.getComentStr());
 	comTxt->Add(curPC.getRespon());
 	comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 	comTxt->Add("");
 	comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
-	printLog("Файл СТВОРЕННО!");
+	printLog("Р¤Р°Р№Р» РЎРўР’РћР Р•РќРќРћ!");
 	progressBarGo(pos += step);
 	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	return true;
@@ -167,7 +167,7 @@ bool job_comTxt() {
 bool job_info() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\info.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування info.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ info.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info.bat";
 	UnicodeString arg = "\""+ outFilePath + "\"";
 	RunApp info {app32, NULL, arg};
@@ -181,7 +181,7 @@ bool job_info() {
 bool job_usb() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\usb.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування usb.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ usb.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
 	UnicodeString app64 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -199,7 +199,7 @@ bool job_usb() {
 bool job_net1() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\net1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування net1.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ net1.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x32.exe";
 	UnicodeString app64 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -214,7 +214,7 @@ bool job_net1() {
 bool job_net2() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\net2.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування net2.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ net2.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\Network\\WifiHistoryView.exe";
 	UnicodeString app64 = NULL;
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -229,7 +229,7 @@ bool job_net2() {
 bool job_license() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\license.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування license.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ license.txt...");
 	if (FileExists("C:\\Windows\\System32\\wbem\\wmic.exe")) {
 		UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info-License-to-File.bat";
 		UnicodeString app64 = NULL;
@@ -259,7 +259,7 @@ bool job_audit() {
 		arg = "/r=go /f=" + outFilePath + " /L=en\"";
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування audit.html...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ audit.html...");
 	UnicodeString app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
 	UnicodeString app64 = NULL;
 	RunApp audit {app32, app64, arg};
@@ -273,7 +273,7 @@ bool job_audit() {
 bool job_diskInfo() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\diskInfo.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування diskInfo.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ diskInfo.txt...");
 	UnicodeString app32 = NULL;
 	UnicodeString app64 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo64.exe";
 	UnicodeString arg = "/CopyExit :";
@@ -298,7 +298,7 @@ bool job_esetLog() {
 		outFilePath = curDir.getGrubFull() + "\\eset-log_full.zip";
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування eset-log.zip...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ eset-log.zip...");
 	UnicodeString app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
 	UnicodeString app64 = NULL;
 	RunApp esetLog {app32, app64, arg};
@@ -311,7 +311,7 @@ bool job_esetLog() {
 }
 //---------------------------------------------------------------------------
 void TForm1::mainGRUBer(bool i) {
-	// -> переменные
+	// -> РїРµСЂРµРјРµРЅРЅС‹Рµ
 	grubActive = true;
 	int persentStep;
 	stopBool = false;
@@ -319,21 +319,21 @@ void TForm1::mainGRUBer(bool i) {
 	bool bigErr = true;
 	UnicodeString dirGrubStr = EditDirGrubName->Text;
 	printLogDebug(curConfig.getDebug(), "{dirGrubStr}=" + dirGrubStr);
-	// -> преварительные процедуры
+	// -> РїСЂРµРІР°СЂРёС‚РµР»СЊРЅС‹Рµ РїСЂРѕС†РµРґСѓСЂС‹
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Form1->BtnGruberRun->Enabled = false;
 	Form1->BtnGruberStop->Enabled = true;
-	Form1->BtnGruberRun->Caption = "Зачекай...";
-	printLog("[>]GRUBer запущено...");
-	printLog("Поточна тека: " + dirGrubStr);
-	StatusBar1->Panels->Items[0]->Text = " GRUBer запущено...";
-	// -> настройка прогресбара
+	Form1->BtnGruberRun->Caption = "Р—Р°С‡РµРєР°Р№...";
+	printLog("[>]GRUBer Р·Р°РїСѓС‰РµРЅРѕ...");
+	printLog("РџРѕС‚РѕС‡РЅР° С‚РµРєР°: " + dirGrubStr);
+	StatusBar1->Panels->Items[0]->Text = " GRUBer Р·Р°РїСѓС‰РµРЅРѕ...";
+	// -> РЅР°СЃС‚СЂРѕР№РєР° РїСЂРѕРіСЂРµСЃР±Р°СЂР°
 	pos = 0;
 	step = progressBarStep();
 	ProgressBar1->State = (TProgressBarState) pbsNormal;
 	Taskbar1->ProgressState = (TTaskBarProgressState) 2;
 	progressBarGo(pos);
-	// -> вывод дебаг инфы
+	// -> РІС‹РІРѕРґ РґРµР±Р°Рі РёРЅС„С‹
 	printLogDebug(curConfig.getDebug(), "{step}=" + UnicodeString(step));
 	printLogDebug(curConfig.getDebug(), "{NewGrub}=" + UnicodeString(curConfig.getNewGrub()));
 	printLogDebug(curConfig.getDebug(), "{OldGrubComent}=" + UnicodeString(curConfig.getOldGrubComent()));
@@ -343,37 +343,37 @@ void TForm1::mainGRUBer(bool i) {
 	printLogDebug(curConfig.getDebug(), "{License}=" + UnicodeString(curConfig.getLicense()));
 	printLogDebug(curConfig.getDebug(), "{Audit}=" + UnicodeString(curConfig.getAudit()));
 	printLogDebug(curConfig.getDebug(), "{EsetLog}=" + UnicodeString(curConfig.getEsetLog()));
-	// -> сохранение введеной инфы о ПК
+	// -> СЃРѕС…СЂР°РЅРµРЅРёРµ РІРІРµРґРµРЅРѕР№ РёРЅС„С‹ Рѕ РџРљ
 	infoSetToFille(curPC);
-	// -> проверка имени папки граба
+	// -> РїСЂРѕРІРµСЂРєР° РёРјРµРЅРё РїР°РїРєРё РіСЂР°Р±Р°
 	for (int i = 1; i < dirGrubStr.Length()+1; i++) {
 		if (dirGrubStr.IsDelimiter("<>:\"/\\|?* ", i)) {
             Form1->BtnGruberRun->Enabled = true;
 			Form1->BtnGruberStop->Enabled = false;
-			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("[!]Назва папки містить недопустимі символи!!! :'(");
+			Form1->BtnGruberRun->Caption = "Р—Р°РїСѓСЃРє GRUBer";
+			printLog("[!]РќР°Р·РІР° РїР°РїРєРё РјС–СЃС‚РёС‚СЊ РЅРµРґРѕРїСѓСЃС‚РёРјС– СЃРёРјРІРѕР»Рё!!! :'(");
             progressBarGo(100, true);
 			return;
 		}
 	}
-	// -> предупреждение о существующей папке
+	// -> РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ Рѕ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµР№ РїР°РїРєРµ
 	if (DirectoryExists(curDir.getGrubFull()) && i) {
 		FormDirExist->ShowDir->Text=(dirGrubStr);
 		FormDirExist->ShowModal();
-		printLog("Знайденно попередню теку!");
-		if (!dirGrubRewrite) { //отказ от перезаписи
+		printLog("Р—РЅР°Р№РґРµРЅРЅРѕ РїРѕРїРµСЂРµРґРЅСЋ С‚РµРєСѓ!");
+		if (!dirGrubRewrite) { //РѕС‚РєР°Р· РѕС‚ РїРµСЂРµР·Р°РїРёСЃРё
 			Form1->BtnGruberRun->Enabled = true;
 			Form1->BtnGruberStop->Enabled = false;
-			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("[!]GRUBer зупинено :'(");
+			Form1->BtnGruberRun->Caption = "Р—Р°РїСѓСЃРє GRUBer";
+			printLog("[!]GRUBer Р·СѓРїРёРЅРµРЅРѕ :'(");
 			return;
 		}
-		printLog("Наявні файли буде перезаписанно!");
+		printLog("РќР°СЏРІРЅС– С„Р°Р№Р»Рё Р±СѓРґРµ РїРµСЂРµР·Р°РїРёСЃР°РЅРЅРѕ!");
 	}
-	// -> создание папок
+	// -> СЃРѕР·РґР°РЅРёРµ РїР°РїРѕРє
     curDir.check();
-	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
-	// -> генерация файлов
+	changeEditDirColor(); //СЃРјРµРЅР° Р·Р°Р»РёРІРєРё РїРѕР»СЏ "РїР°РїРєРё РіСЂР°Р±Р°" Рё Р°РєС‚РёРІР°С†РёСЏ РєРЅРѕРїРѕРє
+	// -> РіРµРЅРµСЂР°С†РёСЏ С„Р°Р№Р»РѕРІ
 	if (curConfig.getNewGrub() && !stopBool) job_infoFille();			//gruber_info.txt
 	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(); 		//coment.txt
 	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(); 	//info.txt
@@ -384,24 +384,24 @@ void TForm1::mainGRUBer(bool i) {
 	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(); 		//audit.html
 	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) bigErr *= job_diskInfo(); //CDI.txt
 	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog();   //eset-log.zip
-	// -> обработка ошибок
+	// -> РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє
 	if (!bigErr) {
-		printLog("[ERR]GRUBer виконано з помилками!");
+		printLog("[ERR]GRUBer РІРёРєРѕРЅР°РЅРѕ Р· РїРѕРјРёР»РєР°РјРё!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
 	} else {
-		printLog("[OK]GRUBer виконано успішно!");
-		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
+		printLog("[OK]GRUBer РІРёРєРѕРЅР°РЅРѕ СѓСЃРїС–С€РЅРѕ!");
+		StatusBar1->Panels->Items[0]->Text = " GRUBer РІРёРєРѕРЅР°РЅРѕ!";
 	}
-	// -> конец граба
+	// -> РєРѕРЅРµС† РіСЂР°Р±Р°
 	grubActive = false;
 	Form1->BtnGruberRun->Enabled = true;
 	Form1->BtnGruberStop->Enabled = false;
-	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
+	Form1->BtnGruberRun->Caption = "Р—Р°РїСѓСЃРє GRUBer";
 }
 //---------------------------------------------------------------------------
-/* Кнопки */
-// запуск Граба
-void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
+/* РљРЅРѕРїРєРё */
+// Р·Р°РїСѓСЃРє Р“СЂР°Р±Р°
+void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Р—Р°РїСѓСЃРє Р“СЂР°Р±Р°
 {
 	mainGRUBer(true);
 }
@@ -434,39 +434,39 @@ void __fastcall TForm1::MiniGrubClick(TObject *Sender)
 	curConfig.setAudit(tm7);
 	curConfig.setEsetLog(tm8);
 }
-// открыть редактор подразделений
+// РѕС‚РєСЂС‹С‚СЊ СЂРµРґР°РєС‚РѕСЂ РїРѕРґСЂР°Р·РґРµР»РµРЅРёР№
 void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
 {
 	FormPartition->EditPartition->Lines = Form1->EditPartition->Items;
 	FormPartition->ShowModal();
 }
-// открыть папку Граба
+// РѕС‚РєСЂС‹С‚СЊ РїР°РїРєСѓ Р“СЂР°Р±Р°
 void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
 {
 	ShellExecuteW(NULL, L"open", curDir.getGrubFull().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// остановка Граба
+// РѕСЃС‚Р°РЅРѕРІРєР° Р“СЂР°Р±Р°
 void __fastcall TForm1::BtnGruberStopClick(TObject *Sender)
 {
 	stopBool = true;
 }
-void __fastcall TForm1::РassClick(TObject *Sender)
+void __fastcall TForm1::Р assClick(TObject *Sender)
 {
 	passBool = true;
 }
-// сохранение настроек
+// СЃРѕС…СЂР°РЅРµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє
 void __fastcall TForm1::BtnSaveSetteingsClick(TObject *Sender)
 {
 	curConfig.saveFileIni();
 }
-// запуск парсера
+// Р·Р°РїСѓСЃРє РїР°СЂСЃРµСЂР°
 void __fastcall TForm1::BtnParserOpenClick(TObject *Sender)
 {
 	UnicodeString setApp = GetCurrentDir() + "\\GRUBer-Parser.exe";
 	UnicodeString setArg = "/run /b " + curDir.getGrubFull();
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
 }
-// запуск консоли
+// Р·Р°РїСѓСЃРє РєРѕРЅСЃРѕР»Рё
 void __fastcall TForm1::BtnKiberConsolOpenClick(TObject *Sender)
 {
 	UnicodeString setApp = curDir.getToolFull() + "\\KiberConsole.msc";
@@ -488,13 +488,13 @@ void __fastcall TForm1::sysdmCplClick(TObject *Sender)
 	UnicodeString setApp = "sysdm.cpl";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// провека лицензий
+// РїСЂРѕРІРµРєР° Р»РёС†РµРЅР·РёР№
 void __fastcall TForm1::BtnLicenseClick(TObject *Sender)
 {
 	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-license-run.bat";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// общее инфо
+// РѕР±С‰РµРµ РёРЅС„Рѕ
 void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 {
 	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-PC-all.bat";
@@ -512,7 +512,7 @@ void __fastcall TForm1::BtnClearPCClick(TObject *Sender)
 	FormClearTempDir->ShowModal();
 }
 //---------------------------------------------------------------------------
-/* Обновление ESET */
+/* РћР±РЅРѕРІР»РµРЅРёРµ ESET */
 void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
 {
 	DirOpenEsetMirror->DefaultFolder = EditEsetMirrorDir->Text;
@@ -529,15 +529,15 @@ void __fastcall TForm1::CheckBox_ShowEsetUpdateClick(TObject *Sender)
 void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 {
 	if (!FileExists(GetCurrentDir() + "\\update.7z")) {
-		printLog("[ESET-Update][!]Немає архіву з базами!");
+		printLog("[ESET-Update][!]РќРµРјР°С” Р°СЂС…С–РІСѓ Р· Р±Р°Р·Р°РјРё!");
 		return;
 	}
-	printLog("[ESET-Update][>]Оновленя бази Eset...");
+	printLog("[ESET-Update][>]РћРЅРѕРІР»РµРЅСЏ Р±Р°Р·Рё Eset...");
 	BtnEsetUpdate->Enabled = false;
-	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
+	StatusBar1->Panels->Items[1]->Text = " РћРЅРѕРІР»РµРЅСЏ Р±Р°Р·Рё Eset...";
 	if (FileExists(curPC.getEsetDir() + "\\dll\\update.ver"))
 		deleteDir(curPC.getEsetDir());
-	//запуск обновления
+	//Р·Р°РїСѓСЃРє РѕР±РЅРѕРІР»РµРЅРёСЏ
 	UnicodeString app32 = curDir.getToolFull() + "\\7zip\\32\\7za.exe";
 	UnicodeString app64 = curDir.getToolFull() + "\\7zip\\64\\7za.exe";
 	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\32\\7zG.exe";
@@ -547,14 +547,14 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	esetBaseUnpack.run(!curConfig.getShowEsetUpd());
 	//------
 	if (esetBaseUnpack.checkErr()){
-		//ошибочка вышла...
-		printLog("[ESET-Update][!]Щось пішло НЕ так...");
+		//РѕС€РёР±РѕС‡РєР° РІС‹С€Р»Р°...
+		printLog("[ESET-Update][!]Р©РѕСЃСЊ РїС–С€Р»Рѕ РќР• С‚Р°Рє...");
 		BtnEsetUpdate->Enabled = true;
 		return;
 	}
-	printLog("[ESET-Update][OK]Бази оновленно!");
+	printLog("[ESET-Update][OK]Р‘Р°Р·Рё РѕРЅРѕРІР»РµРЅРЅРѕ!");
     BtnEsetUpdate->Enabled = true;
-	StatusBar1->Panels->Items[1]->Text = " Бази оновленно!";
+	StatusBar1->Panels->Items[1]->Text = " Р‘Р°Р·Рё РѕРЅРѕРІР»РµРЅРЅРѕ!";
 	if (FileExists("c:\\Program Files\\ESET\\ESET Security\\ermm.exe")) {
 		RunApp esetBaseUpdate {"c:\\Program Files\\ESET\\ESET Security\\ermm.exe",
 			NULL, "start update"};
@@ -562,7 +562,7 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	}
 }
 //---------------------------------------------------------------------------
-/* Изменение полей */
+/* РР·РјРµРЅРµРЅРёРµ РїРѕР»РµР№ */
 void __fastcall TForm1::EditNumberChange(TObject *Sender)
 {
 	curPC.setNumber(EditNumber->Value);
@@ -618,7 +618,7 @@ void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 	UnicodeString dirEdit = EditDirGrubName->Text;
 	if (dirGrub != dirEdit) curDir.setGrubFull(dirEdit);
 	else curDir.setGrubFull(dirGrub);
-	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
+	changeEditDirColor(); //СЃРјРµРЅР° Р·Р°Р»РёРІРєРё РїРѕР»СЏ "РїР°РїРєРё РіСЂР°Р±Р°" Рё Р°РєС‚РёРІР°С†РёСЏ РєРЅРѕРїРѕРє
 }
 void __fastcall TForm1::EditGrubUserChange(TObject *Sender)
 {
@@ -629,7 +629,7 @@ void __fastcall TForm1::EditEsetMirrorDirChange(TObject *Sender)
 	curPC.setEsetDir(Form1->EditEsetMirrorDir->Text);
 	if(gruberStart) infoSetToFille(curPC);
 }
-/* Изменение полей на GRUBer+*/
+/* РР·РјРµРЅРµРЅРёРµ РїРѕР»РµР№ РЅР° GRUBer+*/
 void __fastcall TForm1::Edit_InNumberARMChange(TObject *Sender)
 {
 	curPC.setInNumberARM(Edit_InNumberARM->Text);
@@ -679,7 +679,7 @@ void __fastcall TForm1::CheckBox_MultiUSERSClick(TObject *Sender)
    curPC.setMultiUSERS(CheckBox_MultiUSERS->Checked);
 }
 //---------------------------------------------------------------------------
-/* Чекбоксы в настройках */
+/* Р§РµРєР±РѕРєСЃС‹ РІ РЅР°СЃС‚СЂРѕР№РєР°С… */
 void __fastcall TForm1::CheckBoxShowLogClick(TObject *Sender)
 {
 	curConfig.setShowLog(CheckBoxShowLog->Checked);
@@ -755,8 +755,8 @@ void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
 {
 	bool i = Form1->CheckBoxEsetAutoUpdate->Checked;
 	if(Form1->CheckBoxEsetAutoUpdate->Checked)
-		StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
-	else StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
+		StatusBar1->Panels->Items[1]->Text = " ESET РѕРЅРѕРІР»СЋРµС‚СЊСЃСЏ СЃР°РјРѕСЃС‚С–Р№РЅРѕ";
+	else StatusBar1->Panels->Items[1]->Text = " Р‘Р°Р·Рё РЅРµ РѕРЅРѕРІР»СЋРІР°Р»РёСЃСЏ";
 	Form1->EditEsetMirrorDir->Enabled = !i;
 	Form1->BtnEditEsetMirrorDir->Enabled = !i;
 	Form1->BtnEsetUpdate->Enabled = !i;
@@ -764,7 +764,7 @@ void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
 	if(gruberStart) infoSetToFille(curPC);
 }
 //---------------------------------------------------------------------------
-/* Запуск ПО */
+/* Р—Р°РїСѓСЃРє РџРћ */
 // INFO
 void __fastcall TForm1::BtnApp_HWiNFOClick(TObject *Sender)
 {

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -9,7 +9,7 @@
 #include "GetSMB.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-/* конструктор */
+/* РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ */
 Arm::Arm()
 {
 	readFromFile();
@@ -18,7 +18,7 @@ Arm::Arm()
 	DWORD bufCharCount = 32767;
 	if( GetComputerName( infoBuf, &bufCharCount ) ) {
 		desktopName = UnicodeString(infoBuf);
-	} else desktopName = "Помилка!";
+	} else desktopName = "РџРѕРјРёР»РєР°!";
 	// Get SMB - serial
 	UnicodeString errSer[] = {
 		"To Be Filled By O.E.M.",
@@ -27,14 +27,14 @@ Arm::Arm()
 	};
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
-	if (dataSMB == NULL) serial = "Помилка SMBIOS_DATA!";
+	if (dataSMB == NULL) serial = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
 	serial = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
 	for (auto errSerStr: errSer) {
-		if (serial == errSerStr) serial = "Серійний номер відсутній...";
+		if (serial == errSerStr) serial = "РЎРµСЂС–Р№РЅРёР№ РЅРѕРјРµСЂ РІС–РґСЃСѓС‚РЅС–Р№...";
 	}
 }
 //---------------------------------------------------------------------------
-/* функции */
+/* С„СѓРЅРєС†РёРё */
 UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 {
 	UnicodeString str;
@@ -49,21 +49,21 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 		str = str + partition;
 	} else str = str + prfPart + "_" + partition;
 	// serial
-	if (serial == "Серійний номер відсутній...") {
-		str = str + "#БезСН";
+	if (serial == "РЎРµСЂС–Р№РЅРёР№ РЅРѕРјРµСЂ РІС–РґСЃСѓС‚РЅС–Р№...") {
+		str = str + "#Р‘РµР·РЎРќ";
 	}
 	else str = str + "#" + serial;
 	// category
-	if (categoryID == 0) str = str + "#ОС";
-	if (categoryID == 1) str = str + "#НТ-БП";
-	if (categoryID == 2) str = str + "#НТ-ІСД";
-	if (categoryID == 3) str = str + "#НТ-ЕКМ";
-	if (categoryID == 4) str = str + "#ДСК";
-	if (categoryID == 5) str = str + "#Т";
-	if (categoryID == 6) str = str + "#ЦТ";
+	if (categoryID == 0) str = str + "#РћРЎ";
+	if (categoryID == 1) str = str + "#РќРў-Р‘Рџ";
+	if (categoryID == 2) str = str + "#РќРў-Р†РЎР”";
+	if (categoryID == 3) str = str + "#РќРў-Р•РљРњ";
+	if (categoryID == 4) str = str + "#Р”РЎРљ";
+	if (categoryID == 5) str = str + "#Рў";
+	if (categoryID == 6) str = str + "#Р¦Рў";
 	return fixDirName(str);
 }
-//генерация строк в инфо файлы
+//РіРµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРє РІ РёРЅС„Рѕ С„Р°Р№Р»С‹
 std::vector<UnicodeString> Arm::mStrInfoArm() {
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[infoARM]");
@@ -142,7 +142,7 @@ std::vector<UnicodeString> Arm::mStrInfoArmEset() {
 	mStr.push_back("lastUpdateArchive=");
 	return mStr;
 }
-//генерация строки с датой последнего Граба
+//РіРµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРєРё СЃ РґР°С‚РѕР№ РїРѕСЃР»РµРґРЅРµРіРѕ Р“СЂР°Р±Р°
 UnicodeString Arm::lastGrub() {
 	UnicodeString str = histGr.date;
 	if (histGr.user.IsEmpty() == false) {
@@ -150,10 +150,10 @@ UnicodeString Arm::lastGrub() {
 	}
 	return str;
 }
-//чтение даных из файла
+//С‡С‚РµРЅРёРµ РґР°РЅС‹С… РёР· С„Р°Р№Р»Р°
 bool Arm::readFromFile() {
 	UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
-	//новый файл
+	//РЅРѕРІС‹Р№ С„Р°Р№Р»
 	if (FileExists(dir + "gruber_info.ini")) {
 		TStringList *file = new TStringList;
 		file->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
@@ -188,20 +188,20 @@ bool Arm::readFromFile() {
 		coment = findCategory(file, "[comment]");
 		return true;
 	}
-	//старые файлы
+	//СЃС‚Р°СЂС‹Рµ С„Р°Р№Р»С‹
 	if (FileExists(dir + "info_001.dat")) {
 		TStringList *infoDatIm = new TStringList;
 		infoDatIm->LoadFromFile(dir + "info_001.dat", TEncoding::UTF8);
 		number = (infoDatIm->Strings[1]).ToIntDef(0);
 		partition = infoDatIm->Strings[2];
 		categoryID = (infoDatIm->Strings[3]).ToIntDef(0) + 1;
-		if (categoryID == 0) categoryName = "Особистий";
-		if (categoryID == 1) categoryName = "НТ без підключеня";
-		if (categoryID == 2) categoryName = "НТ з \"Інтернет\"";
-		if (categoryID == 3) categoryName = "НТ з \"Дніпро\"";
-		if (categoryID == 4) categoryName = "ДСК";
-		if (categoryID == 5) categoryName = "Таємно";
-		if (categoryID == 6) categoryName = "Цілком Таємно";
+		if (categoryID == 0) categoryName = "РћСЃРѕР±РёСЃС‚РёР№";
+		if (categoryID == 1) categoryName = "РќРў Р±РµР· РїС–РґРєР»СЋС‡РµРЅСЏ";
+		if (categoryID == 2) categoryName = "РќРў Р· \"Р†РЅС‚РµСЂРЅРµС‚\"";
+		if (categoryID == 3) categoryName = "РќРў Р· \"Р”РЅС–РїСЂРѕ\"";
+		if (categoryID == 4) categoryName = "Р”РЎРљ";
+		if (categoryID == 5) categoryName = "РўР°С”РјРЅРѕ";
+		if (categoryID == 6) categoryName = "Р¦С–Р»РєРѕРј РўР°С”РјРЅРѕ";
 		coment.push_back(infoDatIm->Strings[4]);
 		respon = infoDatIm->Strings[5];
 		if(infoDatIm->Count == 7) {
@@ -218,7 +218,7 @@ bool Arm::readFromFile() {
 	return false;
 }
 //---------------------------------------------------------------------------
-/* сеттери */
+/* СЃРµС‚С‚РµСЂРё */
 void Arm::setNumber(int i) { number = i; }
 void Arm::setPartition(UnicodeString str) { partition = str; }
 void Arm::setClass(UnicodeString str, int i) { className = str; classID = i; }
@@ -244,7 +244,7 @@ void Arm::setPoliticInstall (bool i) { politicInstall = i; }
 void Arm::setContrUSB (bool i) { contrUSB = i; }
 void Arm::setMultiUSERS (bool i) { multiUSERS = i; }
 //---------------------------------------------------------------------------
-/* геттери */
+/* РіРµС‚С‚РµСЂРё */
 int Arm::getNumber() { return number; }
 UnicodeString Arm::getPartition() { return partition; }
 UnicodeString Arm::getClassName() { return className; }

@@ -1,25 +1,34 @@
 object FormDirExist: TFormDirExist
   Left = 0
   Top = 0
+  Margins.Left = 5
+  Margins.Top = 5
+  Margins.Right = 5
+  Margins.Bottom = 5
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'GRUBer'
-  ClientHeight = 93
-  ClientWidth = 381
+  ClientHeight = 163
+  ClientWidth = 667
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
+  Font.Height = -21
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   Position = poMainFormCenter
-  TextHeight = 15
+  PixelsPerInch = 168
+  TextHeight = 30
   object GridPanel1: TGridPanel
     Left = 0
     Top = 0
-    Width = 381
-    Height = 93
+    Width = 667
+    Height = 163
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alClient
     BevelOuter = bvNone
     ColumnCollection = <
@@ -45,38 +54,42 @@ object FormDirExist: TFormDirExist
     RowCollection = <
       item
         SizeStyle = ssAbsolute
-        Value = 35.000000000000000000
+        Value = 61.000000000000000000
       end
       item
         SizeStyle = ssAbsolute
-        Value = 25.000000000000000000
+        Value = 44.000000000000000000
       end
       item
         Value = 100.000000000000000000
       end>
     TabOrder = 0
-    ExplicitLeft = 240
-    ExplicitTop = 72
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     DesignSize = (
-      381
-      93)
+      667
+      163)
     object Label1: TLabel
-      Left = 88
-      Top = 40
-      Width = 205
-      Height = 15
+      Left = 149
+      Top = 68
+      Width = 368
+      Height = 30
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Anchors = []
       Caption = #1044#1072#1085#1072' '#1090#1077#1082#1072' '#1074#1078#1077' '#1110#1089#1085#1091#1077'!!! '#1055#1077#1088#1077#1079#1072#1087#1080#1089#1072#1090#1080'? '
-      ExplicitLeft = 105
-      ExplicitTop = 15
+      ExplicitLeft = 154
+      ExplicitTop = 70
     end
     object ShowDir: TEdit
-      Left = 35
-      Top = 6
-      Width = 310
-      Height = 23
+      Left = 62
+      Top = 11
+      Width = 543
+      Height = 38
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taCenter
       Anchors = [akLeft, akTop, akRight, akBottom]
       Enabled = False
@@ -86,9 +99,13 @@ object FormDirExist: TFormDirExist
     end
     object GridPanel2: TGridPanel
       Left = 0
-      Top = 60
-      Width = 381
-      Height = 33
+      Top = 105
+      Width = 667
+      Height = 58
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Align = alClient
       BevelOuter = bvNone
       ColumnCollection = <
@@ -122,48 +139,53 @@ object FormDirExist: TFormDirExist
           Value = 100.000000000000000000
         end>
       TabOrder = 1
-      ExplicitLeft = 184
-      ExplicitTop = 176
-      ExplicitWidth = 185
-      ExplicitHeight = 41
       DesignSize = (
-        381
-        33)
+        667
+        58)
       object ButtonCancel: TButton
-        Left = 3
-        Top = 4
-        Width = 120
-        Height = 25
+        Left = 6
+        Top = 7
+        Width = 210
+        Height = 44
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Anchors = []
         Caption = #1042#1110#1076#1084#1110#1085#1072
         TabOrder = 0
         OnClick = ButtonCancelClick
-        ExplicitLeft = 57
-        ExplicitTop = 90
+        ExplicitLeft = 5
       end
       object ButtonOpen: TButton
-        Left = 130
-        Top = 4
-        Width = 120
-        Height = 25
+        Left = 229
+        Top = 7
+        Width = 210
+        Height = 44
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Anchors = []
         Caption = #1042#1110#1076#1082#1088#1080#1090#1080' '#1090#1077#1082#1091
         Enabled = False
         TabOrder = 1
-        ExplicitLeft = 246
-        ExplicitTop = 90
+        ExplicitLeft = 228
       end
       object ButtonOK: TButton
-        Left = 257
-        Top = 4
-        Width = 120
-        Height = 25
+        Left = 451
+        Top = 7
+        Width = 210
+        Height = 44
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Anchors = []
         Caption = #1055#1077#1088#1077#1079#1072#1087#1080#1089#1072#1090#1080
         TabOrder = 2
         OnClick = ButtonOKClick
-        ExplicitLeft = 434
-        ExplicitTop = 90
+        ExplicitLeft = 450
       end
     end
   end

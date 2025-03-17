@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #include <vcl.h>
 #pragma hdrstop
@@ -24,8 +24,8 @@ std::vector<UnicodeString> dirListUser {
 	"AppData\\Roaming\\Microsoft\\Word\\",
 	"AppData\\Roaming\\Microsoft\\PowerPoint\\",
 	"AppData\\Roaming\\Microsoft\\Office\\Recent\\",
-	"AppData\\Roaming\\Microsoft\\Office\\Последние файлы\\",
-	"AppData\\Roaming\\Microsoft\\Office\\Останні\\"
+	"AppData\\Roaming\\Microsoft\\Office\\РџРѕСЃР»РµРґРЅРёРµ С„Р°Р№Р»С‹\\",
+	"AppData\\Roaming\\Microsoft\\Office\\РћСЃС‚Р°РЅРЅС–\\"
 };
 struct fille {
 	UnicodeString str;
@@ -45,16 +45,16 @@ patchList scanDirToFille(UnicodeString dir)
 	std::vector<UnicodeString> list(0);
 	TSearchRec sr;
 	if (dir.Length()) {
-		// проверяем на слеш в конце, и если есть - удаляем
+		// РїСЂРѕРІРµСЂСЏРµРј РЅР° СЃР»РµС€ РІ РєРѕРЅС†Рµ, Рё РµСЃР»Рё РµСЃС‚СЊ - СѓРґР°Р»СЏРµРј
 		if (dir.LastDelimiter("\\") == dir.Length()) {
 			dir = dir.SubString(0, dir.Length() - 1);
 		}
-		// процедура поиска
+		// РїСЂРѕС†РµРґСѓСЂР° РїРѕРёСЃРєР°
 		if (!FindFirst(dir + "\\*.*", faAnyFile, sr))
 			do {
-				if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
+				if (!(sr.Name == "." || sr.Name == "..")) { // СЌС‚Рѕ РЅРµ С‚СЂРѕРіР°РµРј
 					if ((sr.Attr & faDirectory) != 0) {
-						patchList tmpFind = scanDirToFille(dir + "\\" + sr.Name); //рекурсия
+						patchList tmpFind = scanDirToFille(dir + "\\" + sr.Name); //СЂРµРєСѓСЂСЃРёСЏ
 						find.list.insert(find.list.end(), tmpFind.list.begin(), tmpFind.list.end());
 						find.dir += tmpFind.dir;
 						find.fille += tmpFind.fille;
@@ -68,7 +68,7 @@ patchList scanDirToFille(UnicodeString dir)
 						find.list.push_back({dir + "\\" + sr.Name, sr.Size, false});
 					}
 				}
-			} while (!FindNext(sr)); // ищем пока не найдем все
+			} while (!FindNext(sr)); // РёС‰РµРј РїРѕРєР° РЅРµ РЅР°Р№РґРµРј РІСЃРµ
 		FindClose(sr);
 	}
 	return find;
@@ -83,7 +83,7 @@ __fastcall TFormClearTempDir::TFormClearTempDir(TComponent* Owner)
 
 void __fastcall TFormClearTempDir::Button_CleanClick(TObject *Sender)
 {
-	//кнопка очистки
+	//РєРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё
 	Memo_LOG->Lines->Add("==========================================");
 	long long delSize = 0, unDelSize = 0;
 	int delCount = 0, unDelCount = 0;
@@ -104,8 +104,8 @@ void __fastcall TFormClearTempDir::Button_CleanClick(TObject *Sender)
         }
 	}
 	Label5->Caption = delCount;
-	Memo_LOG->Lines->Add("Не вдалось видалити " + UnicodeString(unDelCount) + " (" + byteToStr(unDelSize) + ")");
-	Memo_LOG->Lines->Add("Видаленно " + UnicodeString(delCount) + " (" + byteToStr(delSize) + ")");
+	Memo_LOG->Lines->Add("РќРµ РІРґР°Р»РѕСЃСЊ РІРёРґР°Р»РёС‚Рё " + UnicodeString(unDelCount) + " (" + byteToStr(unDelSize) + ")");
+	Memo_LOG->Lines->Add("Р’РёРґР°Р»РµРЅРЅРѕ " + UnicodeString(delCount) + " (" + byteToStr(delSize) + ")");
 
 }
 //---------------------------------------------------------------------------
@@ -115,8 +115,8 @@ void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
     Memo_LOG->Clear();
 	Label4->Caption = "-";
 	Label5->Caption = "-";
-	// --- готовим список пользовательских папок ---
-	Memo_LOG->Lines->Add("Пошук тек користувачів..");
+	// --- РіРѕС‚РѕРІРёРј СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… РїР°РїРѕРє ---
+	Memo_LOG->Lines->Add("РџРѕС€СѓРє С‚РµРє РєРѕСЂРёСЃС‚СѓРІР°С‡С–РІ..");
 	std::vector<UnicodeString> userListBad {
 		"All Users",
 		"Default",
@@ -127,27 +127,27 @@ void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
 	UnicodeString dirUser = "C:\\Users";
 	TSearchRec srUser;
 	if (dirUser.Length()) {
-		// проверяем на слеш в конце, и если есть - удаляем
+		// РїСЂРѕРІРµСЂСЏРµРј РЅР° СЃР»РµС€ РІ РєРѕРЅС†Рµ, Рё РµСЃР»Рё РµСЃС‚СЊ - СѓРґР°Р»СЏРµРј
 		if (dirUser.LastDelimiter("\\") == dirUser.Length()) {
 			dirUser = dirUser.SubString(0, dirUser.Length() - 1);
 		}
-		// процедура поиска
+		// РїСЂРѕС†РµРґСѓСЂР° РїРѕРёСЃРєР°
 		if (!FindFirst(dirUser + "\\*.*", faAnyFile, srUser))
 			do {
-				if (!(srUser.Name == "." || srUser.Name == "..")) { // это не трогаем
+				if (!(srUser.Name == "." || srUser.Name == "..")) { // СЌС‚Рѕ РЅРµ С‚СЂРѕРіР°РµРј
 					if ((srUser.Attr & faDirectory) != 0) {
 						if (!compareVectorAndString(srUser.Name, userListBad)) {
 							userDirList.push_back(dirUser + "\\" + srUser.Name);
 						}
 					}
 				}
-			} while (!FindNext(srUser)); // ищем пока не найдем все
+			} while (!FindNext(srUser)); // РёС‰РµРј РїРѕРєР° РЅРµ РЅР°Р№РґРµРј РІСЃРµ
 		FindClose(srUser);
 	}
 	for (auto a: userDirList) {
 		Memo_LOG->Lines->Add("- " + UnicodeString(a));
 	}
-	// --- готовим список папок ---
+	// --- РіРѕС‚РѕРІРёРј СЃРїРёСЃРѕРє РїР°РїРѕРє ---
 	for (auto dir: dirListFull) {
 		patchList tmpPatch = scanDirToFille(dir);
 		patch.list.insert(patch.list.end(), tmpPatch.list.begin(), tmpPatch.list.end());
@@ -163,10 +163,10 @@ void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
         }
 	}
 
-//	Memo_LOG->Lines->Add("Знайденні тимчасові файли - " + UnicodeString(patch.fille));
-//	Memo_LOG->Lines->Add("Загальний обсяг файлів ---- " + UnicodeString(patch.sumSize));
+//	Memo_LOG->Lines->Add("Р—РЅР°Р№РґРµРЅРЅС– С‚РёРјС‡Р°СЃРѕРІС– С„Р°Р№Р»Рё - " + UnicodeString(patch.fille));
+//	Memo_LOG->Lines->Add("Р—Р°РіР°Р»СЊРЅРёР№ РѕР±СЃСЏРі С„Р°Р№Р»С–РІ ---- " + UnicodeString(patch.sumSize));
 //	Memo_LOG->Lines->Add("==========================================");
-//    Memo_LOG->Lines->Add("Знайденні тимчасові файли:");
+//    Memo_LOG->Lines->Add("Р—РЅР°Р№РґРµРЅРЅС– С‚РёРјС‡Р°СЃРѕРІС– С„Р°Р№Р»Рё:");
 	Label4->Caption = UnicodeString(patch.fille);
 //	for(auto i: patch.list) {
 //		if (!i.dir) Memo_LOG->Lines->Add("-> [" + byteToStr(i.size) + "] - " + i.str);
