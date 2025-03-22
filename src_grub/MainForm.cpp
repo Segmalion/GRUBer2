@@ -283,19 +283,19 @@ bool job_diskInfo() {
 	MoveFile(f1.c_str(), outFilePath.c_str());
 	printLogDebug(curConfig.getDebug(), cdi.errorString());
 	printLog(cdi.resultString());
-	progressBarGo(pos += progressBarStep(), cdi.checkErr());
+	progressBarGo(pos += step, cdi.checkErr());
 	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	return !cdi.checkErr();
 }
 bool job_esetLog() {
 	UnicodeString outFilePath, arg;
 	if(curConfig.getEsetLog() == 1) {
-		arg = "/accepteula /Lang:UKR /Age:0 " + outFilePath + "\"";
-		outFilePath = curDir.getGrubFull() + "\\eset-log_small.zip";
+		outFilePath = curDir.getGrubFull() + "\\eset-log-full.zip";
+		arg = "/accepteula /Lang:UKR /Age:0 \"" + outFilePath + "\"";
 	}
 	if(curConfig.getEsetLog() == 2) {
-		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev " + outFilePath + "\"";
-		outFilePath = curDir.getGrubFull() + "\\eset-log_full.zip";
+		outFilePath = curDir.getGrubFull() + "\\eset-log-mini.zip";
+		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev \"" + outFilePath + "\"";
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування eset-log.zip...");
@@ -305,7 +305,9 @@ bool job_esetLog() {
 	esetLog.run(false);
 	printLogDebug(curConfig.getDebug(), esetLog.errorString());
 	printLog(esetLog.resultString());
-	progressBarGo(pos += progressBarStep(), esetLog.checkErr());
+	progressBarGo(pos += step, esetLog.checkErr());
+	printLogDebug(curConfig.getDebug(), "{app32}=" + app32);
+	printLogDebug(curConfig.getDebug(), "{arg}=" + arg);
 	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	return !esetLog.checkErr();
 }
