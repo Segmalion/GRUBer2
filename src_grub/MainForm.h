@@ -53,10 +53,8 @@ __published:	// IDE-managed Components
 	TComboBox *EditArmClass;
 	TButton *BtnKiberConsolOpen;
 	TGridPanel *GridPanel6;
-	TLabel *Label6;
 	TEdit *ShowSerial;
 	TButton *BtnInfo;
-	TLabel *Label8;
 	TEdit *ShowName;
 	TButton *BtnLicense;
 	TCheckBox *CheckBoxDebug;
@@ -152,6 +150,10 @@ __published:	// IDE-managed Components
 	TButton *Button4;
 	TPopupMenu *PopupMenu_GrubButton;
 	TMenuItem *MiniGrub;
+	TButton *Button_Serial;
+	TGridPanel *GridPanel15;
+	TButton *Button_RestartAssAdmin;
+	TButton *Button_ChangeNamePC;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
@@ -219,6 +221,8 @@ __published:	// IDE-managed Components
 	void __fastcall EditPurposeChange(TObject *Sender);
 	void __fastcall BtnClearPCClick(TObject *Sender);
 	void __fastcall MiniGrubClick(TObject *Sender);
+	void __fastcall Button_SerialClick(TObject *Sender);
+	void __fastcall Button_RestartAssAdminClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer(bool i = true);
@@ -232,6 +236,7 @@ std::vector<UnicodeString> fileInfoGrub();
 double progressBarStep();
 void progressBarGo(int i , bool err = false);
 void changeEditDirColor();
+void RestartApplicationRunas();
 
 bool job_infoFille();
 bool job_comTxt();

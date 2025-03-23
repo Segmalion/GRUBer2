@@ -35,7 +35,8 @@ private:
 	bool politicInstall=0, contrUSB=0, multiUSERS=0;
 	// инфо из ПК
 	UnicodeString desktopName = "";
-	UnicodeString serial = "";
+	UnicodeString serial, serialMain, UUID, serial_mrb, CPUID;
+
 	// структуры
    struct infoEset {
 		bool autoUpdate = true;
@@ -100,6 +101,10 @@ public:
 	UnicodeString getComentStr();
 	UnicodeString getDesktopName();
 	UnicodeString getSerial();
+	UnicodeString getSerialMain();
+	UnicodeString getUUID();
+	UnicodeString getSerial_mrb();
+	UnicodeString getCPUID();
 	UnicodeString getEsetDir();
 	bool getEsetAutoUpdate();
 

@@ -7,10 +7,11 @@
 USEFORM("MainForm.cpp", Form1);
 USEFORM("PartitionForm.cpp", FormPartition);
 USEFORM("Serial.cpp", Form2);
-USEFORM("ComentForm.cpp", FormComent);
 USEFORM("ClearTemp.cpp", FormClearTempDir);
-USEFORM("DialogDirExist.cpp", FormDirExist);
 USEFORM("About.cpp", FormAbout);
+USEFORM("ComentForm.cpp", FormComent);
+USEFORM("DialogDirExist.cpp", FormDirExist);
+USEFORM("FormSerial.cpp", Form_Serial);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
@@ -25,6 +26,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->CreateForm(__classid(TFormClearTempDir), &FormClearTempDir);
 		Application->CreateForm(__classid(TForm2), &Form2);
 		Application->CreateForm(__classid(TFormAbout), &FormAbout);
+		Application->CreateForm(__classid(TForm_Serial), &Form_Serial);
 		Application->Run();
 	}
 	catch (Exception &exception)

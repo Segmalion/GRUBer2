@@ -14,8 +14,8 @@ Arm::Arm()
 {
 	readFromFile();
 	// Get DesktopName
-	TCHAR infoBuf[32767];
 	DWORD bufCharCount = 32767;
+	TCHAR infoBuf[32767];
 	if( GetComputerName( infoBuf, &bufCharCount ) ) {
 		desktopName = UnicodeString(infoBuf);
 	} else desktopName = "Помилка!";
@@ -27,8 +27,17 @@ Arm::Arm()
 	};
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
-	if (dataSMB == NULL) serial = "Помилка SMBIOS_DATA!";
-	serial = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
+	if (dataSMB == NULL) {
+		serialMain = "Помилка SMBIOS_DATA!";
+		UUID = "Помилка SMBIOS_DATA!";
+		serial_mrb = "Помилка SMBIOS_DATA!";
+		CPUID = "Помилка SMBIOS_DATA!";
+	}
+	serialMain = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
+	serial = serialMain;
+	UUID = g.GetBiosValue(dataSMB, SMB_TABLE_SYSTEM, 8, 16);
+	serial_mrb = g.GetBiosString(dataSMB, SMB_TABLE_BASEBOARD, 7);
+	CPUID = g.GetBiosValue(dataSMB, SMB_TABLE_PROCESSOR, 8, 8);
 	for (auto errSerStr: errSer) {
 		if (serial == errSerStr) serial = "Серійний номер відсутній...";
 	}
@@ -268,6 +277,10 @@ UnicodeString Arm::getComentStr() {
 }
 UnicodeString Arm::getDesktopName() { return desktopName; }
 UnicodeString Arm::getSerial() { return serial; }
+UnicodeString Arm::getSerialMain() { return serialMain; }
+UnicodeString Arm::getUUID() { return UUID; }
+UnicodeString Arm::getSerial_mrb() { return serial_mrb; }
+UnicodeString Arm::getCPUID() { return CPUID; }
 UnicodeString Arm::getEsetDir() { return eset.dirMirror; }
 bool Arm::getEsetAutoUpdate() { return eset.autoUpdate; }
 UnicodeString Arm::getInNumberARM() {

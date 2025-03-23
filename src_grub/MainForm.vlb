@@ -119,9 +119,6 @@ Coordinates=232,10,101,124
 [BtnEditPartition]
 Coordinates=611,348,104,58
 
-[Label8]
-Coordinates=922,348,53,58
-
 [ShowName]
 Coordinates=787,144,80,58
 
@@ -166,9 +163,6 @@ Coordinates=699,144,78,58
 
 [GridPanel5]
 Coordinates=833,348,79,58
-
-[Label6]
-Coordinates=824,280,53,58
 
 [Рass]
 Coordinates=818,798,43,36
@@ -264,5 +258,5 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=209,348,59,58
+Coordinates=922,348,53,58
 

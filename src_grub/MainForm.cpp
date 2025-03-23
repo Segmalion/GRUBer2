@@ -1,6 +1,7 @@
 ﻿//---------------------------------------------------------------------------
 
 #include <vcl.h>
+#include <System.Hash.hpp>
 #pragma hdrstop
 
 #include "MainForm.h"
@@ -9,6 +10,7 @@
 #include "DialogDirExist.h"
 #include "About.h"
 #include "ClearTemp.h"
+#include "FormSerial.h"
 
 #include "Arm.h"
 #include "RunApp.h"
@@ -34,7 +36,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 1;
+extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 2;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -74,8 +76,18 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	printLog("[>]Останій граб: " + curPC.lastGrub());
 	if(IsAdminMode()) {
 		printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
-        BtnClearPC->Enabled = true;
-	} else printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
+		Button_RestartAssAdmin->Enabled = false;
+		BtnClearPC->Enabled = true;
+	} else {
+		printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
+		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
+			+ UnicodeString(curPC.getNumber())
+			+ ", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
+		UnicodeString formCaption = "Нема прав Адміна.. :'(";
+		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
+				RestartApplicationRunas();
+		}
+	}
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
 	gruberStart = 1;
 
@@ -135,6 +147,14 @@ void changeEditDirColor() {
 	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	Form1->BtnParserOpen->Enabled = FileExists(curDir.getGrubFull() + "\\usb.txt");
+}
+void RestartApplicationRunas()
+{
+	TCHAR patch[_MAX_PATH+1];
+	GetModuleFileName(NULL, patch, _MAX_PATH);
+	UnicodeString setApp = UnicodeString(patch);
+	ShellExecuteW(NULL, L"runas", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	exit(1);
 }
 //---------------------------------------------------------------------------
 bool job_infoFille() {
@@ -513,6 +533,24 @@ void __fastcall TForm1::BtnClearPCClick(TObject *Sender)
 	FormClearTempDir->Position = (TPosition)7;
 	FormClearTempDir->ShowModal();
 }
+// ----
+void __fastcall TForm1::Button_SerialClick(TObject *Sender)
+{
+	Form_Serial->Edit1->Text = curPC.getSerialMain();
+	Form_Serial->Edit2->Text = curPC.getUUID();
+	Form_Serial->Edit3->Text = curPC.getSerial_mrb();
+	Form_Serial->Edit4->Text = curPC.getCPUID();
+	//ustr = L"Hey! this unicode string will be hashed";
+	UnicodeString hash_sha = curPC.getSerialMain() + curPC.getUUID();
+	Form_Serial->Edit5->Text = THashSHA1::GetHashString(hash_sha);
+	//Form_Serial->Edit5->Text = std::hash(hash_sha);
+	Form_Serial->Position = (TPosition)7;
+	Form_Serial->ShowModal();
+}
+void __fastcall TForm1::Button_RestartAssAdminClick(TObject *Sender)
+{
+	RestartApplicationRunas();
+}
 //---------------------------------------------------------------------------
 /* Обновление ESET */
 void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
@@ -849,5 +887,11 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	curConfig.setEnablePrefixPartition(CheckBoxPrefixPartition->State);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 
