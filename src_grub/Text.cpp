@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #pragma hdrstop
 
 #include "Text.h"
@@ -6,16 +6,16 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-/* Работа со строками */
+/* Р Р°Р±РѕС‚Р° СЃРѕ СЃС‚СЂРѕРєР°РјРё */
 //---------------------------------------------------------------------------
-/* UnicodeString в std::string */
+/* UnicodeString РІ std::string */
 std::string unToStr(UnicodeString str)
 {
 	UTF8String uStr = str;
 	return uStr.c_str();
 }
 //---------------------------------------------------------------------------
-/* Проверка на старт строки */
+/* РџСЂРѕРІРµСЂРєР° РЅР° СЃС‚Р°СЂС‚ СЃС‚СЂРѕРєРё */
 bool isBeginUStr(UnicodeString strOR, UnicodeString srtF)
 {
 	UnicodeString strORsh = strOR.SubString(0, srtF.Length());
@@ -23,7 +23,7 @@ bool isBeginUStr(UnicodeString strOR, UnicodeString srtF)
 	return false;
 }
 //---------------------------------------------------------------------------
-/* Парсинг строки в масив*/
+/* РџР°СЂСЃРёРЅРі СЃС‚СЂРѕРєРё РІ РјР°СЃРёРІ*/
 std::vector<UnicodeString> vStrGenFromStr (UnicodeString str) {
 	std::vector<UnicodeString> vStr;
 	while (str.Pos(";") != 0) {
@@ -33,7 +33,7 @@ std::vector<UnicodeString> vStrGenFromStr (UnicodeString str) {
 	vStr.push_back(str);
 	return vStr;
 }
-/* Обратный парсинг масива в строку */
+/* РћР±СЂР°С‚РЅС‹Р№ РїР°СЂСЃРёРЅРі РјР°СЃРёРІР° РІ СЃС‚СЂРѕРєСѓ */
 UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr) {
 	UnicodeString str;
 	for (auto i : vStr) {
@@ -43,7 +43,7 @@ UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr) {
 	return str;
 }
 //---------------------------------------------------------------------------
-/* Дата и время */
+/* Р”Р°С‚Р° Рё РІСЂРµРјСЏ */
 UnicodeString curDate()
 {
 	TDateTime *myDate = new TDateTime(Now());
@@ -60,7 +60,7 @@ UnicodeString curDateTime()
 	return myTime->FormatString("dd.mm.yy hh:nn:ss");
 }
 //---------------------------------------------------------------------------
-// Чистка строки имени папки от запрещеных символов
+// Р§РёСЃС‚РєР° СЃС‚СЂРѕРєРё РёРјРµРЅРё РїР°РїРєРё РѕС‚ Р·Р°РїСЂРµС‰РµРЅС‹С… СЃРёРјРІРѕР»РѕРІ
 UnicodeString fixDirName(UnicodeString str)
 {
 	for (int i = 1; i < str.Length()+1; i++) {
@@ -72,7 +72,7 @@ UnicodeString fixDirName(UnicodeString str)
 	return str;
 }
 //---------------------------------------------------------------------------
-/* Парсинг параметров */
+/* РџР°СЂСЃРёРЅРі РїР°СЂР°РјРµС‚СЂРѕРІ */
 UnicodeString findParam(TStringList* ini, UnicodeString cat, UnicodeString prm)
 {
 	UnicodeString resultStr, findStr;
@@ -133,7 +133,7 @@ UnicodeString byteToStr(long long i) {
 		str = FloatToStrF((double)i/(pow(1024,3)), ffFixed, 4, 1) + "Gb";
 		return str;
 	}
-	str = FloatToStrF((double)i/(pow(1024,4)), ffFixed, 4, 1) + "Тb";
+	str = FloatToStrF((double)i/(pow(1024,4)), ffFixed, 4, 1) + "Рўb";
 	return str;
 }
 //---------------------------------------------------------------------------

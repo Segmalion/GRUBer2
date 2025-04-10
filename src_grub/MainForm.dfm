@@ -142,7 +142,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabGRUBer
+        ActivePage = Tool
         Constraints.MaxHeight = 1050
         MultiLine = True
         ParentShowHint = False
@@ -1652,7 +1652,7 @@
               end
               item
                 SizeStyle = ssAbsolute
-                Value = 184.000000000000000000
+                Value = 114.000000000000000000
               end
               item
                 SizeStyle = ssAbsolute
@@ -1662,6 +1662,8 @@
                 Value = 100.000000000000000000
               end>
             TabOrder = 0
+            ExplicitLeft = 4
+            ExplicitTop = 4
             DesignSize = (
               682
               811)
@@ -1835,7 +1837,7 @@
               Left = 5
               Top = 259
               Width = 672
-              Height = 174
+              Height = 104
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -1843,11 +1845,12 @@
               Align = alClient
               Caption = #1060#1072#1081#1083#1086#1074#1072' '#1089#1080#1089#1090#1077#1084#1072
               TabOrder = 1
+              ExplicitHeight = 174
               object GridPanel10: TGridPanel
                 Left = 2
                 Top = 32
                 Width = 668
-                Height = 140
+                Height = 70
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -1871,25 +1874,13 @@
                     Column = 1
                     Control = BtnApp_Everything
                     Row = 0
-                  end
-                  item
-                    Column = 0
-                    Control = BtnApp_3
-                    Row = 1
-                  end
-                  item
-                    Column = 1
-                    Control = BtnApp_4
-                    Row = 1
                   end>
                 RowCollection = <
                   item
-                    Value = 50.000000000000000000
-                  end
-                  item
-                    Value = 50.000000000000000000
+                    Value = 100.000000000000000000
                   end>
                 TabOrder = 0
+                ExplicitHeight = 140
                 object BtnApp_Total: TButton
                   AlignWithMargins = True
                   Left = 5
@@ -1920,42 +1911,12 @@
                   TabOrder = 1
                   OnClick = BtnApp_EverythingClick
                 end
-                object BtnApp_3: TButton
-                  AlignWithMargins = True
-                  Left = 5
-                  Top = 75
-                  Width = 324
-                  Height = 60
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  Caption = '...'
-                  Enabled = False
-                  TabOrder = 2
-                end
-                object BtnApp_4: TButton
-                  AlignWithMargins = True
-                  Left = 339
-                  Top = 75
-                  Width = 324
-                  Height = 60
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  Caption = '...'
-                  Enabled = False
-                  TabOrder = 3
-                end
               end
             end
             object GroupBox_AppUSB: TGroupBox
               AlignWithMargins = True
               Left = 5
-              Top = 443
+              Top = 373
               Width = 672
               Height = 174
               Margins.Left = 5
@@ -1965,6 +1926,7 @@
               Align = alClient
               Caption = 'USB '#1087#1088#1080#1089#1090#1088#1086#1111
               TabOrder = 2
+              ExplicitTop = 443
               object GridPanel14: TGridPanel
                 Left = 2
                 Top = 32
@@ -1986,17 +1948,17 @@
                 ControlCollection = <
                   item
                     Column = 0
-                    Control = Button1
+                    Control = BtnApp_UscDevU
                     Row = 0
                   end
                   item
                     Column = 1
-                    Control = Button2
+                    Control = BtnApp_DeviceCleanup
                     Row = 0
                   end
                   item
                     Column = 0
-                    Control = Button3
+                    Control = BtnApp_UsbTreeView
                     Row = 1
                   end
                   item
@@ -2012,7 +1974,7 @@
                     Value = 50.000000000000000000
                   end>
                 TabOrder = 0
-                object Button1: TButton
+                object BtnApp_UscDevU: TButton
                   AlignWithMargins = True
                   Left = 5
                   Top = 5
@@ -2023,11 +1985,11 @@
                   Margins.Right = 5
                   Margins.Bottom = 5
                   Align = alClient
-                  Caption = '...'
-                  Enabled = False
+                  Caption = 'USBDeview'
                   TabOrder = 0
+                  OnClick = BtnApp_UscDevUClick
                 end
-                object Button2: TButton
+                object BtnApp_DeviceCleanup: TButton
                   AlignWithMargins = True
                   Left = 339
                   Top = 5
@@ -2038,11 +2000,11 @@
                   Margins.Right = 5
                   Margins.Bottom = 5
                   Align = alClient
-                  Caption = '...'
-                  Enabled = False
+                  Caption = 'DeviceCleanup'
                   TabOrder = 1
+                  OnClick = BtnApp_DeviceCleanupClick
                 end
-                object Button3: TButton
+                object BtnApp_UsbTreeView: TButton
                   AlignWithMargins = True
                   Left = 5
                   Top = 75
@@ -2053,9 +2015,9 @@
                   Margins.Right = 5
                   Margins.Bottom = 5
                   Align = alClient
-                  Caption = '...'
-                  Enabled = False
+                  Caption = 'UsbTreeView'
                   TabOrder = 2
+                  OnClick = BtnApp_UsbTreeViewClick
                 end
                 object Button4: TButton
                   AlignWithMargins = True
@@ -2436,10 +2398,6 @@
                   Value = 100.000000000000000000
                 end>
               TabOrder = 2
-              ExplicitLeft = 434
-              ExplicitTop = 1348
-              ExplicitWidth = 324
-              ExplicitHeight = 71
               object BtnAboutGruber: TButton
                 AlignWithMargins = True
                 Left = 346
@@ -2458,10 +2416,6 @@
                 ShowHint = False
                 TabOrder = 0
                 OnClick = BtnAboutGruberClick
-                ExplicitLeft = 5
-                ExplicitTop = 724
-                ExplicitWidth = 672
-                ExplicitHeight = 41
               end
               object Button_RestartAssAdmin: TButton
                 AlignWithMargins = True
@@ -2477,10 +2431,6 @@
                 Caption = #1055#1077#1088#1077#1079#1072#1087#1091#1089#1090#1080#1090#1080' '#1074#1110#1076' '#1040#1076#1084#1110#1085#1072
                 TabOrder = 1
                 OnClick = Button_RestartAssAdminClick
-                ExplicitLeft = 35
-                ExplicitTop = 130
-                ExplicitWidth = 131
-                ExplicitHeight = 43
               end
             end
           end
@@ -2547,7 +2497,7 @@
     FileTypes = <>
     Options = [fdoPickFolders, fdoForceFileSystem, fdoPathMustExist, fdoDontAddToRecent]
     OnFileOkClick = DirOpenEsetMirrorFileOkClick
-    Left = 1269
+    Left = 1395
     Top = 222
   end
   object PopupMenu_SysTool: TPopupMenu
@@ -2575,8 +2525,8 @@
     Top = 65
   end
   object PopupMenu_StopGrub: TPopupMenu
-    Left = 919
-    Top = 239
+    Left = 877
+    Top = 211
     object Рass: TMenuItem
       Caption = #1055#1088#1086#1087#1091#1089#1082' '#1082#1088#1086#1082#1091
       OnClick = РassClick
@@ -2584,8 +2534,8 @@
   end
   object PopupMenu_mailGrubFile: TPopupMenu
     AutoLineReduction = maManual
-    Left = 1034
-    Top = 191
+    Left = 1146
+    Top = 219
     object ComentTxt: TMenuItem
       Caption = 'coment.txt'
       Checked = True

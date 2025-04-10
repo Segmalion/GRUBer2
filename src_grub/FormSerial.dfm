@@ -332,8 +332,8 @@ object Form_Serial: TForm_Serial
     object Label5: TLabel
       Left = 0
       Top = 188
-      Width = 664
-      Height = 46
+      Width = 302
+      Height = 30
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -342,7 +342,6 @@ object Form_Serial: TForm_Serial
       Alignment = taCenter
       Caption = #1057#1075#1077#1085#1077#1088#1086#1074#1072#1085#1080#1081' '#1089#1077#1088#1110#1081#1085#1080#1081' '#1085#1086#1084#1077#1088':'
       Layout = tlBottom
-      ExplicitTop = 183
     end
   end
 end

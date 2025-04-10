@@ -36,7 +36,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 2;
+extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 3;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -185,10 +185,10 @@ bool job_comTxt() {
 	return true;
 }
 bool job_info() {
-	UnicodeString outFilePath = curDir.getGrubFull() + "\\info.txt";
+	UnicodeString outFilePath = curDir.getGrubFull() + "\\info_ps1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування info.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info.bat";
+	printLog("Генерування info_ps1.txt...");
+	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\info_ps1\\Run_toFile.bat";
 	UnicodeString arg = "\""+ outFilePath + "\"";
 	RunApp info {app32, NULL, arg};
 	info.run(); // RUN !!!
@@ -273,13 +273,14 @@ bool job_audit() {
 	if(curConfig.getAudit() == 1) {
 		outFilePath = curDir.getGrubFull() + "\\auditMax.html";
 		arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
+		printLog("Генерування auditMax.html...");
 	}
 	if(curConfig.getAudit() == 2) {
 		outFilePath = curDir.getGrubFull() + "\\auditMin.html";
 		arg = "/r=go /f=" + outFilePath + " /L=en\"";
+		printLog("Генерування auditMin.html...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування audit.html...");
 	UnicodeString app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
 	UnicodeString app64 = NULL;
 	RunApp audit {app32, app64, arg};
@@ -312,13 +313,14 @@ bool job_esetLog() {
 	if(curConfig.getEsetLog() == 1) {
 		outFilePath = curDir.getGrubFull() + "\\eset-log-full.zip";
 		arg = "/accepteula /Lang:UKR /Age:0 \"" + outFilePath + "\"";
+		printLog("Генерування eset-log-full.zip...");
 	}
 	if(curConfig.getEsetLog() == 2) {
 		outFilePath = curDir.getGrubFull() + "\\eset-log-mini.zip";
 		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev \"" + outFilePath + "\"";
+		printLog("Генерування eset-log-mini.zip...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування eset-log.zip...");
 	UnicodeString app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
 	UnicodeString app64 = NULL;
 	RunApp esetLog {app32, app64, arg};
@@ -519,7 +521,7 @@ void __fastcall TForm1::BtnLicenseClick(TObject *Sender)
 // общее инфо
 void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 {
-	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-PC-all.bat";
+	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\info_ps1\\Run.bat";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // about form
@@ -871,6 +873,34 @@ void __fastcall TForm1::BtnApp_EverythingClick(TObject *Sender)
 {
 	UnicodeString setApp = curDir.getToolFull() + "\\Everything\\Everything.exe";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+//
+void __fastcall TForm1::BtnApp_UscDevUClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
+	else setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::BtnApp_DeviceCleanupClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\DeviceCleanup\\x64\\DeviceCleanup.exe";
+	else setApp = curDir.getToolFull() + "\\DeviceCleanup\\Win32\\DeviceCleanup.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::BtnApp_UsbTreeViewClick(TObject *Sender)
+{
+	UnicodeString setApp;
+	LPCWSTR oper = L"open";
+	if (x64) setApp = curDir.getToolFull() + "\\UsbTreeView\\x64\\UsbTreeView.exe";
+	else setApp = curDir.getToolFull() + "\\UsbTreeView\\UsbTreeView.exe";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 //---------------------------------------------------------------------------
 

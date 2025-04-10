@@ -29,9 +29,6 @@ Coordinates=313,212,116,58
 Coordinates=575,552,83,36
 Visible=True
 
-[BtnApp_4]
-Coordinates=519,416,71,58
-
 [Label9]
 Coordinates=10,280,53,58
 
@@ -70,9 +67,6 @@ Coordinates=1269,56,137,36
 
 [PageControl1]
 Coordinates=472,552,93,36
-
-[BtnApp_3]
-Coordinates=787,484,71,58
 
 [CheckBoxLicense]
 Coordinates=188,484,117,58
@@ -258,5 +252,5 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=922,348,53,58
+Coordinates=519,416,71,58
 

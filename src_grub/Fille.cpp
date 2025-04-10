@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #pragma hdrstop
 
 #include "Fille.h"
@@ -14,27 +14,27 @@ bool deleteDir(UnicodeString dirDelName)
 		if (!FindFirst(dirDelName+"\\*.*",faAnyFile,sr)) do
       {
          if (!(sr.Name=="." || sr.Name==".."))
-         {// это не удаляем
+         {// СЌС‚Рѕ РЅРµ СѓРґР°Р»СЏРµРј
 				if (((sr.Attr & faDirectory)==faDirectory)||(sr.Attr == faDirectory))
-				{  // найдена папка
+				{  // РЅР°Р№РґРµРЅР° РїР°РїРєР°
 					FileSetAttr(dirDelName+"\\"+sr.Name, faDirectory );
-					deleteDir(dirDelName+"\\"+sr.Name);//рекурсивно удаляем найденную папку
-					RemoveDir(dirDelName + "\\"+sr.Name);// удаляем уже пустую папку
+					deleteDir(dirDelName+"\\"+sr.Name);//СЂРµРєСѓСЂСЃРёРІРЅРѕ СѓРґР°Р»СЏРµРј РЅР°Р№РґРµРЅРЅСѓСЋ РїР°РїРєСѓ
+					RemoveDir(dirDelName + "\\"+sr.Name);// СѓРґР°Р»СЏРµРј СѓР¶Рµ РїСѓСЃС‚СѓСЋ РїР°РїРєСѓ
             } else
-            {  // найден файл
+            {  // РЅР°Р№РґРµРЅ С„Р°Р№Р»
 					FileSetAttr(dirDelName+"\\"+sr.Name, 0);
-					DeleteFile(dirDelName+"\\"+sr.Name);// удаляем файл
+					DeleteFile(dirDelName+"\\"+sr.Name);// СѓРґР°Р»СЏРµРј С„Р°Р№Р»
             }
          }
       }
-      while (!FindNext(sr));// ищем пока не найдем все
+      while (!FindNext(sr));// РёС‰РµРј РїРѕРєР° РЅРµ РЅР°Р№РґРµРј РІСЃРµ
       FindClose(sr);
    }
    RemoveDir(dirDelName);
    return true;
 }
 //---------------------------------------------------------------------------
-// проверка на запуск файла и наличие
+// РїСЂРѕРІРµСЂРєР° РЅР° Р·Р°РїСѓСЃРє С„Р°Р№Р»Р° Рё РЅР°Р»РёС‡РёРµ
 bool fileOpen(UnicodeString str)
 {
 	if (std::FILE *file = std::fopen(unToStr(str).c_str(), "r"))
@@ -45,13 +45,13 @@ bool fileOpen(UnicodeString str)
 	else return false;
 }
 //---------------------------------------------------------------------------
-// смена прав на файл через CMD
+// СЃРјРµРЅР° РїСЂР°РІ РЅР° С„Р°Р№Р» С‡РµСЂРµР· CMD
 void cacls(UnicodeString str)
 {
 	UnicodeString setApp = "C:\\Windows\\System32\\cacls.exe";
 	UnicodeString setArg = str + " /t /e /g Users:c\"";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_HIDE);
-	setArg = str + " /t /e /g Пользователи:c\"";
+	setArg = str + " /t /e /g РџРѕР»СЊР·РѕРІР°С‚РµР»Рё:c\"";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_HIDE);
 }
 //---------------------------------------------------------------------------

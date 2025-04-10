@@ -91,8 +91,6 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel10;
 	TButton *BtnApp_Total;
 	TButton *BtnApp_Everything;
-	TButton *BtnApp_3;
-	TButton *BtnApp_4;
 	TGroupBox *GroupBox_AppUSB;
 	TPopupMenu *PopupMenu_SysTool;
 	TMenuItem *Perfmon;
@@ -144,9 +142,9 @@ __published:	// IDE-managed Components
 	TLabel *Label18;
 	TEdit *EditPurpose;
 	TGridPanel *GridPanel14;
-	TButton *Button1;
-	TButton *Button2;
-	TButton *Button3;
+	TButton *BtnApp_UscDevU;
+	TButton *BtnApp_DeviceCleanup;
+	TButton *BtnApp_UsbTreeView;
 	TButton *Button4;
 	TPopupMenu *PopupMenu_GrubButton;
 	TMenuItem *MiniGrub;
@@ -223,6 +221,9 @@ __published:	// IDE-managed Components
 	void __fastcall MiniGrubClick(TObject *Sender);
 	void __fastcall Button_SerialClick(TObject *Sender);
 	void __fastcall Button_RestartAssAdminClick(TObject *Sender);
+	void __fastcall BtnApp_UscDevUClick(TObject *Sender);
+	void __fastcall BtnApp_DeviceCleanupClick(TObject *Sender);
+	void __fastcall BtnApp_UsbTreeViewClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer(bool i = true);
