@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.986,=D:\UsersFilles\JOB-PROJECTS\cppbuilder\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.767,D:\UsersFilles\JOB-PROJECTS\cppbuilder\Unit1.cpp=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.545,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Unit1.h=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\MainForm.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.672,=D:\UsersFilles\JOB-PROJECTS\cppbuilder\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.755,D:\UsersFilles\JOB-PROJECTS\cppbuilder\Project1PCH1.h=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\ParserPCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.545,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Unit1.dfm=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\MainForm.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.545,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Unit1.cpp=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\MainForm.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.767,D:\UsersFilles\JOB-PROJECTS\cppbuilder\Unit1.dfm=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.790,D:\UsersFilles\JOB-PROJECTS\cppbuilder\Project1.cbproj=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Parser.cbproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.767,D:\UsersFilles\JOB-PROJECTS\cppbuilder\Unit1.h=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\src_parser\Unit1.h</Transaction>
+  </Transactions>
+</BorlandProject>

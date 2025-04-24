@@ -570,10 +570,19 @@ void __fastcall TForm1::CheckBox_ShowEsetUpdateClick(TObject *Sender)
 }
 void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 {
-	if (!FileExists(GetCurrentDir() + "\\update.7z")) {
+	bool oldUPDarch = 0; // 0-old 1-new
+	UnicodeString archUpd;
+	if (FileExists(GetCurrentDir() + "\\update.7z")) {
+		archUpd = GetCurrentDir() + "\\update.7z";
+	} else if (FileExists(GetCurrentDir() + "\\update_x32.upd")
+		 && FileExists(GetCurrentDir() + "\\update_x64.upd")) {
+		if (x64) archUpd = GetCurrentDir() + "\\update_x64.upd";
+		else archUpd = GetCurrentDir() + "\\update_x32.upd";
+	} else {
 		printLog("[ESET-Update][!]Немає архіву з базами!");
 		return;
-	}
+    }
+
 	printLog("[ESET-Update][>]Оновленя бази Eset...");
 	BtnEsetUpdate->Enabled = false;
 	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
@@ -584,8 +593,10 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	UnicodeString app64 = curDir.getToolFull() + "\\7zip\\64\\7za.exe";
 	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\32\\7zG.exe";
 	if (curConfig.getShowEsetUpd()) app64 = curDir.getToolFull() + "\\7zip\\64\\7zG.exe";
-	RunApp esetBaseUnpack {app32, app64,
-		"x -y -o\"" + curPC.getEsetDir() + "\" \"" + GetCurrentDir() + "\\update.7z\""};
+	RunApp esetBaseUnpack {
+		app32,
+		app64,
+		"x -y -o\"" + curPC.getEsetDir() + "\" \"" + archUpd};
 	esetBaseUnpack.run(!curConfig.getShowEsetUpd());
 	//------
 	if (esetBaseUnpack.checkErr()){

@@ -142,7 +142,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = Tool
+        ActivePage = TabGRUBer
         Constraints.MaxHeight = 1050
         MultiLine = True
         ParentShowHint = False
@@ -1662,8 +1662,6 @@
                 Value = 100.000000000000000000
               end>
             TabOrder = 0
-            ExplicitLeft = 4
-            ExplicitTop = 4
             DesignSize = (
               682
               811)
@@ -1845,7 +1843,6 @@
               Align = alClient
               Caption = #1060#1072#1081#1083#1086#1074#1072' '#1089#1080#1089#1090#1077#1084#1072
               TabOrder = 1
-              ExplicitHeight = 174
               object GridPanel10: TGridPanel
                 Left = 2
                 Top = 32
@@ -1880,7 +1877,6 @@
                     Value = 100.000000000000000000
                   end>
                 TabOrder = 0
-                ExplicitHeight = 140
                 object BtnApp_Total: TButton
                   AlignWithMargins = True
                   Left = 5
@@ -1926,7 +1922,6 @@
               Align = alClient
               Caption = 'USB '#1087#1088#1080#1089#1090#1088#1086#1111
               TabOrder = 2
-              ExplicitTop = 443
               object GridPanel14: TGridPanel
                 Left = 2
                 Top = 32
