@@ -84,10 +84,10 @@ __fastcall TFormClearTempDir::TFormClearTempDir(TComponent* Owner)
 void __fastcall TFormClearTempDir::Button_CleanClick(TObject *Sender)
 {
 	//кнопка очистки
-	Memo_LOG->Lines->Add("==========================================");
 	long long delSize = 0, unDelSize = 0;
-	int delCount = 0, unDelCount = 0;
-
+	long long delCount = 0, unDelCount = 0;
+	//очистка временых папок
+	Memo_LOG->Lines->Add("Видалення тимчасових файлів...");
 	for(auto i: patch.list) {
 		if ((FileGetAttr(i.str) & faDirectory) != 0) {
 			FileSetAttr(i.str, faDirectory);
@@ -103,10 +103,21 @@ void __fastcall TFormClearTempDir::Button_CleanClick(TObject *Sender)
 			}
         }
 	}
+	//очистка корзины
+    Memo_LOG->Lines->Add("Очищення кошика...");
+    SHQUERYRBINFO recInfo;
+	recInfo.cbSize = 64;
+	SHQueryRecycleBinW(0, &recInfo);
+	long long recSize = recInfo.i64Size;
+	SHEmptyRecycleBinW(0,0,SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
+	delCount += recInfo.i64NumItems;
+	delSize += recInfo.i64Size;
+	//вывод
 	Label5->Caption = delCount;
+	Memo_LOG->Lines->Add("==================================");
 	Memo_LOG->Lines->Add("Не вдалось видалити " + UnicodeString(unDelCount) + " (" + byteToStr(unDelSize) + ")");
 	Memo_LOG->Lines->Add("Видаленно " + UnicodeString(delCount) + " (" + byteToStr(delSize) + ")");
-
+	Memo_LOG->Lines->Add("==================================");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
@@ -116,7 +127,7 @@ void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
 	Label4->Caption = "-";
 	Label5->Caption = "-";
 	// --- готовим список пользовательских папок ---
-	Memo_LOG->Lines->Add("Пошук тек користувачів..");
+	Memo_LOG->Lines->Add("Знайденні теки користувачів:");
 	std::vector<UnicodeString> userListBad {
 		"All Users",
 		"Default",
@@ -153,20 +164,31 @@ void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
 		patch.list.insert(patch.list.end(), tmpPatch.list.begin(), tmpPatch.list.end());
 		patch.dir += tmpPatch.dir ;
 		patch.fille += tmpPatch.fille ;
+		patch.sumSize += tmpPatch.sumSize;
 	}
 	for (auto userDir: userDirList) {
 		for (auto dir: dirListUser) {
 			patchList tmpPatch = scanDirToFille(userDir + "\\" + dir);
 			patch.list.insert(patch.list.end(), tmpPatch.list.begin(), tmpPatch.list.end());
-			patch.dir += tmpPatch.dir ;
-			patch.fille += tmpPatch.fille ;
+			patch.dir += tmpPatch.dir;
+			patch.fille += tmpPatch.fille;
+            patch.sumSize += tmpPatch.sumSize;
         }
 	}
-
-//	Memo_LOG->Lines->Add("Знайденні тимчасові файли - " + UnicodeString(patch.fille));
-//	Memo_LOG->Lines->Add("Загальний обсяг файлів ---- " + UnicodeString(patch.sumSize));
-//	Memo_LOG->Lines->Add("==========================================");
+	Memo_LOG->Lines->Add("==================================");
+	Memo_LOG->Lines->Add("Знайденні тимчасові файли - " + UnicodeString(patch.fille));
+	Memo_LOG->Lines->Add("Загальний обсяг файлів ---- " + byteToStr(patch.sumSize));
+	Memo_LOG->Lines->Add("==================================");
+	// --- корзина ---
+	SHQUERYRBINFO recInfo;
+	recInfo.cbSize = 64;
+	SHQueryRecycleBinW(0, &recInfo);
+	long long recSize = recInfo.i64Size;
+	Memo_LOG->Lines->Add("Файлів в кошику ----------- " + UnicodeString(recInfo.i64NumItems));
+	Memo_LOG->Lines->Add("Загальний обсяг файлів ---- " + byteToStr(recSize));
+    Memo_LOG->Lines->Add("==================================");
 //    Memo_LOG->Lines->Add("Знайденні тимчасові файли:");
+	patch.fille = patch.fille + recInfo.i64NumItems;
 	Label4->Caption = UnicodeString(patch.fille);
 //	for(auto i: patch.list) {
 //		if (!i.dir) Memo_LOG->Lines->Add("-> [" + byteToStr(i.size) + "] - " + i.str);

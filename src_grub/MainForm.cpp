@@ -36,7 +36,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 3;
+extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 4;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -90,7 +90,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	}
 	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
 	gruberStart = 1;
-
 }
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
@@ -929,10 +928,3 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-

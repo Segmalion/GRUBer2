@@ -8,7 +8,7 @@ object FormClearTempDir: TFormClearTempDir
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'MicroClean'
-  ClientHeight = 424
+  ClientHeight = 588
   ClientWidth = 636
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object FormClearTempDir: TFormClearTempDir
   TextHeight = 30
   object Label2: TLabel
     Left = 10
-    Top = 339
+    Top = 507
     Width = 179
     Height = 30
     Margins.Left = 5
@@ -33,7 +33,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Label3: TLabel
     Left = 10
-    Top = 379
+    Top = 547
     Width = 179
     Height = 30
     Margins.Left = 5
@@ -44,7 +44,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Label4: TLabel
     Left = 221
-    Top = 339
+    Top = 507
     Width = 60
     Height = 30
     Margins.Left = 5
@@ -55,7 +55,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Label5: TLabel
     Left = 221
-    Top = 379
+    Top = 547
     Width = 60
     Height = 30
     Margins.Left = 5
@@ -66,7 +66,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Button_Clean: TButton
     Left = 322
-    Top = 339
+    Top = 507
     Width = 304
     Height = 70
     Margins.Left = 5
@@ -81,11 +81,17 @@ object FormClearTempDir: TFormClearTempDir
     Left = 10
     Top = 10
     Width = 616
-    Height = 319
+    Height = 487
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -21
+    Font.Name = 'Consolas'
+    Font.Style = []
+    ParentFont = False
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 1
