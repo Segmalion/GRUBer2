@@ -23,7 +23,9 @@ Arm::Arm()
 	UnicodeString errSer[] = {
 		"To Be Filled By O.E.M.",
 		"Not Applicable",
-		"System Serial Number"
+		"System Serial Number",
+		"Default string",
+		"serial number"
 	};
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
