@@ -7,6 +7,69 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
+
+patchList scanDirToFille(UnicodeString dir)
+{
+	patchList find;
+	std::vector<UnicodeString> list(0);
+	TSearchRec sr;
+	if (dir.Length()) {
+		// проверяем на слеш в конце, и если есть - удаляем
+		if (dir.LastDelimiter("\\") == dir.Length()) {
+			dir = dir.SubString(0, dir.Length() - 1);
+		}
+		// процедура поиска
+		if (!FindFirst(dir + "\\*.*", faAnyFile, sr))
+			do {
+				if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
+					if ((sr.Attr & faDirectory) != 0) {
+						patchList tmpFind = scanDirToFille(dir + "\\" + sr.Name); //рекурсия
+						find.list.insert(find.list.end(), tmpFind.list.begin(), tmpFind.list.end());
+						find.countDir   += tmpFind.countDir;
+						find.countFille += tmpFind.countFille;
+						find.size       += tmpFind.size;
+						find.countDir++;
+						find.list.push_back({dir + "\\" + sr.Name, sr.Size, true});
+					}
+					if (!((sr.Attr & faDirectory) != 0)) {
+						find.countFille++;
+						find.size += sr.Size;
+						find.list.push_back({dir + "\\" + sr.Name, sr.Size, false});
+					}
+				}
+			} while (!FindNext(sr)); // ищем пока не найдем все
+		FindClose(sr);
+	}
+	return find;
+}
+//---------------------------------------------------------------------------
+std::vector<UnicodeString> getLocalDrivePatch()
+{
+	std::vector<UnicodeString> strDrives;
+	const int BUFFER_SIZE = 256;
+	CHAR driveStrings[BUFFER_SIZE];
+	DWORD result = GetLogicalDriveStringsA(BUFFER_SIZE, driveStrings);
+    if (result == 0) {
+		// Произошла ошибка
+		strDrives.push_back("ERROR" + UnicodeString(result));
+		return strDrives;
+	} else if (result > BUFFER_SIZE) {
+		// Буфер слишком мал. Это маловероятно для обычных систем, но возможно.
+        strDrives.push_back("ERROR" + UnicodeString(result));
+		return strDrives;
+	} else {
+		// Перебираем строки дисков. Строки разделены нуль-терминаторами,
+        // а весь список завершается двойным нуль-терминатором.
+        CHAR* currentDrive = driveStrings;
+		while (*currentDrive != '\0') {
+			strDrives.push_back(UnicodeString(currentDrive));
+			// Переходим к следующей строке, пропуская текущую строку и ее нуль-терминатор
+            currentDrive += lstrlenA(currentDrive) + 1;
+        }
+	}
+	return strDrives;
+}
+//---------------------------------------------------------------------------
 bool deleteDir(UnicodeString dirDelName)
 {
    TSearchRec sr;

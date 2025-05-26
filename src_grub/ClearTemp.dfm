@@ -8,7 +8,7 @@ object FormClearTempDir: TFormClearTempDir
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'MicroClean'
-  ClientHeight = 588
+  ClientHeight = 647
   ClientWidth = 636
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object FormClearTempDir: TFormClearTempDir
   TextHeight = 30
   object Label2: TLabel
     Left = 10
-    Top = 507
+    Top = 563
     Width = 179
     Height = 30
     Margins.Left = 5
@@ -33,7 +33,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Label3: TLabel
     Left = 10
-    Top = 547
+    Top = 603
     Width = 179
     Height = 30
     Margins.Left = 5
@@ -44,7 +44,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Label4: TLabel
     Left = 221
-    Top = 507
+    Top = 563
     Width = 60
     Height = 30
     Margins.Left = 5
@@ -55,7 +55,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Label5: TLabel
     Left = 221
-    Top = 547
+    Top = 603
     Width = 60
     Height = 30
     Margins.Left = 5
@@ -66,7 +66,7 @@ object FormClearTempDir: TFormClearTempDir
   end
   object Button_Clean: TButton
     Left = 322
-    Top = 507
+    Top = 563
     Width = 304
     Height = 70
     Margins.Left = 5
@@ -96,5 +96,18 @@ object FormClearTempDir: TFormClearTempDir
     ScrollBars = ssVertical
     TabOrder = 1
     WordWrap = False
+  end
+  object ProgressBar_Clean: TProgressBar
+    Left = 10
+    Top = 507
+    Width = 616
+    Height = 46
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
+    Smooth = True
+    MarqueeInterval = 1
+    TabOrder = 2
   end
 end

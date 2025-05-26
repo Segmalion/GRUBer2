@@ -36,7 +36,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 4;
+extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 6;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."

@@ -10,6 +10,9 @@
 #include <Vcl.FileCtrl.hpp>
 #include <Vcl.CheckLst.hpp>
 #include <Vcl.Menus.hpp>
+#include <Vcl.ComCtrls.hpp>
+
+#include <vector>
 //---------------------------------------------------------------------------
 class TFormClearTempDir : public TForm
 {
@@ -20,6 +23,7 @@ __published:	// IDE-managed Components
 	TLabel *Label4;
 	TLabel *Label5;
 	TMemo *Memo_LOG;
+	TProgressBar *ProgressBar_Clean;
 	void __fastcall Button_CleanClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
 private:	// User declarations

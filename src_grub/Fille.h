@@ -4,7 +4,22 @@
 
 #include <vector>
 //---------------------------------------------------------------------------
-std::vector<UnicodeString> scanDirToFille(UnicodeString dir);
+
+struct fille {
+	UnicodeString str;
+	long long size;
+	bool dir;
+};
+struct patchList {
+	std::vector<fille> list;
+	int countDir = 0;
+	int countFille = 0;
+	long long size = 0;
+};
+
+//std::vector<UnicodeString> scanDirToFille(UnicodeString dir);
+patchList scanDirToFille(UnicodeString dir);
+std::vector<UnicodeString> getLocalDrivePatch();
 
 bool deleteDir(UnicodeString dirDelName);
 bool fileOpen(UnicodeString str);
