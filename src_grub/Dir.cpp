@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-// обявление
+// РѕР±СЏРІР»РµРЅРёРµ
 Dir::Dir() {
 	progFull = GetCurrentDir();
 	baseName = "base";
@@ -16,18 +16,18 @@ Dir::Dir() {
 	dateFull = baseFull + "\\" + dateName;
 }
 //---------------------------------------------------------------------------
-// проверка директорий
+// РїСЂРѕРІРµСЂРєР° РґРёСЂРµРєС‚РѕСЂРёР№
 void Dir::check() {
 	if (!DirectoryExists(baseFull)) CreateDir(baseFull);
 	if (!DirectoryExists(dateFull)) CreateDir(dateFull);
 	if (!DirectoryExists(grubFull)) CreateDir(grubFull);
 }
 //---------------------------------------------------------------------------
-// геттеры
+// РіРµС‚С‚РµСЂС‹
 UnicodeString Dir::getGrubFull() { return grubFull; }
 UnicodeString Dir::getToolFull() { return (progFull + "\\tool"); }
 //---------------------------------------------------------------------------
-// сеттеры
+// СЃРµС‚С‚РµСЂС‹
 void Dir::setGrubFull (UnicodeString str) {
 	grubName = str;
 	grubFull = dateFull + "\\" + grubName;

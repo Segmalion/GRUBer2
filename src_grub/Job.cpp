@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -21,11 +21,11 @@ extern double pos, step;
 bool job_infoFille() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\gruber_info.ini";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування gruber_info.ini...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ gruber_info.ini...");
 	TStringList *infoFille = new TStringList;
 	for(auto str : fileInfoGrub()) infoFille->Add (str);
-	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
-	printLog("Файл СТВОРЕННО!");
+	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // Р·Р°РїРёСЃСЊ РІ С„Р°Р№Р»
+	printLog("Р¤Р°Р№Р» РЎРўР’РћР Р•РќРќРћ!");
 	progressBarGo(pos += step);
 	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	return true;
@@ -33,14 +33,14 @@ bool job_infoFille() {
 bool job_comTxt() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\coment.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування coment.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ coment.txt...");
 	TStringList *comTxt = new TStringList;
 	comTxt->Add(curPC.getComentStr());
 	comTxt->Add(curPC.getRespon());
 	comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 	comTxt->Add("");
 	comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
-	printLog("Файл СТВОРЕННО!");
+	printLog("Р¤Р°Р№Р» РЎРўР’РћР Р•РќРќРћ!");
 	progressBarGo(pos += step);
 	printLogDebug(curConfig.getDebug(), "{pos}=" + UnicodeString(pos));
 	return true;
@@ -48,7 +48,7 @@ bool job_comTxt() {
 bool job_info() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\info_ps1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування info_ps1.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ info_ps1.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\info_ps1\\Run_toFile.bat";
 	UnicodeString arg = "\""+ outFilePath + "\"";
 	RunApp info {app32, NULL, arg};
@@ -62,7 +62,7 @@ bool job_info() {
 bool job_usb() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\usb.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування usb.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ usb.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
 	UnicodeString app64 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -80,7 +80,7 @@ bool job_usb() {
 bool job_net1() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\net1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування net1.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ net1.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x32.exe";
 	UnicodeString app64 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -95,7 +95,7 @@ bool job_net1() {
 bool job_net2() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\net2.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування net2.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ net2.txt...");
 	UnicodeString app32 = curDir.getToolFull() + "\\Network\\WifiHistoryView.exe";
 	UnicodeString app64 = NULL;
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -110,7 +110,7 @@ bool job_net2() {
 bool job_license() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\license.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування license.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ license.txt...");
 	if (FileExists("C:\\Windows\\System32\\wbem\\wmic.exe")) {
 		UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info-License-to-File.bat";
 		UnicodeString app64 = NULL;
@@ -134,12 +134,12 @@ bool job_audit() {
 	if(curConfig.getAudit() == 1) {
 		outFilePath = curDir.getGrubFull() + "\\auditMax.html";
 		arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
-		printLog("Генерування auditMax.html...");
+		printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ auditMax.html...");
 	}
 	if(curConfig.getAudit() == 2) {
 		outFilePath = curDir.getGrubFull() + "\\auditMin.html";
 		arg = "/r=go /f=" + outFilePath + " /L=en\"";
-		printLog("Генерування auditMin.html...");
+		printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ auditMin.html...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	UnicodeString app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
@@ -155,7 +155,7 @@ bool job_audit() {
 bool job_diskInfo() {
 	UnicodeString outFilePath = curDir.getGrubFull() + "\\diskInfo.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування diskInfo.txt...");
+	printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ diskInfo.txt...");
 	UnicodeString app32 = NULL;
 	UnicodeString app64 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo64.exe";
 	UnicodeString arg = "/CopyExit :";
@@ -174,12 +174,12 @@ bool job_esetLog() {
 	if(curConfig.getEsetLog() == 1) {
 		outFilePath = curDir.getGrubFull() + "\\eset-log-full.zip";
 		arg = "/accepteula /Lang:UKR /Age:0 \"" + outFilePath + "\"";
-		printLog("Генерування eset-log-full.zip...");
+		printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ eset-log-full.zip...");
 	}
 	if(curConfig.getEsetLog() == 2) {
 		outFilePath = curDir.getGrubFull() + "\\eset-log-mini.zip";
 		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev \"" + outFilePath + "\"";
-		printLog("Генерування eset-log-mini.zip...");
+		printLog("Р“РµРЅРµСЂСѓРІР°РЅРЅСЏ eset-log-mini.zip...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	UnicodeString app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
