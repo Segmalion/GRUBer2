@@ -234,12 +234,22 @@
             <DependentOn>ComentForm.h</DependentOn>
             <BuildOrder>4</BuildOrder>
         </CppCompile>
+        <CppCompile Include="Config.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>Config.h</DependentOn>
+            <BuildOrder>17</BuildOrder>
+        </CppCompile>
         <CppCompile Include="DialogDirExist.cpp">
             <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
             <Form>FormDirExist</Form>
             <FormType>dfm</FormType>
             <DependentOn>DialogDirExist.h</DependentOn>
             <BuildOrder>8</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Dir.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>Dir.h</DependentOn>
+            <BuildOrder>18</BuildOrder>
         </CppCompile>
         <CppCompile Include="Fille.cpp">
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
@@ -269,6 +279,11 @@
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
             <DependentOn>Help.h</DependentOn>
             <BuildOrder>3</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Job.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>Job.h</DependentOn>
+            <BuildOrder>16</BuildOrder>
         </CppCompile>
         <CppCompile Include="MainForm.cpp">
             <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
@@ -338,7 +353,7 @@
                 <VFOLDERS>
                     <VFOLDER ID="{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}" name="Form"/>
                     <VFOLDER ID="{8701FF02-8B08-42DE-A343-88ECA155892A}" name="Model"/>
-                    <VFOLDER ID="{9A310DFE-C063-4294-88FF-C6C1FB9225A6}" name="tool"/>
+                    <VFOLDER ID="{9A310DFE-C063-4294-88FF-C6C1FB9225A6}" name="Unit"/>
                 </VFOLDERS>
                 <Folders/>
                 <Excluded_Packages>

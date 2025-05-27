@@ -5,13 +5,13 @@
 #include <tchar.h>
 //---------------------------------------------------------------------------
 USEFORM("MainForm.cpp", Form1);
-USEFORM("PartitionForm.cpp", FormPartition);
 USEFORM("Serial.cpp", Form2);
+USEFORM("PartitionForm.cpp", FormPartition);
+USEFORM("ComentForm.cpp", FormComent);
 USEFORM("ClearTemp.cpp", FormClearTempDir);
 USEFORM("About.cpp", FormAbout);
-USEFORM("ComentForm.cpp", FormComent);
-USEFORM("DialogDirExist.cpp", FormDirExist);
 USEFORM("FormSerial.cpp", Form_Serial);
+USEFORM("DialogDirExist.cpp", FormDirExist);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
