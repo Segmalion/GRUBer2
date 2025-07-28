@@ -49,12 +49,12 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
 	// ---
-	Form1->Height = 621*Form1->ScaleFactor;
-	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
-	else Form1->Width = 420*Form1->ScaleFactor;
-
-	Form1->Constraints->MinHeight = 621*Form1->ScaleFactor;
-	Form1->Constraints->MinWidth  = 420*Form1->ScaleFactor;
+//	Form1->Height = 621*Form1->ScaleFactor;
+//	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
+//	else Form1->Width = 420*Form1->ScaleFactor;
+//
+//	Form1->Constraints->MinHeight = 621*Form1->ScaleFactor;
+//	Form1->Constraints->MinWidth  = 420*Form1->ScaleFactor;
 	//
 	Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
@@ -74,7 +74,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
 	}
 	// ---
-	PageControl1->TabIndex = 0;
+	PageControl_SetInfo->TabIndex = 0;
 	printLog("[>]Запушенно GRUBer v." + versionApp);
 	printLog("[>]Останій граб: " + curPC.lastGrub());
 	if(IsAdminMode()) {
@@ -129,11 +129,11 @@ double progressBarStep() {
 }
 void progressBarGo(int i , bool err) {
     if(stopBool == false) {
-		Form1->ProgressBar1->Position = i;
+		Form1->ProgressBar_Grub->Position = i;
 		Form1->Taskbar1->ProgressValue = i;
 	}
 	if(stopBool == true || err == true) {
-		Form1->ProgressBar1->State = (TProgressBarState) pbsError;
+		Form1->ProgressBar_Grub->State = (TProgressBarState) pbsError;
 		Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 4;
 	}
 }
@@ -179,7 +179,7 @@ void TForm1::mainGRUBer(bool i) {
 	// -> настройка прогресбара
 	pos = 0;
 	step = progressBarStep();
-	ProgressBar1->State = (TProgressBarState) pbsNormal;
+	ProgressBar_Grub->State = (TProgressBarState) pbsNormal;
 	Taskbar1->ProgressState = (TTaskBarProgressState) 2;
 	progressBarGo(pos);
 	// -> вывод дебаг инфы

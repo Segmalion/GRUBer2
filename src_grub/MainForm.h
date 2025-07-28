@@ -22,33 +22,29 @@
 class TForm1 : public TForm
 {
 __published:	// IDE-managed Components
-	TGridPanel *GridPanel1;
-	TProgressBar *ProgressBar1;
+	TGridPanel *GridPanel_forPage;
+	TProgressBar *ProgressBar_Grub;
 	TStatusBar *StatusBar1;
-	TPageControl *PageControl1;
+	TPageControl *PageControl_SetInfo;
 	TTabSheet *TabGRUBer;
-	TTabSheet *TabSettings;
 	TMemo *MemoLOG;
-	TGridPanel *GridPanel2;
 	TGridPanel *GridPanelMain;
-	TGroupBox *GroupBox1;
 	TButton *BtnGruberDirOpen;
 	TButton *BtnParserOpen;
-	TGridPanel *GridPanel3;
 	TEdit *EditDirGrubName;
 	TButton *BtnGruberRun;
 	TButton *BtnGruberStop;
 	TButton *BtnEsetUpdate;
 	TGridPanel *GridPanel5;
-	TLabel *Label1;
+	TLabel *Label_Number;
 	TLabel *Label2;
 	TLabel *Label3;
-	TLabel *Label4;
+	TLabel *Label_ResponNow;
 	TEdit *EditRespon;
 	TNumberBox *EditNumber;
 	TComboBox *EditPartition;
 	TComboBox *EditCategory;
-	TGroupBox *GroupBox2;
+	TGroupBox *GroupBox_Info;
 	TLabel *Label7;
 	TComboBox *EditArmClass;
 	TButton *BtnKiberConsolOpen;
@@ -63,7 +59,7 @@ __published:	// IDE-managed Components
 	TCheckBox *CheckBoxShowLog;
 	TMemo *EditComent;
 	TLabeledEdit *EditGrubUser;
-	TGridPanel *GridPanel8;
+	TGridPanel *GridPanel_Settings;
 	TGroupBox *GroupBox3;
 	TCheckBox *CheckBoxAudit;
 	TCheckBox *CheckBoxEsetLog;
@@ -77,8 +73,7 @@ __published:	// IDE-managed Components
 	TButton *BtnEditEsetMirrorDir;
 	TCheckBox *CheckBoxEsetAutoUpdate;
 	TFileOpenDialog *DirOpenEsetMirror;
-	TTabSheet *Tool;
-	TGridPanel *GridPanel7;
+	TGridPanel *GridPanel_Soft;
 	TGroupBox *GroupBox_AppInfo;
 	TGridPanel *GridPanel9;
 	TButton *BtnApp_HWiNFO;
@@ -111,12 +106,9 @@ __published:	// IDE-managed Components
 	TButton *BtnAboutGruber;
 	TButton *BtnClearPC;
 	TTabSheet *TabGRUBerP;
-	TGridPanel *GridPanel4;
-	TGroupBox *GroupBox5;
 	TGridPanel *GridPanel11;
 	TLabel *Label11;
 	TEdit *Edit_InNumberARM;
-	TLabel *Label12;
 	TLabel *Label13;
 	TEdit *Edit_InNumberHDD;
 	TLabel *Label14;
@@ -139,7 +131,7 @@ __published:	// IDE-managed Components
 	TEdit *Edit_ComMultiUSERS;
 	TLabel *Label10;
 	TComboBox *EditLicOffice;
-	TLabel *Label18;
+	TLabel *Label_Purpose;
 	TEdit *EditPurpose;
 	TGridPanel *GridPanel14;
 	TButton *BtnApp_UscDevU;
@@ -152,6 +144,14 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel15;
 	TButton *Button_RestartAssAdmin;
 	TButton *Button_ChangeNamePC;
+	TPageControl *PageControl2;
+	TTabSheet *TabSheet_Info;
+	TTabSheet *TabSheet_Log;
+	TTabSheet *TabSheet_Settings;
+	TTabSheet *TabSheet_Soft;
+	TGridPanel *GridPanel_forButGrub;
+	TTabSheet *TabSheet1;
+	TGridPanel *GridPanel1;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditNumberChange(TObject *Sender);
