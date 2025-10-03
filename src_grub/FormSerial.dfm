@@ -113,7 +113,6 @@ object Form_Serial: TForm_Serial
         SizeStyle = ssAuto
       end>
     TabOrder = 0
-    ExplicitWidth = 612
     object Edit1: TEdit
       AlignWithMargins = True
       Left = 204
@@ -125,7 +124,6 @@ object Form_Serial: TForm_Serial
       Margins.Right = 5
       Margins.Bottom = 5
       Align = alClient
-      CharCase = ecUpperCase
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -23
@@ -136,8 +134,6 @@ object Form_Serial: TForm_Serial
       TabOrder = 0
       Text = 'EDIT1'
       StyleName = 'Windows'
-      ExplicitLeft = 201
-      ExplicitWidth = 448
       ExplicitHeight = 35
     end
     object Edit2: TEdit
@@ -151,7 +147,6 @@ object Form_Serial: TForm_Serial
       Margins.Right = 5
       Margins.Bottom = 5
       Align = alClient
-      CharCase = ecUpperCase
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -23
@@ -162,8 +157,6 @@ object Form_Serial: TForm_Serial
       TabOrder = 1
       Text = 'EDIT2'
       StyleName = 'Windows'
-      ExplicitLeft = 201
-      ExplicitWidth = 448
       ExplicitHeight = 35
     end
     object Edit3: TEdit
@@ -177,7 +170,6 @@ object Form_Serial: TForm_Serial
       Margins.Right = 5
       Margins.Bottom = 5
       Align = alClient
-      CharCase = ecUpperCase
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -23
@@ -188,8 +180,6 @@ object Form_Serial: TForm_Serial
       TabOrder = 2
       Text = 'EDIT3'
       StyleName = 'Windows'
-      ExplicitLeft = 201
-      ExplicitWidth = 448
       ExplicitHeight = 35
     end
     object Edit4: TEdit
@@ -203,7 +193,6 @@ object Form_Serial: TForm_Serial
       Margins.Right = 5
       Margins.Bottom = 5
       Align = alClient
-      CharCase = ecUpperCase
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -23
@@ -214,8 +203,6 @@ object Form_Serial: TForm_Serial
       TabOrder = 3
       Text = 'EDIT4'
       StyleName = 'Windows'
-      ExplicitLeft = 201
-      ExplicitWidth = 448
       ExplicitHeight = 35
     end
     object Edit5: TEdit
@@ -230,7 +217,6 @@ object Form_Serial: TForm_Serial
       Margins.Bottom = 5
       Align = alClient
       Alignment = taCenter
-      CharCase = ecUpperCase
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -23
@@ -240,8 +226,7 @@ object Form_Serial: TForm_Serial
       ReadOnly = True
       TabOrder = 4
       Text = 'EDIT5'
-      ExplicitWidth = 644
-      ExplicitHeight = 32
+      ExplicitTop = 244
     end
     object Label1: TLabel
       AlignWithMargins = True
@@ -332,8 +317,8 @@ object Form_Serial: TForm_Serial
     object Label5: TLabel
       Left = 0
       Top = 188
-      Width = 302
-      Height = 30
+      Width = 664
+      Height = 46
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -342,6 +327,8 @@ object Form_Serial: TForm_Serial
       Alignment = taCenter
       Caption = #1057#1075#1077#1085#1077#1088#1086#1074#1072#1085#1080#1081' '#1089#1077#1088#1110#1081#1085#1080#1081' '#1085#1086#1084#1077#1088':'
       Layout = tlBottom
+      ExplicitWidth = 302
+      ExplicitHeight = 30
     end
   end
 end

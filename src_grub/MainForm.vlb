@@ -25,9 +25,6 @@ Coordinates=313,212,116,58
 [Label9]
 Coordinates=10,280,53,58
 
-[sysdmCpl]
-Coordinates=1074,518,71,36
-
 [CheckBoxNewGrub]
 Coordinates=73,280,127,58
 
@@ -52,9 +49,6 @@ Coordinates=363,144,132,58
 [BtnEsetUpdate]
 Coordinates=346,280,101,58
 
-[PopupMenu_SysTool]
-Coordinates=1269,56,137,36
-
 [CheckBoxLicense]
 Coordinates=188,484,117,58
 
@@ -66,9 +60,6 @@ Coordinates=1074,683,52,36
 
 [BtnLicense]
 Coordinates=368,416,78,58
-
-[Perfmon]
-Coordinates=1074,738,63,36
 
 [Label2]
 Coordinates=952,280,53,58
@@ -82,14 +73,8 @@ Coordinates=896,212,86,58
 [BtnApp_CPUZ]
 Coordinates=725,348,98,58
 
-[MemoLOG]
-Coordinates=133,552,77,58
-
 [GroupBox3]
 Coordinates=735,416,79,58
-
-[EditNumber]
-Coordinates=607,144,82,58
 
 [UsbTxt]
 Coordinates=1074,793,55,36
@@ -130,9 +115,6 @@ Coordinates=1002,416,115,58
 [StatusBar1]
 Coordinates=699,144,78,58
 
-[GridPanel5]
-Coordinates=833,348,79,58
-
 [Рass]
 Coordinates=818,798,43,36
 
@@ -147,9 +129,6 @@ Coordinates=10,416,92,58
 
 [BtnKiberConsolOpen]
 Coordinates=99,144,135,58
-
-[CheckBoxShowLog]
-Coordinates=315,484,126,58
 
 [EditComent]
 Coordinates=568,484,82,58
@@ -196,9 +175,6 @@ Coordinates=680,798,77,36
 [BtnApp_Total]
 Coordinates=505,144,92,58
 
-[MsConfig]
-Coordinates=601,798,69,36
-
 [EditArmClass]
 Coordinates=10,10,101,124
 
@@ -212,7 +188,7 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=10,144,79,58
+Coordinates=1269,56,137,36
 Visible=True
 
 [GroupBox_Info]
@@ -230,12 +206,18 @@ Coordinates=628,10,93,58
 [GridPanel_forPage]
 Coordinates=913,416,79,58
 
-[Label_Number]
-Coordinates=10,212,53,58
-
 [Label_ResponNow]
 Coordinates=367,348,53,58
 
 [PageControl_SetInfo]
 Coordinates=472,552,93,36
+
+[GridPanel_EditInfo]
+Coordinates=833,348,79,58
+
+[Label_Number_UVs]
+Coordinates=10,212,53,58
+
+[EditNumber_UVs]
+Coordinates=607,144,82,58
 

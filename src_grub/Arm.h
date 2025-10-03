@@ -14,7 +14,8 @@ private:
 	** 4 - добавить установку прочитаных значений в форму
 	*/
 	// инфо об ПК (ручная)
-	int number = 0;
+	int number_UVs = 0;
+    int number_OK = 0;
 	UnicodeString partition  = "Без відділу";
 	UnicodeString className   = "Без класу";
 	UnicodeString categoryName   = "Без категорії";
@@ -26,18 +27,21 @@ private:
 	int licOfficeID  = 0;
 	UnicodeString respon = "";
 	UnicodeString purpose = "";
+	UnicodeString place = ""; // <===
+	UnicodeString phone = ""; // <===
 	std::vector<UnicodeString> coment;
 	// инфо об ПК (ручная) - по документам
 	UnicodeString inNumberARM, inNumberHDD, inNumberDeclr;
 	UnicodeString inNumberFormulyar, inNumberWork, inNumberPerson;
+	UnicodeString inRespon, inAdminBP; // <===
 	// инфо об ПК (ручная) - по настройкам
 	UnicodeString comPoliticInstall, comContrUSB, comMultiUSERS;
 	bool politicInstall=0, contrUSB=0, multiUSERS=0;
 	// инфо из ПК
 	UnicodeString desktopName = "";
-	UnicodeString serial, serialMain, UUID, serial_mrb, CPUID;
+	UnicodeString serial, serialMain, UUID, serial_mrb, CPUID, unSerial;
 
-	// структуры
+	// === структуры
    struct infoEset {
 		bool autoUpdate = true;
 		UnicodeString dirMirror = "C:\\ESET\\mirror";
@@ -46,28 +50,31 @@ private:
    struct histGrub {
 		UnicodeString date, user;
 	} histGr;
-   // функции
+   // === функции
 	bool readFromFile();
 public:
-   // конструктор
+	// === конструктор
 	Arm();
-	// функции
+	// === функции
 	UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
+	std::vector<UnicodeString> mStrIniVersionNumber();
 	std::vector<UnicodeString> mStrInfoArm();
-	std::vector<UnicodeString> mStrInfoArmGrubMini();
-	std::vector<UnicodeString> mStrInfoArmGrubFull();
+	std::vector<UnicodeString> mStrInfoArmGrub();
 	std::vector<UnicodeString> mStrInfoArmEset();
 	std::vector<UnicodeString> mStrLastGrub();
 	UnicodeString lastGrub();
-	// сеттери
-	void setNumber(int i);
+	// === сеттери
+	void setNumber_UVs(int i);
+	void setNumber_OK(int i);
 	void setPartition(UnicodeString str);
 	void setClass(UnicodeString str, int i);
 	void setCategory(UnicodeString str, int i);
 	void setLicWindows(UnicodeString str, int i);
 	void setLicOffice(UnicodeString str, int i);
 	void setRespon(UnicodeString str);
-	void setPurpose(UnicodeString str); // ***
+	void setPurpose(UnicodeString str);
+	void setPlace(UnicodeString str); // <===
+	void setPhone(UnicodeString str); // <===
 	void setComent(std::vector<UnicodeString> vStr);
 	void setEsetDir(UnicodeString str);
 	void setEsetAutoUpdate(bool i);
@@ -78,14 +85,17 @@ public:
 	void setInNumberFormulyar (UnicodeString str);
 	void setInNumberWork (UnicodeString str);
 	void setInNumberPerson (UnicodeString str);
+	void setInRespon (UnicodeString str); // <===
+	void setInAdminBP (UnicodeString str); // <===
 	void setComPoliticInstall (UnicodeString str);
 	void setComContrUSB (UnicodeString str);
 	void setComMultiUSERS (UnicodeString str);
 	void setPoliticInstall (bool i);
 	void setContrUSB (bool i);
 	void setMultiUSERS (bool i);
-	// геттери
-	int getNumber();
+	// === геттери
+	int getNumber_UVs();
+	int getNumber_OK();
 	UnicodeString getPartition();
 	UnicodeString getClassName();
 	UnicodeString getCategoryName();
@@ -96,15 +106,13 @@ public:
 	int getLicWindowsID();
 	int getLicOfficeID();
 	UnicodeString getRespon();
-	UnicodeString getPurpose(); // ***
+	UnicodeString getPurpose();
+	UnicodeString getPlace(); // <===
+	UnicodeString getPhone(); // <===
 	std::vector<UnicodeString> getComent();
 	UnicodeString getComentStr();
 	UnicodeString getDesktopName();
-	UnicodeString getSerial();
-	UnicodeString getSerialMain();
-	UnicodeString getUUID();
-	UnicodeString getSerial_mrb();
-	UnicodeString getCPUID();
+
 	UnicodeString getEsetDir();
 	bool getEsetAutoUpdate();
 
@@ -114,9 +122,20 @@ public:
 	UnicodeString getInNumberFormulyar();
 	UnicodeString getInNumberWork();
 	UnicodeString getInNumberPerson();
+	UnicodeString getInRespon(); // <===
+	UnicodeString getInAdminBP(); // <===
+
 	UnicodeString getComPoliticInstall();
 	UnicodeString getComContrUSB();
 	UnicodeString getComMultiUSERS();
+	// серийники
+    UnicodeString getSerial();
+	UnicodeString getSerialMain();
+	UnicodeString getUUID();
+	UnicodeString getSerial_mrb();
+	UnicodeString getCPUID();
+	UnicodeString getUnSerial();
+
 	bool getPoliticInstall();
 	bool getContrUSB();
 	bool getMultiUSERS();

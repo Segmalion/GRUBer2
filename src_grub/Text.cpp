@@ -2,11 +2,28 @@
 #pragma hdrstop
 
 #include "Text.h"
+#include "HashCRC32.h"
 #include <math.h>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 /* Работа со строками */
+//---------------------------------------------------------------------------
+/* Расчет hashCRC32 */
+UnicodeString GetHashCRC32(UnicodeString str) {
+	UnicodeString hashCRC32;
+	Crc32Builder crc_builder;
+	std::string temp_data = unToStr(str);
+//	std::string temp_data = "12345678";
+	uint32_t crc_value = crc_builder.calculate_crc(
+		reinterpret_cast<const uint8_t*>(temp_data.data()), temp_data.length());
+	//crc_value = 0x1234ABCD;
+	//std::string tempStr = crc_value.ToString("X4");
+    char outputString[9];
+	itoa(crc_value, outputString, 16);
+	hashCRC32 = UnicodeString(outputString).Insert("-",5);
+	return hashCRC32.UpperCase();
+}
 //---------------------------------------------------------------------------
 /* UnicodeString в std::string */
 std::string unToStr(UnicodeString str)
@@ -135,5 +152,11 @@ UnicodeString byteToStr(long long i) {
 	}
 	str = FloatToStrF((double)i/(pow(1024,4)), ffFixed, 4, 1) + "Тb";
 	return str;
+}
+//---------------------------------------------------------------------------
+/* Проверка строки на ERROR */
+UnicodeString errCheck(const UnicodeString &str) {
+	if (str == "ERROR") return "";
+	else return str;
 }
 //---------------------------------------------------------------------------

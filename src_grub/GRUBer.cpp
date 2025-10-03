@@ -5,7 +5,6 @@
 #include <tchar.h>
 //---------------------------------------------------------------------------
 USEFORM("MainForm.cpp", Form1);
-USEFORM("Serial.cpp", Form2);
 USEFORM("PartitionForm.cpp", FormPartition);
 USEFORM("ComentForm.cpp", FormComent);
 USEFORM("ClearTemp.cpp", FormClearTempDir);
@@ -24,7 +23,6 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->CreateForm(__classid(TFormDirExist), &FormDirExist);
 		Application->CreateForm(__classid(TFormPartition), &FormPartition);
 		Application->CreateForm(__classid(TFormClearTempDir), &FormClearTempDir);
-		Application->CreateForm(__classid(TForm2), &Form2);
 		Application->CreateForm(__classid(TFormAbout), &FormAbout);
 		Application->CreateForm(__classid(TForm_Serial), &Form_Serial);
 		Application->Run();

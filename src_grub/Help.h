@@ -23,6 +23,7 @@ UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
 //---------------------------------------------------------------------------
 void printLog(UnicodeString str);
 void printLogDebug(bool debug, UnicodeString str);
+void printLog(UnicodeString info, UnicodeString str);
 //---------------------------------------------------------------------------
 bool IsAdminMode();
 //---------------------------------------------------------------------------

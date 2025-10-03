@@ -39,7 +39,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 2, vers3 = 2, vers4 = 6;
+extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 1;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -56,6 +56,11 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 //	Form1->Constraints->MinHeight = 621*Form1->ScaleFactor;
 //	Form1->Constraints->MinWidth  = 420*Form1->ScaleFactor;
 	//
+	if (!x64) {
+		UnicodeString setApp = GetCurrentDir() + "\\GRUBer32.exe";
+		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+		exit(1);
+	}
 	Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
 	// Проверка наличия CMD и прав на выполнение
@@ -75,34 +80,42 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	}
 	// ---
 	PageControl_SetInfo->TabIndex = 0;
-	printLog("[>]Запушенно GRUBer v." + versionApp);
-	printLog("[>]Останій граб: " + curPC.lastGrub());
+	printLog(">>", "Запушенно GRUBer v." + versionApp);
+	printLog(">>", "Останій граб: " + curPC.lastGrub());
+	// проверка прав админа
+	UnicodeString admMode;
 	if(IsAdminMode()) {
 		printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
 		Button_RestartAssAdmin->Enabled = false;
 		BtnClearPC->Enabled = true;
+		admMode = "AdminMode";
 	} else {
 		printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
 		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
-			+ UnicodeString(curPC.getNumber())
+			+ UnicodeString(curPC.getNumber_UVs())
 			+ ", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
 		UnicodeString formCaption = "Нема прав Адміна.. :'(";
 		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
 				RestartApplicationRunas();
 		}
+		admMode = "UserMode";
 	}
-	StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " ";
+	// статус бар
+	if (x64) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
+	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
 	gruberStart = 1;
 }
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
 	std::vector<UnicodeString> vStr;
+    // раздел версии файла
+	for(auto str : curPC.mStrIniVersionNumber()) vStr.push_back(str);
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
 	// раздел об АРМ-1
-	for(auto str : curPC.mStrInfoArmGrubMini()) vStr.push_back(str);
-	// раздел об АРМ-2
 	for(auto str : curPC.mStrInfoArm()) vStr.push_back(str);
+	// раздел об АРМ-2
+	for(auto str : curPC.mStrInfoArmGrub()) vStr.push_back(str);
 	// раздел об ESET
 	for(auto str : curPC.mStrInfoArmEset()) vStr.push_back(str);
 	// раздел коментария
@@ -159,6 +172,7 @@ void RestartApplicationRunas()
 	exit(1);
 }
 //---------------------------------------------------------------------------
+/* ОСНОВНОЙ КОД ГРАБА */
 void TForm1::mainGRUBer(bool i) {
 	// -> переменные
 	grubActive = true;
@@ -173,7 +187,7 @@ void TForm1::mainGRUBer(bool i) {
 	Form1->BtnGruberRun->Enabled = false;
 	Form1->BtnGruberStop->Enabled = true;
 	Form1->BtnGruberRun->Caption = "Зачекай...";
-	printLog("[>]GRUBer запущено...");
+	printLog(">>", "GRUBer запущено...");
 	printLog("Поточна тека: " + dirGrubStr);
 	StatusBar1->Panels->Items[0]->Text = " GRUBer запущено...";
 	// -> настройка прогресбара
@@ -200,7 +214,7 @@ void TForm1::mainGRUBer(bool i) {
             Form1->BtnGruberRun->Enabled = true;
 			Form1->BtnGruberStop->Enabled = false;
 			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("[!]Назва папки містить недопустимі символи!!! :'(");
+			printLog("ER", "Назва папки містить недопустимі символи!!! :'(");
             progressBarGo(100, true);
 			return;
 		}
@@ -209,15 +223,15 @@ void TForm1::mainGRUBer(bool i) {
 	if (DirectoryExists(curDir.getGrubFull()) && i) {
 		FormDirExist->ShowDir->Text=(dirGrubStr);
 		FormDirExist->ShowModal();
-		printLog("Знайденно попередню теку!");
+		printLog("!!","Знайденно попередню теку!");
 		if (!dirGrubRewrite) { //отказ от перезаписи
 			Form1->BtnGruberRun->Enabled = true;
 			Form1->BtnGruberStop->Enabled = false;
 			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("[!]GRUBer зупинено :'(");
+			printLog("ER", "GRUBer зупинено :'(");
 			return;
 		}
-		printLog("Наявні файли буде перезаписанно!");
+		printLog("!!","Наявні файли буде перезаписанно!");
 	}
 	// -> создание папок
     curDir.check();
@@ -235,10 +249,10 @@ void TForm1::mainGRUBer(bool i) {
 	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog();   //eset-log.zip
 	// -> обработка ошибок
 	if (!bigErr) {
-		printLog("[ERR]GRUBer виконано з помилками!");
+		printLog("ER", "GRUBer виконано з помилками!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
 	} else {
-		printLog("[OK]GRUBer виконано успішно!");
+		printLog("OK", "GRUBer виконано успішно!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 	}
 	// -> конец граба
@@ -248,14 +262,15 @@ void TForm1::mainGRUBer(bool i) {
 	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
 }
 //---------------------------------------------------------------------------
-/* Кнопки */
-// запуск Граба
+/* КНОПКИ */
+// === запуск Граба
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 {
 	mainGRUBer(true);
 }
 void __fastcall TForm1::MiniGrubClick(TObject *Sender)
 {
+	//запоминаем текущие настройки граба
 	bool tm1, tm2, tm3, tm4, tm5, tm6, tm7, tm8;
 	tm1 = curConfig.getNewGrub();
 	tm2 = curConfig.getOldGrubComent();
@@ -265,6 +280,7 @@ void __fastcall TForm1::MiniGrubClick(TObject *Sender)
 	tm6 = curConfig.getLicense();
 	tm7 = curConfig.getAudit();
 	tm8 = curConfig.getEsetLog();
+	//устанавливаем временые настройки
 	curConfig.setNewGrub(1);
 	curConfig.setOldGrubComent(0);
 	curConfig.setOldGrubInfo(0);
@@ -273,7 +289,9 @@ void __fastcall TForm1::MiniGrubClick(TObject *Sender)
 	curConfig.setLicense(0);
 	curConfig.setAudit(0);
 	curConfig.setEsetLog(0);
+	//запускаем граб
 	mainGRUBer(false);
+	//возвращаем старые настройки граба
 	curConfig.setNewGrub(tm1);
 	curConfig.setOldGrubComent(tm2);
 	curConfig.setOldGrubInfo(tm3);
@@ -283,97 +301,80 @@ void __fastcall TForm1::MiniGrubClick(TObject *Sender)
 	curConfig.setAudit(tm7);
 	curConfig.setEsetLog(tm8);
 }
-// открыть редактор подразделений
+// === открыть редактор подразделений
 void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
 {
 	FormPartition->EditPartition->Lines = Form1->EditPartition->Items;
 	FormPartition->ShowModal();
 }
-// открыть папку Граба
+// === открыть папку Граба
 void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
 {
 	ShellExecuteW(NULL, L"open", curDir.getGrubFull().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// остановка Граба
+// === остановка Граба
+// --- полная
 void __fastcall TForm1::BtnGruberStopClick(TObject *Sender)
 {
 	stopBool = true;
 }
+// --- частичная
 void __fastcall TForm1::РassClick(TObject *Sender)
 {
 	passBool = true;
 }
-// сохранение настроек
+// === сохранение настроек
 void __fastcall TForm1::BtnSaveSetteingsClick(TObject *Sender)
 {
 	curConfig.saveFileIni();
 }
-// запуск парсера
+// === запуск парсера
 void __fastcall TForm1::BtnParserOpenClick(TObject *Sender)
 {
 	UnicodeString setApp = GetCurrentDir() + "\\GRUBer-Parser.exe";
 	UnicodeString setArg = "/run /b " + curDir.getGrubFull();
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
 }
-// запуск консоли
-void __fastcall TForm1::BtnKiberConsolOpenClick(TObject *Sender)
-{
-	UnicodeString setApp = curDir.getToolFull() + "\\KiberConsole.msc";
-	ShellExecuteW(NULL, L"runas", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
-}
-void __fastcall TForm1::PerfmonClick(TObject *Sender)
-{
-	UnicodeString setApp = "perfmon.exe";
-	UnicodeString setArg = "/rel";
-	ShellExecuteW(NULL, L"runas", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
-}
-void __fastcall TForm1::MsConfigClick(TObject *Sender)
-{
-	UnicodeString setApp = "C:\\Windows\\System32\\msconfig.exe";
-	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
-}
-void __fastcall TForm1::sysdmCplClick(TObject *Sender)
-{
-	UnicodeString setApp = "sysdm.cpl";
-	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
-}
-// провека лицензий
+// === провека лицензий
 void __fastcall TForm1::BtnLicenseClick(TObject *Sender)
 {
 	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-license-run.bat";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// общее инфо
+// === общее инфо
 void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 {
 	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\info_ps1\\Run.bat";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// about form
+// === about form
 void __fastcall TForm1::BtnAboutGruberClick(TObject *Sender)
 {
 	FormAbout->Position = (TPosition)7;
 	FormAbout->ShowModal();
 }
+// === очистка временых файлов
 void __fastcall TForm1::BtnClearPCClick(TObject *Sender)
 {
 	FormClearTempDir->Position = (TPosition)7;
 	FormClearTempDir->ShowModal();
 }
-// ----
+// === окно серийников
 void __fastcall TForm1::Button_SerialClick(TObject *Sender)
 {
 	Form_Serial->Edit1->Text = curPC.getSerialMain();
 	Form_Serial->Edit2->Text = curPC.getUUID();
 	Form_Serial->Edit3->Text = curPC.getSerial_mrb();
 	Form_Serial->Edit4->Text = curPC.getCPUID();
-	//ustr = L"Hey! this unicode string will be hashed";
-	UnicodeString hash_sha = curPC.getSerialMain() + curPC.getUUID();
-	Form_Serial->Edit5->Text = THashSHA1::GetHashString(hash_sha);
-	//Form_Serial->Edit5->Text = std::hash(hash_sha);
+	// генерация уникального серийника
+	UnicodeString toHash  = "1234";
+	Form_Serial->Edit5->Text = GetHashCRC32(toHash);
+	//Form_Serial->Edit5->Text = "test";
+	// открытие окна с серийниками
 	Form_Serial->Position = (TPosition)7;
 	Form_Serial->ShowModal();
 }
+// === перезапуск от админа
 void __fastcall TForm1::Button_RestartAssAdminClick(TObject *Sender)
 {
 	RestartApplicationRunas();
@@ -404,11 +405,11 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 		if (x64) archUpd = GetCurrentDir() + "\\update_x64.upd";
 		else archUpd = GetCurrentDir() + "\\update_x32.upd";
 	} else {
-		printLog("[ESET-Update][!]Немає архіву з базами!");
+		printLog("!!", "ESET-Update: Немає архіву з базами!");
 		return;
     }
 
-	printLog("[ESET-Update][>]Оновленя бази Eset...");
+	printLog(">>", "ESET-Update: Оновленя бази Eset...");
 	BtnEsetUpdate->Enabled = false;
 	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
 	if (FileExists(curPC.getEsetDir() + "\\dll\\update.ver"))
@@ -426,11 +427,11 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	//------
 	if (esetBaseUnpack.checkErr()){
 		//ошибочка вышла...
-		printLog("[ESET-Update][!]Щось пішло НЕ так...");
+		printLog("!!", "ESET-Update: Щось пішло НЕ так...");
 		BtnEsetUpdate->Enabled = true;
 		return;
 	}
-	printLog("[ESET-Update][OK]Бази оновленно!");
+	printLog("OK", "ESET-Update: Бази оновленно!");
     BtnEsetUpdate->Enabled = true;
 	StatusBar1->Panels->Items[1]->Text = " Бази оновленно!";
 	if (FileExists("c:\\Program Files\\ESET\\ESET Security\\ermm.exe")) {
@@ -441,10 +442,16 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 /* Изменение полей */
-void __fastcall TForm1::EditNumberChange(TObject *Sender)
+void __fastcall TForm1::EditNumber_UVsChange(TObject *Sender)
 {
-	curPC.setNumber(EditNumber->Value);
+	curPC.setNumber_UVs(EditNumber_UVs->Value);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+}
+void __fastcall TForm1::EditNumber_OKChange(TObject *Sender)
+{
+    curPC.setNumber_OK(EditNumber_OK->Value);
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+
 }
 void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
@@ -467,7 +474,15 @@ void __fastcall TForm1::EditResponChange(TObject *Sender)
 }
 void __fastcall TForm1::EditPurposeChange(TObject *Sender)
 {
-    curPC.setPurpose(EditPurpose->Text);
+	curPC.setPurpose(EditPurpose->Text);
+}
+void __fastcall TForm1::Edit_PlaceChange(TObject *Sender) // <===
+{
+	curPC.setPlace(Edit_Place->Text);
+}
+void __fastcall TForm1::Edit_PhoneChange(TObject *Sender) // <===
+{
+	curPC.setPhone(Edit_Phone->Text);
 }
 void __fastcall TForm1::EditLicWinChange(TObject *Sender)
 {
@@ -532,6 +547,14 @@ void __fastcall TForm1::Edit_InNumberPersonChange(TObject *Sender)
 {
 	curPC.setInNumberPerson(Edit_InNumberPerson->Text);
 }
+void __fastcall TForm1::Edit_InResponChange(TObject *Sender) // <===
+{
+	curPC.setInRespon(Edit_InRespon->Text);
+}
+void __fastcall TForm1::Edit_InAdminBPChange(TObject *Sender) // <===
+{
+	curPC.setInAdminBP(Edit_InAdminBP->Text);
+}
 void __fastcall TForm1::Edit_ComPoliticInstallChange(TObject *Sender)
 {
 	curPC.setComPoliticInstall(Edit_ComPoliticInstall->Text);
@@ -558,12 +581,6 @@ void __fastcall TForm1::CheckBox_MultiUSERSClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 /* Чекбоксы в настройках */
-void __fastcall TForm1::CheckBoxShowLogClick(TObject *Sender)
-{
-	curConfig.setShowLog(CheckBoxShowLog->Checked);
-	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
-	else Form1->Width = 420*Form1->ScaleFactor;
-}
 void __fastcall TForm1::CheckBoxDebugClick(TObject *Sender)
 {
 	curConfig.setDebug(CheckBoxDebug->Checked);
@@ -738,6 +755,51 @@ void __fastcall TForm1::BtnApp_UsbTreeViewClick(TObject *Sender)
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
+// --- запуск консоли
+void __fastcall TForm1::BtnKiberConsolOpenClick(TObject *Sender)
+{
+    LPCWSTR oper = L"open";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	UnicodeString setApp = curDir.getToolFull() + "\\KiberConsole.msc";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::Button_ControlPanelClick(TObject *Sender)
+{
+	LPCWSTR oper = L"open";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	UnicodeString setApp = "control.exe";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::Button_setingsPCClick(TObject *Sender)
+{
+    LPCWSTR oper = L"open";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	UnicodeString setApp = "sysdm.cpl";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::Button_msconfigClick(TObject *Sender)
+{
+    LPCWSTR oper = L"open";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	UnicodeString setApp = "msconfig.exe";
+	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::Button_CrashMonitorClick(TObject *Sender)
+{
+	LPCWSTR oper = L"open";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	UnicodeString setApp = "perfmon.exe";
+	UnicodeString setArg = "/rel";
+	ShellExecuteW(NULL, oper, setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
+}
+void __fastcall TForm1::Button_ResMonClick(TObject *Sender)
+{
+        LPCWSTR oper = L"open";
+	if(CheckBox_RunAs->Checked) oper = L"runas";
+	UnicodeString setApp = "resmon.exe";
+	UnicodeString setArg = "/rel";
+	ShellExecuteW(NULL, oper, setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
+}
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::EditPrefixPartitionChange(TObject *Sender)
@@ -754,3 +816,4 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 //---------------------------------------------------------------------------
+
