@@ -85,6 +85,10 @@ void Config::readFileIni() {
 		if(findStr == 0 || findStr == 1) {
 			enablePrefixPartition = findStr.ToInt();
 		}
+		findStr = findParam(infoFille, "[settings]", "forNumberARMid");  // <===
+		if(findStr.ToIntDef(-1) >= 0 && findStr.ToIntDef(-1) <= 4) {
+			forNumberARMid = findStr.ToInt();
+		} else forNumberARMid = 0;
 	}
 }
 void Config::saveFileIni() {
@@ -98,6 +102,7 @@ void Config::saveFileIni() {
 	infoFille->Add("grubUser=" + grubUser);
 	infoFille->Add("prefixPartition=" + prefixPartition);
 	infoFille->Add("enablePrefixPartition=" + UnicodeString(enablePrefixPartition));
+	infoFille->Add("forNumberARMid=" + UnicodeString(forNumberARMid)); // <===
 	// раздел
 	infoFille->Add("[genfile]");
 	infoFille->Add("oldGrub=" + UnicodeString(oldGrub));
@@ -152,6 +157,7 @@ std::vector<UnicodeString> Config::getArmClass()  { return armClass; }
 std::vector<UnicodeString> Config::getCategory()  { return category; }
 UnicodeString Config::getPrefixPartition() { return prefixPartition; }
 bool Config::getEnablePrefixPartition() { return enablePrefixPartition; }
+short Config::get_forNumberARMid() { return forNumberARMid; } // <===
 // сеттеры
 void Config::setDebug(bool i)   { debug = i; }
 void Config::setShowLog(bool i) { showLog = i; }
@@ -171,5 +177,6 @@ void Config::setArmClass(std::vector<UnicodeString> vStr)  { armClass = vStr; }
 void Config::setCategory(std::vector<UnicodeString> vStr)  { category = vStr; }
 void Config::setPrefixPartition(UnicodeString str) { prefixPartition = str; }
 void Config::setEnablePrefixPartition(bool i) { enablePrefixPartition = i; }
+void Config::set_forNumberARMid(short i) { forNumberARMid = i; } // <===
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------

@@ -188,7 +188,7 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=1269,56,137,36
+Coordinates=10,212,53,58
 Visible=True
 
 [GroupBox_Info]
@@ -214,10 +214,4 @@ Coordinates=472,552,93,36
 
 [GridPanel_EditInfo]
 Coordinates=833,348,79,58
-
-[Label_Number_UVs]
-Coordinates=10,212,53,58
-
-[EditNumber_UVs]
-Coordinates=607,144,82,58
 

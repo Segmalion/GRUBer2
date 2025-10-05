@@ -15,7 +15,10 @@ private:
 	*/
 	// инфо об ПК (ручная)
 	int number_UVs = 0;
-    int number_OK = 0;
+	int number_OK = 0;
+	int number_UVs_logist = 0;
+	int number_OK_logist = 0;
+	short useForNumberARMid = 0;
 	UnicodeString partition  = "Без відділу";
 	UnicodeString className   = "Без класу";
 	UnicodeString categoryName   = "Без категорії";
@@ -59,13 +62,18 @@ public:
 	UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
 	std::vector<UnicodeString> mStrIniVersionNumber();
 	std::vector<UnicodeString> mStrInfoArm();
+	std::vector<UnicodeString> mStrSerial();
+	std::vector<UnicodeString> mStrNumberARM();
 	std::vector<UnicodeString> mStrInfoArmGrub();
 	std::vector<UnicodeString> mStrInfoArmEset();
 	std::vector<UnicodeString> mStrLastGrub();
 	UnicodeString lastGrub();
 	// === сеттери
+	void set_useForNumberARMid(short i);
 	void setNumber_UVs(int i);
 	void setNumber_OK(int i);
+	void setNumber_UVs_logist(int i);
+	void setNumber_OK_logist(int i);
 	void setPartition(UnicodeString str);
 	void setClass(UnicodeString str, int i);
 	void setCategory(UnicodeString str, int i);
@@ -94,8 +102,11 @@ public:
 	void setContrUSB (bool i);
 	void setMultiUSERS (bool i);
 	// === геттери
+	short get_useForNumberARMid();
 	int getNumber_UVs();
 	int getNumber_OK();
+	int getNumber_UVs_logist();
+	int getNumber_OK_logist();
 	UnicodeString getPartition();
 	UnicodeString getClassName();
 	UnicodeString getCategoryName();

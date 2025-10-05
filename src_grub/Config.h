@@ -17,6 +17,7 @@ private:
 	std::vector<UnicodeString> category;
 	UnicodeString configFile;
 	UnicodeString prefixPartition;
+	short forNumberARMid;
 	bool enablePrefixPartition;
 	// функции
 	void readFileIni();
@@ -43,6 +44,7 @@ public:
 	std::vector<UnicodeString> getCategory();
 	UnicodeString getPrefixPartition();
 	bool getEnablePrefixPartition();
+	short get_forNumberARMid(); // <===
 	// сеттеры
 	void setDebug(bool i);
 	void setShowLog(bool i);
@@ -62,6 +64,7 @@ public:
 	void setCategory(std::vector<UnicodeString> vStr);
 	void setPrefixPartition(UnicodeString str);
 	void setEnablePrefixPartition(bool i);
+	void set_forNumberARMid(short i);
 };
 //---------------------------------------------------------------------------
 #endif

@@ -27,9 +27,9 @@
 TForm1 *Form1;
 //---------------------------------------------------------------------------
 //обявление переменных типа структуры
+Config curConfig;
 Arm curPC;
 Dir curDir;
-Config curConfig;
 // infoEset curEset;
 //обявление переменных
 UnicodeString cmdEXE, curentDate;
@@ -39,7 +39,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 1;
+extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 2;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -48,16 +48,8 @@ extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-	// ---
-//	Form1->Height = 621*Form1->ScaleFactor;
-//	if (curConfig.getShowLog()) Form1->Width = 1024*Form1->ScaleFactor;
-//	else Form1->Width = 420*Form1->ScaleFactor;
-//
-//	Form1->Constraints->MinHeight = 621*Form1->ScaleFactor;
-//	Form1->Constraints->MinWidth  = 420*Form1->ScaleFactor;
-	//
-	if (!x64) {
-		UnicodeString setApp = GetCurrentDir() + "\\GRUBer32.exe";
+	if (x64 && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
+		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
 		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 		exit(1);
 	}
@@ -91,8 +83,9 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		admMode = "AdminMode";
 	} else {
 		printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
+		int number = Form1->Edit_NumberARM->Value;
 		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
-			+ UnicodeString(curPC.getNumber_UVs())
+			+ UnicodeString(number)
 			+ ", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
 		UnicodeString formCaption = "Нема прав Адміна.. :'(";
 		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
@@ -100,9 +93,16 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		}
 		admMode = "UserMode";
 	}
+	// -> вывод дебаг инфы
+    //	printLogDebug(curConfig.getDebug(), "{forNumberARM}=" + UnicodeString(curConfig.get_forNumberARMid()));
+	//	printLogDebug(curConfig.getDebug(), "{number_UVs}=" + UnicodeString(curPC.getNumber_UVs()));
+	//	printLogDebug(curConfig.getDebug(), "{number_UVs_logist}=" + UnicodeString(curPC.getNumber_UVs_logist()));
+	//	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
+	//	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
 	// статус бар
 	if (x64) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
 	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
+    Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text;
 	gruberStart = 1;
 }
 //---------------------------------------------------------------------------
@@ -112,6 +112,10 @@ std::vector<UnicodeString> fileInfoGrub() {
 	for(auto str : curPC.mStrIniVersionNumber()) vStr.push_back(str);
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
+	// раздел номеров ПК
+	for(auto str : curPC.mStrNumberARM()) vStr.push_back(str);
+	// раздел серийников
+	for(auto str : curPC.mStrSerial()) vStr.push_back(str);
 	// раздел об АРМ-1
 	for(auto str : curPC.mStrInfoArm()) vStr.push_back(str);
 	// раздел об АРМ-2
@@ -163,11 +167,15 @@ void changeEditDirColor() {
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	Form1->BtnParserOpen->Enabled = FileExists(curDir.getGrubFull() + "\\usb.txt");
 }
+UnicodeString appPath()
+{
+    TCHAR patch[_MAX_PATH+1];
+	GetModuleFileName(NULL, patch, _MAX_PATH);
+	return UnicodeString(patch);
+}
 void RestartApplicationRunas()
 {
-	TCHAR patch[_MAX_PATH+1];
-	GetModuleFileName(NULL, patch, _MAX_PATH);
-	UnicodeString setApp = UnicodeString(patch);
+	UnicodeString setApp = appPath();
 	ShellExecuteW(NULL, L"runas", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 	exit(1);
 }
@@ -196,16 +204,6 @@ void TForm1::mainGRUBer(bool i) {
 	ProgressBar_Grub->State = (TProgressBarState) pbsNormal;
 	Taskbar1->ProgressState = (TTaskBarProgressState) 2;
 	progressBarGo(pos);
-	// -> вывод дебаг инфы
-	printLogDebug(curConfig.getDebug(), "{step}=" + UnicodeString(step));
-	printLogDebug(curConfig.getDebug(), "{NewGrub}=" + UnicodeString(curConfig.getNewGrub()));
-	printLogDebug(curConfig.getDebug(), "{OldGrubComent}=" + UnicodeString(curConfig.getOldGrubComent()));
-	printLogDebug(curConfig.getDebug(), "{OldGrubInfo}=" + UnicodeString(curConfig.getOldGrubInfo()));
-	printLogDebug(curConfig.getDebug(), "{OldGrubUsb}=" + UnicodeString(curConfig.getOldGrubUsb()));
-	printLogDebug(curConfig.getDebug(), "{OldGrubNet}=" + UnicodeString(curConfig.getOldGrubNet()));
-	printLogDebug(curConfig.getDebug(), "{License}=" + UnicodeString(curConfig.getLicense()));
-	printLogDebug(curConfig.getDebug(), "{Audit}=" + UnicodeString(curConfig.getAudit()));
-	printLogDebug(curConfig.getDebug(), "{EsetLog}=" + UnicodeString(curConfig.getEsetLog()));
 	// -> сохранение введеной инфы о ПК
 	infoSetToFille(curPC);
 	// -> проверка имени папки граба
@@ -442,16 +440,22 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 /* Изменение полей */
-void __fastcall TForm1::EditNumber_UVsChange(TObject *Sender)
+void __fastcall TForm1::Edit_NumberARMChange(TObject *Sender)
 {
-	curPC.setNumber_UVs(EditNumber_UVs->Value);
+	//curPC.setNumber_OK(Edit_NumberARM->Value);
+	if (ComboBox_forNumberARM->ItemIndex == 1) {
+		curPC.setNumber_UVs(Edit_NumberARM->Value);
+	}
+	if (ComboBox_forNumberARM->ItemIndex == 2) {
+		curPC.setNumber_UVs_logist(Edit_NumberARM->Value);
+	}
+	if (ComboBox_forNumberARM->ItemIndex == 3) {
+		curPC.setNumber_OK(Edit_NumberARM->Value);
+	}
+	if (ComboBox_forNumberARM->ItemIndex == 4) {
+		curPC.setNumber_OK_logist(Edit_NumberARM->Value);
+	}
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-}
-void __fastcall TForm1::EditNumber_OKChange(TObject *Sender)
-{
-    curPC.setNumber_OK(EditNumber_OK->Value);
-	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-
 }
 void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
@@ -658,6 +662,38 @@ void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
 	curPC.setEsetAutoUpdate(i);
 	if(gruberStart) infoSetToFille(curPC);
 }
+void __fastcall TForm1::ComboBox_forNumberARMChange(TObject *Sender)
+{
+	short id = ComboBox_forNumberARM->ItemIndex;
+	curConfig.set_forNumberARMid(ComboBox_forNumberARM->ItemIndex);
+	curPC.set_useForNumberARMid(id);
+	if (id == 0) {
+		Edit_NumberARM->Value = 0;
+		Edit_NumberARM->Enabled = false;
+//		Label_NumberARM->Caption = "Номер АРМ(...):";
+	}
+	if (id == 1) {
+		Edit_NumberARM->Value = curPC.getNumber_UVs();
+		Edit_NumberARM->Enabled = true;
+//		Label_NumberARM->Caption = "Номер АРМ(УВс\"П\"):";
+	}
+	if (id == 2) {
+		Edit_NumberARM->Value = curPC.getNumber_UVs_logist();
+		Edit_NumberARM->Enabled = true;
+//		Label_NumberARM->Caption = "Номер АРМ(УВс\"П\"-лог):";
+	}
+		if (id == 3) {
+		Edit_NumberARM->Value = curPC.getNumber_OK();
+		Edit_NumberARM->Enabled = true;
+//		Label_NumberARM->Caption = "Номер АРМ(ОК\"П\"):";
+	}
+	if (id == 4) {
+		Edit_NumberARM->Value = curPC.getNumber_OK_logist();
+		Edit_NumberARM->Enabled = true;
+//		Label_NumberARM->Caption = "Номер АРМ(ОК\"П\"-лог):";
+	}
+	Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text;
+}
 //---------------------------------------------------------------------------
 /* Запуск ПО */
 // INFO
@@ -815,5 +851,8 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	curConfig.setEnablePrefixPartition(CheckBoxPrefixPartition->State);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 

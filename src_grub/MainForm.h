@@ -35,12 +35,10 @@ __published:	// IDE-managed Components
 	TButton *BtnGruberStop;
 	TButton *BtnEsetUpdate;
 	TGridPanel *GridPanel_EditInfo;
-	TLabel *Label_Number_UVs;
 	TLabel *Label2;
 	TLabel *Label3;
 	TLabel *Label_ResponNow;
 	TEdit *EditRespon;
-	TNumberBox *EditNumber_UVs;
 	TComboBox *EditPartition;
 	TComboBox *EditCategory;
 	TGroupBox *GroupBox_Info;
@@ -155,9 +153,8 @@ __published:	// IDE-managed Components
 	TLabel *Label_Phone;
 	TEdit *Edit_Place;
 	TEdit *Edit_Phone;
-	TGridPanel *GridPanel_Number;
-	TLabel *Label_Number_OK;
-	TNumberBox *EditNumber_OK;
+	TLabel *Label_NumberARM;
+	TNumberBox *Edit_NumberARM;
 	TGroupBox *GroupBox_SettingsPC;
 	TGridPanel *GridPanel_SettingsPC;
 	TButton *Button_ControlPanel;
@@ -165,9 +162,12 @@ __published:	// IDE-managed Components
 	TButton *Button_msconfig;
 	TButton *Button_CrashMonitor;
 	TButton *Button_ResMon;
+	TComboBox *ComboBox_forNumberARM;
+	TLabel *Label_ForNumberARM;
+	TGridPanel *GridPanel2;
+	TLabel *Label_infoForNumberARM;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
-	void __fastcall EditNumber_UVsChange(TObject *Sender);
 	void __fastcall EditPartitionChange(TObject *Sender);
 	void __fastcall EditArmClassChange(TObject *Sender);
 	void __fastcall EditCategoryChange(TObject *Sender);
@@ -238,11 +238,12 @@ __published:	// IDE-managed Components
 	void __fastcall Button_msconfigClick(TObject *Sender);
 	void __fastcall Button_CrashMonitorClick(TObject *Sender);
 	void __fastcall Button_ResMonClick(TObject *Sender);
-	void __fastcall EditNumber_OKChange(TObject *Sender);
+	void __fastcall Edit_NumberARMChange(TObject *Sender);
 	void __fastcall Edit_PlaceChange(TObject *Sender);
 	void __fastcall Edit_PhoneChange(TObject *Sender);
 	void __fastcall Edit_InResponChange(TObject *Sender);
 	void __fastcall Edit_InAdminBPChange(TObject *Sender);
+	void __fastcall ComboBox_forNumberARMChange(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer(bool i = true);
@@ -256,6 +257,7 @@ std::vector<UnicodeString> fileInfoGrub();
 double progressBarStep();
 void progressBarGo(int i , bool err = false);
 void changeEditDirColor();
+UnicodeString appPath();
 void RestartApplicationRunas();
 //---------------------------------------------------------------------------
 #endif

@@ -55,10 +55,11 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 {
 	UnicodeString str;
 	str = "[";
+	int number = Form1->Edit_NumberARM->Value;
 	// number
-	if (number_UVs == 0) {
+	if (number == 0) {
 		str = str + "--";
-	} else str = str + UnicodeString(number_UVs);
+	} else str = str + UnicodeString(number);
 	str = str + "][" + curDate() + "]";
 	// partition
 	if (prfPart.IsEmpty() || !enPrfPart) {
@@ -92,6 +93,10 @@ std::vector<UnicodeString> Arm::mStrInfoArm() {
 	mStr.push_back("[infoARM]");
 	mStr.push_back("serialNumber=" + serial);
 	mStr.push_back("desktopName=" + desktopName);
+	return mStr;
+}
+std::vector<UnicodeString> Arm::mStrSerial() {
+	std::vector<UnicodeString> mStr;
 	mStr.push_back("[serial]");
 	mStr.push_back("serialMain=" + serialMain);
 	mStr.push_back("UUID=" + UUID);
@@ -100,11 +105,19 @@ std::vector<UnicodeString> Arm::mStrInfoArm() {
 	mStr.push_back("unSerial=" + unSerial);
 	return mStr;
 }
+std::vector<UnicodeString> Arm::mStrNumberARM() {
+	std::vector<UnicodeString> mStr;
+	mStr.push_back("[numberARM]");
+	mStr.push_back("useForNumberARMid=" + UnicodeString(useForNumberARMid));
+	mStr.push_back("UVs=" + UnicodeString(number_UVs));
+	mStr.push_back("UVs_logist=" + UnicodeString(number_UVs_logist));
+	mStr.push_back("OK=" + UnicodeString(number_OK));
+	mStr.push_back("OK_logist=" + UnicodeString(number_OK_logist));
+	return mStr;
+}
 std::vector<UnicodeString> Arm::mStrInfoArmGrub() {
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[infoGrubARM]");
-	mStr.push_back("number_UVs=" + UnicodeString(number_UVs));
-	mStr.push_back("number_OK=" + UnicodeString(number_OK));
 	mStr.push_back("partition=" + partition);
 	mStr.push_back("className=" + className);
 	mStr.push_back("classID=" + UnicodeString(classID));
@@ -168,8 +181,11 @@ bool Arm::readFromFile() {
 		file->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
         int vers = findParam(file, "[iniVersion]", "version").ToIntDef(1);
 		if (vers >= 2) {
-			number_UVs = findParam(file, "[infoGrubARM]", "number_UVs").ToIntDef(0);
-			number_OK = findParam(file, "[infoGrubARM]", "number_OK").ToIntDef(0);
+			useForNumberARMid = findParam(file, "[numberARM]", "useForNumberARMid").ToIntDef(0);
+			number_OK = findParam(file, "[numberARM]", "OK").ToIntDef(0);
+			number_OK_logist = findParam(file, "[numberARM]", "OK_logist").ToIntDef(0);
+            number_UVs = findParam(file, "[numberARM]", "UVs").ToIntDef(0);
+			number_UVs_logist = findParam(file, "[numberARM]", "UVs_logist").ToIntDef(0);
 			place = findParam(file, "[infoGrubARM]", "place");
 			phone = findParam(file, "[infoGrubARM]", "phone");
 			inRespon = findParam(file, "[infoGrubARM]", "inRespon");
@@ -239,8 +255,11 @@ bool Arm::readFromFile() {
 //---------------------------------------------------------------------------
 /* сеттери */
 // ручной ввод по компу
+void Arm::set_useForNumberARMid(short i) { useForNumberARMid = i; }
 void Arm::setNumber_UVs(int i) { number_UVs = i; }
 void Arm::setNumber_OK(int i) { number_OK = i; }
+void Arm::setNumber_UVs_logist(int i) { number_UVs_logist = i; }
+void Arm::setNumber_OK_logist(int i) { number_OK_logist = i; }
 void Arm::setPartition(UnicodeString str) { partition = str; }
 void Arm::setClass(UnicodeString str, int i) { className = str; classID = i; }
 void Arm::setCategory(UnicodeString str, int i) { categoryName = str; categoryID = i; }
@@ -277,8 +296,11 @@ void Arm::setMultiUSERS (bool i) { multiUSERS = i; }
 /* геттери */
 UnicodeString Arm::getDesktopName() { return desktopName; }
 // ручной ввод по компу
+short Arm::get_useForNumberARMid() { return useForNumberARMid; }
 int Arm::getNumber_UVs() { return number_UVs; }
 int Arm::getNumber_OK() { return number_OK; }
+int Arm::getNumber_UVs_logist() { return number_UVs_logist; }
+int Arm::getNumber_OK_logist() { return number_OK_logist; }
 UnicodeString Arm::getPartition() { return partition; }
 UnicodeString Arm::getClassName() { return className; }
 UnicodeString Arm::getCategoryName() { return categoryName; }

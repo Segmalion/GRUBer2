@@ -76,18 +76,66 @@ bool IsAdminMode() {
 	 return fRet;
 }
 //---------------------------------------------------------------------------
+void setConfigToForm(Config &curConfig) {
+	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
+	//Form1->CheckBoxShowLog->Checked = curConfig.getShowLog();
+	Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();
+	Form1->EditGrubUser->Text = curConfig.getUser();
+	Form1->CheckBoxOldGrub->State = (TCheckBoxState)curConfig.getOldGrub();
+	Form1->ComentTxt->Checked = curConfig.getOldGrubComent();
+	Form1->InfoTxt->Checked = curConfig.getOldGrubInfo();
+	Form1->NetTxt->Checked = curConfig.getOldGrubNet();
+	Form1->UsbTxt->Checked = curConfig.getOldGrubUsb();
+	Form1->CheckBoxNewGrub->Checked = curConfig.getNewGrub();
+	Form1->CheckBoxLicense->Checked = curConfig.getLicense();
+	Form1->CheckBoxAudit->State = (TCheckBoxState)curConfig.getAudit();
+	//if (curConfig.getAudit() == 0) Form1->CheckBoxAudit->State = cbUnchecked;
+	//if (curConfig.getAudit() == 2) Form1->CheckBoxAudit->State = cbGrayed;
+	//if (curConfig.getAudit() == 1) Form1->CheckBoxAudit->State = cbChecked;
+	Form1->CheckBoxEsetLog->State = (TCheckBoxState)curConfig.getEsetLog();
+	//if (curConfig.getEsetLog() == 0) Form1->CheckBoxEsetLog->State = cbUnchecked;
+	//if (curConfig.getEsetLog() == 2) Form1->CheckBoxEsetLog->State = cbGrayed;
+	//if (curConfig.getEsetLog() == 1) Form1->CheckBoxEsetLog->State = cbChecked;
+	//Form1->CheckBoxEsetLog->State = curConfig.getEsetLog();
+	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
+	for(auto i : curConfig.getArmClass()) Form1->EditArmClass->Items->Add(i);
+	for(auto i : curConfig.getCategory()) Form1->EditCategory->Items->Add(i);
+	Form1->CheckBoxPrefixPartition->State = (TCheckBoxState)curConfig.getEnablePrefixPartition();
+    Form1->EditPrefixPartition->Text = curConfig.getPrefixPartition();
+	Form1->ComboBox_forNumberARM->ItemIndex = curConfig.get_forNumberARMid(); // <===
+}
 void setInfoArmToForm(Arm &curPC) {
-	Form1->EditNumber_UVs->Value   = curPC.getNumber_UVs();
-    Form1->EditNumber_OK->Value   = curPC.getNumber_OK();
+	if (curPC.get_useForNumberARMid() != 0)
+		Form1->ComboBox_forNumberARM->ItemIndex = curPC.get_useForNumberARMid();
+	if (Form1->ComboBox_forNumberARM->ItemIndex == 0) {
+		Form1->Edit_NumberARM->Value = 0;
+		Form1->Edit_NumberARM->Enabled = false;
+	}
+	if (Form1->ComboBox_forNumberARM->ItemIndex == 1) {
+		Form1->Edit_NumberARM->Value = curPC.getNumber_UVs();
+		Form1->Edit_NumberARM->Enabled = true;
+	}
+	if (Form1->ComboBox_forNumberARM->ItemIndex == 2) {
+		Form1->Edit_NumberARM->Value = curPC.getNumber_UVs_logist();
+		Form1->Edit_NumberARM->Enabled = true;
+	}
+	if (Form1->ComboBox_forNumberARM->ItemIndex == 3) {
+		Form1->Edit_NumberARM->Value = curPC.getNumber_OK();
+		Form1->Edit_NumberARM->Enabled = true;
+	}
+	if (Form1->ComboBox_forNumberARM->ItemIndex == 4) {
+		Form1->Edit_NumberARM->Value = curPC.getNumber_OK_logist();
+		Form1->Edit_NumberARM->Enabled = true;
+	}
 	Form1->EditPartition->Text = curPC.getPartition();
 	Form1->EditArmClass->ItemIndex = curPC.getClassID();
 	Form1->EditCategory->ItemIndex = curPC.getCategoryID();
 	Form1->EditLicWin->ItemIndex    = curPC.getLicWindowsID();
 	Form1->EditLicOffice->ItemIndex = curPC.getLicOfficeID();
-	Form1->EditArmClass->Text  = curPC.getClassName();
-	Form1->EditCategory->Text  = curPC.getCategoryName();
-	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
-	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
+//	Form1->EditArmClass->Text  = curPC.getClassName();
+//	Form1->EditCategory->Text  = curPC.getCategoryName();
+//	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
+//	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
 	Form1->EditRespon->Text    = curPC.getRespon();
 	Form1->EditPurpose->Text   = curPC.getPurpose();
 	Form1->Edit_Place->Text   = curPC.getPlace(); // <==
@@ -124,34 +172,6 @@ void setInfoArmToForm(Arm &curPC) {
 	//infoSetToFille(curPC);
 //...
 }
-void setConfigToForm(Config &curConfig) {
-	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
-	//Form1->CheckBoxShowLog->Checked = curConfig.getShowLog();
-    Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();
-	Form1->EditGrubUser->Text = curConfig.getUser();
-	Form1->CheckBoxOldGrub->State = (TCheckBoxState)curConfig.getOldGrub();
-	Form1->ComentTxt->Checked = curConfig.getOldGrubComent();
-	Form1->InfoTxt->Checked = curConfig.getOldGrubInfo();
-	Form1->NetTxt->Checked = curConfig.getOldGrubNet();
-	Form1->UsbTxt->Checked = curConfig.getOldGrubUsb();
-	Form1->CheckBoxNewGrub->Checked = curConfig.getNewGrub();
-	Form1->CheckBoxLicense->Checked = curConfig.getLicense();
-	Form1->CheckBoxAudit->State = (TCheckBoxState)curConfig.getAudit();
-	//if (curConfig.getAudit() == 0) Form1->CheckBoxAudit->State = cbUnchecked;
-	//if (curConfig.getAudit() == 2) Form1->CheckBoxAudit->State = cbGrayed;
-	//if (curConfig.getAudit() == 1) Form1->CheckBoxAudit->State = cbChecked;
-	Form1->CheckBoxEsetLog->State = (TCheckBoxState)curConfig.getEsetLog();
-	//if (curConfig.getEsetLog() == 0) Form1->CheckBoxEsetLog->State = cbUnchecked;
-	//if (curConfig.getEsetLog() == 2) Form1->CheckBoxEsetLog->State = cbGrayed;
-	//if (curConfig.getEsetLog() == 1) Form1->CheckBoxEsetLog->State = cbChecked;
-	//Form1->CheckBoxEsetLog->State = curConfig.getEsetLog();
-	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
-	for(auto i : curConfig.getArmClass()) Form1->EditArmClass->Items->Add(i);
-	for(auto i : curConfig.getCategory()) Form1->EditCategory->Items->Add(i);
-	Form1->CheckBoxPrefixPartition->State = (TCheckBoxState)curConfig.getEnablePrefixPartition();
-    Form1->EditPrefixPartition->Text = curConfig.getPrefixPartition();
-
-}
 bool infoSetToFille(Arm &curPC)
 {
 	const UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
@@ -162,6 +182,10 @@ bool infoSetToFille(Arm &curPC)
 	for(auto str : curPC.mStrIniVersionNumber()) infoFille->Add(str);
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) infoFille->Add(str);
+	// раздел номеров ПК
+	for(auto str : curPC.mStrNumberARM()) infoFille->Add(str);
+	// раздел серийников
+	for(auto str : curPC.mStrSerial()) infoFille->Add(str);
 	// раздел об АРМ
 	for(auto str : curPC.mStrInfoArmGrub()) infoFille->Add(str);
 	// раздел об ESET
