@@ -69,7 +69,7 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 	if (serial == "ErrorSN") {
 		str = str + "#БезСН";
 	}
-	else str = str + "#" + serial;
+	else str = str + "#(" + unSerial + ")" + serial;
 	// category
 	if (categoryID == 0) str = str + "#ОС";
 	if (categoryID == 1) str = str + "#НТ-БП";
