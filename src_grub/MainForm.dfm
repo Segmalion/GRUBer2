@@ -310,8 +310,8 @@
               Align = alClient
               Caption = #1055#1110#1076#1088#1086#1079#1076#1110#1083':'
               Layout = tlCenter
-              ExplicitLeft = 8
-              ExplicitTop = 64
+              ExplicitWidth = 96
+              ExplicitHeight = 30
             end
             object Label3: TLabel
               AlignWithMargins = True
@@ -456,7 +456,6 @@
               WordWrap = False
               OnChange = EditComentChange
               OnDblClick = EditComentDblClick
-              ExplicitHeight = 94
             end
             object Label_Purpose: TLabel
               AlignWithMargins = True
@@ -573,8 +572,8 @@
               ParentBiDiMode = False
               ParentFont = False
               Layout = tlCenter
-              ExplicitLeft = 8
-              ExplicitTop = 13
+              ExplicitWidth = 179
+              ExplicitHeight = 30
             end
             object GridPanel2: TGridPanel
               Left = 238
@@ -610,10 +609,6 @@
                   Value = 100.000000000000000000
                 end>
               TabOrder = 8
-              ExplicitLeft = 239
-              ExplicitTop = 13
-              ExplicitWidth = 420
-              ExplicitHeight = 40
               object Edit_NumberARM: TNumberBox
                 AlignWithMargins = True
                 Left = 5
@@ -633,9 +628,6 @@
                 SpinButtonOptions.Placement = nbspCompact
                 UseMouseWheel = True
                 OnChange = Edit_NumberARMChange
-                ExplicitLeft = 243
-                ExplicitTop = 495
-                ExplicitWidth = 420
                 ExplicitHeight = 38
               end
               object Label_infoForNumberARM: TLabel
@@ -658,9 +650,8 @@
                 Font.Style = [fsItalic]
                 ParentFont = False
                 Layout = tlCenter
-                ExplicitTop = -1
-                ExplicitWidth = 260
-                ExplicitHeight = 50
+                ExplicitWidth = 234
+                ExplicitHeight = 30
               end
             end
           end
@@ -1383,7 +1374,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet_Settings
+        ActivePage = TabSheet_Info
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -1675,7 +1666,6 @@
               Align = alClient
               Caption = #1030#1085#1092#1086#1088#1084#1072#1094#1110#1103' '#1086' '#1055#1050
               TabOrder = 0
-              ExplicitHeight = 372
               object GridPanel9: TGridPanel
                 Left = 2
                 Top = 32
@@ -1736,7 +1726,6 @@
                     Value = 33.332982290250640000
                   end>
                 TabOrder = 0
-                ExplicitHeight = 338
                 object BtnApp_HWiNFO: TButton
                   AlignWithMargins = True
                   Left = 5
@@ -1751,7 +1740,6 @@
                   Caption = 'HWiNFO'
                   TabOrder = 0
                   OnClick = BtnApp_HWiNFOClick
-                  ExplicitHeight = 103
                 end
                 object BtnApp_procexp: TButton
                   AlignWithMargins = True
@@ -1767,7 +1755,6 @@
                   Caption = 'Process Explorer'
                   TabOrder = 1
                   OnClick = BtnApp_procexpClick
-                  ExplicitHeight = 103
                 end
                 object BtnApp_CPUZ: TButton
                   AlignWithMargins = True
@@ -1783,8 +1770,6 @@
                   Caption = 'CPU-Z'
                   TabOrder = 2
                   OnClick = BtnApp_CPUZClick
-                  ExplicitTop = 118
-                  ExplicitHeight = 102
                 end
                 object BtnApp_autoruns: TButton
                   AlignWithMargins = True
@@ -1800,8 +1785,6 @@
                   Caption = 'AutoRuns'
                   TabOrder = 3
                   OnClick = BtnApp_autorunsClick
-                  ExplicitTop = 118
-                  ExplicitHeight = 102
                 end
                 object BtnApp_GPUZ: TButton
                   AlignWithMargins = True
@@ -1817,8 +1800,6 @@
                   Caption = 'GPU-Z'
                   TabOrder = 4
                   OnClick = BtnApp_GPUZClick
-                  ExplicitTop = 230
-                  ExplicitHeight = 103
                 end
                 object BtnApp_tcpview: TButton
                   AlignWithMargins = True
@@ -1834,8 +1815,6 @@
                   Caption = 'TcpView'
                   TabOrder = 5
                   OnClick = BtnApp_tcpviewClick
-                  ExplicitTop = 230
-                  ExplicitHeight = 103
                 end
               end
             end
@@ -1852,7 +1831,6 @@
               Align = alClient
               Caption = #1060#1072#1081#1083#1086#1074#1072' '#1089#1080#1089#1090#1077#1084#1072
               TabOrder = 1
-              ExplicitTop = 387
               object GridPanel10: TGridPanel
                 Left = 2
                 Top = 32
@@ -1932,8 +1910,6 @@
               Align = alClient
               Caption = 'USB '#1087#1088#1080#1089#1090#1088#1086#1111
               TabOrder = 2
-              ExplicitTop = 501
-              ExplicitHeight = 244
               object GridPanel14: TGridPanel
                 Left = 2
                 Top = 32
@@ -1981,7 +1957,6 @@
                     Value = 50.000000000000000000
                   end>
                 TabOrder = 0
-                ExplicitHeight = 210
                 object BtnApp_UscDevU: TButton
                   AlignWithMargins = True
                   Left = 5
@@ -1996,7 +1971,6 @@
                   Caption = 'USBDeview'
                   TabOrder = 0
                   OnClick = BtnApp_UscDevUClick
-                  ExplicitHeight = 95
                 end
                 object BtnApp_DeviceCleanup: TButton
                   AlignWithMargins = True
@@ -2012,7 +1986,6 @@
                   Caption = 'DeviceCleanup'
                   TabOrder = 1
                   OnClick = BtnApp_DeviceCleanupClick
-                  ExplicitHeight = 95
                 end
                 object BtnApp_UsbTreeView: TButton
                   AlignWithMargins = True
@@ -2028,8 +2001,6 @@
                   Caption = 'UsbTreeView'
                   TabOrder = 2
                   OnClick = BtnApp_UsbTreeViewClick
-                  ExplicitTop = 110
-                  ExplicitHeight = 95
                 end
                 object Button4: TButton
                   AlignWithMargins = True
@@ -2045,8 +2016,6 @@
                   Caption = '...'
                   Enabled = False
                   TabOrder = 3
-                  ExplicitTop = 110
-                  ExplicitHeight = 95
                 end
               end
             end
@@ -2065,10 +2034,6 @@
               Checked = True
               State = cbChecked
               TabOrder = 3
-              ExplicitLeft = 0
-              ExplicitTop = 806
-              ExplicitWidth = 678
-              ExplicitHeight = 128
             end
             object GroupBox_SettingsPC: TGroupBox
               AlignWithMargins = True
@@ -2083,10 +2048,6 @@
               Align = alClient
               Caption = #1057#1080#1089#1090#1077#1084#1085#1110' '#1091#1090#1110#1083#1110#1090#1080
               TabOrder = 4
-              ExplicitLeft = 431
-              ExplicitTop = 1096
-              ExplicitWidth = 323
-              ExplicitHeight = 183
               object GridPanel_SettingsPC: TGridPanel
                 Left = 2
                 Top = 32
@@ -2147,10 +2108,6 @@
                     Value = 33.336506165646750000
                   end>
                 TabOrder = 0
-                ExplicitLeft = 266
-                ExplicitTop = 112
-                ExplicitWidth = 324
-                ExplicitHeight = 72
                 object BtnKiberConsolOpen: TButton
                   AlignWithMargins = True
                   Left = 5
@@ -2180,10 +2137,6 @@
                   Caption = #1055#1072#1085#1077#1083#1100' '#1082#1077#1088#1091#1074#1072#1085#1103
                   TabOrder = 1
                   OnClick = Button_ControlPanelClick
-                  ExplicitLeft = 805
-                  ExplicitTop = 39
-                  ExplicitWidth = 131
-                  ExplicitHeight = 43
                 end
                 object Button_setingsPC: TButton
                   AlignWithMargins = True
@@ -2199,10 +2152,6 @@
                   Caption = #1042#1083#1072#1089#1090#1080#1074#1086#1089#1090#1110' '#1089#1080#1089#1090#1077#1084#1080
                   TabOrder = 2
                   OnClick = Button_setingsPCClick
-                  ExplicitLeft = 224
-                  ExplicitTop = 161
-                  ExplicitWidth = 131
-                  ExplicitHeight = 44
                 end
                 object Button_msconfig: TButton
                   AlignWithMargins = True
@@ -2218,10 +2167,6 @@
                   Caption = 'MSconfig'
                   TabOrder = 3
                   OnClick = Button_msconfigClick
-                  ExplicitLeft = 805
-                  ExplicitTop = 161
-                  ExplicitWidth = 131
-                  ExplicitHeight = 44
                 end
                 object Button_CrashMonitor: TButton
                   AlignWithMargins = True
@@ -2237,10 +2182,6 @@
                   Caption = #1052#1086#1085#1110#1090#1086#1088' '#1089#1090#1072#1073#1110#1083#1100#1085#1086#1089#1090#1110
                   TabOrder = 4
                   OnClick = Button_CrashMonitorClick
-                  ExplicitLeft = 224
-                  ExplicitTop = 284
-                  ExplicitWidth = 131
-                  ExplicitHeight = 43
                 end
                 object Button_ResMon: TButton
                   AlignWithMargins = True
@@ -2256,10 +2197,6 @@
                   Caption = #1052#1086#1085#1110#1090#1086#1088' '#1088#1077#1089#1091#1088#1089#1110#1074
                   TabOrder = 5
                   OnClick = Button_ResMonClick
-                  ExplicitLeft = 805
-                  ExplicitTop = 284
-                  ExplicitWidth = 131
-                  ExplicitHeight = 43
                 end
               end
             end
@@ -2332,7 +2269,6 @@
               Align = alClient
               Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' GRUBer'#39#1072
               TabOrder = 0
-              ExplicitHeight = 440
               object Label_ForNumberARM: TLabel
                 Left = 19
                 Top = 380
@@ -2548,8 +2484,6 @@
               Align = alClient
               Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' '#1086#1085#1086#1074#1083#1077#1085#1085#1103' ESET ('#1076#1083#1103' '#1087#1086#1090#1086#1095#1085#1086#1075#1086' '#1055#1050')'
               TabOrder = 1
-              ExplicitTop = 455
-              ExplicitHeight = 423
               object EditEsetMirrorDir: TLabeledEdit
                 Left = 25
                 Top = 70

@@ -365,8 +365,7 @@ void __fastcall TForm1::Button_SerialClick(TObject *Sender)
 	Form_Serial->Edit3->Text = curPC.getSerial_mrb();
 	Form_Serial->Edit4->Text = curPC.getCPUID();
 	// генерация уникального серийника
-	UnicodeString toHash  = "1234";
-	Form_Serial->Edit5->Text = GetHashCRC32(toHash);
+	Form_Serial->Edit5->Text = curPC.getUnSerial();
 	//Form_Serial->Edit5->Text = "test";
 	// открытие окна с серийниками
 	Form_Serial->Position = (TPosition)7;
