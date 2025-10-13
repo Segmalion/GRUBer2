@@ -9,6 +9,7 @@ private:
 	UnicodeString baseName, baseFull;
 	UnicodeString dateName, dateFull;
 	UnicodeString grubName, grubFull;
+	UnicodeString grubTemp;
 public:
 	Dir();
 	void check();
@@ -17,5 +18,6 @@ public:
 	//геттеры
 	UnicodeString getGrubFull();
 	UnicodeString getToolFull();
+    UnicodeString get_grubTemp();
 };
 #endif

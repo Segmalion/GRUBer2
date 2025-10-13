@@ -14,6 +14,7 @@ Dir::Dir() {
 	dateName = "[" + curDate() + "]";
 	baseFull = progFull + "\\" + baseName;
 	dateFull = baseFull + "\\" + dateName;
+	grubTemp = "C:\\ProgramData\\GRUBer\\TempGRUB";
 }
 //---------------------------------------------------------------------------
 // проверка директорий
@@ -26,6 +27,7 @@ void Dir::check() {
 // геттеры
 UnicodeString Dir::getGrubFull() { return grubFull; }
 UnicodeString Dir::getToolFull() { return (progFull + "\\tool"); }
+UnicodeString Dir::get_grubTemp() { return grubTemp; }
 //---------------------------------------------------------------------------
 // сеттеры
 void Dir::setGrubFull (UnicodeString str) {

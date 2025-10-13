@@ -13,7 +13,7 @@
 UnicodeString GetHashCRC32(UnicodeString str) {
 	UnicodeString hashCRC32;
 	Crc32Builder crc_builder;
-	std::string temp_data = unToStr(str);
+	std::wstring temp_data = unToStr(str);
 //	std::string temp_data = "12345678";
 	uint32_t crc_value = crc_builder.calculate_crc(
 		reinterpret_cast<const uint8_t*>(temp_data.data()), temp_data.length());
@@ -26,10 +26,9 @@ UnicodeString GetHashCRC32(UnicodeString str) {
 }
 //---------------------------------------------------------------------------
 /* UnicodeString в std::string */
-std::string unToStr(UnicodeString str)
+std::wstring unToStr(UnicodeString str)
 {
-	UTF8String uStr = str;
-	return uStr.c_str();
+	return str.c_str();
 }
 //---------------------------------------------------------------------------
 /* Проверка на старт строки */
@@ -158,5 +157,19 @@ UnicodeString byteToStr(long long i) {
 UnicodeString errCheck(const UnicodeString &str) {
 	if (str == "ERROR") return "";
 	else return str;
+}
+//---------------------------------------------------------------------------
+bool compareInSring(UnicodeString strFull, UnicodeString strSearch) {
+	bool ret = false;
+	int lengthStrFull = strFull.Length();
+	int lengthStrSearch = strSearch.Length();
+	for(int i = 0; i < strFull.Length() - strSearch.Length(); i++) {
+		UnicodeString strTemp = strFull.SubString(i, strSearch.Length());
+		if (strTemp == strSearch) {
+			ret = true;
+			break;
+		}
+	}
+	return ret;
 }
 //---------------------------------------------------------------------------

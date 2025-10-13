@@ -4,8 +4,8 @@
 #pragma hdrstop
 #include <tchar.h>
 //---------------------------------------------------------------------------
-USEFORM("MainForm.cpp", Form1);
 USEFORM("PartitionForm.cpp", FormPartition);
+USEFORM("MainForm.cpp", Form1);
 USEFORM("ComentForm.cpp", FormComent);
 USEFORM("ClearTemp.cpp", FormClearTempDir);
 USEFORM("About.cpp", FormAbout);

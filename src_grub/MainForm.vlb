@@ -178,9 +178,6 @@ Coordinates=505,144,92,58
 [EditArmClass]
 Coordinates=10,10,101,124
 
-[GridPanel6]
-Coordinates=278,348,79,58
-
 [GroupBox_AppFille]
 Coordinates=210,280,126,58
 
@@ -188,11 +185,8 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=10,212,53,58
-Visible=True
-
-[GroupBox_Info]
 Coordinates=993,10,79,58
+Visible=True
 
 [GridPanel_Settings]
 Coordinates=99,484,79,58

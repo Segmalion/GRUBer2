@@ -2,6 +2,8 @@
 
 #include <vcl.h>
 #include <System.Hash.hpp>
+#include <chrono>
+#include <filesystem>
 #pragma hdrstop
 
 #include "MainForm.h"
@@ -11,6 +13,8 @@
 #include "About.h"
 #include "ClearTemp.h"
 #include "FormSerial.h"
+#include "InstallSoft.h"
+#include "Users.h"
 
 #include "Arm.h"
 #include "RunApp.h"
@@ -39,7 +43,7 @@ bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 bool grubActive = 0;
 double pos, step;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 2;
+extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 4;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -55,6 +59,25 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	}
 	Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
+    Form1->ShowSerialGenarate->Text = curPC.getUnSerial();
+	// список софта
+	std::vector<InstalledProgram> blockedInstalledSoft = blockInstallSoft();
+	if (blockedInstalledSoft.size() == 0) Form1->Memo1->Lines->Add("Не знайдено!");
+	else for(auto soft: blockedInstalledSoft) Form1->Memo1->Lines->Add(soft.name);
+	// список пользователей
+	std::vector<User> usersList = currentUsers();
+	if (usersList.size() == 0) Form1->Memo1->Lines->Add("Нема юзерів... О_о");
+	else for(auto user: usersList) {
+		UnicodeString str;
+		if (user.isAdmin) {
+			if (user.fullName.IsEmpty() || user.fullName == user.name) str = "Admin: " + user.name;
+			else str = "Admin: " + user.name + " ("+ user.fullName + ")";
+		} else {
+			if (user.fullName.IsEmpty() || user.fullName == user.name) str = "User:  " + user.name;
+			else str = "User:  " + user.name + " ("+ user.fullName + ")";
+		}
+		Form1->Memo2->Lines->Add(str);
+	}
 	// Проверка наличия CMD и прав на выполнение
 	cmdEXE = cmdCheck();
 	if(cmdEXE == "ERROR") printLog("[!]Не мае доступу чи прав на CMD!");
@@ -71,18 +94,22 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
 	}
 	// ---
+	LabEdit_NumUVs->Text = curPC.getNumber_UVs();
+	LabEdit_NumUVsO->Text = curPC.getNumber_UVs_logist();
+	LabEdit_NumOK->Text = curPC.getNumber_OK();
+	LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
 	PageControl_SetInfo->TabIndex = 0;
 	printLog(">>", "Запушенно GRUBer v." + versionApp);
 	printLog(">>", "Останій граб: " + curPC.lastGrub());
 	// проверка прав админа
 	UnicodeString admMode;
 	if(IsAdminMode()) {
-		printLogDebug(curConfig.getDebug(), "Запущено з правами Адміністратора!");
+		printLogDebug("Запущено з правами Адміністратора!");
 		Button_RestartAssAdmin->Enabled = false;
 		BtnClearPC->Enabled = true;
 		admMode = "AdminMode";
 	} else {
-		printLogDebug(curConfig.getDebug(), "Запущено без прав Адміністратора!");
+		printLogDebug("Запущено без прав Адміністратора!");
 		int number = Form1->Edit_NumberARM->Value;
 		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
 			+ UnicodeString(number)
@@ -141,7 +168,7 @@ double progressBarStep() {
 	if (curConfig.getAudit()) i ++;
 	if (curConfig.getAudit() && x64 && IsAdminMode()) i ++;
 	if (curConfig.getEsetLog()) i++;
-	printLogDebug(curConfig.getDebug(), "{count}=" + UnicodeString(i));
+	//printLogDebug("{count}=" + UnicodeString(i));
 	return 100/(double)i;
 }
 void progressBarGo(int i , bool err) {
@@ -179,6 +206,7 @@ void RestartApplicationRunas()
 	ShellExecuteW(NULL, L"runas", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 	exit(1);
 }
+
 //---------------------------------------------------------------------------
 /* ОСНОВНОЙ КОД ГРАБА */
 void TForm1::mainGRUBer(bool i) {
@@ -189,7 +217,7 @@ void TForm1::mainGRUBer(bool i) {
 	passBool = false;
 	bool bigErr = true;
 	UnicodeString dirGrubStr = EditDirGrubName->Text;
-	printLogDebug(curConfig.getDebug(), "{dirGrubStr}=" + dirGrubStr);
+	//printLogDebug("{dirGrubStr}=" + dirGrubStr);
 	// -> преварительные процедуры
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Form1->BtnGruberRun->Enabled = false;
@@ -217,6 +245,13 @@ void TForm1::mainGRUBer(bool i) {
 			return;
 		}
 	}
+	UnicodeString GrubDir;
+	bool tempDir = CheckBox_TempDir->Checked;
+	if (tempDir) {
+		GrubDir = curDir.get_grubTemp();
+		if (!DirectoryExists(GrubDir)) CreateDir(GrubDir);
+		else deleteDir(GrubDir, false);
+	} else GrubDir = curDir.getGrubFull();
 	// -> предупреждение о существующей папке
 	if (DirectoryExists(curDir.getGrubFull()) && i) {
 		FormDirExist->ShowDir->Text=(dirGrubStr);
@@ -231,20 +266,39 @@ void TForm1::mainGRUBer(bool i) {
 		}
 		printLog("!!","Наявні файли буде перезаписанно!");
 	}
+	// -- запуск секундомера
+	auto start_time = std::chrono::steady_clock::now();
 	// -> создание папок
     curDir.check();
 	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
 	// -> генерация файлов
-	if (curConfig.getNewGrub() && !stopBool) job_infoFille();			//gruber_info.txt
-	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(); 		//coment.txt
-	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(); 	//info.txt
-	if (curConfig.getOldGrubUsb() && !stopBool) bigErr *= job_usb();    //usb.txt
-	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net1(); 	//net1.txt
-	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net2(); 	//net2.txt
-	if (curConfig.getLicense() && !stopBool) bigErr *= job_license(); 	//license.txt
-	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(); 		//audit.html
-	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) bigErr *= job_diskInfo(); //CDI.txt
-	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog();   //eset-log.zip
+	if (curConfig.getNewGrub() && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
+	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(GrubDir); 		//coment.txt
+	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
+	if (curConfig.getOldGrubUsb() && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
+	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net1(GrubDir); 	//net1.txt
+	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
+	if (curConfig.getLicense() && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
+	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
+	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
+	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
+	// --
+	if (tempDir) {
+        TSearchRec sr;
+		if (GrubDir.Length()) {
+			if (!FindFirst(GrubDir + "\\*.*", faAnyFile, sr)) {
+				do {
+					if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
+						// если находим папку граба, добавляем в список
+						std::wstring oldFile = unToStr(GrubDir + "\\" + sr.Name);
+						std::wstring newFile = unToStr(curDir.getGrubFull() + "\\" + sr.Name);
+						std::filesystem::rename(oldFile, newFile);
+					}
+				} while (!FindNext(sr)); // ищем пока не найдем все
+			}
+			FindClose(sr);
+		}
+	}
 	// -> обработка ошибок
 	if (!bigErr) {
 		printLog("ER", "GRUBer виконано з помилками!");
@@ -253,6 +307,11 @@ void TForm1::mainGRUBer(bool i) {
 		printLog("OK", "GRUBer виконано успішно!");
 		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 	}
+	// --
+	auto end_time = std::chrono::steady_clock::now();
+	auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+	long double speedTimer = (long double)elapsed_ns.count()/1000000000;
+	printLog("chrono", "Время выполнения: " + FloatToStrF(speedTimer, ffFixed, 4, 2));
 	// -> конец граба
 	grubActive = false;
 	Form1->BtnGruberRun->Enabled = true;
@@ -357,20 +416,6 @@ void __fastcall TForm1::BtnClearPCClick(TObject *Sender)
 	FormClearTempDir->Position = (TPosition)7;
 	FormClearTempDir->ShowModal();
 }
-// === окно серийников
-void __fastcall TForm1::Button_SerialClick(TObject *Sender)
-{
-	Form_Serial->Edit1->Text = curPC.getSerialMain();
-	Form_Serial->Edit2->Text = curPC.getUUID();
-	Form_Serial->Edit3->Text = curPC.getSerial_mrb();
-	Form_Serial->Edit4->Text = curPC.getCPUID();
-	// генерация уникального серийника
-	Form_Serial->Edit5->Text = curPC.getUnSerial();
-	//Form_Serial->Edit5->Text = "test";
-	// открытие окна с серийниками
-	Form_Serial->Position = (TPosition)7;
-	Form_Serial->ShowModal();
-}
 // === перезапуск от админа
 void __fastcall TForm1::Button_RestartAssAdminClick(TObject *Sender)
 {
@@ -454,6 +499,10 @@ void __fastcall TForm1::Edit_NumberARMChange(TObject *Sender)
 	if (ComboBox_forNumberARM->ItemIndex == 4) {
 		curPC.setNumber_OK_logist(Edit_NumberARM->Value);
 	}
+	LabEdit_NumUVs->Text = curPC.getNumber_UVs();
+	LabEdit_NumUVsO->Text = curPC.getNumber_UVs_logist();
+	LabEdit_NumOK->Text = curPC.getNumber_OK();
+	LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 void __fastcall TForm1::EditPartitionChange(TObject *Sender)
@@ -581,6 +630,20 @@ void __fastcall TForm1::CheckBox_ContrUSBClick(TObject *Sender)
 void __fastcall TForm1::CheckBox_MultiUSERSClick(TObject *Sender)
 {
    curPC.setMultiUSERS(CheckBox_MultiUSERS->Checked);
+}
+// -----
+void __fastcall TForm1::ShowSerialGenarateDblClick(TObject *Sender)
+{
+	Form_Serial->Edit1->Text = curPC.getSerialMain();
+	Form_Serial->Edit2->Text = curPC.getUUID();
+	Form_Serial->Edit3->Text = curPC.getSerial_mrb();
+	Form_Serial->Edit4->Text = curPC.getCPUID();
+	// генерация уникального серийника
+	Form_Serial->Edit5->Text = curPC.getUnSerial();
+	//Form_Serial->Edit5->Text = "test";
+	// открытие окна с серийниками
+	Form_Serial->Position = (TPosition)7;
+	Form_Serial->ShowModal();
 }
 //---------------------------------------------------------------------------
 /* Чекбоксы в настройках */
@@ -853,5 +916,8 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 

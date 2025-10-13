@@ -22,7 +22,7 @@ void cacls(UnicodeString str);
 UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
 //---------------------------------------------------------------------------
 void printLog(UnicodeString str);
-void printLogDebug(bool debug, UnicodeString str);
+void printLogDebug(UnicodeString str);
 void printLog(UnicodeString info, UnicodeString str);
 //---------------------------------------------------------------------------
 bool IsAdminMode();

@@ -32,10 +32,10 @@ void printLog(UnicodeString str)
 	Form1->RichEdit_LOG->SelAttributes->Color = (TColor) 0x008080F0;
 	*/
 }
-void printLogDebug(bool debug, UnicodeString str)
+void printLogDebug(UnicodeString str)
 {
-	if (debug == 0) return;
-	printLog("[DEBUG]" + str);
+	if (Form1->CheckBoxDebug->Checked == false) return;
+	else printLog("[DEBUG]" + str);
 }
 void printLog(UnicodeString info, UnicodeString str)
 {

@@ -41,11 +41,9 @@ __published:	// IDE-managed Components
 	TEdit *EditRespon;
 	TComboBox *EditPartition;
 	TComboBox *EditCategory;
-	TGroupBox *GroupBox_Info;
 	TLabel *Label7;
 	TComboBox *EditArmClass;
 	TButton *BtnKiberConsolOpen;
-	TGridPanel *GridPanel6;
 	TEdit *ShowSerial;
 	TButton *BtnInfo;
 	TEdit *ShowName;
@@ -132,10 +130,8 @@ __published:	// IDE-managed Components
 	TButton *Button4;
 	TPopupMenu *PopupMenu_GrubButton;
 	TMenuItem *MiniGrub;
-	TButton *Button_Serial;
 	TGridPanel *GridPanel15;
 	TButton *Button_RestartAssAdmin;
-	TButton *Button_ChangeNamePC;
 	TPageControl *PageControl_InfoTabs;
 	TTabSheet *TabSheet_Info;
 	TTabSheet *TabSheet_Log;
@@ -166,6 +162,31 @@ __published:	// IDE-managed Components
 	TLabel *Label_ForNumberARM;
 	TGridPanel *GridPanel2;
 	TLabel *Label_infoForNumberARM;
+	TCheckBox *CheckBox_TempDir;
+	TMemo *Memo1;
+	TMemo *Memo2;
+	TGridPanel *GridPanel_Info;
+	TGridPanel *GridPanel3;
+	TGroupBox *GroupBox_Number;
+	TLabeledEdit *LabEdit_NumUVs;
+	TLabeledEdit *LabEdit_NumUVsO;
+	TLabeledEdit *LabEdit_NumOK;
+	TLabeledEdit *LabEdit_NumOKO;
+	TGroupBox *GroupBox_InfoARM;
+	TGridPanel *GridPanel_InfoArm;
+	TLabel *Label5;
+	TLabel *Label6;
+	TLabel *Label8;
+	TEdit *ShowSerialGenarate;
+	TGroupBox *GroupBox_CheckInfo;
+	TGridPanel *GridPanel_CheckInfo;
+	TGridPanel *GridPanel_ESETQuarantine;
+	TLabel *Label12;
+	TLabel *Label18;
+	TLabel *Label19;
+	TEdit *Show_ESETQuarantine;
+	TGroupBox *GroupBox_ConsoleUtil;
+	TGridPanel *GridPanel_ConsoleUtil;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditPartitionChange(TObject *Sender);
@@ -228,7 +249,6 @@ __published:	// IDE-managed Components
 	void __fastcall EditPurposeChange(TObject *Sender);
 	void __fastcall BtnClearPCClick(TObject *Sender);
 	void __fastcall MiniGrubClick(TObject *Sender);
-	void __fastcall Button_SerialClick(TObject *Sender);
 	void __fastcall Button_RestartAssAdminClick(TObject *Sender);
 	void __fastcall BtnApp_UscDevUClick(TObject *Sender);
 	void __fastcall BtnApp_DeviceCleanupClick(TObject *Sender);
@@ -244,6 +264,7 @@ __published:	// IDE-managed Components
 	void __fastcall Edit_InResponChange(TObject *Sender);
 	void __fastcall Edit_InAdminBPChange(TObject *Sender);
 	void __fastcall ComboBox_forNumberARMChange(TObject *Sender);
+	void __fastcall ShowSerialGenarateDblClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer(bool i = true);
@@ -253,6 +274,17 @@ public:		// User declarations
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
 
+struct InstalledProgram {
+	UnicodeString type;
+	UnicodeString name;
+	UnicodeString version;
+	UnicodeString publisher;
+};
+struct User {
+	bool isAdmin;
+	UnicodeString name;
+	UnicodeString fullName;
+};
 std::vector<UnicodeString> fileInfoGrub();
 double progressBarStep();
 void progressBarGo(int i , bool err = false);

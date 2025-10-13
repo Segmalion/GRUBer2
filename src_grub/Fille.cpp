@@ -70,7 +70,7 @@ std::vector<UnicodeString> getLocalDrivePatch()
 	return strDrives;
 }
 //---------------------------------------------------------------------------
-bool deleteDir(UnicodeString dirDelName)
+bool deleteDir(UnicodeString dirDelName, bool delDir)
 {
    TSearchRec sr;
 	if (dirDelName.Length()) {
@@ -93,14 +93,17 @@ bool deleteDir(UnicodeString dirDelName)
       while (!FindNext(sr));// ищем пока не найдем все
       FindClose(sr);
    }
-   RemoveDir(dirDelName);
+   if (delDir) RemoveDir(dirDelName);
    return true;
 }
 //---------------------------------------------------------------------------
 // проверка на запуск файла и наличие
 bool fileOpen(UnicodeString str)
 {
-	if (std::FILE *file = std::fopen(unToStr(str).c_str(), "r"))
+	std::wstring wSrt( unToStr(str) );
+	std::string tStr( wSrt.begin(), wSrt.end() );
+
+	if (std::FILE *file = std::fopen(tStr.c_str(), "r"))
 	{
 		fclose(file);
 		return true;

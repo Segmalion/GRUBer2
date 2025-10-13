@@ -4,15 +4,15 @@
 #define JobH
 //---------------------------------------------------------------------------
 
-bool job_infoFille();
-bool job_comTxt();
-bool job_info();
-bool job_usb();
-bool job_net1();
-bool job_net2();
-bool job_license();
-bool job_audit();
-bool job_diskInfo();
-bool job_esetLog();
+bool job_infoFille(UnicodeString dir);
+bool job_comTxt(UnicodeString dir);
+bool job_info(UnicodeString dir);
+bool job_usb(UnicodeString dir);
+bool job_net1(UnicodeString dir);
+bool job_net2(UnicodeString dir);
+bool job_license(UnicodeString dir);
+bool job_audit(UnicodeString dir);
+bool job_diskInfo(UnicodeString dir);
+bool job_esetLog(UnicodeString dir);
 //---------------------------------------------------------------------------
 #endif

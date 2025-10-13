@@ -21,7 +21,7 @@ struct patchList {
 patchList scanDirToFille(UnicodeString dir);
 std::vector<UnicodeString> getLocalDrivePatch();
 
-bool deleteDir(UnicodeString dirDelName);
+bool deleteDir(UnicodeString dirDelName, bool delDir = true);
 bool fileOpen(UnicodeString str);
 void cacls(UnicodeString str);
 //---------------------------------------------------------------------------
