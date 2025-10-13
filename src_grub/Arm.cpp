@@ -67,7 +67,7 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 	} else str = str + prfPart + "_" + partition;
 	// serial
 	if (serial == "ErrorSN") {
-		str = str + "#БезСН";
+		str = str + "#(" + unSerial + ")" + "#БезСН";
 	}
 	else str = str + "#(" + unSerial + ")" + serial;
 	// category
