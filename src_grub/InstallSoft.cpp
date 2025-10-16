@@ -14,17 +14,23 @@
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> blockProgrammsNames =
 	{
-		"Radmin", "Browsec", "Opera", "Tor", "Яндекс", "UC", "Рамблер", "FindFace", "FaceApp",
-		"NewProfilePic", "LightShot", "Joxi", "Punto", "PROMT", "Бирмана", "SiteAnalyzer",
-		"AdGuard", "AIMP", "AOMEI", "ArtMoney", "Bambu", "DiskTrix", "FarManager", "FBReader",
-		"Flameshot", "WinRAR", "7-Zip", "NoxPlayer", "Скриншотер", "Flash", "DriverPack",
-		"IObit", "Ccleaner", "KMS", "PVS-Studio", "ДМБ таймер", "ABBYY", "2gis","MapsMe",
-		"Сleversite", "JivoSite", "Mail.ru", "Bitrix24", "Telegram", "Viber", "DaOffice",
-		"TikTok", "VK.com", "Однокласники", "ONLYOFFICE", "DeskRoll", "TeamViewer", "Radmin",
-		"Ammyy", "DrWeb", "Kaspersky", "360", "BAS", "BAF", "OtelMS", "Bnovo", "1С", "iiko",
-		"R-Keeper", "Alzex", "Парус", "Yandex", "Rambler", "UltimateDefrag", "Far", "2ГИС",
-		"Unattended"
+		"Radmin ", "Browsec", "Opera", "Tor Browser", "Яндекс", "UC Browser", "Rambler",
+		"FindFace", "FaceApp", "NewProfilePic", "LightShot", "Joxi", "Punto", "PROMT", "Бирмана",
+		"SiteAnalyzer", "AdGuard", "AIMP", "AOMEI ", "ArtMoney", "Bambu", "Cheat ",
+		"UltimateDefrag", "Far Manager 3", "FBReader", "Flameshot", "WinRAR", "7-Zip",
+		"NoxPlayer", "Скриншотер", "Adobe Flash", "DriverPack", "IObit", "Ccleaner", "KMS",
+		"PVS-Studio", "ДМБ таймер", "ABBYY", "2ГИС", "MapsMe", "Сleversite", "JivoSite",
+		"Mail.ru", "Bitrix24", "Drive & Docs", "Telegram", "Viber", "DaOffice", "TikTok",
+		"VK.com", "Однокласники", "ONLYOFFICE", "DeskRoll ", "TeamViewer", "Radmin",
+		"Remote Utilities", "Ammyy", "DrWeb", "Kaspersky", "360 Total", "BAS", "BAF",
+		"OtelMS", "Bnovo", "1С", "iiko", "R-Keeper", "Alzex", "Парус", "MediaGet",
+		"utorrent", "µTorrent", "Transmission", "Utweb", "Download Studio", "qBittorent",
+		"Deluge", "BitTorrent", "Getcontact", "PokerStars", "IVI", "Wargaming.net",
+		"World of Tanks", "EveryLang", "FalconGaze", "Skillbox", "LinguaLeo", "R7-Office",
+		"MyOffice", "Yandex", "Key Management Service", "2gis", "Teamlab",
+		"Remote Manipulator System", "WOT"
 	};
+extern bool x64run;
 //---------------------------------------------------------------------------
 std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
 	std::vector<InstalledProgram> tempListSoft;
@@ -104,6 +110,7 @@ std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
 			retCode = RegQueryValueEx(hSubkey,L"DisplayName",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
 					program.name = buffer;
+					//program.name = program.name + " {" + UnicodeString(achKey) + "}";
 			}
 
 			cdata = sizeof(buffer);
@@ -144,7 +151,7 @@ std::vector<InstalledProgram> installSoft() {
 	}
 	RegCloseKey(hKey);
 
-    lResult = RegOpenKeyEx(HKEY_CURRENT_USER,
+	lResult = RegOpenKeyEx(HKEY_CURRENT_USER,
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
 	if (lResult != ERROR_SUCCESS) {
@@ -156,6 +163,34 @@ std::vector<InstalledProgram> installSoft() {
 		listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
 	}
 	RegCloseKey(hKey);
+
+	if (x64run) {
+		LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+									0, KEY_READ, &hKey);
+		if (lResult != ERROR_SUCCESS) {
+	//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
+	//		Form1->Memo1->Lines->Add("ERR");
+			return listSoft;
+		} else {
+			std::vector<InstalledProgram> GlobalListSoft = read_hKey(hKey, "Global");
+			listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
+		}
+		RegCloseKey(hKey);
+
+		lResult = RegOpenKeyEx(HKEY_CURRENT_USER,
+									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+									0, KEY_READ, &hKey);
+		if (lResult != ERROR_SUCCESS) {
+	//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
+	//		Form1->Memo1->Lines->Add("ERR");
+			return listSoft;
+		} else {
+			std::vector<InstalledProgram> GlobalListSoft = read_hKey(hKey, "CurentUser");
+			listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
+		}
+		RegCloseKey(hKey);
+	}
 
 	return listSoft;
 }

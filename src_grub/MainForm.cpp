@@ -40,10 +40,12 @@ UnicodeString cmdEXE, curentDate;
 bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
 std::vector<UnicodeString> vStrPartition;
 bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
+bool x64run;
 bool grubActive = 0;
 double pos, step;
+extern std::vector<UnicodeString> blockProgrammsNames;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 4;
+extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 5;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -52,6 +54,8 @@ extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	if (sizeof(LPVOID) == 4) x64run = false;
+	else x64run = true;
 	if (x64 && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
 		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
 		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -127,7 +131,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	//	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
 	//	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
 	// статус бар
-	if (x64) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
+	if (x64run) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
 	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
     Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text;
 	gruberStart = 1;

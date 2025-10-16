@@ -161,11 +161,12 @@ UnicodeString errCheck(const UnicodeString &str) {
 //---------------------------------------------------------------------------
 bool compareInSring(UnicodeString strFull, UnicodeString strSearch) {
 	bool ret = false;
-	int lengthStrFull = strFull.Length();
-	int lengthStrSearch = strSearch.Length();
-	for(int i = 0; i < strFull.Length() - strSearch.Length(); i++) {
-		UnicodeString strTemp = strFull.SubString(i, strSearch.Length());
-		if (strTemp == strSearch) {
+	UnicodeString fix_strFull   = fixDirName(strFull).LowerCase();
+	UnicodeString fix_strSearch = fixDirName(strSearch).LowerCase();
+	if (fix_strFull.Length() < fix_strSearch.Length()) return ret;
+	for(int i = 0; i < fix_strFull.Length()+1 - fix_strSearch.Length()+1; i++) {
+		UnicodeString strTemp = fix_strFull.SubString(i, fix_strSearch.Length());
+		if (strTemp == fix_strSearch) {
 			ret = true;
 			break;
 		}

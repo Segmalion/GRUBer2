@@ -1512,16 +1512,19 @@
                     Value = 100.000000000000000000
                   end>
                 TabOrder = 0
+                DesignSize = (
+                  664
+                  81)
                 object LabEdit_NumUVs: TLabeledEdit
-                  AlignWithMargins = True
-                  Left = 5
+                  Left = 8
                   Top = 35
-                  Width = 160
+                  Width = 150
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
+                  Anchors = [akLeft, akTop, akRight]
                   EditLabel.Width = 82
                   EditLabel.Height = 30
                   EditLabel.Margins.Left = 5
@@ -1543,15 +1546,15 @@
                   Text = ''
                 end
                 object LabEdit_NumUVsO: TLabeledEdit
-                  AlignWithMargins = True
-                  Left = 171
+                  Left = 174
                   Top = 35
-                  Width = 160
+                  Width = 150
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
+                  Anchors = [akLeft, akTop, akRight]
                   EditLabel.Width = 144
                   EditLabel.Height = 30
                   EditLabel.Margins.Left = 5
@@ -1571,15 +1574,15 @@
                   Text = ''
                 end
                 object LabEdit_NumOK: TLabeledEdit
-                  AlignWithMargins = True
-                  Left = 337
+                  Left = 340
                   Top = 35
-                  Width = 160
+                  Width = 150
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
+                  Anchors = [akLeft, akTop, akRight]
                   EditLabel.Width = 60
                   EditLabel.Height = 30
                   EditLabel.Margins.Left = 5
@@ -1599,15 +1602,15 @@
                   Text = ''
                 end
                 object LabEdit_NumOKO: TLabeledEdit
-                  AlignWithMargins = True
-                  Left = 503
+                  Left = 506
                   Top = 35
-                  Width = 160
+                  Width = 150
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
+                  Anchors = [akLeft, akTop, akRight]
                   EditLabel.Width = 128
                   EditLabel.Height = 30
                   EditLabel.Margins.Left = 5
@@ -3476,7 +3479,6 @@
           Width = 88
         end>
       UseSystemFont = False
-      ExplicitTop = 1005
     end
   end
   object DirOpenEsetMirror: TFileOpenDialog
