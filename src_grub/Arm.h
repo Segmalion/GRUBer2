@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef ArmH
 #define ArmH
 
@@ -6,24 +6,24 @@
 //---------------------------------------------------------------------------
 class Arm {
 private:
-	/* ПЕРЕМЕННЫЕ */
-	/* При добавлении перемепных:
-	** 1 - добавить переменную в приватный раздел
-	** 2 - добавить сеттеры и геттеры
-	** 3 - добавить чтение и запись в файл
-	** 4 - добавить установку прочитаных значений в форму
+	/* РџР•Р Р•РњР•РќРќР«Р• */
+	/* РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё РїРµСЂРµРјРµРїРЅС‹С…:
+	** 1 - РґРѕР±Р°РІРёС‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ РІ РїСЂРёРІР°С‚РЅС‹Р№ СЂР°Р·РґРµР»
+	** 2 - РґРѕР±Р°РІРёС‚СЊ СЃРµС‚С‚РµСЂС‹ Рё РіРµС‚С‚РµСЂС‹
+	** 3 - РґРѕР±Р°РІРёС‚СЊ С‡С‚РµРЅРёРµ Рё Р·Р°РїРёСЃСЊ РІ С„Р°Р№Р»
+	** 4 - РґРѕР±Р°РІРёС‚СЊ СѓСЃС‚Р°РЅРѕРІРєСѓ РїСЂРѕС‡РёС‚Р°РЅС‹С… Р·РЅР°С‡РµРЅРёР№ РІ С„РѕСЂРјСѓ
 	*/
-	// инфо об ПК (ручная)
+	// РёРЅС„Рѕ РѕР± РџРљ (СЂСѓС‡РЅР°СЏ)
 	int number_UVs = 0;
 	int number_OK = 0;
 	int number_UVs_logist = 0;
 	int number_OK_logist = 0;
 	short useForNumberARMid = 0;
-	UnicodeString partition  = "Без відділу";
-	UnicodeString className   = "Без класу";
-	UnicodeString categoryName   = "Без категорії";
-	UnicodeString licWindowsName = "Не вказано";
-	UnicodeString licOfficeName  = "Не вказано";
+	UnicodeString partition  = "Р‘РµР· РІС–РґРґС–Р»Сѓ";
+	UnicodeString className   = "Р‘РµР· РєР»Р°СЃСѓ";
+	UnicodeString categoryName   = "Р‘РµР· РєР°С‚РµРіРѕСЂС–С—";
+	UnicodeString licWindowsName = "РќРµ РІРєР°Р·Р°РЅРѕ";
+	UnicodeString licOfficeName  = "РќРµ РІРєР°Р·Р°РЅРѕ";
 	int classID   = 0;
 	int categoryID   = 0;
 	int licWindowsID = 0;
@@ -33,18 +33,18 @@ private:
 	UnicodeString place = ""; // <===
 	UnicodeString phone = ""; // <===
 	std::vector<UnicodeString> coment;
-	// инфо об ПК (ручная) - по документам
+	// РёРЅС„Рѕ РѕР± РџРљ (СЂСѓС‡РЅР°СЏ) - РїРѕ РґРѕРєСѓРјРµРЅС‚Р°Рј
 	UnicodeString inNumberARM, inNumberHDD, inNumberDeclr;
 	UnicodeString inNumberFormulyar, inNumberWork, inNumberPerson;
 	UnicodeString inRespon, inAdminBP; // <===
-	// инфо об ПК (ручная) - по настройкам
+	// РёРЅС„Рѕ РѕР± РџРљ (СЂСѓС‡РЅР°СЏ) - РїРѕ РЅР°СЃС‚СЂРѕР№РєР°Рј
 	UnicodeString comPoliticInstall, comContrUSB, comMultiUSERS;
 	bool politicInstall=0, contrUSB=0, multiUSERS=0;
-	// инфо из ПК
+	// РёРЅС„Рѕ РёР· РџРљ
 	UnicodeString desktopName = "";
 	UnicodeString serial, serialMain, UUID, serial_mrb, CPUID, unSerial;
 
-	// === структуры
+	// === СЃС‚СЂСѓРєС‚СѓСЂС‹
    struct infoEset {
 		bool autoUpdate = true;
 		UnicodeString dirMirror = "C:\\ESET\\mirror";
@@ -53,12 +53,12 @@ private:
    struct histGrub {
 		UnicodeString date, user;
 	} histGr;
-   // === функции
+   // === С„СѓРЅРєС†РёРё
 	bool readFromFile();
 public:
-	// === конструктор
+	// === РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	Arm();
-	// === функции
+	// === С„СѓРЅРєС†РёРё
 	UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
 	std::vector<UnicodeString> mStrIniVersionNumber();
 	std::vector<UnicodeString> mStrInfoArm();
@@ -68,7 +68,7 @@ public:
 	std::vector<UnicodeString> mStrInfoArmEset();
 	std::vector<UnicodeString> mStrLastGrub();
 	UnicodeString lastGrub();
-	// === сеттери
+	// === СЃРµС‚С‚РµСЂРё
 	void set_useForNumberARMid(short i);
 	void setNumber_UVs(int i);
 	void setNumber_OK(int i);
@@ -101,7 +101,7 @@ public:
 	void setPoliticInstall (bool i);
 	void setContrUSB (bool i);
 	void setMultiUSERS (bool i);
-	// === геттери
+	// === РіРµС‚С‚РµСЂРё
 	short get_useForNumberARMid();
 	int getNumber_UVs();
 	int getNumber_OK();
@@ -139,7 +139,7 @@ public:
 	UnicodeString getComPoliticInstall();
 	UnicodeString getComContrUSB();
 	UnicodeString getComMultiUSERS();
-	// серийники
+	// СЃРµСЂРёР№РЅРёРєРё
     UnicodeString getSerial();
 	UnicodeString getSerialMain();
 	UnicodeString getUUID();

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -14,17 +14,17 @@
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> blockProgrammsNames =
 	{
-		"Radmin ", "Browsec", "Opera", "Tor Browser", "Яндекс", "UC Browser", "Rambler",
-		"FindFace", "FaceApp", "NewProfilePic", "LightShot", "Joxi", "Punto", "PROMT", "Бирмана",
+		"Radmin ", "Browsec", "Opera", "Tor Browser", "РЇРЅРґРµРєСЃ", "UC Browser", "Rambler",
+		"FindFace", "FaceApp", "NewProfilePic", "LightShot", "Joxi", "Punto", "PROMT", "Р‘РёСЂРјР°РЅР°",
 		"SiteAnalyzer", "AdGuard", "AIMP", "AOMEI ", "ArtMoney", "Bambu", "Cheat ",
 		"UltimateDefrag", "Far Manager 3", "FBReader", "Flameshot", "WinRAR", "7-Zip",
-		"NoxPlayer", "Скриншотер", "Adobe Flash", "DriverPack", "IObit", "Ccleaner", "KMS",
-		"PVS-Studio", "ДМБ таймер", "ABBYY", "2ГИС", "MapsMe", "Сleversite", "JivoSite",
+		"NoxPlayer", "РЎРєСЂРёРЅС€РѕС‚РµСЂ", "Adobe Flash", "DriverPack", "IObit", "Ccleaner", "KMS",
+		"PVS-Studio", "Р”РњР‘ С‚Р°Р№РјРµСЂ", "ABBYY", "2Р“РРЎ", "MapsMe", "РЎleversite", "JivoSite",
 		"Mail.ru", "Bitrix24", "Drive & Docs", "Telegram", "Viber", "DaOffice", "TikTok",
-		"VK.com", "Однокласники", "ONLYOFFICE", "DeskRoll ", "TeamViewer", "Radmin",
+		"VK.com", "РћРґРЅРѕРєР»Р°СЃРЅРёРєРё", "ONLYOFFICE", "DeskRoll ", "TeamViewer", "Radmin",
 		"Remote Utilities", "Ammyy", "DrWeb", "Kaspersky", "360 Total", "BAS", "BAF",
-		"OtelMS", "Bnovo", "1С", "iiko", "R-Keeper", "Alzex", "Парус", "MediaGet",
-		"utorrent", "µTorrent", "Transmission", "Utweb", "Download Studio", "qBittorent",
+		"OtelMS", "Bnovo", "1РЎ", "iiko", "R-Keeper", "Alzex", "РџР°СЂСѓСЃ", "MediaGet",
+		"utorrent", "ВµTorrent", "Transmission", "Utweb", "Download Studio", "qBittorent",
 		"Deluge", "BitTorrent", "Getcontact", "PokerStars", "IVI", "Wargaming.net",
 		"World of Tanks", "EveryLang", "FalconGaze", "Skillbox", "LinguaLeo", "R7-Office",
 		"MyOffice", "Yandex", "Key Management Service", "2gis", "Teamlab",
@@ -124,7 +124,7 @@ std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
 			if(retCode == ERROR_SUCCESS){
 					program.publisher = buffer;
 			}
-			if (!program.name.IsEmpty()) { // Добавляем, только если есть название
+			if (!program.name.IsEmpty()) { // Р”РѕР±Р°РІР»СЏРµРј, С‚РѕР»СЊРєРѕ РµСЃР»Рё РµСЃС‚СЊ РЅР°Р·РІР°РЅРёРµ
 				tempListSoft.push_back(program);
 			} //else printLogDebug("NAME IsEmpty!");
 			RegCloseKey(hSubkey);
@@ -142,7 +142,7 @@ std::vector<InstalledProgram> installSoft() {
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
 	if (lResult != ERROR_SUCCESS) {
-//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
+//		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РєР»СЋС‡ СЂРµРµСЃС‚СЂР°." << std::endl;
 //		Form1->Memo1->Lines->Add("ERR");
 		return listSoft;
 	} else {
@@ -155,7 +155,7 @@ std::vector<InstalledProgram> installSoft() {
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
 	if (lResult != ERROR_SUCCESS) {
-//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
+//		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РєР»СЋС‡ СЂРµРµСЃС‚СЂР°." << std::endl;
 //		Form1->Memo1->Lines->Add("ERR");
 		return listSoft;
 	} else {
@@ -169,7 +169,7 @@ std::vector<InstalledProgram> installSoft() {
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);
 		if (lResult != ERROR_SUCCESS) {
-	//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
+	//		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РєР»СЋС‡ СЂРµРµСЃС‚СЂР°." << std::endl;
 	//		Form1->Memo1->Lines->Add("ERR");
 			return listSoft;
 		} else {
@@ -182,7 +182,7 @@ std::vector<InstalledProgram> installSoft() {
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);
 		if (lResult != ERROR_SUCCESS) {
-	//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
+	//		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РєР»СЋС‡ СЂРµРµСЃС‚СЂР°." << std::endl;
 	//		Form1->Memo1->Lines->Add("ERR");
 			return listSoft;
 		} else {
