@@ -62,8 +62,8 @@ object FormAbout: TFormAbout
     object Image1: TImage
       Left = 0
       Top = 0
-      Width = 469
-      Height = 185
+      Width = 472
+      Height = 188
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -1919,8 +1919,6 @@ object FormAbout: TFormAbout
         826D420E7177866F301C9993AA553F258EB90DB80E10714CD2C7CAF8F2786B51
         7F099EC9858E758C8E10E0C362583EF802C7A4E8BEF32E2DC48159E9F1BDF8D8
         0DE024E5FF03993516EDD575BAB90000000049454E44AE426082}
-      ExplicitWidth = 472
-      ExplicitHeight = 188
     end
     object Panel1: TPanel
       Left = 0

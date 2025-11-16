@@ -159,6 +159,7 @@ UnicodeString errCheck(const UnicodeString &str) {
 	else return str;
 }
 //---------------------------------------------------------------------------
+/* Проверка на включение строки в строку */
 bool compareInSring(UnicodeString strFull, UnicodeString strSearch) {
 	bool ret = false;
 	UnicodeString fix_strFull   = fixDirName(strFull).LowerCase();
@@ -174,3 +175,22 @@ bool compareInSring(UnicodeString strFull, UnicodeString strSearch) {
 	return ret;
 }
 //---------------------------------------------------------------------------
+void sortToVector(std::vector<UnicodeString> &vStr, UnicodeString &str) {
+	if (vStr.size() == 0) {
+		vStr.push_back(str);
+		return;
+	}
+	bool stop = false;
+	for (int i = 0; i < vStr.size(); i++) {
+		UnicodeString temp_str = vStr[i];
+		if (str.CompareIC(temp_str) < 0) {
+			vStr.insert(vStr.begin()+i, str);
+			stop = true;
+			break;	
+		}
+		if (str.CompareIC(temp_str) == 0) break;
+	}
+	if (!stop) vStr.push_back(str);
+}
+//---------------------------------------------------------------------------
+

@@ -2,8 +2,10 @@
 #ifndef TextH
 #define TextH
 
+#include <vector>
 #include "Help.h"
 //---------------------------------------------------------------------------
+
 std::wstring unToStr(UnicodeString str);
 bool isBeginUStr(UnicodeString strOR, UnicodeString srtF);
 std::vector<UnicodeString> vStrGenFromStr (UnicodeString str);
@@ -20,4 +22,6 @@ bool compareInSring(UnicodeString strFull, UnicodeString strSearch);
 UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
 std::vector<UnicodeString> findCategory(TStringList *ini, UnicodeString cat);
 //---------------------------------------------------------------------------
+void sortToVector(std::vector<UnicodeString> &vStr, UnicodeString &str);
+
 #endif

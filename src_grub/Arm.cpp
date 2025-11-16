@@ -7,6 +7,7 @@
 #include "Arm.h"
 #include "Text.h"
 #include "GetSMB.h"
+
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 /* конструктор */
@@ -48,6 +49,9 @@ Arm::Arm()
 							serial_mrb +
 							CPUID;
 	unSerial = GetHashCRC32(toHash);
+	// установленый софт
+	softInstall = installSoft();
+	softBlock = blockInstallSoft(softInstall);
 }
 //---------------------------------------------------------------------------
 /* функции */
@@ -347,4 +351,7 @@ int Arm::getLicWindowsID() { return licWindowsID; }
 int Arm::getLicOfficeID() { return licOfficeID; }
 UnicodeString Arm::getLicWindowsName() { return licWindowsName; }
 UnicodeString Arm::getLicOfficeName() { return licOfficeName; }
+// софт
+std::vector<program> Arm::get_softInstall() { return softInstall; }
+std::vector<program> Arm::get_softBlock() { return softBlock; }
 //---------------------------------------------------------------------------

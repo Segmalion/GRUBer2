@@ -274,12 +274,6 @@ public:		// User declarations
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
 
-struct InstalledProgram {
-	UnicodeString type;
-	UnicodeString name;
-	UnicodeString version;
-	UnicodeString publisher;
-};
 struct User {
 	bool isAdmin;
 	UnicodeString name;

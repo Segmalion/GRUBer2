@@ -7,6 +7,7 @@
 bool job_infoFille(UnicodeString dir);
 bool job_comTxt(UnicodeString dir);
 bool job_info(UnicodeString dir);
+bool job_softFille(UnicodeString dir);
 bool job_usb(UnicodeString dir);
 bool job_net1(UnicodeString dir);
 bool job_net2(UnicodeString dir);

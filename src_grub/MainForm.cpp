@@ -30,6 +30,8 @@
 
 TForm1 *Form1;
 //---------------------------------------------------------------------------
+//bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
+//bool x64run;
 //обявление переменных типа структуры
 Config curConfig;
 Arm curPC;
@@ -39,13 +41,11 @@ Dir curDir;
 UnicodeString cmdEXE, curentDate;
 bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
 std::vector<UnicodeString> vStrPartition;
-bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
-bool x64run;
 bool grubActive = 0;
 double pos, step;
 extern std::vector<UnicodeString> blockProgrammsNames;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 5;
+extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 7;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -54,9 +54,7 @@ extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-	if (sizeof(LPVOID) == 4) x64run = false;
-	else x64run = true;
-	if (x64 && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
+	if (x64() && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
 		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
 		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 		exit(1);
@@ -65,9 +63,20 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	Form1->ShowSerial->Text = curPC.getSerial();
     Form1->ShowSerialGenarate->Text = curPC.getUnSerial();
 	// список софта
-	std::vector<InstalledProgram> blockedInstalledSoft = blockInstallSoft();
+	std::vector<UnicodeString> sortList;
+	std::vector<program> blockedInstalledSoft = curPC.get_softBlock();
 	if (blockedInstalledSoft.size() == 0) Form1->Memo1->Lines->Add("Не знайдено!");
-	else for(auto soft: blockedInstalledSoft) Form1->Memo1->Lines->Add(soft.name);
+	else {
+		for(auto soft: blockedInstalledSoft) sortToVector(sortList, soft.name);
+		for(auto str: sortList) Form1->Memo1->Lines->Add(str);
+	}
+
+//	for (auto str: blockProgrammsNames) {
+//		if (compareInSring("Update for Windows 10 for x64-based Systems (KB5001716)", str)) {
+//			Form1->Memo1->Lines->Add("{true} - [" + str + "]");		
+//		} 		
+//	}
+
 	// список пользователей
 	std::vector<User> usersList = currentUsers();
 	if (usersList.size() == 0) Form1->Memo1->Lines->Add("Нема юзерів... О_о");
@@ -103,6 +112,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	LabEdit_NumOK->Text = curPC.getNumber_OK();
 	LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
 	PageControl_SetInfo->TabIndex = 0;
+    PageControl_InfoTabs->TabIndex = 0;
 	printLog(">>", "Запушенно GRUBer v." + versionApp);
 	printLog(">>", "Останій граб: " + curPC.lastGrub());
 	// проверка прав админа
@@ -131,7 +141,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	//	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
 	//	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
 	// статус бар
-	if (x64run) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
+	if (x64_run()) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
 	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
     Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text;
 	gruberStart = 1;
@@ -163,14 +173,14 @@ std::vector<UnicodeString> fileInfoGrub() {
 }
 double progressBarStep() {
 	short i = 0;
-	if (curConfig.getNewGrub()) i++;
+	if (curConfig.getNewGrub()) i += 2;
 	if (curConfig.getOldGrubComent()) i++;
 	if (curConfig.getOldGrubInfo()) i++;
 	if (curConfig.getOldGrubUsb()) i++;
 	if (curConfig.getOldGrubNet()) i += 2;
 	if (curConfig.getLicense()) i++;
 	if (curConfig.getAudit()) i ++;
-	if (curConfig.getAudit() && x64 && IsAdminMode()) i ++;
+	if (curConfig.getAudit() && x64() && IsAdminMode()) i ++;
 	if (curConfig.getEsetLog()) i++;
 	//printLogDebug("{count}=" + UnicodeString(i));
 	return 100/(double)i;
@@ -277,6 +287,7 @@ void TForm1::mainGRUBer(bool i) {
 	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
 	// -> генерация файлов
 	if (curConfig.getNewGrub() && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
+	if (curConfig.getNewGrub() && !stopBool) job_softFille(GrubDir);
 	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(GrubDir); 		//coment.txt
 	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
 	if (curConfig.getOldGrubUsb() && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
@@ -284,7 +295,7 @@ void TForm1::mainGRUBer(bool i) {
 	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
 	if (curConfig.getLicense() && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
 	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
-	if (curConfig.getAudit() && !stopBool && x64 && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
+	if (curConfig.getAudit() && !stopBool && x64() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
 	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
 	// --
 	if (tempDir) {
@@ -448,7 +459,7 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 		archUpd = GetCurrentDir() + "\\update.7z";
 	} else if (FileExists(GetCurrentDir() + "\\update_x32.upd")
 		 && FileExists(GetCurrentDir() + "\\update_x64.upd")) {
-		if (x64) archUpd = GetCurrentDir() + "\\update_x64.upd";
+		if (x64()) archUpd = GetCurrentDir() + "\\update_x64.upd";
 		else archUpd = GetCurrentDir() + "\\update_x32.upd";
 	} else {
 		printLog("!!", "ESET-Update: Немає архіву з базами!");
@@ -522,6 +533,17 @@ void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 {
 	short indx = EditCategory->ItemIndex;
 	curPC.setCategory(EditCategory->Items->Strings[indx], indx);
+	if (indx == 0 || indx == 2 || indx == 3 || indx == 4) {
+		EditArmClass->Enabled = true;
+		if (indx == 0) EditArmClass->ItemIndex = 0;
+		if (indx == 2) EditArmClass->ItemIndex = 3;
+		if (indx == 3) EditArmClass->ItemIndex = 2;
+        if (indx == 4) EditArmClass->ItemIndex = 1;
+	}
+	else {
+		EditArmClass->Enabled = false;
+		EditArmClass->ItemIndex = 1;
+	}
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 void __fastcall TForm1::EditResponChange(TObject *Sender)
@@ -767,7 +789,7 @@ void __fastcall TForm1::BtnApp_HWiNFOClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO64.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO64.exe";
 	else setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO32.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -776,7 +798,7 @@ void __fastcall TForm1::BtnApp_CPUZClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x64.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x64.exe";
 	else setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x32.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -791,7 +813,7 @@ void __fastcall TForm1::BtnApp_procexpClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp64.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp64.exe";
 	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -800,7 +822,7 @@ void __fastcall TForm1::BtnApp_autorunsClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns64.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns64.exe";
 	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -809,7 +831,7 @@ void __fastcall TForm1::BtnApp_tcpviewClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview64.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview64.exe";
 	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -819,7 +841,7 @@ void __fastcall TForm1::BtnApp_TotalClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD64.EXE";
+	if (x64()) setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD64.EXE";
 	else setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD.EXE";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -834,7 +856,7 @@ void __fastcall TForm1::BtnApp_UscDevUClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
 	else setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -843,7 +865,7 @@ void __fastcall TForm1::BtnApp_DeviceCleanupClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\DeviceCleanup\\x64\\DeviceCleanup.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\DeviceCleanup\\x64\\DeviceCleanup.exe";
 	else setApp = curDir.getToolFull() + "\\DeviceCleanup\\Win32\\DeviceCleanup.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -852,7 +874,7 @@ void __fastcall TForm1::BtnApp_UsbTreeViewClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64) setApp = curDir.getToolFull() + "\\UsbTreeView\\x64\\UsbTreeView.exe";
+	if (x64()) setApp = curDir.getToolFull() + "\\UsbTreeView\\x64\\UsbTreeView.exe";
 	else setApp = curDir.getToolFull() + "\\UsbTreeView\\UsbTreeView.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);

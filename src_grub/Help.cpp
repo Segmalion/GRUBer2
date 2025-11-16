@@ -210,5 +210,11 @@ bool compareVectorAndString(UnicodeString str, std::vector<UnicodeString> vct) {
 	return false;
 }
 //---------------------------------------------------------------------------
-
+bool x64() {
+	return GetSystemWow64DirectoryW(nullptr, 0u);
+}
+bool x64_run() {
+	if (sizeof(LPVOID) == 4) return false;
+	else return true;
+}
 

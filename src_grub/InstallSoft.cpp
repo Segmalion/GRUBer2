@@ -30,10 +30,13 @@ std::vector<UnicodeString> blockProgrammsNames =
 		"MyOffice", "Yandex", "Key Management Service", "2gis", "Teamlab",
 		"Remote Manipulator System", "WOT"
 	};
-extern bool x64run;
+std::vector<UnicodeString> UnBlockProgrammsNames =
+	{
+		"Update for Windows", "LaserJet", "SQL Server", "HPSmartDeviceAgentBase"
+	};
 //---------------------------------------------------------------------------
-std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
-	std::vector<InstalledProgram> tempListSoft;
+std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
+	std::vector<program> tempListSoft;
 
 	wchar_t    achKey[MAX_KEY_LENGTH];   // buffer for subkey name
 	DWORD    cbName;                   // size of name string
@@ -80,7 +83,7 @@ std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
 	else {
 		for (i=0; i<cSubKeys; i++)
         {
-			InstalledProgram program;
+			program soft;
 			cbName = MAX_KEY_LENGTH;
 			retCode = RegEnumKeyEx(hKey, i,
 					 achKey,
@@ -103,29 +106,29 @@ std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
 					continue;
 			}
 
-			program.type = typeProg;
+			soft.type = typeProg;
 			WCHAR buffer[256];
 
 			cdata = sizeof(buffer);
 			retCode = RegQueryValueEx(hSubkey,L"DisplayName",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
-					program.name = buffer;
-					//program.name = program.name + " {" + UnicodeString(achKey) + "}";
+					soft.name = buffer;
+					//soft.name = soft.name + " {" + UnicodeString(achKey) + "}";
 			}
 
 			cdata = sizeof(buffer);
 			retCode = RegQueryValueEx(hSubkey,L"DisplayVersion",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
-					program.version = buffer;
+					soft.version = buffer;
 			}
 
 			cdata = sizeof(buffer);
 			retCode = RegQueryValueEx(hSubkey,L"Publisher",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
-					program.publisher = buffer;
+					soft.publisher = buffer;
 			}
-			if (!program.name.IsEmpty()) { // Добавляем, только если есть название
-				tempListSoft.push_back(program);
+			if (!soft.name.IsEmpty()) { // Добавляем, только если есть название
+				tempListSoft.push_back(soft);
 			} //else printLogDebug("NAME IsEmpty!");
 			RegCloseKey(hSubkey);
 		}
@@ -133,8 +136,9 @@ std::vector<InstalledProgram> read_hKey(HKEY hKey, UnicodeString typeProg) {
 	return tempListSoft;
 }
 //---------------------------------------------------------------------------
-std::vector<InstalledProgram> installSoft() {
-	std::vector<InstalledProgram> listSoft;
+std::vector<program> installSoft() {
+	std::vector<program> listSoft;
+	std::vector<program> sort_listSoft;
 
 	HKEY hKey;
 
@@ -142,11 +146,9 @@ std::vector<InstalledProgram> installSoft() {
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
 	if (lResult != ERROR_SUCCESS) {
-//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
-//		Form1->Memo1->Lines->Add("ERR");
 		return listSoft;
 	} else {
-		std::vector<InstalledProgram> GlobalListSoft = read_hKey(hKey, "Global");
+		std::vector<program> GlobalListSoft = read_hKey(hKey, "Global");
 		listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
 	}
 	RegCloseKey(hKey);
@@ -155,25 +157,21 @@ std::vector<InstalledProgram> installSoft() {
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
 	if (lResult != ERROR_SUCCESS) {
-//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
-//		Form1->Memo1->Lines->Add("ERR");
 		return listSoft;
 	} else {
-		std::vector<InstalledProgram> GlobalListSoft = read_hKey(hKey, "CurentUser");
+		std::vector<program> GlobalListSoft = read_hKey(hKey, "CurentUser");
 		listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
 	}
 	RegCloseKey(hKey);
 
-	if (x64run) {
+	if (x64()) {
 		LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);
 		if (lResult != ERROR_SUCCESS) {
-	//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
-	//		Form1->Memo1->Lines->Add("ERR");
 			return listSoft;
 		} else {
-			std::vector<InstalledProgram> GlobalListSoft = read_hKey(hKey, "Global");
+			std::vector<program> GlobalListSoft = read_hKey(hKey, "Global(x32)");
 			listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
 		}
 		RegCloseKey(hKey);
@@ -182,30 +180,31 @@ std::vector<InstalledProgram> installSoft() {
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);
 		if (lResult != ERROR_SUCCESS) {
-	//		std::cerr << "Не удалось открыть ключ реестра." << std::endl;
-	//		Form1->Memo1->Lines->Add("ERR");
 			return listSoft;
 		} else {
-			std::vector<InstalledProgram> GlobalListSoft = read_hKey(hKey, "CurentUser");
+			std::vector<program> GlobalListSoft = read_hKey(hKey, "CurentUser(x32)");
 			listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
 		}
 		RegCloseKey(hKey);
 	}
-
 	return listSoft;
 }
 //---------------------------------------------------------------------------
-std::vector<InstalledProgram> blockInstallSoft() {
-	std::vector<InstalledProgram> blockListSoft;
-	std::vector<InstalledProgram> listSoft = installSoft();
-	for (auto porgram: listSoft) {
+std::vector<program> blockInstallSoft(std::vector<program> listSoft) {
+	std::vector<program> blockListSoft;
+	for (auto soft: listSoft) {
+		bool UnBlock = false;
+		for(auto UnBlockProgr: UnBlockProgrammsNames) {
+			if (compareInSring(soft.name, UnBlockProgr)) UnBlock = true;
+		}
+		if (UnBlock) continue;
 		for(auto blockProgr: blockProgrammsNames) {
-			if (compareInSring(porgram.name, blockProgr)) {
-				blockListSoft.push_back(porgram);
+			if (compareInSring(soft.name, blockProgr)) {
+				blockListSoft.push_back(soft);
 				break;
             }
-        }
-    }
+		}
+	}
 	return blockListSoft;
 }
 //---------------------------------------------------------------------------

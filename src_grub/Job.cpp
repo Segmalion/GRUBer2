@@ -5,6 +5,7 @@
 #include "Job.h"
 #include "MainForm.h"
 
+#include "Text.h"
 #include "Arm.h"
 #include "RunApp.h"
 #include "Help.h"
@@ -26,6 +27,31 @@ bool job_infoFille(UnicodeString dir) {
 	for(auto str : fileInfoGrub()) infoFille->Add (str);
 	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 	printLog("Файл СТВОРЕННО!");
+	progressBarGo(pos += step);
+//	printLogDebug("{pos}=" + UnicodeString(pos));
+	return true;
+}
+bool job_softFille(UnicodeString dir) {
+	UnicodeString outFilePath = dir + "\\soft_all.txt";
+	std::vector<UnicodeString> sortList_all;
+	std::vector<UnicodeString> sortList_block;
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog("Генерування soft_all.txt...");
+	TStringList *softAllFille = new TStringList;
+	for(auto soft : curPC.get_softInstall()) sortToVector(sortList_all, soft.name);
+	for(auto str: sortList_all) softAllFille->Add (str);
+	softAllFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
+	printLog("Файл СТВОРЕННО!");
+	if (curPC.get_softBlock().size() > 0) {
+		outFilePath = dir + "\\soft_block.txt";
+		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+		printLog("Генерування soft_block.txt...");
+		TStringList *softBlockFille = new TStringList;
+		for(auto soft : curPC.get_softBlock()) sortToVector(sortList_block, soft.name);
+		for(auto str: sortList_block) softBlockFille->Add (str);
+		softBlockFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
+		printLog("Файл СТВОРЕННО!");
+	}
 	progressBarGo(pos += step);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return true;

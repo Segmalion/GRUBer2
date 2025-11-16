@@ -3,6 +3,8 @@
 #define ArmH
 
 #include <vector>
+
+#include "InstallSoft.h"
 //---------------------------------------------------------------------------
 class Arm {
 private:
@@ -43,7 +45,6 @@ private:
 	// инфо из ПК
 	UnicodeString desktopName = "";
 	UnicodeString serial, serialMain, UUID, serial_mrb, CPUID, unSerial;
-
 	// === структуры
    struct infoEset {
 		bool autoUpdate = true;
@@ -53,6 +54,14 @@ private:
    struct histGrub {
 		UnicodeString date, user;
 	} histGr;
+//	struct program {
+//		UnicodeString type;
+//		UnicodeString name;
+//		UnicodeString version;
+//		UnicodeString publisher;
+//	};
+	std::vector<program> softInstall;
+    std::vector<program> softBlock;
    // === функции
 	bool readFromFile();
 public:
@@ -150,5 +159,8 @@ public:
 	bool getPoliticInstall();
 	bool getContrUSB();
 	bool getMultiUSERS();
+    // софт
+	std::vector<program> get_softInstall();
+	std::vector<program> get_softBlock();
 };
 #endif

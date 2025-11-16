@@ -36,4 +36,6 @@ bool infoSetToFille(Arm &curPC);
 //---------------------------------------------------------------------------
 bool compareVectorAndString(UnicodeString str, std::vector<UnicodeString> vct);
 //---------------------------------------------------------------------------
+bool x64();
+bool x64_run();
 #endif
