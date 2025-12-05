@@ -16,7 +16,7 @@ std::vector<UnicodeString> blockProgrammsNames =
 	{
 		"Radmin ", "Browsec", "Opera", "Tor Browser", "Яндекс", "UC Browser", "Rambler",
 		"FindFace", "FaceApp", "NewProfilePic", "LightShot", "Joxi", "Punto", "PROMT", "Бирмана",
-		"SiteAnalyzer", "AdGuard", "AIMP", "AOMEI ", "ArtMoney", "Bambu", "Cheat ",
+		"SiteAnalyzer", "AdGuard", "AIMP", "AOMEI ", "ArtMoney", "Bambu", "Cheat",
 		"UltimateDefrag", "Far Manager 3", "FBReader", "Flameshot", "WinRAR", "7-Zip",
 		"NoxPlayer", "Скриншотер", "Adobe Flash", "DriverPack", "IObit", "Ccleaner", "KMS",
 		"PVS-Studio", "ДМБ таймер", "ABBYY", "2ГИС", "MapsMe", "Сleversite", "JivoSite",
@@ -32,7 +32,8 @@ std::vector<UnicodeString> blockProgrammsNames =
 	};
 std::vector<UnicodeString> UnBlockProgrammsNames =
 	{
-		"Update for Windows", "LaserJet", "SQL Server", "HPSmartDeviceAgentBase"
+		"Update for Windows", "LaserJet", "SQL Server", "HPSmartDeviceAgentBase",
+		"Update for x64-based Windows", "Basic", "ESET"
 	};
 //---------------------------------------------------------------------------
 std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {

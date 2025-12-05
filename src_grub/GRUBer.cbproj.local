@@ -5,9 +5,9 @@
     <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.cpp=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.637,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Serial.cpp=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit2.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.507,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Text.cpp</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.410,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.647,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.552,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.066,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.410,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.dfm=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.dfm</Transaction>
     <Transaction>1899.12.30 00:00:00.000.564,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\wmi.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.307,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\wmi.cpp=</Transaction>
@@ -24,7 +24,7 @@
     <Transaction>1899.12.30 00:00:00.000.935,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\include\unistd.h</Transaction>
     <Transaction>1899.12.30 00:00:00.000.751,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\include\unistd.h=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.398,C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\GRUBer\src\Unit1.h=C:\Users\User-KB-1\Documents\PROJECT\CppBuilder\Unit1.h</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.066,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.647,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.426,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.536,=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.902,D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Unit1.cpp=D:\UsersFilles\JOB-PROJECTS\git_projects\GRUBer2\scr\Fille.cpp</Transaction>

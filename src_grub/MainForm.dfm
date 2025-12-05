@@ -315,7 +315,6 @@
               Align = alClient
               Caption = #1050#1072#1090#1077#1075#1086#1088#1110#1103':'
               Layout = tlCenter
-              ExplicitTop = 171
               ExplicitWidth = 96
               ExplicitHeight = 30
             end
@@ -332,9 +331,8 @@
               Align = alClient
               Caption = #1055#1086#1090'.'#1074#1110#1076#1087#1086#1074#1110#1076'.:'
               Layout = tlCenter
-              ExplicitLeft = 13
-              ExplicitTop = 283
-              ExplicitWidth = 220
+              ExplicitWidth = 129
+              ExplicitHeight = 30
             end
             object EditPartition: TComboBox
               AlignWithMargins = True
@@ -351,8 +349,6 @@
               TabOrder = 0
               Text = #1041#1077#1079' '#1074#1110#1076#1076#1110#1083#1091
               OnChange = EditPartitionChange
-              ExplicitLeft = 243
-              ExplicitWidth = 420
             end
             object EditCategory: TComboBox
               AlignWithMargins = True
@@ -378,9 +374,6 @@
                 #1044#1057#1050
                 #1058#1072#1108#1084#1085#1086
                 #1062#1110#1083#1082#1086#1084' '#1058#1072#1108#1084#1085#1086)
-              ExplicitLeft = 243
-              ExplicitTop = 171
-              ExplicitWidth = 420
             end
             object Label7: TLabel
               AlignWithMargins = True
@@ -395,7 +388,6 @@
               Align = alClient
               Caption = #1050#1083#1072#1089' '#1040#1056#1052':'
               Layout = tlCenter
-              ExplicitTop = 117
               ExplicitWidth = 100
               ExplicitHeight = 30
             end
@@ -422,9 +414,6 @@
                 #1040#1057'-2 ('#1051#1086#1082#1072#1083#1100#1085#1072' '#1084#1077#1088#1077#1078#1072')'
                 #1040#1057'-3 ('#1043#1083#1086#1073#1072#1083#1100#1085#1072' '#1084#1077#1088#1077#1078#1072')'
                 #1040#1057'-3 ('#1042#1086#1088#1082#1083#1072#1091#1076')')
-              ExplicitLeft = 243
-              ExplicitTop = 117
-              ExplicitWidth = 420
             end
             object EditRespon: TEdit
               AlignWithMargins = True
@@ -439,8 +428,6 @@
               Align = alClient
               TabOrder = 3
               OnChange = EditResponChange
-              ExplicitLeft = 243
-              ExplicitWidth = 420
               ExplicitHeight = 38
             end
             object EditComent: TMemo
@@ -489,8 +476,6 @@
               Align = alClient
               TabOrder = 5
               OnChange = EditPurposeChange
-              ExplicitLeft = 243
-              ExplicitWidth = 420
               ExplicitHeight = 38
             end
             object Label_Place: TLabel
@@ -539,9 +524,7 @@
               TabOrder = 6
               Text = 'Edit_Place'
               OnChange = Edit_PlaceChange
-              ExplicitLeft = 243
-              ExplicitTop = 334
-              ExplicitWidth = 420
+              ExplicitHeight = 38
             end
             object Edit_Phone: TEdit
               AlignWithMargins = True
@@ -557,9 +540,7 @@
               TabOrder = 7
               Text = 'Edit_Phone'
               OnChange = Edit_PhoneChange
-              ExplicitLeft = 243
-              ExplicitTop = 388
-              ExplicitWidth = 420
+              ExplicitHeight = 38
             end
             object Label_NumberARM: TLabel
               AlignWithMargins = True
@@ -620,8 +601,6 @@
                   Value = 100.000000000000000000
                 end>
               TabOrder = 8
-              ExplicitLeft = 238
-              ExplicitWidth = 430
               object Edit_NumberARM: TNumberBox
                 AlignWithMargins = True
                 Left = 5
@@ -641,7 +620,6 @@
                 SpinButtonOptions.Placement = nbspCompact
                 UseMouseWheel = True
                 OnChange = Edit_NumberARMChange
-                ExplicitWidth = 160
                 ExplicitHeight = 38
               end
               object Label_infoForNumberARM: TLabel
@@ -664,7 +642,6 @@
                 Font.Style = [fsItalic]
                 ParentFont = False
                 Layout = tlCenter
-                ExplicitLeft = 175
                 ExplicitWidth = 234
                 ExplicitHeight = 30
               end
@@ -1394,12 +1371,13 @@
         ActivePage = TabSheet_Info
         Align = alClient
         TabOrder = 1
+        StyleElements = [seFont, seBorder]
         object TabSheet_Info: TTabSheet
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
           Margins.Bottom = 5
-          Caption = #1047#1072#1075#1072#1083#1100#1085#1072' '#1030#1053#1060#1054
+          Caption = #1030#1053#1060#1054
           object GridPanel_Info: TGridPanel
             Left = 0
             Top = 0
@@ -1425,11 +1403,6 @@
                 Column = 0
                 Control = GroupBox_InfoARM
                 Row = 1
-              end
-              item
-                Column = 0
-                Control = GroupBox_CheckInfo
-                Row = 2
               end>
             RowCollection = <
               item
@@ -1438,7 +1411,7 @@
               end
               item
                 SizeStyle = ssAbsolute
-                Value = 240.000000000000000000
+                Value = 400.000000000000000000
               end
               item
                 Value = 100.000000000000000000
@@ -1631,19 +1604,20 @@
               Left = 5
               Top = 130
               Width = 668
-              Height = 230
+              Height = 390
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
+              Anchors = []
               Caption = #1030#1085#1092#1086' '#1087#1088#1086' '#1040#1056#1052':'
               TabOrder = 1
               object GridPanel_InfoArm: TGridPanel
                 Left = 2
                 Top = 32
                 Width = 664
-                Height = 196
+                Height = 356
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -1687,26 +1661,52 @@
                     Column = 1
                     Control = ShowSerialGenarate
                     Row = 1
+                  end
+                  item
+                    Column = 0
+                    Control = Label1
+                    Row = 3
+                  end
+                  item
+                    Column = 1
+                    Control = ShowManufacturer
+                    Row = 3
+                  end
+                  item
+                    Column = 0
+                    Control = Label4
+                    Row = 4
+                  end
+                  item
+                    Column = 1
+                    Control = ShowProductName
+                    Row = 4
                   end>
                 RowCollection = <
                   item
-                    Value = 33.500982462924070000
+                    Value = 20.000000000000000000
                   end
                   item
-                    Value = 33.332940611299990000
+                    Value = 20.000000000000000000
                   end
                   item
-                    Value = 33.166076925775940000
+                    Value = 20.000000000000000000
+                  end
+                  item
+                    Value = 20.000000000000000000
+                  end
+                  item
+                    Value = 20.000000000000000000
                   end>
                 TabOrder = 0
                 DesignSize = (
                   664
-                  196)
+                  356)
                 object Label5: TLabel
                   Left = 0
                   Top = 0
                   Width = 169
-                  Height = 66
+                  Height = 71
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
@@ -1720,9 +1720,9 @@
                 end
                 object Label6: TLabel
                   Left = 0
-                  Top = 66
+                  Top = 71
                   Width = 169
-                  Height = 65
+                  Height = 71
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
@@ -1736,9 +1736,9 @@
                 end
                 object Label8: TLabel
                   Left = 0
-                  Top = 131
+                  Top = 142
                   Width = 169
-                  Height = 65
+                  Height = 72
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
@@ -1752,7 +1752,7 @@
                 end
                 object ShowSerial: TEdit
                   Left = 176
-                  Top = 15
+                  Top = 18
                   Width = 480
                   Height = 35
                   Margins.Left = 5
@@ -1772,7 +1772,7 @@
                 end
                 object ShowName: TEdit
                   Left = 176
-                  Top = 146
+                  Top = 160
                   Width = 480
                   Height = 35
                   Margins.Left = 5
@@ -1792,7 +1792,7 @@
                 end
                 object ShowSerialGenarate: TEdit
                   Left = 176
-                  Top = 81
+                  Top = 89
                   Width = 480
                   Height = 35
                   Margins.Left = 5
@@ -1811,228 +1811,348 @@
                   Text = 'ShowSerialGenarate'
                   OnDblClick = ShowSerialGenarateDblClick
                 end
+                object Label1: TLabel
+                  Left = 0
+                  Top = 214
+                  Width = 169
+                  Height = 71
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Alignment = taCenter
+                  Caption = #1042#1080#1088#1086#1073#1085#1080#1082':'
+                  Layout = tlCenter
+                  ExplicitWidth = 99
+                  ExplicitHeight = 30
+                end
+                object ShowManufacturer: TEdit
+                  AlignWithMargins = True
+                  Left = 176
+                  Top = 232
+                  Width = 480
+                  Height = 35
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Anchors = []
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -23
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  TabOrder = 3
+                  Text = 'ShowManufacturer'
+                end
+                object Label4: TLabel
+                  Left = 0
+                  Top = 285
+                  Width = 169
+                  Height = 71
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Alignment = taCenter
+                  Caption = #1052#1086#1076#1077#1083#1100':'
+                  Layout = tlCenter
+                  ExplicitWidth = 80
+                  ExplicitHeight = 30
+                end
+                object ShowProductName: TEdit
+                  Left = 176
+                  Top = 303
+                  Width = 480
+                  Height = 35
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Anchors = []
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -23
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  TabOrder = 4
+                  Text = 'ShowProductName'
+                end
               end
             end
-            object GroupBox_CheckInfo: TGroupBox
-              AlignWithMargins = True
-              Left = 5
-              Top = 370
-              Width = 668
-              Height = 599
+          end
+        end
+        object TabSheet_CheckList: TTabSheet
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Caption = #1055#1077#1088#1077#1074#1110#1088#1082#1080
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -21
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ImageIndex = 4
+          ParentFont = False
+          object GridPanel_CheckInfo: TGridPanel
+            Left = 0
+            Top = 0
+            Width = 678
+            Height = 974
+            Margins.Left = 5
+            Margins.Top = 5
+            Margins.Right = 5
+            Margins.Bottom = 5
+            Align = alClient
+            BevelOuter = bvNone
+            ColumnCollection = <
+              item
+                Value = 100.000000000000000000
+              end>
+            ControlCollection = <
+              item
+                Column = 0
+                Control = GridPanel_ESETQuarantine
+                Row = 0
+              end
+              item
+                Column = 0
+                Control = Label_DefectionUser
+                Row = 1
+              end
+              item
+                Column = 0
+                Control = Memo2
+                Row = 2
+              end
+              item
+                Column = 0
+                Control = Label_DefectionSoft
+                Row = 3
+              end
+              item
+                Column = 0
+                Control = Memo1
+                Row = 4
+              end
+              item
+                Column = 0
+                Control = Button_CheckDefection
+                Row = 6
+              end>
+            RowCollection = <
+              item
+                SizeStyle = ssAbsolute
+                Value = 50.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 50.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 160.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 50.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 160.000000000000000000
+              end
+              item
+                Value = 100.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 80.000000000000000000
+              end>
+            TabOrder = 0
+            object GridPanel_ESETQuarantine: TGridPanel
+              Left = 0
+              Top = 0
+              Width = 678
+              Height = 50
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
-              Caption = #1055#1077#1088#1077#1074#1110#1088#1082#1080':'
-              TabOrder = 2
-              object GridPanel_CheckInfo: TGridPanel
-                Left = 2
-                Top = 32
-                Width = 664
-                Height = 565
+              BevelOuter = bvNone
+              ColumnCollection = <
+                item
+                  Value = 58.070761609198890000
+                end
+                item
+                  Value = 41.929238390801110000
+                end>
+              ControlCollection = <
+                item
+                  Column = 0
+                  Control = Label_checkQuarantineEset_1
+                  Row = 0
+                end
+                item
+                  Column = 1
+                  Control = Show_ESETQuarantine
+                  Row = 0
+                end>
+              RowCollection = <
+                item
+                  Value = 100.000000000000000000
+                end
+                item
+                  SizeStyle = ssAuto
+                end>
+              TabOrder = 0
+              ExplicitTop = -5
+              DesignSize = (
+                678
+                50)
+              object Label_checkQuarantineEset_1: TLabel
+                AlignWithMargins = True
+                Left = 5
+                Top = 5
+                Width = 384
+                Height = 40
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
                 Margins.Bottom = 5
                 Align = alClient
-                BevelOuter = bvNone
-                ColumnCollection = <
-                  item
-                    Value = 100.000000000000000000
-                  end>
-                ControlCollection = <
-                  item
-                    Column = 0
-                    Control = GridPanel_ESETQuarantine
-                    Row = 0
-                  end
-                  item
-                    Column = 0
-                    Control = Label18
-                    Row = 1
-                  end
-                  item
-                    Column = 0
-                    Control = Memo2
-                    Row = 2
-                  end
-                  item
-                    Column = 0
-                    Control = Label19
-                    Row = 3
-                  end
-                  item
-                    Column = 0
-                    Control = Memo1
-                    Row = 4
-                  end>
-                RowCollection = <
-                  item
-                    SizeStyle = ssAbsolute
-                    Value = 50.000000000000000000
-                  end
-                  item
-                    SizeStyle = ssAbsolute
-                    Value = 50.000000000000000000
-                  end
-                  item
-                    Value = 50.000000000000000000
-                  end
-                  item
-                    SizeStyle = ssAbsolute
-                    Value = 50.000000000000000000
-                  end
-                  item
-                    Value = 50.000000000000000000
-                  end>
-                TabOrder = 0
-                object GridPanel_ESETQuarantine: TGridPanel
-                  Left = 0
-                  Top = 0
-                  Width = 664
-                  Height = 50
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  BevelOuter = bvNone
-                  ColumnCollection = <
-                    item
-                      Value = 55.200765953408200000
-                    end
-                    item
-                      Value = 44.799234046591800000
-                    end>
-                  ControlCollection = <
-                    item
-                      Column = 0
-                      Control = Label12
-                      Row = 0
-                    end
-                    item
-                      Column = 1
-                      Control = Show_ESETQuarantine
-                      Row = 0
-                    end>
-                  RowCollection = <
-                    item
-                      Value = 100.000000000000000000
-                    end>
-                  TabOrder = 0
-                  DesignSize = (
-                    664
-                    50)
-                  object Label12: TLabel
-                    AlignWithMargins = True
-                    Left = 5
-                    Top = 5
-                    Width = 357
-                    Height = 40
-                    Margins.Left = 5
-                    Margins.Top = 5
-                    Margins.Right = 5
-                    Margins.Bottom = 5
-                    Align = alClient
-                    Caption = #1047#1085#1072#1081#1076#1077#1085#1085#1086' '#1092#1072#1081#1083#1110#1074' '#1074' '#1082#1072#1088#1072#1085#1090#1080#1085#1110' ESET:'
-                    Layout = tlCenter
-                    ExplicitWidth = 346
-                    ExplicitHeight = 30
-                  end
-                  object Show_ESETQuarantine: TEdit
-                    AlignWithMargins = True
-                    Left = 380
-                    Top = 6
-                    Width = 270
-                    Height = 38
-                    Margins.Left = 5
-                    Margins.Top = 5
-                    Margins.Right = 5
-                    Margins.Bottom = 5
-                    Anchors = []
-                    Enabled = False
-                    ReadOnly = True
-                    TabOrder = 0
-                    Text = '[WIP] ESETQuarantine'
-                  end
-                end
-                object Label18: TLabel
-                  AlignWithMargins = True
-                  Left = 5
-                  Top = 55
-                  Width = 654
-                  Height = 40
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  Caption = #1055#1086#1090#1086#1095#1085#1110' '#1082#1086#1088#1080#1089#1090#1091#1074#1072#1095#1110' '#1040#1056#1052':'
-                  Layout = tlCenter
-                  ExplicitWidth = 253
-                  ExplicitHeight = 30
-                end
-                object Memo2: TMemo
-                  AlignWithMargins = True
-                  Left = 5
-                  Top = 105
-                  Width = 654
-                  Height = 198
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  Font.Charset = DEFAULT_CHARSET
-                  Font.Color = clWindowText
-                  Font.Height = -21
-                  Font.Name = 'Consolas'
-                  Font.Style = []
-                  ParentFont = False
-                  ReadOnly = True
-                  ScrollBars = ssVertical
-                  TabOrder = 1
-                end
-                object Label19: TLabel
-                  AlignWithMargins = True
-                  Left = 5
-                  Top = 313
-                  Width = 654
-                  Height = 40
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  Caption = #1047#1072#1073#1086#1088#1086#1085#1077#1085#1080#1081' '#1089#1086#1092#1090':'
-                  Layout = tlCenter
-                  ExplicitWidth = 185
-                  ExplicitHeight = 30
-                end
-                object Memo1: TMemo
-                  AlignWithMargins = True
-                  Left = 5
-                  Top = 363
-                  Width = 654
-                  Height = 197
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Align = alClient
-                  Font.Charset = DEFAULT_CHARSET
-                  Font.Color = clWindowText
-                  Font.Height = -21
-                  Font.Name = 'Consolas'
-                  Font.Style = []
-                  ParentFont = False
-                  ReadOnly = True
-                  ScrollBars = ssVertical
-                  TabOrder = 2
-                  WordWrap = False
-                end
+                Caption = #1047#1085#1072#1081#1076#1077#1085#1085#1086' '#1092#1072#1081#1083#1110#1074' '#1074' '#1082#1072#1088#1072#1085#1090#1080#1085#1110' ESET:'
+                Layout = tlCenter
+                ExplicitWidth = 346
+                ExplicitHeight = 30
               end
+              object Show_ESETQuarantine: TEdit
+                AlignWithMargins = True
+                Left = 401
+                Top = 6
+                Width = 270
+                Height = 38
+                Hint = '12312321'
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Anchors = []
+                ParentShowHint = False
+                ReadOnly = True
+                ShowHint = True
+                TabOrder = 0
+                Text = '[WIP] ESETQuarantine'
+                ExplicitLeft = 399
+                ExplicitTop = 7
+              end
+            end
+            object Label_DefectionUser: TLabel
+              AlignWithMargins = True
+              Left = 5
+              Top = 55
+              Width = 668
+              Height = 40
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Caption = #1055#1086#1090#1086#1095#1085#1110' '#1082#1086#1088#1080#1089#1090#1091#1074#1072#1095#1110' '#1040#1056#1052':'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+              Layout = tlBottom
+              ExplicitWidth = 253
+              ExplicitHeight = 30
+            end
+            object Memo2: TMemo
+              AlignWithMargins = True
+              Left = 5
+              Top = 105
+              Width = 668
+              Height = 150
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Consolas'
+              Font.Style = []
+              ParentFont = False
+              ReadOnly = True
+              ScrollBars = ssVertical
+              TabOrder = 1
+              ExplicitHeight = 262
+            end
+            object Label_DefectionSoft: TLabel
+              AlignWithMargins = True
+              Left = 5
+              Top = 265
+              Width = 668
+              Height = 40
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Caption = #1047#1072#1073#1086#1088#1086#1085#1077#1085#1080#1081' '#1089#1086#1092#1090':'
+              Layout = tlBottom
+              ExplicitTop = 377
+              ExplicitWidth = 185
+              ExplicitHeight = 30
+            end
+            object Memo1: TMemo
+              AlignWithMargins = True
+              Left = 5
+              Top = 315
+              Width = 668
+              Height = 150
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Consolas'
+              Font.Style = []
+              ParentFont = False
+              ReadOnly = True
+              ScrollBars = ssVertical
+              TabOrder = 2
+              WordWrap = False
+              ExplicitTop = 427
+              ExplicitHeight = 262
+            end
+            object Button_CheckDefection: TButton
+              AlignWithMargins = True
+              Left = 5
+              Top = 899
+              Width = 668
+              Height = 70
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Caption = #1055#1086#1074#1090#1086#1088#1085#1072' '#1087#1077#1088#1077#1074#1110#1088#1082#1072
+              TabOrder = 3
+              OnClick = Button_CheckDefectionClick
             end
           end
         end
@@ -3115,6 +3235,19 @@
                 TabOrder = 2
                 OnClick = CheckBoxEsetAutoUpdateClick
               end
+              object CheckBox1: TCheckBox
+                Left = 493
+                Top = 378
+                Width = 170
+                Height = 30
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Caption = 'CheckBox1'
+                TabOrder = 3
+                OnClick = CheckBox1Click
+              end
             end
             object GridPanel15: TGridPanel
               Left = 0
@@ -3168,9 +3301,6 @@
                 ShowHint = False
                 TabOrder = 0
                 OnClick = BtnAboutGruberClick
-                ExplicitTop = 6
-                ExplicitWidth = 328
-                ExplicitHeight = 39
               end
               object Button_RestartAssAdmin: TButton
                 AlignWithMargins = True
@@ -3186,10 +3316,6 @@
                 Caption = #1055#1077#1088#1077#1079#1072#1087#1091#1089#1090#1080#1090#1080' '#1074#1110#1076' '#1040#1076#1084#1110#1085#1072
                 TabOrder = 1
                 OnClick = Button_RestartAssAdminClick
-                ExplicitLeft = 6
-                ExplicitTop = 6
-                ExplicitWidth = 328
-                ExplicitHeight = 39
               end
             end
           end

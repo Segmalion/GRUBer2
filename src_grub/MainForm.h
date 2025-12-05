@@ -178,15 +178,21 @@ __published:	// IDE-managed Components
 	TLabel *Label6;
 	TLabel *Label8;
 	TEdit *ShowSerialGenarate;
-	TGroupBox *GroupBox_CheckInfo;
 	TGridPanel *GridPanel_CheckInfo;
 	TGridPanel *GridPanel_ESETQuarantine;
-	TLabel *Label12;
-	TLabel *Label18;
-	TLabel *Label19;
+	TLabel *Label_checkQuarantineEset_1;
+	TLabel *Label_DefectionUser;
+	TLabel *Label_DefectionSoft;
 	TEdit *Show_ESETQuarantine;
 	TGroupBox *GroupBox_ConsoleUtil;
 	TGridPanel *GridPanel_ConsoleUtil;
+	TTabSheet *TabSheet_CheckList;
+	TLabel *Label1;
+	TEdit *ShowManufacturer;
+	TLabel *Label4;
+	TEdit *ShowProductName;
+	TCheckBox *CheckBox1;
+	TButton *Button_CheckDefection;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditPartitionChange(TObject *Sender);
@@ -265,6 +271,8 @@ __published:	// IDE-managed Components
 	void __fastcall Edit_InAdminBPChange(TObject *Sender);
 	void __fastcall ComboBox_forNumberARMChange(TObject *Sender);
 	void __fastcall ShowSerialGenarateDblClick(TObject *Sender);
+	void __fastcall CheckBox1Click(TObject *Sender);
+	void __fastcall Button_CheckDefectionClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	void mainGRUBer(bool i = true);
@@ -274,16 +282,15 @@ public:		// User declarations
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
 
-struct User {
-	bool isAdmin;
-	UnicodeString name;
-	UnicodeString fullName;
-};
 std::vector<UnicodeString> fileInfoGrub();
 double progressBarStep();
 void progressBarGo(int i , bool err = false);
 void changeEditDirColor();
 UnicodeString appPath();
 void RestartApplicationRunas();
+
+void showSoft();
+void showUsers();
+void checkDefection ();
 //---------------------------------------------------------------------------
 #endif

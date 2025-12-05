@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "InstallSoft.h"
+#include "Users.h"
 //---------------------------------------------------------------------------
 class Arm {
 private:
@@ -15,7 +16,7 @@ private:
 	** 3 - добавить чтение и запись в файл
 	** 4 - добавить установку прочитаных значений в форму
 	*/
-	// инфо об ПК (ручная)
+	// --- инфо об ПК (ручная)
 	int number_UVs = 0;
 	int number_OK = 0;
 	int number_UVs_logist = 0;
@@ -35,40 +36,41 @@ private:
 	UnicodeString place = ""; // <===
 	UnicodeString phone = ""; // <===
 	std::vector<UnicodeString> coment;
-	// инфо об ПК (ручная) - по документам
+	// --- инфо об ПК (ручная) - по документам
 	UnicodeString inNumberARM, inNumberHDD, inNumberDeclr;
 	UnicodeString inNumberFormulyar, inNumberWork, inNumberPerson;
 	UnicodeString inRespon, inAdminBP; // <===
-	// инфо об ПК (ручная) - по настройкам
+	// --- инфо об ПК (ручная) - по настройкам
 	UnicodeString comPoliticInstall, comContrUSB, comMultiUSERS;
 	bool politicInstall=0, contrUSB=0, multiUSERS=0;
-	// инфо из ПК
+	// --- инфо из ПК
 	UnicodeString desktopName = "";
 	UnicodeString serial, serialMain, UUID, serial_mrb, CPUID, unSerial;
+	UnicodeString manufacturer, productName;
+	// --- установленное ПО
+	std::vector<program> softInstall;
+	std::vector<program> softBlock;
+	// --- пользователи
+	std::vector<User> users;
 	// === структуры
-   struct infoEset {
+	struct infoEset {
 		bool autoUpdate = true;
 		UnicodeString dirMirror = "C:\\ESET\\mirror";
 		UnicodeString lastUpdateDate, lastUpdateUser, lastUpdateArchive;
 	} eset;
-   struct histGrub {
+	struct histGrub {
 		UnicodeString date, user;
 	} histGr;
-//	struct program {
-//		UnicodeString type;
-//		UnicodeString name;
-//		UnicodeString version;
-//		UnicodeString publisher;
-//	};
-	std::vector<program> softInstall;
-    std::vector<program> softBlock;
-   // === функции
+	// === функции
+	// -- чтение из файла на ПК (c:\ProgramData\GRUBer\gruber_info.ini)
 	bool readFromFile();
 public:
 	// === конструктор
 	Arm();
 	// === функции
 	UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
+	void read_soft();
+	void read_user();
 	std::vector<UnicodeString> mStrIniVersionNumber();
 	std::vector<UnicodeString> mStrInfoArm();
 	std::vector<UnicodeString> mStrSerial();
@@ -156,11 +158,16 @@ public:
 	UnicodeString getCPUID();
 	UnicodeString getUnSerial();
 
+	UnicodeString get_manufacturer();
+	UnicodeString get_productName();
+
 	bool getPoliticInstall();
 	bool getContrUSB();
 	bool getMultiUSERS();
     // софт
 	std::vector<program> get_softInstall();
 	std::vector<program> get_softBlock();
+    // пользователи
+	std::vector<User> get_users();
 };
 #endif

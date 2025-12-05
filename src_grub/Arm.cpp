@@ -14,13 +14,13 @@
 Arm::Arm()
 {
 	readFromFile();
-	// Get DesktopName
+	// получаем DesktopName
 	DWORD bufCharCount = 32767;
 	TCHAR infoBuf[32767];
 	if( GetComputerName( infoBuf, &bufCharCount ) ) {
 		desktopName = UnicodeString(infoBuf);
 	} else desktopName = "Помилка!";
-	// Get SMB - serial
+	// получаем данные из SMB - serial
 	UnicodeString errSer[] = {
 		"To Be Filled By O.E.M.",
 		"Not Applicable",
@@ -35,6 +35,8 @@ Arm::Arm()
 		UUID = "Помилка SMBIOS_DATA!";
 		serial_mrb = "Помилка SMBIOS_DATA!";
 		CPUID = "Помилка SMBIOS_DATA!";
+		manufacturer = "Помилка SMBIOS_DATA!";
+		productName = "Помилка SMBIOS_DATA!";
 	}
 	serialMain = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
 	serial = serialMain;
@@ -49,9 +51,12 @@ Arm::Arm()
 							serial_mrb +
 							CPUID;
 	unSerial = GetHashCRC32(toHash);
+	manufacturer = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 4);
+	productName  = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 5);
 	// установленый софт
-	softInstall = installSoft();
-	softBlock = blockInstallSoft(softInstall);
+	read_soft();
+	// пользователи системы
+    read_user();
 }
 //---------------------------------------------------------------------------
 /* функции */
@@ -84,6 +89,13 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 	if (categoryID == 6) str = str + "#ЦТ";
 	return fixDirName(str);
 }
+void Arm::read_soft() {
+	softInstall = installSoft();
+	softBlock = blockInstallSoft(softInstall);
+}
+void Arm::read_user() {
+	users = currentUsers();
+}
 //генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrIniVersionNumber() {
 	const int iniVersionNumber = 2;
@@ -97,6 +109,8 @@ std::vector<UnicodeString> Arm::mStrInfoArm() {
 	mStr.push_back("[infoARM]");
 	mStr.push_back("serialNumber=" + serial);
 	mStr.push_back("desktopName=" + desktopName);
+	mStr.push_back("manufacturer=" + manufacturer);
+	mStr.push_back("productName=" + productName);
 	return mStr;
 }
 std::vector<UnicodeString> Arm::mStrSerial() {
@@ -183,7 +197,9 @@ bool Arm::readFromFile() {
 	if (FileExists(dir + "gruber_info.ini")) {
 		TStringList *file = new TStringList;
 		file->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
-        int vers = findParam(file, "[iniVersion]", "version").ToIntDef(1);
+		// определение версии файла
+		int vers = findParam(file, "[iniVersion]", "version").ToIntDef(1);
+		// версия --2--
 		if (vers >= 2) {
 			useForNumberARMid = findParam(file, "[numberARM]", "useForNumberARMid").ToIntDef(0);
 			number_OK = findParam(file, "[numberARM]", "OK").ToIntDef(0);
@@ -196,7 +212,8 @@ bool Arm::readFromFile() {
 			inAdminBP = findParam(file, "[infoGrubARM]", "inAdminBP");
 		} else {
 			number_UVs = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
-        }
+		}
+		// общии для всех версий
 		histGr.date = findParam(file, "[lastGrub]", "lastGrubDate");
 		histGr.user = findParam(file, "[lastGrub]", "lastGrubUser");
 		partition = findParam(file, "[infoGrubARM]", "partition");
@@ -327,6 +344,8 @@ UnicodeString Arm::getUUID() { return UUID; }
 UnicodeString Arm::getSerial_mrb() { return serial_mrb; }
 UnicodeString Arm::getCPUID() { return CPUID; }
 UnicodeString Arm::getUnSerial() { return unSerial; }
+UnicodeString Arm::get_manufacturer() { return manufacturer; }
+UnicodeString Arm::get_productName() { return productName; }
 // есет
 UnicodeString Arm::getEsetDir() { return eset.dirMirror; }
 bool Arm::getEsetAutoUpdate() { return eset.autoUpdate; }
@@ -354,4 +373,6 @@ UnicodeString Arm::getLicOfficeName() { return licOfficeName; }
 // софт
 std::vector<program> Arm::get_softInstall() { return softInstall; }
 std::vector<program> Arm::get_softBlock() { return softBlock; }
+// пользователи
+std::vector<User> Arm::get_users() { return users; }
 //---------------------------------------------------------------------------

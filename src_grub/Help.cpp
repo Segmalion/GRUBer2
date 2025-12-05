@@ -49,16 +49,6 @@ void printLog(UnicodeString info, UnicodeString str)
 	printLog("[" + info + "]" + str);
 }
 //---------------------------------------------------------------------------
-// проверка и установка CMD
-UnicodeString cmdCheck(void)
-{
-	if (fileOpen("C:\\Windows\\System32\\cmd.exe"))
-		return "C:\\Windows\\System32\\cmd.exe";
-	if (fileOpen("C:\\Windows\\SysWOW64\\cmd.exe"))
-		return "C:\\Windows\\SysWOW64\\cmd.exe";
-	return "ERROR";
-}
-//---------------------------------------------------------------------------
 /* Проверка прав админа */
 bool IsAdminMode() {
 	 bool fRet = false;
@@ -169,6 +159,17 @@ void setInfoArmToForm(Arm &curPC) {
 		Form1->StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
 	else Form1->StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
 	Form1->EditEsetMirrorDir->Text = curPC.getEsetDir();
+
+	Form1->LabEdit_NumUVs->Text = curPC.getNumber_UVs();
+	Form1->LabEdit_NumUVsO->Text = curPC.getNumber_UVs_logist();
+	Form1->LabEdit_NumOK->Text = curPC.getNumber_OK();
+	Form1->LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
+
+    Form1->ShowName->Text = curPC.getDesktopName();
+	Form1->ShowSerial->Text = curPC.getSerial();
+	Form1->ShowSerialGenarate->Text = curPC.getUnSerial();
+	Form1->ShowManufacturer->Text = curPC.get_manufacturer();
+	Form1->ShowProductName->Text = curPC.get_productName();
 	//infoSetToFille(curPC);
 //...
 }

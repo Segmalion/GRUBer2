@@ -44,8 +44,13 @@ std::vector<UnicodeString> vStrPartition;
 bool grubActive = 0;
 double pos, step;
 extern std::vector<UnicodeString> blockProgrammsNames;
+struct defection {
+	bool user;
+	bool soft;
+	bool eset;
+} curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 7;
+extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 8;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -54,68 +59,18 @@ extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	PageControl_SetInfo->TabIndex = 0;
+	PageControl_InfoTabs->TabIndex = 0;
+	// === выводим настройки & сохраненую инфу об АРМ
+	setConfigToForm(curConfig);
+	setInfoArmToForm(curPC);
+	/* === */
 	if (x64() && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
 		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
 		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 		exit(1);
 	}
-	Form1->ShowName->Text = curPC.getDesktopName();
-	Form1->ShowSerial->Text = curPC.getSerial();
-    Form1->ShowSerialGenarate->Text = curPC.getUnSerial();
-	// список софта
-	std::vector<UnicodeString> sortList;
-	std::vector<program> blockedInstalledSoft = curPC.get_softBlock();
-	if (blockedInstalledSoft.size() == 0) Form1->Memo1->Lines->Add("Не знайдено!");
-	else {
-		for(auto soft: blockedInstalledSoft) sortToVector(sortList, soft.name);
-		for(auto str: sortList) Form1->Memo1->Lines->Add(str);
-	}
-
-//	for (auto str: blockProgrammsNames) {
-//		if (compareInSring("Update for Windows 10 for x64-based Systems (KB5001716)", str)) {
-//			Form1->Memo1->Lines->Add("{true} - [" + str + "]");		
-//		} 		
-//	}
-
-	// список пользователей
-	std::vector<User> usersList = currentUsers();
-	if (usersList.size() == 0) Form1->Memo1->Lines->Add("Нема юзерів... О_о");
-	else for(auto user: usersList) {
-		UnicodeString str;
-		if (user.isAdmin) {
-			if (user.fullName.IsEmpty() || user.fullName == user.name) str = "Admin: " + user.name;
-			else str = "Admin: " + user.name + " ("+ user.fullName + ")";
-		} else {
-			if (user.fullName.IsEmpty() || user.fullName == user.name) str = "User:  " + user.name;
-			else str = "User:  " + user.name + " ("+ user.fullName + ")";
-		}
-		Form1->Memo2->Lines->Add(str);
-	}
-	// Проверка наличия CMD и прав на выполнение
-	cmdEXE = cmdCheck();
-	if(cmdEXE == "ERROR") printLog("[!]Не мае доступу чи прав на CMD!");
-	// выводим настройки & сохраненую инфу об АРМ
-	setConfigToForm(curConfig);
-	setInfoArmToForm(curPC);
-	// ---
-	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-	if (DirectoryExists(curDir.getGrubFull())) {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
-	} else {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
-	}
-	// ---
-	LabEdit_NumUVs->Text = curPC.getNumber_UVs();
-	LabEdit_NumUVsO->Text = curPC.getNumber_UVs_logist();
-	LabEdit_NumOK->Text = curPC.getNumber_OK();
-	LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
-	PageControl_SetInfo->TabIndex = 0;
-    PageControl_InfoTabs->TabIndex = 0;
-	printLog(">>", "Запушенно GRUBer v." + versionApp);
-	printLog(">>", "Останій граб: " + curPC.lastGrub());
-	// проверка прав админа
+	/* === проверка прав админа === */
 	UnicodeString admMode;
 	if(IsAdminMode()) {
 		printLogDebug("Запущено з правами Адміністратора!");
@@ -134,16 +89,32 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		}
 		admMode = "UserMode";
 	}
-	// -> вывод дебаг инфы
-    //	printLogDebug(curConfig.getDebug(), "{forNumberARM}=" + UnicodeString(curConfig.get_forNumberARMid()));
-	//	printLogDebug(curConfig.getDebug(), "{number_UVs}=" + UnicodeString(curPC.getNumber_UVs()));
-	//	printLogDebug(curConfig.getDebug(), "{number_UVs_logist}=" + UnicodeString(curPC.getNumber_UVs_logist()));
-	//	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
-	//	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
-	// статус бар
+	/* === наполняем форму === */
+	printLog(">>", "Запушенно GRUBer v." + versionApp);
+	printLog(">>", "Останій граб: " + curPC.lastGrub());
+	// --- проверка нарушений
+	checkDefection();
+	// --- заполняем строку с именем папки граба
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+	if (DirectoryExists(curDir.getGrubFull())) {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
+	} else {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
+	}
+	// --- статус бар
 	if (x64_run()) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
 	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
-    Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text;
+	// --- разное
+	Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text; // тип номера ПК
+	/* --- вывод дебаг инфы
+	printLogDebug(curConfig.getDebug(), "{forNumberARM}=" + UnicodeString(curConfig.get_forNumberARMid()));
+	printLogDebug(curConfig.getDebug(), "{number_UVs}=" + UnicodeString(curPC.getNumber_UVs()));
+	printLogDebug(curConfig.getDebug(), "{number_UVs_logist}=" + UnicodeString(curPC.getNumber_UVs_logist()));
+	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
+	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
+	*/
 	gruberStart = 1;
 }
 //---------------------------------------------------------------------------
@@ -220,7 +191,148 @@ void RestartApplicationRunas()
 	ShellExecuteW(NULL, L"runas", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 	exit(1);
 }
-
+void showSoft() {
+	bool i;
+	std::vector<UnicodeString> sortList;
+	std::vector<program> blockedInstalledSoft = curPC.get_softBlock();
+	Form1->Memo1->Clear();
+	if (blockedInstalledSoft.size() == 0) {
+		Form1->Memo1->Lines->Add("Не знайдено!");
+		curDefection.soft = false;
+	} else {
+		for(auto soft: blockedInstalledSoft) sortToVector(sortList, soft.name);
+		for(auto str: sortList) Form1->Memo1->Lines->Add(str);
+		curDefection.soft = true;
+	}
+}
+void showUsers() {
+	std::vector<User> usersList = curPC.get_users();
+	Form1->Memo2->Clear();
+	if (usersList.size() == 0) Form1->Memo2->Lines->Add("Нема юзерів... О_о");
+	else {
+		short admin_t = 0, user_t = 0, guest_t = 0;
+		for(auto user: usersList) {
+			UnicodeString str;
+			if (user.priv == "ADMIN") {
+				str = "Admin: ";
+				admin_t++;
+			}
+			if (user.priv == "USER"){
+				str = "User:  ";
+				user_t++;
+			}
+			if (user.priv == "GUEST"){
+				str = "Guest: ";
+				guest_t++;
+			}
+			str = str + user.name;
+			if (!(user.fullName.IsEmpty() || user.fullName == user.name)) str = str + " ("+ user.fullName + ")";
+			if (user.password_age > 42 && user.priv != "ADMIN") str = str + " [Days PASS - " + user.password_age + "]";
+			Form1->Memo2->Lines->Add(str);
+		}
+		if (admin_t == 1 && (user_t + guest_t) > 0) curDefection.user = false;
+		if (admin_t == 1 && (user_t + guest_t) == 0) curDefection.user = true;
+		if (admin_t > 1) curDefection.user = true;
+	}
+}
+void checkEsetQuarantine() {
+	UnicodeString dirSysQuarantine  = "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\ESET\\ESET Security\\Quarantine\\";
+	UnicodeString dirUserQuarantine = "AppData\\Local\\ESET\\ESET Security\\Quarantine\\";
+	patchList sysList, userList;
+    // --- готовим список пользовательских папок (userDirList)---
+	std::vector<UnicodeString> userListBad { //запрещеные пользователи
+		"All Users",
+		"Default",
+		"Default User",
+		"Public"
+	};
+	std::vector<UnicodeString> userDirList; //создаем вектор с папками пользователей
+	// процедура поиска папок пользователей
+	UnicodeString dirUser = "C:\\Users";
+	TSearchRec srUser;
+	if (!FindFirst(dirUser + "\\*.*", faAnyFile, srUser))
+		do {
+			if (!(srUser.Name == "." || srUser.Name == ".." || srUser.Name == "INFO.NQI")) { // это не трогаем
+				if ((srUser.Attr & faDirectory) != 0) {
+					if (!compareVectorAndString(srUser.Name, userListBad)) {
+						userDirList.push_back(dirUser + "\\" + srUser.Name);
+					}
+				}
+			}
+		} while (!FindNext(srUser)); // ищем пока не найдем все
+	FindClose(srUser);
+	// --- готовим список всех файлов во временых папках ---
+	// папка системного карантина
+	patchList temp = scanDirToFille(dirSysQuarantine);
+	sysList.list.insert(sysList.list.end(), temp.list.begin(), temp.list.end());
+	sysList.countDir += temp.countDir ;
+	sysList.countFille += temp.countFille ;
+	sysList.size += temp.size;
+	// папки карантина пользователей
+	for (auto userDir: userDirList) {
+		patchList temp = scanDirToFille(userDir + "\\" + dirUserQuarantine);
+		userList.list.insert(userList.list.end(), temp.list.begin(), temp.list.end());
+		userList.countDir += temp.countDir;
+		userList.countFille += temp.countFille;
+		userList.size += temp.size;
+	}
+	// подщет файлов в карантине
+	int countSysQuarantineFille = 0;
+	int countUserQuarantineFille = 0;
+	int countQuarantineFille = 0;
+	for (auto file: sysList.list) {
+		if (!(compareInSring(file.str, "INFO.NQI") || file.dir)) countSysQuarantineFille ++;
+	}
+	for (auto file: userList.list) {
+		if (!(compareInSring(file.str, "INFO.NQI") || file.dir)) countUserQuarantineFille ++;
+	}
+	countSysQuarantineFille = countSysQuarantineFille / 3;
+	countUserQuarantineFille = countUserQuarantineFille / 3;
+	countQuarantineFille = countSysQuarantineFille + countUserQuarantineFille;
+	// вывод информации по карантину
+	if (countQuarantineFille > 0) {
+		Form1->Show_ESETQuarantine->Text = UnicodeString(countQuarantineFille);
+		UnicodeString str = "В системі " + UnicodeString(countSysQuarantineFille)
+			+ ", у користувачів " + UnicodeString(countUserQuarantineFille) + "...";
+		Form1->Show_ESETQuarantine->Hint = str;
+		curDefection.eset = true;
+	} else {
+		Form1->Show_ESETQuarantine->Text = "0";
+		UnicodeString str = "Карантин порожній!";
+		Form1->Show_ESETQuarantine->Hint = str;
+        curDefection.eset = false;
+	}
+}
+void checkDefection() {
+	showSoft();
+	showUsers();
+    checkEsetQuarantine();
+	Form1->PageControl_InfoTabs->Pages[1]->Caption = u"Перевірки"; // \uE10A(B) - все норм
+	if (curDefection.soft || curDefection.user || curDefection.eset) {
+		Form1->PageControl_InfoTabs->Pages[1]->Caption = u"\uE10AПеревірки\uE10A"; // \uE10A(B) - все норм
+	}
+	if (curDefection.soft) {
+		Form1->Label_DefectionSoft->Font->Color = (TColor)clRed;
+		Form1->Label_DefectionSoft->Font->Style = TFontStyles() << fsBold;
+	} else {
+		Form1->Label_DefectionSoft->Font->Color = (TColor)clWindowText; 
+		Form1->Label_DefectionSoft->Font->Style = TFontStyles() >> fsBold;
+	}
+	if (curDefection.user) {
+		Form1->Label_DefectionUser->Font->Color = (TColor)clRed;
+		Form1->Label_DefectionUser->Font->Style = TFontStyles() << fsBold;
+	}else {
+		Form1->Label_DefectionUser->Font->Color = (TColor)clWindowText;
+		Form1->Label_DefectionUser->Font->Style = TFontStyles() >> fsBold;
+	}
+	if (curDefection.eset) {
+		Form1->Label_checkQuarantineEset_1->Font->Color = (TColor)clRed;
+		Form1->Label_checkQuarantineEset_1->Font->Style = TFontStyles() << fsBold;
+	}else {
+		Form1->Label_checkQuarantineEset_1->Font->Color = (TColor)clWindowText;
+		Form1->Label_checkQuarantineEset_1->Font->Style = TFontStyles() >> fsBold;
+	}
+}
 //---------------------------------------------------------------------------
 /* ОСНОВНОЙ КОД ГРАБА */
 void TForm1::mainGRUBer(bool i) {
@@ -233,6 +345,9 @@ void TForm1::mainGRUBer(bool i) {
 	UnicodeString dirGrubStr = EditDirGrubName->Text;
 	//printLogDebug("{dirGrubStr}=" + dirGrubStr);
 	// -> преварительные процедуры
+	// --- проверка нарушений
+	checkDefection();
+	// ...
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Form1->BtnGruberRun->Enabled = false;
 	Form1->BtnGruberStop->Enabled = true;
@@ -940,10 +1055,17 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 //---------------------------------------------------------------------------
+/* тестовый чекбокс*/
+void __fastcall TForm1::CheckBox1Click(TObject *Sender)
+{
 
+	// bool status = Form1->CheckBox1->Checked;
+}
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-
-
+/* перезапуск проверки нарушений на ПК */
+void __fastcall TForm1::Button_CheckDefectionClick(TObject *Sender)
+{
+	checkDefection();
+}
 //---------------------------------------------------------------------------
 
