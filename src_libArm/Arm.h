@@ -1,4 +1,4 @@
-п»ї//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 #ifndef ArmH
 #define ArmH
 
@@ -9,25 +9,24 @@
 //---------------------------------------------------------------------------
 class Arm {
 private:
-	/* РџР•Р Р•РњР•РќРќР«Р• */
-	/* РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё РїРµСЂРµРјРµРїРЅС‹С…:
-	** 1 - РґРѕР±Р°РІРёС‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ РІ РїСЂРёРІР°С‚РЅС‹Р№ СЂР°Р·РґРµР»
-	** 2 - РґРѕР±Р°РІРёС‚СЊ СЃРµС‚С‚РµСЂС‹ Рё РіРµС‚С‚РµСЂС‹
-	** 3 - РґРѕР±Р°РІРёС‚СЊ С‡С‚РµРЅРёРµ Рё Р·Р°РїРёСЃСЊ РІ С„Р°Р№Р»
-	** 4 - РґРѕР±Р°РІРёС‚СЊ СѓСЃС‚Р°РЅРѕРІРєСѓ РїСЂРѕС‡РёС‚Р°РЅС‹С… Р·РЅР°С‡РµРЅРёР№ РІ С„РѕСЂРјСѓ
+	/* ПЕРЕМЕННЫЕ */
+	/* При добавлении перемепных:
+	** 1 - добавить переменную в приватный раздел
+	** 2 - добавить сеттеры и геттеры
+	** 3 - добавить чтение и запись в файл
+	** 4 - добавить установку прочитаных значений в форму
 	*/
-	// --- РёРЅС„Рѕ РѕР± РџРљ (СЂСѓС‡РЅР°СЏ)
+	// --- инфо об ПК (ручная)
 		int number_UVs = 0;
 		int number_OK = 0;
 		int number_UVs_logist = 0;
 		int number_OK_logist = 0;
 		short useForNumberARMid = 0;
-		UnicodeString partition  = "Р‘РµР· РІС–РґРґС–Р»Сѓ";
-		UnicodeString className   = "Р‘РµР· РєР»Р°СЃСѓ";
-		UnicodeString categoryName   = "РћСЃРѕР±РёСЃС‚РёР№";
-		UnicodeString categoryNameShort = "РћРЎ";
-		UnicodeString licWindowsName = "РќРµ РІРєР°Р·Р°РЅРѕ";
-		UnicodeString licOfficeName  = "РќРµ РІРєР°Р·Р°РЅРѕ";
+		UnicodeString partition  = "Без відділу";
+		UnicodeString className   = "Без класу";
+		UnicodeString categoryName   = "Без категорії";
+		UnicodeString licWindowsName = "Не вказано";
+		UnicodeString licOfficeName  = "Не вказано";
 		int classID   = 0;
 		int categoryID   = 0;
 		int licWindowsID = 0;
@@ -37,23 +36,23 @@ private:
 		UnicodeString place = ""; // <===
 		UnicodeString phone = ""; // <===
 		std::vector<UnicodeString> coment;
-	// --- РёРЅС„Рѕ РѕР± РџРљ (СЂСѓС‡РЅР°СЏ) - РїРѕ РґРѕРєСѓРјРµРЅС‚Р°Рј
+	// --- инфо об ПК (ручная) - по документам
 		UnicodeString inNumberARM, inNumberHDD, inNumberDeclr;
 		UnicodeString inNumberFormulyar, inNumberWork, inNumberPerson;
 		UnicodeString inRespon, inAdminBP; // <===
-	// --- РёРЅС„Рѕ РѕР± РџРљ (СЂСѓС‡РЅР°СЏ) - РїРѕ РЅР°СЃС‚СЂРѕР№РєР°Рј
+	// --- инфо об ПК (ручная) - по настройкам
 		UnicodeString comPoliticInstall, comContrUSB, comMultiUSERS;
 		bool politicInstall=0, contrUSB=0, multiUSERS=0;
-	// --- РёРЅС„Рѕ РёР· РџРљ
+	// --- инфо из ПК
 		UnicodeString desktopName = "";
 		UnicodeString serial, serialMain, UUID, serial_mrb, CPUID, unSerial;
 		UnicodeString manufacturer, productName;
-	// --- СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕРµ РџРћ
+	// --- установленное ПО
 		std::vector<program> softInstall;
 		std::vector<program> softBlock;
-	// --- РїРѕР»СЊР·РѕРІР°С‚РµР»Рё
+	// --- пользователи
 		std::vector<User> users;
-	// === СЃС‚СЂСѓРєС‚СѓСЂС‹
+	// === структуры
 	struct infoEset {
 		bool autoUpdate = true;
 		UnicodeString dirMirror = "C:\\ESET\\mirror";
@@ -62,13 +61,13 @@ private:
 	struct histGrub {
 		UnicodeString date, user;
 	} histGr;
-	// === С„СѓРЅРєС†РёРё
-	// -- С‡С‚РµРЅРёРµ РёР· С„Р°Р№Р»Р° РЅР° РџРљ (c:\ProgramData\GRUBer\gruber_info.ini)
+	// === функции
+	// -- чтение из файла на ПК (c:\ProgramData\GRUBer\gruber_info.ini)
 	bool readFromFile();
 public:
-	// === РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
+	// === конструктор
 		Arm();
-	// === С„СѓРЅРєС†РёРё
+	// === функции
 		UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
 		void read_soft();
 		void read_user();
@@ -80,7 +79,7 @@ public:
 		std::vector<UnicodeString> mStrInfoArmEset();
 		std::vector<UnicodeString> mStrLastGrub();
 		UnicodeString lastGrub();
-	// === СЃРµС‚С‚РµСЂРё
+	// === сеттери
 		void set_useForNumberARMid(short i);
 		void setNumber_UVs(int i);
 		void setNumber_OK(int i);
@@ -113,7 +112,7 @@ public:
 		void setPoliticInstall (bool i);
 		void setContrUSB (bool i);
 		void setMultiUSERS (bool i);
-	// === РіРµС‚С‚РµСЂРё
+	// === геттери
 		short get_useForNumberARMid();
 		int getNumber_UVs();
 		int getNumber_OK();
@@ -151,7 +150,7 @@ public:
 		UnicodeString getComPoliticInstall();
 		UnicodeString getComContrUSB();
 		UnicodeString getComMultiUSERS();
-	// СЃРµСЂРёР№РЅРёРєРё
+	// серийники
 		UnicodeString getSerial();
 		UnicodeString getSerialMain();
 		UnicodeString getUUID();
@@ -165,10 +164,10 @@ public:
 		bool getPoliticInstall();
 		bool getContrUSB();
 		bool getMultiUSERS();
-	// СЃРѕС„С‚
+	// софт
 		std::vector<program> get_softInstall();
 		std::vector<program> get_softBlock();
-	// РїРѕР»СЊР·РѕРІР°С‚РµР»Рё
+	// пользователи
 		std::vector<User> get_users();
 };
 #endif

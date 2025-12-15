@@ -1,4 +1,4 @@
-п»ї//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -10,17 +10,17 @@
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-/* РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ */
+/* конструктор */
 Arm::Arm()
 {
 	readFromFile();
-	// РїРѕР»СѓС‡Р°РµРј DesktopName
+	// получаем DesktopName
 	DWORD bufCharCount = 32767;
 	TCHAR infoBuf[32767];
 	if( GetComputerName( infoBuf, &bufCharCount ) ) {
 		desktopName = UnicodeString(infoBuf);
-	} else desktopName = "РџРѕРјРёР»РєР°!";
-	// РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РёР· SMB - serial
+	} else desktopName = "Помилка!";
+	// получаем данные из SMB - serial
 	UnicodeString errSer[] = {
 		"To Be Filled By O.E.M.",
 		"Not Applicable",
@@ -31,12 +31,12 @@ Arm::Arm()
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
 	if (dataSMB == NULL) {
-		serialMain = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
-		UUID = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
-		serial_mrb = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
-		CPUID = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
-		manufacturer = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
-		productName = "РџРѕРјРёР»РєР° SMBIOS_DATA!";
+		serialMain = "Помилка SMBIOS_DATA!";
+		UUID = "Помилка SMBIOS_DATA!";
+		serial_mrb = "Помилка SMBIOS_DATA!";
+		CPUID = "Помилка SMBIOS_DATA!";
+		manufacturer = "Помилка SMBIOS_DATA!";
+		productName = "Помилка SMBIOS_DATA!";
 	}
 	serialMain = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
 	serial = serialMain;
@@ -53,13 +53,13 @@ Arm::Arm()
 	unSerial = GetHashCRC32(toHash);
 	manufacturer = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 4);
 	productName  = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 5);
-	// СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹Р№ СЃРѕС„С‚
+	// установленый софт
 	read_soft();
-	// РїРѕР»СЊР·РѕРІР°С‚РµР»Рё СЃРёСЃС‚РµРјС‹
+	// пользователи системы
     read_user();
 }
 //---------------------------------------------------------------------------
-/* С„СѓРЅРєС†РёРё */
+/* функции */
 UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 {
 	UnicodeString str;
@@ -76,11 +76,17 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 	} else str = str + prfPart + "_" + partition;
 	// serial
 	if (serial == "ErrorSN") {
-		str = str + "#(" + unSerial + ")" + "Р‘РµР·РЎРќ";
+		str = str + "#(" + unSerial + ")" + "БезСН";
 	}
 	else str = str + "#(" + unSerial + ")" + serial;
 	// category
-	str = str + "#" + categoryNameShort;
+	if (categoryID == 0) str = str + "#ОС";
+	if (categoryID == 1) str = str + "#НТ-БП";
+	if (categoryID == 2) str = str + "#НТ-ІСД";
+	if (categoryID == 3) str = str + "#НТ-ЕКМ";
+	if (categoryID == 4) str = str + "#ДСК";
+	if (categoryID == 5) str = str + "#Т";
+	if (categoryID == 6) str = str + "#ЦТ";
 	return fixDirName(str);
 }
 void Arm::read_soft() {
@@ -90,9 +96,9 @@ void Arm::read_soft() {
 void Arm::read_user() {
 	users = currentUsers();
 }
-//РіРµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРє РІ РёРЅС„Рѕ С„Р°Р№Р»С‹
+//генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrIniVersionNumber() {
-	const int iniVersionNumber = 3;
+	const int iniVersionNumber = 2;
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[iniVersion]");
 	mStr.push_back("version=" + UnicodeString(iniVersionNumber));
@@ -134,7 +140,6 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrub() {
 	mStr.push_back("className=" + className);
 	mStr.push_back("classID=" + UnicodeString(classID));
 	mStr.push_back("categoryName=" + categoryName);
-	mStr.push_back("categoryNameShort=" + categoryNameShort);
 	mStr.push_back("categoryID=" + UnicodeString(categoryID));
 	mStr.push_back("licWindowsName=" + licWindowsName);
 	mStr.push_back("licWindowsID=" + UnicodeString(licWindowsID));
@@ -177,7 +182,7 @@ std::vector<UnicodeString> Arm::mStrInfoArmEset() {
 	mStr.push_back("lastUpdateArchive=");
 	return mStr;
 }
-//РіРµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРєРё СЃ РґР°С‚РѕР№ РїРѕСЃР»РµРґРЅРµРіРѕ Р“СЂР°Р±Р°
+//генерация строки с датой последнего Граба
 UnicodeString Arm::lastGrub() {
 	UnicodeString str = histGr.date;
 	if (histGr.user.IsEmpty() == false) {
@@ -185,16 +190,30 @@ UnicodeString Arm::lastGrub() {
 	}
 	return str;
 }
-//С‡С‚РµРЅРёРµ РґР°РЅС‹С… РёР· С„Р°Р№Р»Р°
+//чтение даных из файла
 bool Arm::readFromFile() {
 	UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
-	//РЅРѕРІС‹Р№ INI С„Р°Р№Р»
+	//новый INI файл
 	if (FileExists(dir + "gruber_info.ini")) {
 		TStringList *file = new TStringList;
 		file->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
-		// РѕРїСЂРµРґРµР»РµРЅРёРµ РІРµСЂСЃРёРё С„Р°Р№Р»Р°
+		// определение версии файла
 		int vers = findParam(file, "[iniVersion]", "version").ToIntDef(1);
-        // РѕР±С‰РёРё РґР»СЏ РІСЃРµС… РІРµСЂСЃРёР№
+		// версия --2--
+		if (vers >= 2) {
+			useForNumberARMid = findParam(file, "[numberARM]", "useForNumberARMid").ToIntDef(0);
+			number_OK = findParam(file, "[numberARM]", "OK").ToIntDef(0);
+			number_OK_logist = findParam(file, "[numberARM]", "OK_logist").ToIntDef(0);
+            number_UVs = findParam(file, "[numberARM]", "UVs").ToIntDef(0);
+			number_UVs_logist = findParam(file, "[numberARM]", "UVs_logist").ToIntDef(0);
+			place = findParam(file, "[infoGrubARM]", "place");
+			phone = findParam(file, "[infoGrubARM]", "phone");
+			inRespon = findParam(file, "[infoGrubARM]", "inRespon");
+			inAdminBP = findParam(file, "[infoGrubARM]", "inAdminBP");
+		} else {
+			number_UVs = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
+		}
+		// общии для всех версий
 		histGr.date = findParam(file, "[lastGrub]", "lastGrubDate");
 		histGr.user = findParam(file, "[lastGrub]", "lastGrubUser");
 		partition = findParam(file, "[infoGrubARM]", "partition");
@@ -223,49 +242,22 @@ bool Arm::readFromFile() {
 		eset.autoUpdate = findParam(file, "[infoESET]", "autoUpdate").ToIntDef(1);
 		eset.dirMirror = findParam(file, "[infoESET]", "dirMirror");
 		coment = findCategory(file, "[comment]");
-		// РІРµСЂСЃРёСЏ --2--
-		if (vers == 1) {
-			number_UVs = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
-        }
-		if (vers >= 1) {
-			if (categoryID == 0) {categoryNameShort = "РћРЎ";}
-			if (categoryID == 1) {categoryNameShort = "РќРў-Р‘Рџ";}
-			if (categoryID == 2) {categoryNameShort = "РќРў-Р†РЎР”";}
-			if (categoryID == 3) {categoryNameShort = "РќРў-Р•РљРњ";}
-			if (categoryID == 4) {categoryNameShort = "Р”РЎРљ";}
-			if (categoryID == 5) {categoryNameShort = "Рў";}
-			if (categoryID == 6) {categoryNameShort = "Р¦Рў";}
-		}
-		if (vers >= 2) {
-			useForNumberARMid = findParam(file, "[numberARM]", "useForNumberARMid").ToIntDef(0);
-			number_OK = findParam(file, "[numberARM]", "OK").ToIntDef(0);
-			number_OK_logist = findParam(file, "[numberARM]", "OK_logist").ToIntDef(0);
-            number_UVs = findParam(file, "[numberARM]", "UVs").ToIntDef(0);
-			number_UVs_logist = findParam(file, "[numberARM]", "UVs_logist").ToIntDef(0);
-			place = findParam(file, "[infoGrubARM]", "place");
-			phone = findParam(file, "[infoGrubARM]", "phone");
-			inRespon = findParam(file, "[infoGrubARM]", "inRespon");
-			inAdminBP = findParam(file, "[infoGrubARM]", "inAdminBP");
-		}
-		if (vers >= 3) {
-			categoryNameShort = findParam(file, "[infoGrubARM]", "categoryNameShort");
-		}
 		return true;
 	}
-	//СЃС‚Р°СЂС‹Рµ С„Р°Р№Р»С‹
+	//старые файлы
 	if (FileExists(dir + "info_001.dat")) {
 		TStringList *infoDatIm = new TStringList;
 		infoDatIm->LoadFromFile(dir + "info_001.dat", TEncoding::UTF8);
 		number_UVs = (infoDatIm->Strings[1]).ToIntDef(0);
 		partition = infoDatIm->Strings[2];
 		categoryID = (infoDatIm->Strings[3]).ToIntDef(0) + 1;
-		if (categoryID == 0) {categoryName = "РћСЃРѕР±РёСЃС‚РёР№"; categoryNameShort = "РћРЎ";}
-		if (categoryID == 1) {categoryName = "РќРў Р±РµР· РїС–РґРєР»СЋС‡РµРЅСЏ"; categoryNameShort = "РќРў-Р‘Рџ";}
-		if (categoryID == 2) {categoryName = "РќРў Р· \"Р†РЅС‚РµСЂРЅРµС‚\""; categoryNameShort = "РќРў-Р†РЎР”";}
-		if (categoryID == 3) {categoryName = "РќРў Р· \"Р”РЅС–РїСЂРѕ\""; categoryNameShort = "РќРў-Р•РљРњ";}
-		if (categoryID == 4) {categoryName = "Р”РЎРљ"; categoryNameShort = "Р”РЎРљ";}
-		if (categoryID == 5) {categoryName = "РўР°С”РјРЅРѕ"; categoryNameShort = "Рў";}
-		if (categoryID == 6) {categoryName = "Р¦С–Р»РєРѕРј РўР°С”РјРЅРѕ"; categoryNameShort = "Р¦Рў";}
+		if (categoryID == 0) categoryName = "Особистий";
+		if (categoryID == 1) categoryName = "НТ без підключеня";
+		if (categoryID == 2) categoryName = "НТ з \"Інтернет\"";
+		if (categoryID == 3) categoryName = "НТ з \"Дніпро\"";
+		if (categoryID == 4) categoryName = "ДСК";
+		if (categoryID == 5) categoryName = "Таємно";
+		if (categoryID == 6) categoryName = "Цілком Таємно";
 		coment.push_back(infoDatIm->Strings[4]);
 		respon = infoDatIm->Strings[5];
 		if(infoDatIm->Count == 7) {
@@ -282,8 +274,8 @@ bool Arm::readFromFile() {
 	return false;
 }
 //---------------------------------------------------------------------------
-/* СЃРµС‚С‚РµСЂРё */
-// СЂСѓС‡РЅРѕР№ РІРІРѕРґ РїРѕ РєРѕРјРїСѓ
+/* сеттери */
+// ручной ввод по компу
 void Arm::set_useForNumberARMid(short i) { useForNumberARMid = i; }
 void Arm::setNumber_UVs(int i) { number_UVs = i; }
 void Arm::setNumber_OK(int i) { number_OK = i; }
@@ -291,31 +283,21 @@ void Arm::setNumber_UVs_logist(int i) { number_UVs_logist = i; }
 void Arm::setNumber_OK_logist(int i) { number_OK_logist = i; }
 void Arm::setPartition(UnicodeString str) { partition = str; }
 void Arm::setClass(UnicodeString str, int i) { className = str; classID = i; }
-void Arm::setCategory(UnicodeString str, int i) {
-	categoryName = str;
-	categoryID = i;
-	if (categoryID == 0) categoryNameShort = "РћРЎ";
-	if (categoryID == 1) categoryNameShort = "РќРў-Р‘Рџ";
-	if (categoryID == 2) categoryNameShort = "РќРў-Р†РЎР”";
-	if (categoryID == 3) categoryNameShort = "РќРў-Р•РљРњ";
-	if (categoryID == 4) categoryNameShort = "Р”РЎРљ";
-	if (categoryID == 5) categoryNameShort = "Рў";
-	if (categoryID == 6) categoryNameShort = "Р¦Рў";
-}
+void Arm::setCategory(UnicodeString str, int i) { categoryName = str; categoryID = i; }
 void Arm::setLicWindows(UnicodeString str, int i) { licWindowsName = str; licWindowsID = i; }
 void Arm::setLicOffice(UnicodeString str, int i) { licOfficeName = str; licOfficeID = i; }
 void Arm::setRespon(UnicodeString str) { respon = str; }
 void Arm::setPurpose(UnicodeString str) { purpose = str; }
 void Arm::setPlace(UnicodeString str) { place = str; } // <===
 void Arm::setPhone(UnicodeString str) { phone = str; } // <===
-// РєРѕРјРµРЅС‚Р°СЂРёР№
+// коментарий
 void Arm::setComent(std::vector<UnicodeString> vStr) { coment = vStr; }
-// РµСЃРµС‚
+// есет
 void Arm::setEsetDir(UnicodeString str) { eset.dirMirror = str; }
 void Arm::setEsetAutoUpdate(bool i) { eset.autoUpdate = i; }
-// РїРѕСЃР»РµРґРЅРёР№ РіСЂР°Р±
+// последний граб
 void Arm::setLastGrub(UnicodeString user, UnicodeString date) { histGr.date = date; histGr.user = user; }
-// РїРѕ РґРѕРєР°Рј
+// по докам
 void Arm::setInNumberARM (UnicodeString str) { inNumberARM=str; }
 void Arm::setInNumberHDD (UnicodeString str) { inNumberHDD=str; }
 void Arm::setInNumberDeclr (UnicodeString str) { inNumberDeclr=str; }
@@ -332,9 +314,9 @@ void Arm::setPoliticInstall (bool i) { politicInstall = i; }
 void Arm::setContrUSB (bool i) { contrUSB = i; }
 void Arm::setMultiUSERS (bool i) { multiUSERS = i; }
 //---------------------------------------------------------------------------
-/* РіРµС‚С‚РµСЂРё */
+/* геттери */
 UnicodeString Arm::getDesktopName() { return desktopName; }
-// СЂСѓС‡РЅРѕР№ РІРІРѕРґ РїРѕ РєРѕРјРїСѓ
+// ручной ввод по компу
 short Arm::get_useForNumberARMid() { return useForNumberARMid; }
 int Arm::getNumber_UVs() { return number_UVs; }
 int Arm::getNumber_OK() { return number_OK; }
@@ -349,13 +331,13 @@ UnicodeString Arm::getRespon() { return errCheck(respon); }
 UnicodeString Arm::getPurpose() { return errCheck(purpose); }
 UnicodeString Arm::getPlace() { return errCheck(place); } // <===
 UnicodeString Arm::getPhone() { return errCheck(phone); } // <===
-// РєРѕРјРµРЅС‚Р°СЂРёР№
+// коментарий
 std::vector<UnicodeString> Arm::getComent() { return coment; }
 UnicodeString Arm::getComentStr() {
    if (coment.empty()) return "";
 	else return coment[0];
 }
-// СЃРµСЂРёР№РЅРёРєРё
+// серийники
 UnicodeString Arm::getSerial() { return serial; }
 UnicodeString Arm::getSerialMain() { return serialMain; }
 UnicodeString Arm::getUUID() { return UUID; }
@@ -364,10 +346,10 @@ UnicodeString Arm::getCPUID() { return CPUID; }
 UnicodeString Arm::getUnSerial() { return unSerial; }
 UnicodeString Arm::get_manufacturer() { return manufacturer; }
 UnicodeString Arm::get_productName() { return productName; }
-// РµСЃРµС‚
+// есет
 UnicodeString Arm::getEsetDir() { return eset.dirMirror; }
 bool Arm::getEsetAutoUpdate() { return eset.autoUpdate; }
-// РїРѕ РґРѕРєР°Рј
+// по докам
 UnicodeString Arm::getInNumberARM() { return errCheck(inNumberARM); }
 UnicodeString Arm::getInNumberHDD() { return errCheck(inNumberHDD); }
 UnicodeString Arm::getInNumberDeclr() { return errCheck(inNumberDeclr); }
@@ -376,21 +358,21 @@ UnicodeString Arm::getInNumberWork() { return errCheck(inNumberWork); }
 UnicodeString Arm::getInNumberPerson() { return errCheck(inNumberPerson); }
 UnicodeString Arm::getInRespon() { return errCheck(inRespon); }// <===
 UnicodeString Arm::getInAdminBP() { return errCheck(inAdminBP); }// <===
-// РїРѕ РЅР°СЃС‚СЂРѕР№РєР°Рј
+// по настройкам
 UnicodeString Arm::getComPoliticInstall() { return errCheck(comPoliticInstall); }
 UnicodeString Arm::getComContrUSB() { return errCheck(comContrUSB); }
 UnicodeString Arm::getComMultiUSERS() { return errCheck(comMultiUSERS); }
 bool Arm::getPoliticInstall() { return politicInstall; }
 bool Arm::getContrUSB() { return contrUSB; }
 bool Arm::getMultiUSERS() { return multiUSERS; }
-// РїРѕ Р»РёС†РµРЅР·РёСЏРј РџРћ
+// по лицензиям ПО
 int Arm::getLicWindowsID() { return licWindowsID; }
 int Arm::getLicOfficeID() { return licOfficeID; }
 UnicodeString Arm::getLicWindowsName() { return licWindowsName; }
 UnicodeString Arm::getLicOfficeName() { return licOfficeName; }
-// СЃРѕС„С‚
+// софт
 std::vector<program> Arm::get_softInstall() { return softInstall; }
 std::vector<program> Arm::get_softBlock() { return softBlock; }
-// РїРѕР»СЊР·РѕРІР°С‚РµР»Рё
+// пользователи
 std::vector<User> Arm::get_users() { return users; }
 //---------------------------------------------------------------------------

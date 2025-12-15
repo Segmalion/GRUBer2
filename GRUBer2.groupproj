@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{93054C53-238B-4EBA-B919-8056A7F7D7F7}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="src_grub\GRUBer.cbproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="src_libArm\linArm.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="GRUBer">
+        <MSBuild Projects="src_grub\GRUBer.cbproj"/>
+    </Target>
+    <Target Name="GRUBer:Clean">
+        <MSBuild Projects="src_grub\GRUBer.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GRUBer:Make">
+        <MSBuild Projects="src_grub\GRUBer.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="linArm">
+        <MSBuild Projects="src_libArm\linArm.cbproj"/>
+    </Target>
+    <Target Name="linArm:Clean">
+        <MSBuild Projects="src_libArm\linArm.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="linArm:Make">
+        <MSBuild Projects="src_libArm\linArm.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="GRUBer;linArm"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="GRUBer:Clean;linArm:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="GRUBer:Make;linArm:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
