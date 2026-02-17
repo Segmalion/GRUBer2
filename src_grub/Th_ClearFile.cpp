@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #include <System.hpp>
 #pragma hdrstop
@@ -34,8 +34,8 @@ std::vector<UnicodeString> dirListUser {
 	"AppData\\Roaming\\Microsoft\\Word\\",
 	"AppData\\Roaming\\Microsoft\\PowerPoint\\",
 	"AppData\\Roaming\\Microsoft\\Office\\Recent\\",
-	"AppData\\Roaming\\Microsoft\\Office\\Последние файлы\\",
-	"AppData\\Roaming\\Microsoft\\Office\\Останні\\"
+	"AppData\\Roaming\\Microsoft\\Office\\РџРѕСЃР»РµРґРЅРёРµ С„Р°Р№Р»С‹\\",
+	"AppData\\Roaming\\Microsoft\\Office\\РћСЃС‚Р°РЅРЅС–\\"
 };
 extern patchList fullList, tempList, recycleList;
 extern bool newOpenFormClean;
@@ -56,56 +56,56 @@ void __fastcall Th_ClearFile::Execute()
 		FormClearTempDir->Memo_LOG->Clear();
 		FormClearTempDir->Label4->Caption = "-";
 		FormClearTempDir->Label5->Caption = "-";
-		FormClearTempDir->Memo_LOG->Lines->Add("Пошук файлів...");
-		// --- готовим список пользовательских папок (userDirList)---
-		std::vector<UnicodeString> userListBad { //запрещеные пользователи
+		FormClearTempDir->Memo_LOG->Lines->Add("РџРѕС€СѓРє С„Р°Р№Р»С–РІ...");
+		// --- РіРѕС‚РѕРІРёРј СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… РїР°РїРѕРє (userDirList)---
+		std::vector<UnicodeString> userListBad { //Р·Р°РїСЂРµС‰РµРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё
 			"All Users",
 			"Default",
 			"Default User",
 			"Public"
 		};
-		std::vector<UnicodeString> userDirList; //создаем вектор с папками пользователей
-		// процедура поиска папок пользователей
+		std::vector<UnicodeString> userDirList; //СЃРѕР·РґР°РµРј РІРµРєС‚РѕСЂ СЃ РїР°РїРєР°РјРё РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+		// РїСЂРѕС†РµРґСѓСЂР° РїРѕРёСЃРєР° РїР°РїРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
 		UnicodeString dirUser = "C:\\Users";
 		TSearchRec srUser;
 		if (!FindFirst(dirUser + "\\*.*", faAnyFile, srUser))
 			do {
-				if (!(srUser.Name == "." || srUser.Name == "..")) { // это не трогаем
+				if (!(srUser.Name == "." || srUser.Name == "..")) { // СЌС‚Рѕ РЅРµ С‚СЂРѕРіР°РµРј
 					if ((srUser.Attr & faDirectory) != 0) {
 						if (!compareVectorAndString(srUser.Name, userListBad)) {
 							userDirList.push_back(dirUser + "\\" + srUser.Name);
 						}
 					}
 				}
-			} while (!FindNext(srUser)); // ищем пока не найдем все
+			} while (!FindNext(srUser)); // РёС‰РµРј РїРѕРєР° РЅРµ РЅР°Р№РґРµРј РІСЃРµ
 		FindClose(srUser);
 		/*
 		for (auto a: userDirList) {
 			Memo_LOG->Lines->Add("- " + UnicodeString(a));
 		}
 		*/
-		// --- готовим список с папками корзин (recycleDirList) ---
+		// --- РіРѕС‚РѕРІРёРј СЃРїРёСЃРѕРє СЃ РїР°РїРєР°РјРё РєРѕСЂР·РёРЅ (recycleDirList) ---
 		std::vector<UnicodeString> drives = getLocalDrivePatch();
-		std::vector<UnicodeString> recycleDirList; //создаем вектор для папок корзин
+		std::vector<UnicodeString> recycleDirList; //СЃРѕР·РґР°РµРј РІРµРєС‚РѕСЂ РґР»СЏ РїР°РїРѕРє РєРѕСЂР·РёРЅ
 		for(auto drive: drives) {
 			//Memo_LOG->Lines->Add(drive);
-			// процедура поиска папок пользователей
+			// РїСЂРѕС†РµРґСѓСЂР° РїРѕРёСЃРєР° РїР°РїРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
 			UnicodeString dirRecycle = drive + "$Recycle.Bin";
 			TSearchRec srRecycle;
 			if (!FindFirst(dirRecycle + "\\*.*", faAnyFile, srRecycle))
 				do {
-					if (!(srRecycle.Name == "." || srRecycle.Name == "..")) { // это не трогаем
+					if (!(srRecycle.Name == "." || srRecycle.Name == "..")) { // СЌС‚Рѕ РЅРµ С‚СЂРѕРіР°РµРј
 						if ((srRecycle.Attr & faDirectory) != 0) {
 							recycleDirList.push_back(dirRecycle + "\\" + srRecycle.Name);
 						}
 					}
-				} while (!FindNext(srRecycle)); // ищем пока не найдем все
+				} while (!FindNext(srRecycle)); // РёС‰РµРј РїРѕРєР° РЅРµ РЅР°Р№РґРµРј РІСЃРµ
 			FindClose(srRecycle);
 		}
 		//Memo_LOG->Lines->Add("----------------------------------");
 		//for(auto dir: recycleDirList) Memo_LOG->Lines->Add("-> " + dir);
 		// ------------------------------------------------------------------
-		// --- готовим список всех файлов во временых папках ---
+		// --- РіРѕС‚РѕРІРёРј СЃРїРёСЃРѕРє РІСЃРµС… С„Р°Р№Р»РѕРІ РІРѕ РІСЂРµРјРµРЅС‹С… РїР°РїРєР°С… ---
 		for (auto dir: dirListFull) {
 			patchList temp = scanDirToFille(dir);
 			tempList.list.insert(tempList.list.end(), temp.list.begin(), temp.list.end());
@@ -138,22 +138,22 @@ void __fastcall Th_ClearFile::Execute()
 		fullList.countFille = tempList.countFille + recycleList.countFille;
 		fullList.size       = tempList.size       + recycleList.size;
 		FormClearTempDir->Memo_LOG->Lines->Add("----------------------------------");
-		FormClearTempDir->Memo_LOG->Lines->Add("ТИМЧАСОВІ ФАЙЛИ:");
-		FormClearTempDir->Memo_LOG->Lines->Add("Тек ---- " + UnicodeString(tempList.countDir));
-		FormClearTempDir->Memo_LOG->Lines->Add("Файлів - " + UnicodeString(tempList.countFille));
-		FormClearTempDir->Memo_LOG->Lines->Add("Розмір - " + byteToStr(tempList.size));
+		FormClearTempDir->Memo_LOG->Lines->Add("РўРРњР§РђРЎРћР’Р† Р¤РђР™Р›Р:");
+		FormClearTempDir->Memo_LOG->Lines->Add("РўРµРє ---- " + UnicodeString(tempList.countDir));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р¤Р°Р№Р»С–РІ - " + UnicodeString(tempList.countFille));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р РѕР·РјС–СЂ - " + byteToStr(tempList.size));
 		FormClearTempDir->Memo_LOG->Lines->Add("----------------------------------");
-		FormClearTempDir->Memo_LOG->Lines->Add("ФАЙЛИ В КОРЗИНІ:");
-		FormClearTempDir->Memo_LOG->Lines->Add("Тек ---- " + UnicodeString(recycleList.countDir));
-		FormClearTempDir->Memo_LOG->Lines->Add("Файлів - " + UnicodeString(recycleList.countFille));
-		FormClearTempDir->Memo_LOG->Lines->Add("Розмір - " + byteToStr(recycleList.size));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р¤РђР™Р›Р Р’ РљРћР Р—РРќР†:");
+		FormClearTempDir->Memo_LOG->Lines->Add("РўРµРє ---- " + UnicodeString(recycleList.countDir));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р¤Р°Р№Р»С–РІ - " + UnicodeString(recycleList.countFille));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р РѕР·РјС–СЂ - " + byteToStr(recycleList.size));
 		FormClearTempDir->Memo_LOG->Lines->Add("----------------------------------");
-		FormClearTempDir->Memo_LOG->Lines->Add("ЗАГАЛЬНО:");
-		FormClearTempDir->Memo_LOG->Lines->Add("Тек ---- " + UnicodeString(fullList.countDir));
-		FormClearTempDir->Memo_LOG->Lines->Add("Файлів - " + UnicodeString(fullList.countFille));
-		FormClearTempDir->Memo_LOG->Lines->Add("Розмір - " + byteToStr(fullList.size));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р—РђР“РђР›Р¬РќРћ:");
+		FormClearTempDir->Memo_LOG->Lines->Add("РўРµРє ---- " + UnicodeString(fullList.countDir));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р¤Р°Р№Р»С–РІ - " + UnicodeString(fullList.countFille));
+		FormClearTempDir->Memo_LOG->Lines->Add("Р РѕР·РјС–СЂ - " + byteToStr(fullList.size));
 		FormClearTempDir->Memo_LOG->Lines->Add("==================================");
-	//  Memo_LOG->Lines->Add("Знайденні тимчасові файли:");
+	//  Memo_LOG->Lines->Add("Р—РЅР°Р№РґРµРЅРЅС– С‚РёРјС‡Р°СЃРѕРІС– С„Р°Р№Р»Рё:");
 	//	patch.fille = patch.fille + recInfo.i64NumItems;
 		//FormClearTempDir->Label4->Caption = UnicodeString(fullList.countFille);
 	//	for(auto i: patch.list) {
@@ -166,11 +166,11 @@ void __fastcall Th_ClearFile::Execute()
 		FormClearTempDir->Memo_LOG->Lines->Add(fullList.countFille);
 		long long step = fullList.countFille / 100;
 		double tmpPos = 0;
-		//кнопка очистки
+		//РєРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё
 		long long sizeDel  = 0, sizeUnDel  = 0;
 		long long countDel = 0, countUnDel = 0, countAll = 0;
-		//очистка временых папок
-		FormClearTempDir->Memo_LOG->Lines->Add("Видалення тимчасових файлів...");
+		//РѕС‡РёСЃС‚РєР° РІСЂРµРјРµРЅС‹С… РїР°РїРѕРє
+		FormClearTempDir->Memo_LOG->Lines->Add("Р’РёРґР°Р»РµРЅРЅСЏ С‚РёРјС‡Р°СЃРѕРІРёС… С„Р°Р№Р»С–РІ...");
 		for(auto i: fullList.list) {
 			if ((FileGetAttr(i.str) & faDirectory) != 0) {
 				FileSetAttr(i.str, faDirectory);
@@ -192,12 +192,12 @@ void __fastcall Th_ClearFile::Execute()
 			} else if (countAll % step == 0) FormClearTempDir->ProgressBar_Clean->Position ++;
 		}
 		//ProgressBar_Clean->Position = 100;
-		//вывод
+		//РІС‹РІРѕРґ
 		//FormClearTempDir->Label5->Caption = countDel;
 		//fullList.countFille = countUnDel;
 		FormClearTempDir->Memo_LOG->Lines->Add("----------------------------------");
-		FormClearTempDir->Memo_LOG->Lines->Add("Видаленно ----------- " + UnicodeString(countDel) + " (" + byteToStr(sizeDel) + ")");
-		FormClearTempDir->Memo_LOG->Lines->Add("Не вдалось видалити - " + UnicodeString(countUnDel) + " (" + byteToStr(sizeUnDel) + ")");
+		FormClearTempDir->Memo_LOG->Lines->Add("Р’РёРґР°Р»РµРЅРЅРѕ ----------- " + UnicodeString(countDel) + " (" + byteToStr(sizeDel) + ")");
+		FormClearTempDir->Memo_LOG->Lines->Add("РќРµ РІРґР°Р»РѕСЃСЊ РІРёРґР°Р»РёС‚Рё - " + UnicodeString(countUnDel) + " (" + byteToStr(sizeUnDel) + ")");
 		FormClearTempDir->Memo_LOG->Lines->Add("==================================");
 	}
 }
