@@ -613,6 +613,7 @@
                 Margins.Bottom = 5
                 Align = alClient
                 Anchors = []
+                Color = clBtnFace
                 MaxValue = 9999.000000000000000000
                 MaxLength = 3
                 TabOrder = 0
@@ -1368,10 +1369,9 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet_Info
+        ActivePage = TabSheet_Settings
         Align = alClient
         TabOrder = 1
-        StyleElements = [seFont, seBorder]
         object TabSheet_Info: TTabSheet
           Margins.Left = 5
           Margins.Top = 5
@@ -1485,7 +1485,7 @@
                   81)
                 object LabEdit_NumUVs: TLabeledEdit
                   Left = 8
-                  Top = 39
+                  Top = 35
                   Width = 150
                   Height = 38
                   Margins.Left = 5
@@ -1515,7 +1515,7 @@
                 end
                 object LabEdit_NumUVsO: TLabeledEdit
                   Left = 174
-                  Top = 39
+                  Top = 35
                   Width = 150
                   Height = 38
                   Margins.Left = 5
@@ -1543,7 +1543,7 @@
                 end
                 object LabEdit_NumOK: TLabeledEdit
                   Left = 340
-                  Top = 39
+                  Top = 35
                   Width = 150
                   Height = 38
                   Margins.Left = 5
@@ -1571,7 +1571,7 @@
                 end
                 object LabEdit_NumOKO: TLabeledEdit
                   Left = 506
-                  Top = 39
+                  Top = 35
                   Width = 150
                   Height = 38
                   Margins.Left = 5
@@ -1947,6 +1947,12 @@
                 Control = Button_CheckDefection
                 Row = 6
               end>
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -21
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
             RowCollection = <
               item
                 SizeStyle = ssAbsolute
@@ -2013,7 +2019,6 @@
                   SizeStyle = ssAuto
                 end>
               TabOrder = 0
-              ExplicitTop = -5
               DesignSize = (
                 678
                 50)
@@ -2029,7 +2034,14 @@
                 Margins.Bottom = 5
                 Align = alClient
                 Caption = #1047#1085#1072#1081#1076#1077#1085#1085#1086' '#1092#1072#1081#1083#1110#1074' '#1074' '#1082#1072#1088#1072#1085#1090#1080#1085#1110' ESET:'
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clWhite
+                Font.Height = -21
+                Font.Name = 'Segoe UI'
+                Font.Style = []
+                ParentFont = False
                 Layout = tlCenter
+                StyleElements = [seClient, seBorder]
                 ExplicitWidth = 346
                 ExplicitHeight = 30
               end
@@ -2050,8 +2062,6 @@
                 ShowHint = True
                 TabOrder = 0
                 Text = '[WIP] ESETQuarantine'
-                ExplicitLeft = 399
-                ExplicitTop = 7
               end
             end
             object Label_DefectionUser: TLabel
@@ -2067,12 +2077,13 @@
               Align = alClient
               Caption = #1055#1086#1090#1086#1095#1085#1110' '#1082#1086#1088#1080#1089#1090#1091#1074#1072#1095#1110' '#1040#1056#1052':'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = clWindowText
+              Font.Color = clWhite
               Font.Height = -21
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
               Layout = tlBottom
+              StyleElements = [seClient, seBorder]
               ExplicitWidth = 253
               ExplicitHeight = 30
             end
@@ -2096,7 +2107,6 @@
               ReadOnly = True
               ScrollBars = ssVertical
               TabOrder = 1
-              ExplicitHeight = 262
             end
             object Label_DefectionSoft: TLabel
               AlignWithMargins = True
@@ -2110,8 +2120,14 @@
               Margins.Bottom = 5
               Align = alClient
               Caption = #1047#1072#1073#1086#1088#1086#1085#1077#1085#1080#1081' '#1089#1086#1092#1090':'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWhite
+              Font.Height = -21
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
               Layout = tlBottom
-              ExplicitTop = 377
+              StyleElements = [seClient, seBorder]
               ExplicitWidth = 185
               ExplicitHeight = 30
             end
@@ -2136,8 +2152,6 @@
               ScrollBars = ssVertical
               TabOrder = 2
               WordWrap = False
-              ExplicitTop = 427
-              ExplicitHeight = 262
             end
             object Button_CheckDefection: TButton
               AlignWithMargins = True
@@ -2927,22 +2941,28 @@
               item
                 Column = 0
                 Control = GridPanel15
+                Row = 3
+              end
+              item
+                Column = 0
+                Control = GroupBox1
                 Row = 2
               end>
             RowCollection = <
               item
                 SizeStyle = ssAbsolute
-                Value = 500.000000000000000000
+                Value = 440.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 180.000000000000000000
               end
               item
                 Value = 100.000000000000000000
               end
               item
                 SizeStyle = ssAbsolute
-                Value = 51.000000000000000000
-              end
-              item
-                SizeStyle = ssAuto
+                Value = 110.000000000000000000
               end>
             TabOrder = 0
             object GroupBox3: TGroupBox
@@ -2950,13 +2970,13 @@
               Left = 5
               Top = 5
               Width = 668
-              Height = 490
+              Height = 430
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
-              Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' GRUBer'#39#1072
+              Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' '#1089#1073#1086#1088#1091' GRUBer'#39#1072
               TabOrder = 0
               object Label_ForNumberARM: TLabel
                 Left = 19
@@ -3098,20 +3118,6 @@
                 TabOrder = 8
                 OnClick = CheckBox_ShowEsetUpdateClick
               end
-              object BtnSaveSetteings: TButton
-                AlignWithMargins = True
-                Left = 19
-                Top = 428
-                Width = 632
-                Height = 51
-                Margins.Left = 5
-                Margins.Top = 5
-                Margins.Right = 5
-                Margins.Bottom = 5
-                Caption = #1047#1073#1077#1088#1077#1075#1090#1080' '#1085#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103
-                TabOrder = 9
-                OnClick = BtnSaveSetteingsClick
-              end
               object EditPrefixPartition: TEdit
                 Left = 291
                 Top = 327
@@ -3122,7 +3128,7 @@
                 Margins.Right = 5
                 Margins.Bottom = 5
                 Enabled = False
-                TabOrder = 10
+                TabOrder = 9
                 OnChange = EditPrefixPartitionChange
               end
               object CheckBoxPrefixPartition: TCheckBox
@@ -3135,7 +3141,7 @@
                 Margins.Right = 5
                 Margins.Bottom = 5
                 Caption = #1055#1088#1077#1092#1110#1082#1089' '#1076#1086' '#1087#1110#1076#1088#1086#1079#1076#1110#1083#1091':'
-                TabOrder = 11
+                TabOrder = 10
                 OnClick = CheckBoxPrefixPartitionClick
               end
               object ComboBox_forNumberARM: TComboBox
@@ -3149,7 +3155,7 @@
                 Margins.Bottom = 5
                 Style = csDropDownList
                 ItemIndex = 0
-                TabOrder = 12
+                TabOrder = 11
                 Text = #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
                 OnChange = ComboBox_forNumberARMChange
                 Items.Strings = (
@@ -3169,15 +3175,15 @@
                 Margins.Right = 5
                 Margins.Bottom = 5
                 Caption = 'CheckBox_TempDir'
-                TabOrder = 13
+                TabOrder = 12
               end
             end
             object GroupBox4: TGroupBox
               AlignWithMargins = True
               Left = 5
-              Top = 505
+              Top = 445
               Width = 668
-              Height = 413
+              Height = 170
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -3235,25 +3241,12 @@
                 TabOrder = 2
                 OnClick = CheckBoxEsetAutoUpdateClick
               end
-              object CheckBox1: TCheckBox
-                Left = 493
-                Top = 378
-                Width = 170
-                Height = 30
-                Margins.Left = 5
-                Margins.Top = 5
-                Margins.Right = 5
-                Margins.Bottom = 5
-                Caption = 'CheckBox1'
-                TabOrder = 3
-                OnClick = CheckBox1Click
-              end
             end
             object GridPanel15: TGridPanel
               Left = 0
-              Top = 923
+              Top = 864
               Width = 678
-              Height = 51
+              Height = 110
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -3271,24 +3264,33 @@
                 item
                   Column = 1
                   Control = BtnAboutGruber
-                  Row = 0
+                  Row = 1
                 end
                 item
                   Column = 0
                   Control = Button_RestartAssAdmin
+                  Row = 1
+                end
+                item
+                  Column = 0
+                  ColumnSpan = 2
+                  Control = BtnSaveSetteings
                   Row = 0
                 end>
               RowCollection = <
                 item
-                  Value = 100.000000000000000000
+                  Value = 50.000000000000000000
+                end
+                item
+                  Value = 50.000000000000000000
                 end>
               TabOrder = 2
               object BtnAboutGruber: TButton
                 AlignWithMargins = True
                 Left = 344
-                Top = 5
+                Top = 60
                 Width = 329
-                Height = 41
+                Height = 45
                 Hint = #1055#1088#1086' GRUBer'
                 Margins.Left = 5
                 Margins.Top = 5
@@ -3305,9 +3307,9 @@
               object Button_RestartAssAdmin: TButton
                 AlignWithMargins = True
                 Left = 5
-                Top = 5
+                Top = 60
                 Width = 329
-                Height = 41
+                Height = 45
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -3316,6 +3318,109 @@
                 Caption = #1055#1077#1088#1077#1079#1072#1087#1091#1089#1090#1080#1090#1080' '#1074#1110#1076' '#1040#1076#1084#1110#1085#1072
                 TabOrder = 1
                 OnClick = Button_RestartAssAdminClick
+              end
+              object BtnSaveSetteings: TButton
+                AlignWithMargins = True
+                Left = 5
+                Top = 5
+                Width = 668
+                Height = 45
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Align = alClient
+                Caption = #1047#1073#1077#1088#1077#1075#1090#1080' '#1085#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103
+                TabOrder = 2
+                OnClick = BtnSaveSetteingsClick
+              end
+            end
+            object GroupBox1: TGroupBox
+              AlignWithMargins = True
+              Left = 5
+              Top = 625
+              Width = 668
+              Height = 234
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1103' '#1055#1054
+              TabOrder = 3
+              object GridPanel4: TGridPanel
+                Left = 2
+                Top = 32
+                Width = 664
+                Height = 200
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Align = alClient
+                BevelOuter = bvNone
+                ColumnCollection = <
+                  item
+                    Value = 30.747922437673130000
+                  end
+                  item
+                    Value = 69.252077562326870000
+                  end>
+                ControlCollection = <
+                  item
+                    Column = 0
+                    Control = Label12
+                    Row = 0
+                  end
+                  item
+                    Column = 1
+                    Control = ComboBox_ThemeChange
+                    Row = 0
+                  end>
+                RowCollection = <
+                  item
+                    SizeStyle = ssAbsolute
+                    Value = 48.000000000000000000
+                  end
+                  item
+                    Value = 100.000000000000000000
+                  end>
+                TabOrder = 0
+                object Label12: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 5
+                  Width = 194
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Caption = #1058#1077#1084#1072' '#1074#1110#1082#1085#1072':'
+                  ExplicitWidth = 108
+                  ExplicitHeight = 30
+                end
+                object ComboBox_ThemeChange: TComboBox
+                  AlignWithMargins = True
+                  Left = 209
+                  Top = 5
+                  Width = 450
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Style = csDropDownList
+                  ItemIndex = 0
+                  TabOrder = 0
+                  Text = #1057#1074#1110#1090#1083#1072' '#1090#1077#1084#1072
+                  OnChange = ComboBox_ThemeChangeChange
+                  Items.Strings = (
+                    #1057#1074#1110#1090#1083#1072' '#1090#1077#1084#1072
+                    #1058#1077#1084#1085#1072' '#1090#1077#1084#1072)
+                end
               end
             end
           end
@@ -3423,18 +3528,19 @@
           BevelEdges = []
           BevelInner = bvNone
           BiDiMode = bdLeftToRight
-          Color = clWhite
+          Color = clBtnFace
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clBlack
-          Font.Height = -23
+          Font.Color = clWindowText
+          Font.Height = -21
           Font.Name = 'Consolas'
-          Font.Style = [fsBold]
+          Font.Style = []
           ParentBiDiMode = False
           ParentFont = False
           TabOrder = 0
           Text = 'EditDirGrubName'
+          StyleElements = [seBorder]
           OnChange = EditDirGrubNameChange
-          ExplicitHeight = 35
+          ExplicitHeight = 32
         end
         object BtnGruberDirOpen: TButton
           AlignWithMargins = True
@@ -3626,9 +3732,13 @@
   object PopupMenu_GrubButton: TPopupMenu
     Left = 835
     Top = 831
-    object MiniGrub: TMenuItem
-      Caption = #1054#1085#1086#1074#1080#1090#1080' '#1076#1072#1085#1085#1110' ('#1084#1110#1085#1110#1084#1072#1083#1100#1085#1080#1081' '#1075#1088#1072#1073')'
-      OnClick = MiniGrubClick
+    object Gruber_Mini: TMenuItem
+      Caption = #1054#1085#1086#1074#1080#1090#1080' '#1076#1072#1085#1085#1110
+      OnClick = Gruber_MiniClick
+    end
+    object Gruber_USB: TMenuItem
+      Caption = #1054#1085#1086#1074#1080#1090#1080' USB'
+      OnClick = Gruber_USBClick
     end
   end
 end

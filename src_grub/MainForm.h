@@ -129,7 +129,7 @@ __published:	// IDE-managed Components
 	TButton *BtnApp_UsbTreeView;
 	TButton *Button4;
 	TPopupMenu *PopupMenu_GrubButton;
-	TMenuItem *MiniGrub;
+	TMenuItem *Gruber_Mini;
 	TGridPanel *GridPanel15;
 	TButton *Button_RestartAssAdmin;
 	TPageControl *PageControl_InfoTabs;
@@ -191,8 +191,12 @@ __published:	// IDE-managed Components
 	TEdit *ShowManufacturer;
 	TLabel *Label4;
 	TEdit *ShowProductName;
-	TCheckBox *CheckBox1;
 	TButton *Button_CheckDefection;
+	TMenuItem *Gruber_USB;
+	TGroupBox *GroupBox1;
+	TGridPanel *GridPanel4;
+	TLabel *Label12;
+	TComboBox *ComboBox_ThemeChange;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditPartitionChange(TObject *Sender);
@@ -254,7 +258,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBox_MultiUSERSClick(TObject *Sender);
 	void __fastcall EditPurposeChange(TObject *Sender);
 	void __fastcall BtnClearPCClick(TObject *Sender);
-	void __fastcall MiniGrubClick(TObject *Sender);
+	void __fastcall Gruber_MiniClick(TObject *Sender);
 	void __fastcall Button_RestartAssAdminClick(TObject *Sender);
 	void __fastcall BtnApp_UscDevUClick(TObject *Sender);
 	void __fastcall BtnApp_DeviceCleanupClick(TObject *Sender);
@@ -271,11 +275,12 @@ __published:	// IDE-managed Components
 	void __fastcall Edit_InAdminBPChange(TObject *Sender);
 	void __fastcall ComboBox_forNumberARMChange(TObject *Sender);
 	void __fastcall ShowSerialGenarateDblClick(TObject *Sender);
-	void __fastcall CheckBox1Click(TObject *Sender);
+	//void __fastcall CheckBox1Click(TObject *Sender);
 	void __fastcall Button_CheckDefectionClick(TObject *Sender);
+	void __fastcall Gruber_USBClick(TObject *Sender);
+	void __fastcall ComboBox_ThemeChangeChange(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
-	void mainGRUBer(bool i = true);
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };
@@ -283,8 +288,6 @@ public:		// User declarations
 extern PACKAGE TForm1 *Form1;
 
 std::vector<UnicodeString> fileInfoGrub();
-double progressBarStep();
-void progressBarGo(int i , bool err = false);
 void changeEditDirColor();
 UnicodeString appPath();
 void RestartApplicationRunas();

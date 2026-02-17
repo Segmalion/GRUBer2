@@ -1,8 +1,21 @@
 //---------------------------------------------------------------------------
 
-#ifndef JobH
-#define JobH
+#ifndef Th_GruberH
+#define Th_GruberH
 //---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+//---------------------------------------------------------------------------
+class Th_Gruber : public TThread
+{
+private:
+protected:
+	void __fastcall Execute();
+public:
+	__fastcall Th_Gruber(bool CreateSuspended);
+};
+
+double progressBarStep();
+void progressBarGo(int i , bool err = 0);
 
 bool job_infoFille(UnicodeString dir);
 bool job_comTxt(UnicodeString dir);

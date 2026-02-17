@@ -4,6 +4,8 @@
 #pragma hdrstop
 #include <tchar.h>
 //---------------------------------------------------------------------------
+#include <Vcl.Styles.hpp>
+#include <Vcl.Themes.hpp>
 USEFORM("PartitionForm.cpp", FormPartition);
 USEFORM("MainForm.cpp", Form1);
 USEFORM("ComentForm.cpp", FormComent);
@@ -18,6 +20,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 	{
 		Application->Initialize();
 		Application->MainFormOnTaskBar = true;
+		TStyleManager::TrySetStyle("Windows11 Polar Light");
 		Application->CreateForm(__classid(TForm1), &Form1);
 		Application->CreateForm(__classid(TFormComent), &FormComent);
 		Application->CreateForm(__classid(TFormDirExist), &FormDirExist);

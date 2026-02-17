@@ -17,13 +17,15 @@
 #include "Users.h"
 
 #include "Arm.h"
+#include "Config.h"
+#include "Dir.h"
+
 #include "RunApp.h"
 #include "Help.h"
 #include "Text.h"
 #include "Fille.h"
-#include "Job.h"
-#include "Dir.h"
-#include "Config.h"
+
+#include "Th_Gruber.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -40,6 +42,7 @@ Dir curDir;
 //обявление переменных
 UnicodeString cmdEXE, curentDate;
 bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
+bool checkDirExist;
 std::vector<UnicodeString> vStrPartition;
 bool grubActive = 0;
 double pos, step;
@@ -50,77 +53,15 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 0, vers4 = 8;
+extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 0;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
 							  + UnicodeString(vers4);
 //---------------------------------------------------------------------------
-__fastcall TForm1::TForm1(TComponent* Owner)
-	: TForm(Owner)
-{
-	PageControl_SetInfo->TabIndex = 0;
-	PageControl_InfoTabs->TabIndex = 0;
-	// === выводим настройки & сохраненую инфу об АРМ
-	setConfigToForm(curConfig);
-	setInfoArmToForm(curPC);
-	/* === */
-	if (x64() && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
-		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
-		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
-		exit(1);
-	}
-	/* === проверка прав админа === */
-	UnicodeString admMode;
-	if(IsAdminMode()) {
-		printLogDebug("Запущено з правами Адміністратора!");
-		Button_RestartAssAdmin->Enabled = false;
-		BtnClearPC->Enabled = true;
-		admMode = "AdminMode";
-	} else {
-		printLogDebug("Запущено без прав Адміністратора!");
-		int number = Form1->Edit_NumberARM->Value;
-		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
-			+ UnicodeString(number)
-			+ ", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
-		UnicodeString formCaption = "Нема прав Адміна.. :'(";
-		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
-				RestartApplicationRunas();
-		}
-		admMode = "UserMode";
-	}
-	/* === наполняем форму === */
-	printLog(">>", "Запушенно GRUBer v." + versionApp);
-	printLog(">>", "Останій граб: " + curPC.lastGrub());
-	// --- проверка нарушений
-	checkDefection();
-	// --- заполняем строку с именем папки граба
-	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-	if (DirectoryExists(curDir.getGrubFull())) {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
-	} else {
-		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
-		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
-	}
-	// --- статус бар
-	if (x64_run()) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
-	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
-	// --- разное
-	Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text; // тип номера ПК
-	/* --- вывод дебаг инфы
-	printLogDebug(curConfig.getDebug(), "{forNumberARM}=" + UnicodeString(curConfig.get_forNumberARMid()));
-	printLogDebug(curConfig.getDebug(), "{number_UVs}=" + UnicodeString(curPC.getNumber_UVs()));
-	printLogDebug(curConfig.getDebug(), "{number_UVs_logist}=" + UnicodeString(curPC.getNumber_UVs_logist()));
-	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
-	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
-	*/
-	gruberStart = 1;
-}
-//---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
 	std::vector<UnicodeString> vStr;
-    // раздел версии файла
+	// раздел версии файла
 	for(auto str : curPC.mStrIniVersionNumber()) vStr.push_back(str);
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
@@ -141,30 +82,6 @@ std::vector<UnicodeString> fileInfoGrub() {
 	}
 	vStr.push_back("#stop");
 	return vStr;
-}
-double progressBarStep() {
-	short i = 0;
-	if (curConfig.getNewGrub()) i += 2;
-	if (curConfig.getOldGrubComent()) i++;
-	if (curConfig.getOldGrubInfo()) i++;
-	if (curConfig.getOldGrubUsb()) i++;
-	if (curConfig.getOldGrubNet()) i += 2;
-	if (curConfig.getLicense()) i++;
-	if (curConfig.getAudit()) i ++;
-	if (curConfig.getAudit() && x64() && IsAdminMode()) i ++;
-	if (curConfig.getEsetLog()) i++;
-	//printLogDebug("{count}=" + UnicodeString(i));
-	return 100/(double)i;
-}
-void progressBarGo(int i , bool err) {
-    if(stopBool == false) {
-		Form1->ProgressBar_Grub->Position = i;
-		Form1->Taskbar1->ProgressValue = i;
-	}
-	if(stopBool == true || err == true) {
-		Form1->ProgressBar_Grub->State = (TProgressBarState) pbsError;
-		Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 4;
-	}
 }
 void changeEditDirColor() {
 	if(DirectoryExists(curDir.getGrubFull())) {
@@ -315,7 +232,7 @@ void checkDefection() {
 		Form1->Label_DefectionSoft->Font->Color = (TColor)clRed;
 		Form1->Label_DefectionSoft->Font->Style = TFontStyles() << fsBold;
 	} else {
-		Form1->Label_DefectionSoft->Font->Color = (TColor)clWindowText; 
+		Form1->Label_DefectionSoft->Font->Color = (TColor)clWindowText;
 		Form1->Label_DefectionSoft->Font->Style = TFontStyles() >> fsBold;
 	}
 	if (curDefection.user) {
@@ -334,131 +251,82 @@ void checkDefection() {
 	}
 }
 //---------------------------------------------------------------------------
-/* ОСНОВНОЙ КОД ГРАБА */
-void TForm1::mainGRUBer(bool i) {
-	// -> переменные
-	grubActive = true;
-	int persentStep;
-	stopBool = false;
-	passBool = false;
-	bool bigErr = true;
-	UnicodeString dirGrubStr = EditDirGrubName->Text;
-	//printLogDebug("{dirGrubStr}=" + dirGrubStr);
-	// -> преварительные процедуры
+__fastcall TForm1::TForm1(TComponent* Owner)
+	: TForm(Owner)
+{
+	PageControl_SetInfo->TabIndex = 0;
+	PageControl_InfoTabs->TabIndex = 0;
+	// === выводим настройки & сохраненую инфу об АРМ
+	setConfigToForm(curConfig);
+	setInfoArmToForm(curPC);
+	/* === */
+	if (x64() && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
+		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
+		ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+		exit(1);
+	}
+	/* === проверка прав админа === */
+	UnicodeString admMode;
+	if(IsAdminMode()) {
+		printLogDebug("Запущено з правами Адміністратора!");
+		Button_RestartAssAdmin->Enabled = false;
+		BtnClearPC->Enabled = true;
+		admMode = "AdminMode";
+	} else {
+		printLogDebug("Запущено без прав Адміністратора!");
+		int number = Form1->Edit_NumberARM->Value;
+		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
+			+ UnicodeString(number)
+			+ ", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
+		UnicodeString formCaption = "Нема прав Адміна.. :'(";
+		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
+				RestartApplicationRunas();
+		}
+		admMode = "UserMode";
+	}
+	/* === наполняем форму === */
+	printLog(">>", "Запушенно GRUBer v." + versionApp);
+	printLog(">>", "Останій граб: " + curPC.lastGrub());
 	// --- проверка нарушений
 	checkDefection();
-	// ...
-	curPC.setLastGrub(curConfig.getUser(), curDateTime());
-	Form1->BtnGruberRun->Enabled = false;
-	Form1->BtnGruberStop->Enabled = true;
-	Form1->BtnGruberRun->Caption = "Зачекай...";
-	printLog(">>", "GRUBer запущено...");
-	printLog("Поточна тека: " + dirGrubStr);
-	StatusBar1->Panels->Items[0]->Text = " GRUBer запущено...";
-	// -> настройка прогресбара
-	pos = 0;
-	step = progressBarStep();
-	ProgressBar_Grub->State = (TProgressBarState) pbsNormal;
-	Taskbar1->ProgressState = (TTaskBarProgressState) 2;
-	progressBarGo(pos);
-	// -> сохранение введеной инфы о ПК
-	infoSetToFille(curPC);
-	// -> проверка имени папки граба
-	for (int i = 1; i < dirGrubStr.Length()+1; i++) {
-		if (dirGrubStr.IsDelimiter("<>:\"/\\|?* ", i)) {
-            Form1->BtnGruberRun->Enabled = true;
-			Form1->BtnGruberStop->Enabled = false;
-			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("ER", "Назва папки містить недопустимі символи!!! :'(");
-            progressBarGo(100, true);
-			return;
-		}
-	}
-	UnicodeString GrubDir;
-	bool tempDir = CheckBox_TempDir->Checked;
-	if (tempDir) {
-		GrubDir = curDir.get_grubTemp();
-		if (!DirectoryExists(GrubDir)) CreateDir(GrubDir);
-		else deleteDir(GrubDir, false);
-	} else GrubDir = curDir.getGrubFull();
-	// -> предупреждение о существующей папке
-	if (DirectoryExists(curDir.getGrubFull()) && i) {
-		FormDirExist->ShowDir->Text=(dirGrubStr);
-		FormDirExist->ShowModal();
-		printLog("!!","Знайденно попередню теку!");
-		if (!dirGrubRewrite) { //отказ от перезаписи
-			Form1->BtnGruberRun->Enabled = true;
-			Form1->BtnGruberStop->Enabled = false;
-			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("ER", "GRUBer зупинено :'(");
-			return;
-		}
-		printLog("!!","Наявні файли буде перезаписанно!");
-	}
-	// -- запуск секундомера
-	auto start_time = std::chrono::steady_clock::now();
-	// -> создание папок
-    curDir.check();
-	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
-	// -> генерация файлов
-	if (curConfig.getNewGrub() && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
-	if (curConfig.getNewGrub() && !stopBool) job_softFille(GrubDir);
-	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(GrubDir); 		//coment.txt
-	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
-	if (curConfig.getOldGrubUsb() && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
-	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net1(GrubDir); 	//net1.txt
-	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
-	if (curConfig.getLicense() && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
-	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
-	if (curConfig.getAudit() && !stopBool && x64() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
-	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
-	// --
-	if (tempDir) {
-        TSearchRec sr;
-		if (GrubDir.Length()) {
-			if (!FindFirst(GrubDir + "\\*.*", faAnyFile, sr)) {
-				do {
-					if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
-						// если находим папку граба, добавляем в список
-						std::wstring oldFile = unToStr(GrubDir + "\\" + sr.Name);
-						std::wstring newFile = unToStr(curDir.getGrubFull() + "\\" + sr.Name);
-						std::filesystem::rename(oldFile, newFile);
-					}
-				} while (!FindNext(sr)); // ищем пока не найдем все
-			}
-			FindClose(sr);
-		}
-	}
-	// -> обработка ошибок
-	if (!bigErr) {
-		printLog("ER", "GRUBer виконано з помилками!");
-		StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
+	// --- заполняем строку с именем папки граба
+	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+	if (DirectoryExists(curDir.getGrubFull())) {
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
 	} else {
-		printLog("OK", "GRUBer виконано успішно!");
-		StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
+		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
+		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
 	}
-	// --
-	auto end_time = std::chrono::steady_clock::now();
-	auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
-	long double speedTimer = (long double)elapsed_ns.count()/1000000000;
-	printLog("chrono", "Время выполнения: " + FloatToStrF(speedTimer, ffFixed, 4, 2));
-	// -> конец граба
-	grubActive = false;
-	Form1->BtnGruberRun->Enabled = true;
-	Form1->BtnGruberStop->Enabled = false;
-	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
+	// --- статус бар
+	if (x64_run()) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
+	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
+	// --- разное
+	Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text; // тип номера ПК
+	/* --- вывод дебаг инфы
+	printLogDebug(curConfig.getDebug(), "{forNumberARM}=" + UnicodeString(curConfig.get_forNumberARMid()));
+	printLogDebug(curConfig.getDebug(), "{number_UVs}=" + UnicodeString(curPC.getNumber_UVs()));
+	printLogDebug(curConfig.getDebug(), "{number_UVs_logist}=" + UnicodeString(curPC.getNumber_UVs_logist()));
+	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
+	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
+	*/
+	gruberStart = 1;
 }
 //---------------------------------------------------------------------------
 /* КНОПКИ */
 // === запуск Граба
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 {
-	mainGRUBer(true);
+	//mainGRUBer(true);
+    checkDirExist = true;
+	Th_Gruber *Thr = new Th_Gruber(true);
+	Thr->Resume();
 }
-void __fastcall TForm1::MiniGrubClick(TObject *Sender)
+void __fastcall TForm1::Gruber_MiniClick(TObject *Sender)
 {
 	//запоминаем текущие настройки граба
-	bool tm1, tm2, tm3, tm4, tm5, tm6, tm7, tm8;
+	bool tm1, tm2, tm3, tm4, tm5, tm6;
+	short tm7, tm8;
 	tm1 = curConfig.getNewGrub();
 	tm2 = curConfig.getOldGrubComent();
 	tm3 = curConfig.getOldGrubInfo();
@@ -477,7 +345,45 @@ void __fastcall TForm1::MiniGrubClick(TObject *Sender)
 	curConfig.setAudit(0);
 	curConfig.setEsetLog(0);
 	//запускаем граб
-	mainGRUBer(false);
+	checkDirExist = false;
+	Th_Gruber *Thr = new Th_Gruber(true);
+	Thr->Resume();
+	//возвращаем старые настройки граба
+	curConfig.setNewGrub(tm1);
+	curConfig.setOldGrubComent(tm2);
+	curConfig.setOldGrubInfo(tm3);
+	curConfig.setOldGrubUsb(tm4);
+	curConfig.setOldGrubNet(tm5);
+	curConfig.setLicense(tm6);
+	curConfig.setAudit(tm7);
+	curConfig.setEsetLog(tm8);
+}
+void __fastcall TForm1::Gruber_USBClick(TObject *Sender)
+{
+    //запоминаем текущие настройки граба
+	bool tm1, tm2, tm3, tm4, tm5, tm6;
+	short tm7, tm8;
+	tm1 = curConfig.getNewGrub();
+	tm2 = curConfig.getOldGrubComent();
+	tm3 = curConfig.getOldGrubInfo();
+	tm4 = curConfig.getOldGrubUsb();
+	tm5 = curConfig.getOldGrubNet();
+	tm6 = curConfig.getLicense();
+	tm7 = curConfig.getAudit();
+	tm8 = curConfig.getEsetLog();
+	//устанавливаем временые настройки
+	curConfig.setNewGrub(0);
+	curConfig.setOldGrubComent(0);
+	curConfig.setOldGrubInfo(0);
+	curConfig.setOldGrubUsb(1);
+	curConfig.setOldGrubNet(0);
+	curConfig.setLicense(0);
+	curConfig.setAudit(0);
+	curConfig.setEsetLog(0);
+	//запускаем граб
+	checkDirExist = false;
+	Th_Gruber *Thr = new Th_Gruber(true);
+	Thr->Resume();
 	//возвращаем старые настройки граба
 	curConfig.setNewGrub(tm1);
 	curConfig.setOldGrubComent(tm2);
@@ -1055,17 +961,21 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 //---------------------------------------------------------------------------
-/* тестовый чекбокс*/
-void __fastcall TForm1::CheckBox1Click(TObject *Sender)
-{
-
-	// bool status = Form1->CheckBox1->Checked;
-}
-//---------------------------------------------------------------------------
 /* перезапуск проверки нарушений на ПК */
 void __fastcall TForm1::Button_CheckDefectionClick(TObject *Sender)
 {
 	checkDefection();
+}
+//---------------------------------------------------------------------------
+
+
+
+void __fastcall TForm1::ComboBox_ThemeChangeChange(TObject *Sender)
+{
+	short indx = ComboBox_ThemeChange->ItemIndex;
+//	printLog(">>", "{indx} = " + UnicodeString(indx));
+	if (indx == 0) TStyleManager::TrySetStyle("Windows11 Polar Light");
+    if (indx == 1) TStyleManager::TrySetStyle("Windows11 Polar Dark");
 }
 //---------------------------------------------------------------------------
 

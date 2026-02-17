@@ -949,6 +949,7 @@ CTestTestfile.cmake
 _deps
 ##### C++ Builder
 */__recovery/
+*/__astcache/
 
 ##### C++
 # Prerequisites

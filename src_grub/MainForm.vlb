@@ -356,9 +356,6 @@ Coordinates=1072,493,154,58
 [EditPurpose]
 Coordinates=875,674,85,58
 
-[MiniGrub]
-Coordinates=787,87,67,36
-
 [Label_ForNumberARM]
 Coordinates=1684,232,146,58
 
@@ -509,4 +506,7 @@ Coordinates=994,561,60,58
 
 [Label_checkQuarantineEset_1]
 Coordinates=1005,770,60,58
+
+[Gruber_Mini]
+Coordinates=787,87,67,36
 
