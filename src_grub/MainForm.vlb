@@ -1,9 +1,6 @@
 ﻿[BtnApp_tcpview]
 Coordinates=451,484,107,58
 
-[GroupBox4]
-Coordinates=824,416,79,58
-
 [CheckBoxAudit]
 Coordinates=112,416,114,58
 
@@ -72,9 +69,6 @@ Coordinates=896,212,86,58
 
 [BtnApp_CPUZ]
 Coordinates=725,348,98,58
-
-[GroupBox3]
-Coordinates=735,416,79,58
 
 [UsbTxt]
 Coordinates=1074,793,55,36
@@ -215,9 +209,6 @@ Coordinates=637,674,79,58
 [GroupBox_InfoARM]
 Coordinates=1684,78,129,58
 
-[GridPanel11]
-Coordinates=442,770,86,58
-
 [Edit_Phone]
 Coordinates=733,444,81,58
 
@@ -244,9 +235,6 @@ Coordinates=694,512,64,58
 
 [BtnApp_UscDevU]
 Coordinates=1502,1,118,58
-
-[GridPanel13]
-Coordinates=1307,897,86,58
 
 [Label_Purpose]
 Coordinates=370,153,101,58
@@ -419,9 +407,6 @@ Coordinates=102,674,82,58
 [Edit_InNumberHDD]
 Coordinates=1155,628,128,58
 
-[GridPanel12]
-Coordinates=1080,924,86,58
-
 [GridPanel3]
 Coordinates=1357,751,79,58
 
@@ -509,4 +494,19 @@ Coordinates=1005,770,60,58
 
 [Gruber_Mini]
 Coordinates=787,87,67,36
+
+[GroupBox_SetingsGRUB]
+Coordinates=735,416,79,58
+
+[GroupBox_SetingsESET]
+Coordinates=824,416,79,58
+
+[GridPanel_EditInfoDoc]
+Coordinates=442,770,86,58
+
+[GridPanel_EditInfoBezp]
+Coordinates=1080,924,86,58
+
+[GridPanel_EditInfoLic]
+Coordinates=1307,897,86,58
 

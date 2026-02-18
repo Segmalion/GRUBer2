@@ -14,8 +14,10 @@ public:
 	__fastcall Th_Gruber(bool CreateSuspended);
 };
 
-double progressBarStep();
+void progressBarStep();
 void progressBarGo(int i , bool err = 0);
+void jobDone(short &c, short &n);
+void blockGrub(bool i);
 
 bool job_infoFille(UnicodeString dir);
 bool job_comTxt(UnicodeString dir);

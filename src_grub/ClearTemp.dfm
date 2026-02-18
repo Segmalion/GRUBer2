@@ -106,8 +106,9 @@ object FormClearTempDir: TFormClearTempDir
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
-    Smooth = True
+    ParentShowHint = False
     MarqueeInterval = 1
+    ShowHint = False
     TabOrder = 2
   end
 end

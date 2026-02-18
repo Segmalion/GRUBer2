@@ -13,6 +13,7 @@ TFormClearTempDir *FormClearTempDir;
 //---------------------------------------------------------------------------
 patchList fullList, tempList, recycleList;
 bool newOpenFormClean;
+extern bool th_ClearFile_run;
 //---------------------------------------------------------------------------
 __fastcall TFormClearTempDir::TFormClearTempDir(TComponent* Owner)
 	: TForm(Owner)
@@ -22,16 +23,20 @@ __fastcall TFormClearTempDir::TFormClearTempDir(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormClearTempDir::Button_CleanClick(TObject *Sender)
 {
-	newOpenFormClean = false;
-	Th_ClearFile *Thr = new Th_ClearFile(true);
-	Thr->Resume();
+	if (th_ClearFile_run == false) {
+		newOpenFormClean = false;
+		Th_ClearFile *Thr = new Th_ClearFile(true);
+		Thr->Resume();
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormClearTempDir::FormShow(TObject *Sender)
 {
-	newOpenFormClean = true;
-	Th_ClearFile *Thr = new Th_ClearFile(true);
-	Thr->Resume();
+	if (th_ClearFile_run == false) {
+		newOpenFormClean = true;
+		Th_ClearFile *Thr = new Th_ClearFile(true);
+		Thr->Resume();
+	}
 }
 //---------------------------------------------------------------------------
 

@@ -23,7 +23,7 @@ RunApp::RunApp(UnicodeString apSx32, UnicodeString apSx64, UnicodeString arS) {
 	else {
 		if (x64()) app = app64;
 		else app = app32;
-    }
+	}
 }
 
 void RunApp::run(bool h, bool r) {
@@ -50,41 +50,65 @@ void RunApp::run(bool h, bool r) {
 	ShExecInfoA.nShow = hide;
 	ShExecInfoA.hInstApp = errRun;
 	//Запуск ПО
-	ShellExecuteExW(&ShExecInfoA);
+	BOOL shellOk = ShellExecuteExW(&ShExecInfoA);
+	if (!shellOk) {
+		// Если ShellExecuteEx вернул FALSE, используем GetLastError как код ошибки
+		DWORD lastErr = GetLastError();
+		error.runCode = std::to_wstring(static_cast<unsigned long long>(lastErr));
+		error.run = 1; // ошибка запуска
+		error.exit = 1;
+		return;
+	}
+	//Вычислим числовой код результата запуска из hInstApp
+	ULONG_PTR errU = reinterpret_cast<ULONG_PTR>(ShExecInfoA.hInstApp);
+	error.runCode = std::to_wstring(static_cast<unsigned long long>(errU));
+	// По документации: значение > 32 означает успех для ShellExecute-подобных функций.
+	// Так же учитывать случай 0 (иногда конкретные вызовы могут возвращать 0 в частных ситуациях).
+	if (errU > 32 || errU == 0) error.run = 0;	//good
+	else error.run = 1;							//error
+	//Если процесс не был получен (на всякий случай), завершить
+	if (ShExecInfoA.hProcess == NULL) {
+		// Нет процесса для ожидания; просто вернуть (код запуска уже в error.runCode)
+		if (error.run == 0) error.exit = 0; // считать, что выполнено успешно, но процесса ждать неоткуда
+		else error.exit = 1;
+		return;
+	}
 	//Ожидание в фоне ПО
 	HANDLE hHandles[] = { ShExecInfoA.hProcess };
 	MSG msg;
 	while(1) {
-		DWORD dwRet = ::MsgWaitForMultipleObjects(1, hHandles, FALSE, INFINITE, QS_ALLINPUT);
+		DWORD dwRet = ::MsgWaitForMultipleObjects(1, hHandles, FALSE, 50, QS_ALLINPUT);
+		if (stopBool || passBool) {
+			TerminateProcess(ShExecInfoA.hProcess, 1);
+			if (passBool) { passBool = false; passBoolTmp = true;}
+            error.exit = -1;
+			break;
+		}
 		if(dwRet == WAIT_OBJECT_0) {
 			break;
 		}
-		else
-			if(dwRet == WAIT_OBJECT_0 + 1){
-				// There is a window message available. Dispatch it.
-				while(PeekMessage(&msg,NULL,NULL,NULL,PM_REMOVE)) {
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-				if (stopBool || passBool) {
-					TerminateProcess(ShExecInfoA.hProcess, 1);
-					if (passBool) { passBool = false; passBoolTmp = true;}
-				}
-			} else break;
+		else if(dwRet == WAIT_OBJECT_0 + 1) {
+			// There is a window message available. Dispatch it.
+			while(PeekMessage(&msg,NULL,NULL,NULL,PM_REMOVE)) {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+		}
 	}
-	//Тут проверка на запуск програмы
-	ULONG_PTR errU = reinterpret_cast<ULONG_PTR>(errRun);
-	error.runCode = UnicodeString(errU);
-	if (error.runCode.ToDouble() >32 || error.runCode==0) error.run = 0;      //good
-		else error.run = 1;           //error
 	//Тут результат выполнения ПО
-	GetExitCodeProcess(ShExecInfoA.hProcess, &exitCode);
-	error.exitCode = UnicodeString(exitCode);
-	if (error.exitCode.ToDouble() == 0) {
-		error.exit = 0; //good
+	if (!GetExitCodeProcess(ShExecInfoA.hProcess, &exitCode)) {
+		// Ошибка получения кода выхода
+		error.exitCode = std::to_wstring((int)-1);
+		error.exit = 1;
 	} else {
-		if (passBoolTmp || stopBool) error.exit = -1;
-		else error.exit = 1; //error
+		error.exitCode = std::to_wstring(exitCode);
+		if (exitCode == 0) {
+			error.exit = 0; //good
+		}
+		else {
+			if (passBoolTmp || stopBool) error.exit = -1;
+			else error.exit = 1; //error
+		}
 	}
 	//Закрытие приложения
 	CloseHandle(ShExecInfoA.hProcess);
@@ -102,11 +126,11 @@ UnicodeString RunApp::errorString() {
 }
 UnicodeString RunApp::resultString() {
 	if (error.run) {
-		return "[!]Щось пішло НЕ так, під час запуску...)";
+		return "[!!]Щось пішло НЕ так, під час запуску...)";
 	} else {
-		if (error.exit == 1) return "[!]Щось пішло НЕ так, під час створення файлу...";
+		if (error.exit == 1) return "[!!]Щось пішло НЕ так, під час створення файлу...";
 		if (error.exit == 0) return "Файл СТВОРЕННО!";
-		if (error.exit == -1) return "[!]Ручна зупинка Граба...";
+		if (error.exit == -1) return "[!!]Ручна зупинка Граба...";
 	}
 	return "[:(]Якась хуйня.."; // заглушка
 }

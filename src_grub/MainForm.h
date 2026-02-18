@@ -54,7 +54,7 @@ __published:	// IDE-managed Components
 	TMemo *EditComent;
 	TLabeledEdit *EditGrubUser;
 	TGridPanel *GridPanel_Settings;
-	TGroupBox *GroupBox3;
+	TGroupBox *GroupBox_SetingsGRUB;
 	TCheckBox *CheckBoxAudit;
 	TCheckBox *CheckBoxEsetLog;
 	TButton *BtnSaveSetteings;
@@ -62,7 +62,7 @@ __published:	// IDE-managed Components
 	TCheckBox *CheckBoxNewGrub;
 	TCheckBox *CheckBoxLicense;
 	TButton *BtnEditPartition;
-	TGroupBox *GroupBox4;
+	TGroupBox *GroupBox_SetingsESET;
 	TLabeledEdit *EditEsetMirrorDir;
 	TButton *BtnEditEsetMirrorDir;
 	TCheckBox *CheckBoxEsetAutoUpdate;
@@ -96,7 +96,7 @@ __published:	// IDE-managed Components
 	TButton *BtnAboutGruber;
 	TButton *BtnClearPC;
 	TTabSheet *TabGRUBerP;
-	TGridPanel *GridPanel11;
+	TGridPanel *GridPanel_EditInfoDoc;
 	TLabel *Label11;
 	TEdit *Edit_InNumberARM;
 	TLabel *Label13;
@@ -111,8 +111,8 @@ __published:	// IDE-managed Components
 	TEdit *Edit_InNumberPerson;
 	TGroupBox *GroupBox6;
 	TGroupBox *GroupBox7;
-	TGridPanel *GridPanel12;
-	TGridPanel *GridPanel13;
+	TGridPanel *GridPanel_EditInfoBezp;
+	TGridPanel *GridPanel_EditInfoLic;
 	TCheckBox *CheckBox_PoliticInstall;
 	TEdit *Edit_ComPoliticInstall;
 	TCheckBox *CheckBox_ContrUSB;
@@ -278,7 +278,6 @@ __published:	// IDE-managed Components
 	//void __fastcall CheckBox1Click(TObject *Sender);
 	void __fastcall Button_CheckDefectionClick(TObject *Sender);
 	void __fastcall Gruber_USBClick(TObject *Sender);
-	void __fastcall ComboBox_ThemeChangeChange(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 public:		// User declarations

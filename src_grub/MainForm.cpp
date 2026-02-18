@@ -2,7 +2,8 @@
 
 #include <vcl.h>
 #include <System.Hash.hpp>
-#include <chrono>
+#include <thread> // Required for std::this_thread::sleep_for
+#include <chrono> // Required for std::chrono::seconds
 #include <filesystem>
 #pragma hdrstop
 
@@ -41,11 +42,12 @@ Dir curDir;
 // infoEset curEset;
 //обявление переменных
 UnicodeString cmdEXE, curentDate;
-bool stopBool, passBool, dirGrubRewrite, gruberStart=0;
+bool th_Gruber_run=0, th_ClearFile_run=0, th_EsetUpdate_run=0;
+bool th_Gruber_runMini, th_Gruber_runUSB;
+bool stopBool=0, passBool=0, dirGrubRewrite, gruberStart=0;
 bool checkDirExist;
 std::vector<UnicodeString> vStrPartition;
 bool grubActive = 0;
-double pos, step;
 extern std::vector<UnicodeString> blockProgrammsNames;
 struct defection {
 	bool user;
@@ -53,7 +55,7 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 0;
+extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 1;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -317,82 +319,32 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 // === запуск Граба
 void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
 {
-	//mainGRUBer(true);
-    checkDirExist = true;
-	Th_Gruber *Thr = new Th_Gruber(true);
-	Thr->Resume();
+	if (th_Gruber_run == false) {
+		checkDirExist = true;
+		th_Gruber_runMini = false; th_Gruber_runUSB=false;
+		Th_Gruber *Thr = new Th_Gruber(true);
+		Thr->Resume();
+	}
 }
 void __fastcall TForm1::Gruber_MiniClick(TObject *Sender)
 {
-	//запоминаем текущие настройки граба
-	bool tm1, tm2, tm3, tm4, tm5, tm6;
-	short tm7, tm8;
-	tm1 = curConfig.getNewGrub();
-	tm2 = curConfig.getOldGrubComent();
-	tm3 = curConfig.getOldGrubInfo();
-	tm4 = curConfig.getOldGrubUsb();
-	tm5 = curConfig.getOldGrubNet();
-	tm6 = curConfig.getLicense();
-	tm7 = curConfig.getAudit();
-	tm8 = curConfig.getEsetLog();
-	//устанавливаем временые настройки
-	curConfig.setNewGrub(1);
-	curConfig.setOldGrubComent(0);
-	curConfig.setOldGrubInfo(0);
-	curConfig.setOldGrubUsb(0);
-	curConfig.setOldGrubNet(0);
-	curConfig.setLicense(0);
-	curConfig.setAudit(0);
-	curConfig.setEsetLog(0);
 	//запускаем граб
-	checkDirExist = false;
-	Th_Gruber *Thr = new Th_Gruber(true);
-	Thr->Resume();
-	//возвращаем старые настройки граба
-	curConfig.setNewGrub(tm1);
-	curConfig.setOldGrubComent(tm2);
-	curConfig.setOldGrubInfo(tm3);
-	curConfig.setOldGrubUsb(tm4);
-	curConfig.setOldGrubNet(tm5);
-	curConfig.setLicense(tm6);
-	curConfig.setAudit(tm7);
-	curConfig.setEsetLog(tm8);
+	if (th_Gruber_run == false) {
+		checkDirExist = false;
+		th_Gruber_runMini = true; th_Gruber_runUSB=false;
+		Th_Gruber *Thr = new Th_Gruber(true);
+		Thr->Resume();
+	}
 }
 void __fastcall TForm1::Gruber_USBClick(TObject *Sender)
 {
-    //запоминаем текущие настройки граба
-	bool tm1, tm2, tm3, tm4, tm5, tm6;
-	short tm7, tm8;
-	tm1 = curConfig.getNewGrub();
-	tm2 = curConfig.getOldGrubComent();
-	tm3 = curConfig.getOldGrubInfo();
-	tm4 = curConfig.getOldGrubUsb();
-	tm5 = curConfig.getOldGrubNet();
-	tm6 = curConfig.getLicense();
-	tm7 = curConfig.getAudit();
-	tm8 = curConfig.getEsetLog();
-	//устанавливаем временые настройки
-	curConfig.setNewGrub(0);
-	curConfig.setOldGrubComent(0);
-	curConfig.setOldGrubInfo(0);
-	curConfig.setOldGrubUsb(1);
-	curConfig.setOldGrubNet(0);
-	curConfig.setLicense(0);
-	curConfig.setAudit(0);
-	curConfig.setEsetLog(0);
 	//запускаем граб
-	checkDirExist = false;
-	Th_Gruber *Thr = new Th_Gruber(true);
-	Thr->Resume();
-	//возвращаем старые настройки граба
-	curConfig.setNewGrub(tm1);
-	curConfig.setOldGrubComent(tm2);
-	curConfig.setOldGrubInfo(tm3);
-	curConfig.setOldGrubUsb(tm4);
-	curConfig.setOldGrubNet(tm5);
-	curConfig.setLicense(tm6);
-	curConfig.setAudit(tm7);
-	curConfig.setEsetLog(tm8);
+	if (th_Gruber_run == false) {
+		checkDirExist = false;
+		th_Gruber_runMini = false; th_Gruber_runUSB=true;
+		Th_Gruber *Thr = new Th_Gruber(true);
+		Thr->Resume();
+	}
 }
 // === открыть редактор подразделений
 void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
@@ -965,17 +917,6 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 void __fastcall TForm1::Button_CheckDefectionClick(TObject *Sender)
 {
 	checkDefection();
-}
-//---------------------------------------------------------------------------
-
-
-
-void __fastcall TForm1::ComboBox_ThemeChangeChange(TObject *Sender)
-{
-	short indx = ComboBox_ThemeChange->ItemIndex;
-//	printLog(">>", "{indx} = " + UnicodeString(indx));
-	if (indx == 0) TStyleManager::TrySetStyle("Windows11 Polar Light");
-    if (indx == 1) TStyleManager::TrySetStyle("Windows11 Polar Dark");
 }
 //---------------------------------------------------------------------------
 

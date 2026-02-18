@@ -127,7 +127,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabGRUBer
+        ActivePage = TabSheet1
         Align = alClient
         Constraints.MaxHeight = 1050
         MultiLine = True
@@ -656,7 +656,7 @@
           Margins.Bottom = 5
           Caption = #1055#1086' '#1076#1086#1082#1091#1084#1077#1085#1090#1072#1093
           ImageIndex = 3
-          object GridPanel11: TGridPanel
+          object GridPanel_EditInfoDoc: TGridPanel
             Left = 0
             Top = 0
             Width = 672
@@ -1067,7 +1067,7 @@
               Align = alClient
               Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' '#1073#1077#1079#1087#1077#1082#1080' '#1040#1056#1052
               TabOrder = 0
-              object GridPanel12: TGridPanel
+              object GridPanel_EditInfoBezp: TGridPanel
                 Left = 2
                 Top = 32
                 Width = 658
@@ -1216,6 +1216,7 @@
                   TabOrder = 5
                   Text = 'Edit_ComMultiUSERS'
                   OnChange = Edit_ComMultiUSERSChange
+                  ExplicitLeft = 266
                 end
               end
             end
@@ -1233,7 +1234,7 @@
               Anchors = []
               Caption = #1030#1085#1092#1086' '#1087#1088#1086' '#1055#1054' '#1085#1072' '#1040#1056#1052
               TabOrder = 1
-              object GridPanel13: TGridPanel
+              object GridPanel_EditInfoLic: TGridPanel
                 Left = 2
                 Top = 32
                 Width = 658
@@ -2930,12 +2931,12 @@
             ControlCollection = <
               item
                 Column = 0
-                Control = GroupBox3
+                Control = GroupBox_SetingsGRUB
                 Row = 0
               end
               item
                 Column = 0
-                Control = GroupBox4
+                Control = GroupBox_SetingsESET
                 Row = 1
               end
               item
@@ -2965,7 +2966,7 @@
                 Value = 110.000000000000000000
               end>
             TabOrder = 0
-            object GroupBox3: TGroupBox
+            object GroupBox_SetingsGRUB: TGroupBox
               AlignWithMargins = True
               Left = 5
               Top = 5
@@ -3178,7 +3179,7 @@
                 TabOrder = 12
               end
             end
-            object GroupBox4: TGroupBox
+            object GroupBox_SetingsESET: TGroupBox
               AlignWithMargins = True
               Left = 5
               Top = 445
@@ -3413,10 +3414,10 @@
                   Margins.Bottom = 5
                   Align = alClient
                   Style = csDropDownList
+                  Enabled = False
                   ItemIndex = 0
                   TabOrder = 0
                   Text = #1057#1074#1110#1090#1083#1072' '#1090#1077#1084#1072
-                  OnChange = ComboBox_ThemeChangeChange
                   Items.Strings = (
                     #1057#1074#1110#1090#1083#1072' '#1090#1077#1084#1072
                     #1058#1077#1084#1085#1072' '#1090#1077#1084#1072)

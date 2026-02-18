@@ -23,37 +23,37 @@
 extern Config curConfig;
 extern Arm curPC;
 extern Dir curDir;
+extern bool th_Gruber_run;
+extern bool th_Gruber_runMini, th_Gruber_runUSB;
 extern bool stopBool, passBool, dirGrubRewrite, gruberStart;
 extern bool grubActive;
-extern double pos, step;
+double pos, step;
 extern bool checkDirExist;
-//---------------------------------------------------------------------------
+bool jb1, jb2, jb3, jb4, jb5, jb6;
+short jb7, jb8;
+short countJob, curJob;
 
-//   Important: Methods and properties of objects in VCL can only be
-//   used in a method called using Synchronize, for example:
-//
-//      Synchronize(&UpdateCaption);
-//
-//   where UpdateCaption could look like:
-//
-//      void __fastcall Th_Gruber::UpdateCaption()
-//      {
-//        Form1->Caption = "Updated in a thread";
-//      }
 //---------------------------------------------------------------------------
-double progressBarStep() {
-	short i = 0;
-	if (curConfig.getNewGrub()) i += 2;
-	if (curConfig.getOldGrubComent()) i++;
-	if (curConfig.getOldGrubInfo()) i++;
-	if (curConfig.getOldGrubUsb()) i++;
-	if (curConfig.getOldGrubNet()) i += 2;
-	if (curConfig.getLicense()) i++;
-	if (curConfig.getAudit()) i ++;
-	if (curConfig.getAudit() && x64() && IsAdminMode()) i ++;
-	if (curConfig.getEsetLog()) i++;
-	//printLogDebug("{count}=" + UnicodeString(i));
-	return 100/(double)i;
+void progressBarStep() {
+	countJob = 0;
+	if (jb1 != 0) countJob += 2;   //gruber_info.ini & soft_all.txt
+	if (jb1 != 0) countJob++; 	   //soft_block.txt
+	if (jb2 != 0) countJob++;      //coment.txt
+	if (jb3 != 0) countJob++;      //info_ps1.txt
+	if (jb4 != 0) countJob++;      //usb.txt
+	if (jb5 != 0) countJob += 2;   //net1.txt & net2.txt
+	if (jb6 != 0) countJob++;      //license.txt
+	if (jb7 != 0) countJob++;      //auditMin.html || auditMax.html
+	if (jb7 != 0 && x64() && IsAdminMode()) countJob++; //diskInfo.txt
+	if (jb8 != 0) countJob++;      //eset-log-mini.zip || eset-log-max.zip
+	printLogDebug("{countJob}=" + UnicodeString(countJob));
+	step = 100/(double)countJob;
+}
+void jobDone(short &c, short &n) {
+	UnicodeString str;
+	if (c > n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + "]GRUBer запущено...";
+	else if (c == n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + "]GRUBer зібрано!!!";
+	Form1->StatusBar1->Panels->Items[0]->Text = str;
 }
 void progressBarGo(int i , bool err) {
     if(stopBool == true || err == true) {
@@ -62,6 +62,52 @@ void progressBarGo(int i , bool err) {
 	}
     Form1->ProgressBar_Grub->Position = i;
 	Form1->Taskbar1->ProgressValue = i;
+}
+void blockGrub(bool i) {
+	Form1->BtnGruberRun->Enabled = !i;
+	Form1->BtnGruberStop->Enabled = i;
+	//Form1->GroupBox_SetingsGRUB->Enabled = !i;
+	//-----
+	Form1->Edit_NumberARM->Enabled = !i;
+	Form1->EditPartition->Enabled = !i;
+	Form1->EditCategory->Enabled = !i;
+	Form1->EditArmClass->Enabled = !i;
+	Form1->EditPurpose->Enabled = !i;
+	Form1->EditRespon->Enabled = !i;
+	Form1->Edit_Place->Enabled = !i;
+	Form1->Edit_Phone->Enabled = !i;
+	Form1->EditComent->Enabled = !i;
+	//-----
+	Form1->Edit_InNumberARM->Enabled = !i;
+	Form1->Edit_InNumberHDD->Enabled = !i;
+	Form1->Edit_InNumberDeclr->Enabled = !i;
+	Form1->Edit_InNumberFormulyar->Enabled = !i;
+	Form1->Edit_InNumberWork->Enabled = !i;
+	Form1->Edit_InNumberPerson->Enabled = !i;
+	Form1->Edit_InRespon->Enabled = !i;
+	Form1->Edit_InAdminBP->Enabled = !i;
+	//-----
+	Form1->Edit_ComPoliticInstall->Enabled = !i;
+	Form1->Edit_ComContrUSB->Enabled = !i;
+	Form1->Edit_ComMultiUSERS->Enabled = !i;
+	Form1->EditLicWin->Enabled = !i;
+	Form1->EditLicOffice->Enabled = !i;
+	Form1->CheckBox_PoliticInstall->Enabled = !i;
+	Form1->CheckBox_ContrUSB->Enabled = !i;
+	Form1->CheckBox_MultiUSERS->Enabled = !i;
+	//-----
+	Form1->EditGrubUser->Enabled = !i;
+	Form1->CheckBoxOldGrub->Enabled = !i;
+	Form1->CheckBoxNewGrub->Enabled = !i;
+	Form1->CheckBoxLicense->Enabled = !i;
+	Form1->CheckBoxAudit->Enabled = !i;
+	Form1->CheckBoxEsetLog->Enabled = !i;
+	Form1->CheckBoxPrefixPartition->Enabled = !i;
+	Form1->EditPrefixPartition->Enabled = !i;
+	Form1->ComboBox_forNumberARM->Enabled = !i;
+	//-----
+	if (i) Form1->BtnGruberRun->Caption = "Зачекай...";
+	else Form1->BtnGruberRun->Caption = "Запуск GRUBer";
 }
 //----------
 __fastcall Th_Gruber::Th_Gruber(bool CreateSuspended)
@@ -72,41 +118,58 @@ __fastcall Th_Gruber::Th_Gruber(bool CreateSuspended)
 /* ОСНОВНОЙ КОД ГРАБА */
 void __fastcall Th_Gruber::Execute()
 {
+	FreeOnTerminate = true;
 	// -> переменные
+	th_Gruber_run = true;
 	grubActive = true;
 	int persentStep;
 	stopBool = false;
 	passBool = false;
 	bool bigErr = true;
 	UnicodeString dirGrubStr = Form1->EditDirGrubName->Text;
-	//printLogDebug("{dirGrubStr}=" + dirGrubStr);
+	// -> переменные JOB
+	jb1 = curConfig.getNewGrub();
+	jb2 = curConfig.getOldGrubComent();
+	jb3 = curConfig.getOldGrubInfo();
+	jb4 = curConfig.getOldGrubUsb();
+	jb5 = curConfig.getOldGrubNet();
+	jb6 = curConfig.getLicense();
+	jb7 = curConfig.getAudit();
+	jb8 = curConfig.getEsetLog();
+	if (th_Gruber_runMini == true) {
+		jb1 = 1; jb2 = 0; jb3 = 0; jb4 = 0; jb5 = 0; jb6 = 0; jb7 = 0; jb8 = 0; }
+	if (th_Gruber_runUSB == true) {
+		jb1 = 0; jb2 = 0; jb3 = 0; jb4 = 1; jb5 = 0; jb6 = 0; jb7 = 0; jb8 = 0; }
 	// -> преварительные процедуры
+	// --- настройка прогресбара
+	pos = 0;
+	progressBarStep();
+	Synchronize([this]() {
+		Form1->ProgressBar_Grub->State = (TProgressBarState) pbsNormal;
+		Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 2;
+		progressBarGo(pos);
+	});
 	// --- проверка нарушений
 	checkDefection();
 	// ...
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
-	Form1->BtnGruberRun->Enabled = false;
-	Form1->BtnGruberStop->Enabled = true;
-	Form1->BtnGruberRun->Caption = "Зачекай...";
-	printLog(">>", "GRUBer запущено...");
-	printLog("Поточна тека: " + dirGrubStr);
-	Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer запущено...";
-	// -> настройка прогресбара
-	pos = 0;
-	step = progressBarStep();
-	Form1->ProgressBar_Grub->State = (TProgressBarState) pbsNormal;
-	Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 2;
-	progressBarGo(pos);
+	Synchronize([=]() {
+		blockGrub(true);
+		printLog(">>", "GRUBer запущено...");
+		jobDone(countJob, curJob);
+	});
 	// -> сохранение введеной инфы о ПК
 	infoSetToFille(curPC);
 	// -> проверка имени папки граба
 	for (int i = 1; i < dirGrubStr.Length()+1; i++) {
 		if (dirGrubStr.IsDelimiter("<>:\"/\\|?* ", i)) {
-            Form1->BtnGruberRun->Enabled = true;
-			Form1->BtnGruberStop->Enabled = false;
-			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("ER", "Назва папки містить недопустимі символи!!! :'(");
-            progressBarGo(100, true);
+			Synchronize([this]() {
+				blockGrub(false);
+				printLog("ER", "Назва папки містить недопустимі символи!!! :'(");
+				Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
+				progressBarGo(100, true);
+			});
+            th_Gruber_run = false;
 			return;
 		}
 	}
@@ -119,17 +182,21 @@ void __fastcall Th_Gruber::Execute()
 	} else GrubDir = curDir.getGrubFull();
 	// -> предупреждение о существующей папке
 	if (DirectoryExists(curDir.getGrubFull()) && checkDirExist) {
-		FormDirExist->ShowDir->Text=(dirGrubStr);
-		FormDirExist->ShowModal();
-		printLog("!!","Знайденно попередню теку!");
+		Synchronize([=]() {
+			FormDirExist->ShowDir->Text=(dirGrubStr);
+			FormDirExist->ShowModal();
+			printLog("!!","Знайденно попередню теку!");
+		});
 		if (!dirGrubRewrite) { //отказ от перезаписи
-			Form1->BtnGruberRun->Enabled = true;
-			Form1->BtnGruberStop->Enabled = false;
-			Form1->BtnGruberRun->Caption = "Запуск GRUBer";
-			printLog("ER", "GRUBer зупинено :'(");
+			Synchronize([this]() {
+				blockGrub(false);
+				printLog("SP", "GRUBer зупинено :'(");
+				Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer зупинено:'(";
+			});
+			th_Gruber_run = false;
 			return;
 		}
-		printLog("!!","Наявні файли буде перезаписанно!");
+		Synchronize([this]() { printLog("!!","Наявні файли буде перезаписанно!"); });
 	}
 	// -- запуск секундомера
 	auto start_time = std::chrono::steady_clock::now();
@@ -137,17 +204,17 @@ void __fastcall Th_Gruber::Execute()
     curDir.check();
 	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
 	// -> генерация файлов
-	if (curConfig.getNewGrub() && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
-	if (curConfig.getNewGrub() && !stopBool) job_softFille(GrubDir);
-	if (curConfig.getOldGrubComent() && !stopBool) job_comTxt(GrubDir); 		//coment.txt
-	if (curConfig.getOldGrubInfo() && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
-	if (curConfig.getOldGrubUsb() && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
-	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net1(GrubDir); 	//net1.txt
-	if (curConfig.getOldGrubNet() && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
-	if (curConfig.getLicense() && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
-	if (curConfig.getAudit() && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
-	if (curConfig.getAudit() && !stopBool && x64() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
-	if (curConfig.getEsetLog() && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
+	if (jb1 != 0 && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
+	if (jb1 != 0 && !stopBool) job_softFille(GrubDir);
+	if (jb2 != 0 && !stopBool) job_comTxt(GrubDir); 		//coment.txt
+	if (jb3 != 0 && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
+	if (jb4 != 0 && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
+	if (jb5 != 0 && !stopBool) bigErr *= job_net1(GrubDir); 	//net1.txt
+	if (jb5 != 0 && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
+	if (jb6 != 0 && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
+	if (jb7 != 0 && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
+	if (jb7 != 0 && !stopBool && x64() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
+	if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
 	// --
 	if (tempDir) {
         TSearchRec sr;
@@ -167,22 +234,28 @@ void __fastcall Th_Gruber::Execute()
 	}
 	// -> обработка ошибок
 	if (!bigErr) {
-		printLog("ER", "GRUBer виконано з помилками!");
-		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
+		Synchronize([this]() {
+			printLog("ER", "GRUBer виконано з помилками!");
+			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
+            progressBarGo(100, true);
+		});
 	} else {
-		printLog("OK", "GRUBer виконано успішно!");
-		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
+		Synchronize([this]() {
+			printLog("OK", "GRUBer виконано успішно!");
+			//Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
+		});
 	}
 	// --
 	auto end_time = std::chrono::steady_clock::now();
 	auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
 	long double speedTimer = (long double)elapsed_ns.count()/1000000000;
-	printLog("chrono", "Время выполнения: " + FloatToStrF(speedTimer, ffFixed, 4, 2));
 	// -> конец граба
 	grubActive = false;
-	Form1->BtnGruberRun->Enabled = true;
-	Form1->BtnGruberStop->Enabled = false;
-	Form1->BtnGruberRun->Caption = "Запуск GRUBer";
+	Synchronize([=]() {
+		printLog("chrono", "Время выполнения: " + FloatToStrF(speedTimer, ffFixed, 4, 2));
+		blockGrub(false);
+	});
+    th_Gruber_run = false;
 }
 //---------------------------------------------------------------------------
 bool job_infoFille(UnicodeString dir) {
@@ -193,6 +266,7 @@ bool job_infoFille(UnicodeString dir) {
 	for(auto str : fileInfoGrub()) infoFille->Add (str);
 	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 	printLog("Файл СТВОРЕННО!");
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return true;
@@ -208,6 +282,7 @@ bool job_softFille(UnicodeString dir) {
 	for(auto str: sortList_all) softAllFille->Add (str);
 	softAllFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 	printLog("Файл СТВОРЕННО!");
+    progressBarGo(pos += step);
 	if (curPC.get_softBlock().size() > 0) {
 		outFilePath = dir + "\\soft_block.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
@@ -218,6 +293,8 @@ bool job_softFille(UnicodeString dir) {
 		softBlockFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 		printLog("Файл СТВОРЕННО!");
 	}
+    curJob += 2;
+	jobDone(countJob, curJob);
 	progressBarGo(pos += step);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return true;
@@ -233,6 +310,7 @@ bool job_comTxt(UnicodeString dir) {
 	comTxt->Add("");
 	comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
 	printLog("Файл СТВОРЕННО!");
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return true;
@@ -247,6 +325,7 @@ bool job_info(UnicodeString dir) {
 	info.run(); // RUN !!!
 //	printLogDebug(info.errorString());
 	printLog(info.resultString());
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, info.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !info.checkErr();
@@ -262,6 +341,7 @@ bool job_usb(UnicodeString dir) {
 	usb.run();
 //	printLogDebug(usb.errorString());
 	printLog(usb.resultString());
+	jobDone(countJob, ++curJob);
 	if (FileExists(outFilePath)) {
 		Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
 	}
@@ -280,6 +360,7 @@ bool job_net1(UnicodeString dir) {
 	net1.run();
 //	printLogDebug(net1.errorString());
 	printLog(net1.resultString());
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, net1.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !net1.checkErr();
@@ -295,6 +376,7 @@ bool job_net2(UnicodeString dir) {
 	net2.run();
 //	printLogDebug(net2.errorString());
 	printLog(net2.resultString());
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, net2.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !net2.checkErr();
@@ -310,18 +392,19 @@ bool job_license(UnicodeString dir) {
 	lic.run();
 //	printLogDebug(lic.errorString());
 	printLog(lic.resultString());
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, lic.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !lic.checkErr();
 }
 bool job_audit(UnicodeString dir) {
 	UnicodeString outFilePath, arg;
-	if(curConfig.getAudit() == 1) {
+	if(jb7 == 1) {
 		outFilePath = dir + "\\auditMax.html";
 		arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
 		printLog("Генерування auditMax.html...");
 	}
-	if(curConfig.getAudit() == 2) {
+	if(jb7 == 2) {
 		outFilePath = dir + "\\auditMin.html";
 		arg = "/r=go /f=" + outFilePath + " /L=en\"";
 		printLog("Генерування auditMin.html...");
@@ -333,6 +416,7 @@ bool job_audit(UnicodeString dir) {
 	audit.run();
 //	printLogDebug(audit.errorString());
 	printLog(audit.resultString());
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, audit.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !audit.checkErr();
@@ -350,18 +434,19 @@ bool job_diskInfo(UnicodeString dir) {
 	MoveFile(f1.c_str(), outFilePath.c_str());
 //	printLogDebug(cdi.errorString());
 	printLog(cdi.resultString());
+	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, cdi.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !cdi.checkErr();
 }
 bool job_esetLog(UnicodeString dir) {
 	UnicodeString outFilePath, arg;
-	if(curConfig.getEsetLog() == 1) {
+	if(jb8 == 1) {
 		outFilePath = dir + "\\eset-log-full.zip";
 		arg = "/accepteula /Lang:UKR /Age:0 \"" + outFilePath + "\"";
 		printLog("Генерування eset-log-full.zip...");
 	}
-	if(curConfig.getEsetLog() == 2) {
+	if(jb8 == 2) {
 		outFilePath = dir + "\\eset-log-mini.zip";
 		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev \"" + outFilePath + "\"";
 		printLog("Генерування eset-log-mini.zip...");
@@ -373,6 +458,7 @@ bool job_esetLog(UnicodeString dir) {
 	esetLog.run(false);
 //	printLogDebug(esetLog.errorString());
 	printLog(esetLog.resultString());
+    jobDone(countJob, ++curJob);
 	progressBarGo(pos += step, esetLog.checkErr());
 //	printLogDebug("{app32}=" + app32);
 //	printLogDebug("{arg}=" + arg);
