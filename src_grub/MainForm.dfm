@@ -20,6 +20,7 @@
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poDesigned
+  StyleName = 'Windows'
   PixelsPerInch = 168
   TextHeight = 30
   object GridPanelMain: TGridPanel
@@ -627,8 +628,8 @@
                 AlignWithMargins = True
                 Left = 188
                 Top = 5
-                Width = 271
-                Height = 40
+                Width = 234
+                Height = 30
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -643,8 +644,6 @@
                 Font.Style = [fsItalic]
                 ParentFont = False
                 Layout = tlCenter
-                ExplicitWidth = 234
-                ExplicitHeight = 30
               end
             end
           end
@@ -1033,7 +1032,10 @@
             BevelOuter = bvNone
             ColumnCollection = <
               item
-                Value = 100.000000000000000000
+                Value = 61.819980217606330000
+              end
+              item
+                Value = 38.180019782393670000
               end>
             ControlCollection = <
               item
@@ -1045,21 +1047,32 @@
                 Column = 0
                 Control = GroupBox7
                 Row = 1
+              end
+              item
+                Column = 1
+                Control = GroupBox_SPZ
+                Row = 0
+                RowSpan = 3
               end>
             RowCollection = <
               item
-                Value = 50.000000000000000000
+                SizeStyle = ssAbsolute
+                Value = 185.000000000000000000
               end
               item
-                Value = 50.000000000000000000
+                SizeStyle = ssAbsolute
+                Value = 140.000000000000000000
+              end
+              item
+                Value = 100.000000000000000000
               end>
             TabOrder = 0
             object GroupBox6: TGroupBox
               AlignWithMargins = True
               Left = 5
               Top = 5
-              Width = 662
-              Height = 283
+              Width = 405
+              Height = 175
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -1070,8 +1083,8 @@
               object GridPanel_EditInfoBezp: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 658
-                Height = 249
+                Width = 401
+                Height = 141
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -1087,33 +1100,33 @@
                   end>
                 ControlCollection = <
                   item
-                    Column = 0
-                    Control = CheckBox_PoliticInstall
+                    Column = 1
+                    Control = ComboBox_PoliticInstall
                     Row = 0
                   end
                   item
                     Column = 1
-                    Control = Edit_ComPoliticInstall
-                    Row = 0
-                  end
-                  item
-                    Column = 0
-                    Control = CheckBox_ContrUSB
+                    Control = ComboBox_ContrUSB
                     Row = 1
                   end
                   item
                     Column = 1
-                    Control = Edit_ComContrUSB
-                    Row = 1
-                  end
-                  item
-                    Column = 0
-                    Control = CheckBox_MultiUSERS
+                    Control = ComboBox_MultiUSERS
                     Row = 2
                   end
                   item
-                    Column = 1
-                    Control = Edit_ComMultiUSERS
+                    Column = 0
+                    Control = Label18
+                    Row = 0
+                  end
+                  item
+                    Column = 0
+                    Control = Label19
+                    Row = 1
+                  end
+                  item
+                    Column = 0
+                    Control = Label20
                     Row = 2
                   end>
                 RowCollection = <
@@ -1127,105 +1140,107 @@
                     Value = 33.333333333333400000
                   end>
                 TabOrder = 0
-                DesignSize = (
-                  658
-                  249)
-                object CheckBox_PoliticInstall: TCheckBox
+                object ComboBox_PoliticInstall: TComboBox
                   AlignWithMargins = True
-                  Left = 5
-                  Top = 27
-                  Width = 251
-                  Height = 28
+                  Left = 163
+                  Top = 5
+                  Width = 233
+                  Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
-                  Anchors = [akLeft]
-                  Caption = #1042#1089#1090#1072#1085#1086#1074#1083#1077#1085#1085#1110' '#1087#1086#1083#1110#1090#1080#1082#1080':'
+                  Align = alClient
                   TabOrder = 0
-                  OnClick = CheckBox_PoliticInstallClick
+                  Text = '---'
+                  OnChange = ComboBox_PoliticInstallChange
                 end
-                object Edit_ComPoliticInstall: TEdit
-                  Left = 268
-                  Top = 22
-                  Width = 380
+                object ComboBox_ContrUSB: TComboBox
+                  AlignWithMargins = True
+                  Left = 163
+                  Top = 52
+                  Width = 233
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
-                  Anchors = []
+                  Align = alClient
                   TabOrder = 1
-                  Text = 'Edit_ComPoliticInstall'
-                  OnChange = Edit_ComPoliticInstallChange
+                  Text = '---'
+                  OnChange = ComboBox_ContrUSBChange
                 end
-                object CheckBox_ContrUSB: TCheckBox
+                object ComboBox_MultiUSERS: TComboBox
                   AlignWithMargins = True
-                  Left = 5
-                  Top = 110
-                  Width = 251
-                  Height = 29
+                  Left = 163
+                  Top = 99
+                  Width = 233
+                  Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
-                  Anchors = [akLeft]
-                  Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' '#1050#1055':'
+                  Align = alClient
                   TabOrder = 2
-                  OnClick = CheckBox_ContrUSBClick
+                  Text = '---'
+                  OnChange = ComboBox_MultiUSERSChange
                 end
-                object Edit_ComContrUSB: TEdit
-                  Left = 268
-                  Top = 105
-                  Width = 380
-                  Height = 38
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Anchors = []
-                  TabOrder = 3
-                  Text = 'Edit_ComContrUSB'
-                  OnChange = Edit_ComContrUSBChange
-                end
-                object CheckBox_MultiUSERS: TCheckBox
+                object Label18: TLabel
                   AlignWithMargins = True
                   Left = 5
-                  Top = 192
-                  Width = 251
-                  Height = 30
+                  Top = 5
+                  Width = 148
+                  Height = 37
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
-                  Anchors = [akLeft]
-                  Caption = #1056#1086#1079#1084#1077#1078#1091#1074#1072#1085#1103' '#1076#1086#1089#1090#1091#1087#1091':'
-                  TabOrder = 4
-                  OnClick = CheckBox_MultiUSERSClick
+                  Align = alClient
+                  Caption = #1055#1086#1083#1110#1090#1080#1082#1080':'
+                  Layout = tlCenter
+                  ExplicitWidth = 91
+                  ExplicitHeight = 30
                 end
-                object Edit_ComMultiUSERS: TEdit
-                  Left = 268
-                  Top = 188
-                  Width = 380
-                  Height = 38
+                object Label19: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 52
+                  Width = 148
+                  Height = 37
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
-                  Anchors = []
-                  TabOrder = 5
-                  Text = 'Edit_ComMultiUSERS'
-                  OnChange = Edit_ComMultiUSERSChange
-                  ExplicitLeft = 266
+                  Align = alClient
+                  Caption = 'USB:'
+                  Layout = tlCenter
+                  ExplicitWidth = 42
+                  ExplicitHeight = 30
+                end
+                object Label20: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 99
+                  Width = 148
+                  Height = 37
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Caption = #1050#1086#1088#1080#1089#1090#1091#1074#1072#1095#1110':'
+                  Layout = tlCenter
+                  ExplicitWidth = 121
+                  ExplicitHeight = 30
                 end
               end
             end
             object GroupBox7: TGroupBox
               AlignWithMargins = True
               Left = 5
-              Top = 298
-              Width = 662
-              Height = 283
+              Top = 190
+              Width = 405
+              Height = 130
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -1237,8 +1252,8 @@
               object GridPanel_EditInfoLic: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 658
-                Height = 249
+                Width = 401
+                Height = 96
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -1275,46 +1290,42 @@
                   end>
                 RowCollection = <
                   item
-                    Value = 50.176296918237020000
+                    Value = 50.088304136590000000
                   end
                   item
-                    Value = 49.823703081762980000
+                    Value = 49.911695863410000000
                   end>
                 TabOrder = 0
-                DesignSize = (
-                  658
-                  249)
                 object Label9: TLabel
                   AlignWithMargins = True
                   Left = 5
-                  Top = 47
-                  Width = 133
-                  Height = 30
-                  Margins.Left = 5
-                  Margins.Top = 5
-                  Margins.Right = 5
-                  Margins.Bottom = 5
-                  Anchors = [akLeft]
-                  Caption = #1051#1110#1094'. Windows:'
-                  ExplicitTop = 15
-                end
-                object EditLicWin: TComboBox
-                  Left = 270
-                  Top = 43
-                  Width = 378
+                  Top = 5
+                  Width = 149
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
-                  Style = csDropDownList
-                  Anchors = []
-                  ItemIndex = 0
+                  Align = alClient
+                  Caption = #1051#1110#1094'. Windows:'
+                  ExplicitWidth = 133
+                  ExplicitHeight = 30
+                end
+                object EditLicWin: TComboBox
+                  AlignWithMargins = True
+                  Left = 164
+                  Top = 5
+                  Width = 232
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
                   TabOrder = 0
-                  Text = #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
+                  Text = '---'
                   OnChange = EditLicWinChange
                   Items.Strings = (
-                    #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
                     #1040#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     #1053#1077' '#1072#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     'KMS')
@@ -1322,39 +1333,66 @@
                 object Label10: TLabel
                   AlignWithMargins = True
                   Left = 9
-                  Top = 172
-                  Width = 104
+                  Top = 57
+                  Width = 141
                   Height = 30
                   Margins.Left = 9
                   Margins.Top = 9
                   Margins.Right = 9
                   Margins.Bottom = 9
-                  Anchors = [akLeft]
+                  Align = alClient
                   Caption = #1051#1110#1094'. Office:'
-                  ExplicitTop = 73
+                  ExplicitWidth = 104
                 end
                 object EditLicOffice: TComboBox
-                  Left = 270
-                  Top = 168
-                  Width = 378
+                  AlignWithMargins = True
+                  Left = 164
+                  Top = 53
+                  Width = 232
                   Height = 38
-                  Margins.Left = 9
-                  Margins.Top = 9
-                  Margins.Right = 9
-                  Margins.Bottom = 9
-                  Style = csDropDownList
-                  Anchors = []
-                  ItemIndex = 0
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
                   TabOrder = 1
-                  Text = #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
+                  Text = '---'
                   OnChange = EditLicOfficeChange
                   Items.Strings = (
-                    #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
                     #1040#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     #1053#1077' '#1072#1082#1090#1080#1074#1086#1074#1072#1085#1072
                     'KMS'
                     #1055#1054' '#1074#1110#1076#1089#1091#1090#1085#1077)
                 end
+              end
+            end
+            object GroupBox_SPZ: TGroupBox
+              AlignWithMargins = True
+              Left = 420
+              Top = 5
+              Width = 247
+              Height = 576
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Caption = #1053#1072#1083#1072#1096#1090#1086#1074#1072#1085#1077' '#1057#1055#1047
+              TabOrder = 2
+              object CheckListBox_SPZ: TCheckListBox
+                AlignWithMargins = True
+                Left = 7
+                Top = 37
+                Width = 233
+                Height = 532
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Align = alClient
+                ItemHeight = 30
+                TabOrder = 0
+                OnClickCheck = CheckListBox_SPZClickCheck
               end
             end
           end
@@ -1370,7 +1408,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet_Settings
+        ActivePage = TabSheet_Info
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -2036,7 +2074,7 @@
                 Align = alClient
                 Caption = #1047#1085#1072#1081#1076#1077#1085#1085#1086' '#1092#1072#1081#1083#1110#1074' '#1074' '#1082#1072#1088#1072#1085#1090#1080#1085#1110' ESET:'
                 Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWhite
+                Font.Color = clWindowText
                 Font.Height = -21
                 Font.Name = 'Segoe UI'
                 Font.Style = []
@@ -2058,6 +2096,12 @@
                 Margins.Right = 5
                 Margins.Bottom = 5
                 Anchors = []
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clWhite
+                Font.Height = -21
+                Font.Name = 'Segoe UI'
+                Font.Style = []
+                ParentFont = False
                 ParentShowHint = False
                 ReadOnly = True
                 ShowHint = True
@@ -2078,7 +2122,7 @@
               Align = alClient
               Caption = #1055#1086#1090#1086#1095#1085#1110' '#1082#1086#1088#1080#1089#1090#1091#1074#1072#1095#1110' '#1040#1056#1052':'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = clWhite
+              Font.Color = clWindowText
               Font.Height = -21
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -2099,12 +2143,6 @@
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clWindowText
-              Font.Height = -21
-              Font.Name = 'Consolas'
-              Font.Style = []
-              ParentFont = False
               ReadOnly = True
               ScrollBars = ssVertical
               TabOrder = 1
@@ -2122,7 +2160,7 @@
               Align = alClient
               Caption = #1047#1072#1073#1086#1088#1086#1085#1077#1085#1080#1081' '#1089#1086#1092#1090':'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = clWhite
+              Font.Color = clWindowText
               Font.Height = -21
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -2143,12 +2181,6 @@
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clWindowText
-              Font.Height = -21
-              Font.Name = 'Consolas'
-              Font.Style = []
-              ParentFont = False
               ReadOnly = True
               ScrollBars = ssVertical
               TabOrder = 2
@@ -3528,20 +3560,12 @@
           Alignment = taCenter
           BevelEdges = []
           BevelInner = bvNone
-          BiDiMode = bdLeftToRight
           Color = clBtnFace
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -21
-          Font.Name = 'Consolas'
-          Font.Style = []
-          ParentBiDiMode = False
-          ParentFont = False
           TabOrder = 0
           Text = 'EditDirGrubName'
           StyleElements = [seBorder]
           OnChange = EditDirGrubNameChange
-          ExplicitHeight = 32
+          ExplicitHeight = 38
         end
         object BtnGruberDirOpen: TButton
           AlignWithMargins = True

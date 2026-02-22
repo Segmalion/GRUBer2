@@ -17,6 +17,7 @@ struct patchList {
 	long long size = 0;
 };
 
+bool checkConfigFileExist();
 //std::vector<UnicodeString> scanDirToFille(UnicodeString dir);
 patchList scanDirToFille(UnicodeString dir);
 std::vector<UnicodeString> getLocalDrivePatch();

@@ -68,7 +68,6 @@ bool IsAdminMode() {
 //---------------------------------------------------------------------------
 void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
-	//Form1->CheckBoxShowLog->Checked = curConfig.getShowLog();
 	Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();
 	Form1->EditGrubUser->Text = curConfig.getUser();
 	Form1->CheckBoxOldGrub->State = (TCheckBoxState)curConfig.getOldGrub();
@@ -79,20 +78,15 @@ void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxNewGrub->Checked = curConfig.getNewGrub();
 	Form1->CheckBoxLicense->Checked = curConfig.getLicense();
 	Form1->CheckBoxAudit->State = (TCheckBoxState)curConfig.getAudit();
-	//if (curConfig.getAudit() == 0) Form1->CheckBoxAudit->State = cbUnchecked;
-	//if (curConfig.getAudit() == 2) Form1->CheckBoxAudit->State = cbGrayed;
-	//if (curConfig.getAudit() == 1) Form1->CheckBoxAudit->State = cbChecked;
 	Form1->CheckBoxEsetLog->State = (TCheckBoxState)curConfig.getEsetLog();
-	//if (curConfig.getEsetLog() == 0) Form1->CheckBoxEsetLog->State = cbUnchecked;
-	//if (curConfig.getEsetLog() == 2) Form1->CheckBoxEsetLog->State = cbGrayed;
-	//if (curConfig.getEsetLog() == 1) Form1->CheckBoxEsetLog->State = cbChecked;
-	//Form1->CheckBoxEsetLog->State = curConfig.getEsetLog();
-	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
-	for(auto i : curConfig.getArmClass()) Form1->EditArmClass->Items->Add(i);
-	for(auto i : curConfig.getCategory()) Form1->EditCategory->Items->Add(i);
 	Form1->CheckBoxPrefixPartition->State = (TCheckBoxState)curConfig.getEnablePrefixPartition();
-    Form1->EditPrefixPartition->Text = curConfig.getPrefixPartition();
-	Form1->ComboBox_forNumberARM->ItemIndex = curConfig.get_forNumberARMid(); // <===
+	Form1->ComboBox_forNumberARM->ItemIndex = curConfig.get_forNumberARMid();
+	Form1->EditPrefixPartition->Text = curConfig.getPrefixPartition();
+	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
+	for(auto i : curConfig.get_lgpo()) if(!i.IsEmpty()) Form1->ComboBox_PoliticInstall->Items->Add(i); //<--
+	for(auto i : curConfig.get_usb())  if(!i.IsEmpty()) Form1->ComboBox_ContrUSB->Items->Add(i); //<--
+	for(auto i : curConfig.get_user()) if(!i.IsEmpty()) Form1->ComboBox_MultiUSERS->Items->Add(i); //<--
+	for(auto i : curConfig.get_spz()) if(!i.IsEmpty()) Form1->CheckListBox_SPZ->Items->Add(i); //<--
 }
 void setInfoArmToForm(Arm &curPC) {
 	if (curPC.get_useForNumberARMid() != 0)
@@ -118,18 +112,33 @@ void setInfoArmToForm(Arm &curPC) {
 		Form1->Edit_NumberARM->Enabled = true;
 	}
 	Form1->EditPartition->Text = curPC.getPartition();
+	//---
+	if (!curPC.get_lgpo().IsEmpty())
+		Form1->ComboBox_PoliticInstall->Text = curPC.get_lgpo();  //<--
+	if (!curPC.get_controlUSB().IsEmpty())
+		Form1->ComboBox_ContrUSB->Text  = curPC.get_controlUSB(); //<--
+	if (!curPC.get_multiUser().IsEmpty())
+		Form1->ComboBox_MultiUSERS->Text = curPC.get_multiUser(); //<--
+	std::vector<UnicodeString> tp_vStr = curPC.get_spzInstal();
+	for (int i = 0; i < tp_vStr.size(); i++) {
+		if (Form1->CheckListBox_SPZ->Items->Count !=0) {
+			for (int j = 0; j < Form1->CheckListBox_SPZ->Items->Count; j++) {
+				if (tp_vStr[i] == Form1->CheckListBox_SPZ->Items->Strings[j]) {
+					//printLogDebug("CHECK = " + UnicodeString(j));
+					Form1->CheckListBox_SPZ->Checked[j] = true;
+				}
+			}
+		}
+	}
+	//---
 	Form1->EditArmClass->ItemIndex = curPC.getClassID();
 	Form1->EditCategory->ItemIndex = curPC.getCategoryID();
-	Form1->EditLicWin->ItemIndex    = curPC.getLicWindowsID();
-	Form1->EditLicOffice->ItemIndex = curPC.getLicOfficeID();
-//	Form1->EditArmClass->Text  = curPC.getClassName();
-//	Form1->EditCategory->Text  = curPC.getCategoryName();
-//	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
-//	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
+	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
+	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
 	Form1->EditRespon->Text    = curPC.getRespon();
 	Form1->EditPurpose->Text   = curPC.getPurpose();
-	Form1->Edit_Place->Text   = curPC.getPlace(); // <==
-	Form1->Edit_Phone->Text   = curPC.getPhone(); // <==
+	Form1->Edit_Place->Text   = curPC.getPlace();
+	Form1->Edit_Phone->Text   = curPC.getPhone();
 
 	Form1->Edit_InNumberARM->Text = curPC.getInNumberARM();
 	Form1->Edit_InNumberHDD->Text = curPC.getInNumberHDD();
@@ -137,18 +146,8 @@ void setInfoArmToForm(Arm &curPC) {
 	Form1->Edit_InNumberFormulyar->Text = curPC.getInNumberFormulyar();
 	Form1->Edit_InNumberWork->Text = curPC.getInNumberWork();
 	Form1->Edit_InNumberPerson->Text = curPC.getInNumberPerson();
-	Form1->Edit_InRespon->Text = curPC.getInRespon(); // <==
-	Form1->Edit_InAdminBP->Text = curPC.getInAdminBP(); // <==
-
-	Form1->Edit_ComPoliticInstall->Text = curPC.getComPoliticInstall();
-	Form1->Edit_ComContrUSB->Text = curPC.getComContrUSB();
-	Form1->Edit_ComMultiUSERS->Text = curPC.getComMultiUSERS();
-	Form1->CheckBox_PoliticInstall->Checked = curPC.getPoliticInstall();
-	Form1->CheckBox_ContrUSB->Checked = curPC.getContrUSB();
-	Form1->CheckBox_MultiUSERS->Checked = curPC.getMultiUSERS();
-	//Form1->Edit_ComPoliticInstall->Enabled = curPC.getPoliticInstall();
-	//Form1->Edit_ComContrUSB->Enabled = curPC.getContrUSB();
-	//Form1->Edit_ComMultiUSERS->Enabled = curPC.getMultiUSERS();
+	Form1->Edit_InRespon->Text = curPC.getInRespon();
+	Form1->Edit_InAdminBP->Text = curPC.getInAdminBP();
 
 	Form1->EditComent->Clear();
 	for (auto str : curPC.getComent()) {

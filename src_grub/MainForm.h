@@ -16,6 +16,7 @@
 #include <Vcl.Menus.hpp>
 #include <System.Win.TaskbarCore.hpp>
 #include <Vcl.Taskbar.hpp>
+#include <Vcl.CheckLst.hpp>
 
 #include <vector>
 //---------------------------------------------------------------------------
@@ -113,12 +114,6 @@ __published:	// IDE-managed Components
 	TGroupBox *GroupBox7;
 	TGridPanel *GridPanel_EditInfoBezp;
 	TGridPanel *GridPanel_EditInfoLic;
-	TCheckBox *CheckBox_PoliticInstall;
-	TEdit *Edit_ComPoliticInstall;
-	TCheckBox *CheckBox_ContrUSB;
-	TEdit *Edit_ComContrUSB;
-	TCheckBox *CheckBox_MultiUSERS;
-	TEdit *Edit_ComMultiUSERS;
 	TLabel *Label10;
 	TComboBox *EditLicOffice;
 	TLabel *Label_Purpose;
@@ -197,6 +192,14 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel4;
 	TLabel *Label12;
 	TComboBox *ComboBox_ThemeChange;
+	TGroupBox *GroupBox_SPZ;
+	TCheckListBox *CheckListBox_SPZ;
+	TComboBox *ComboBox_PoliticInstall;
+	TComboBox *ComboBox_ContrUSB;
+	TComboBox *ComboBox_MultiUSERS;
+	TLabel *Label18;
+	TLabel *Label19;
+	TLabel *Label20;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditPartitionChange(TObject *Sender);
@@ -250,12 +253,6 @@ __published:	// IDE-managed Components
 	void __fastcall Edit_InNumberFormulyarChange(TObject *Sender);
 	void __fastcall Edit_InNumberWorkChange(TObject *Sender);
 	void __fastcall Edit_InNumberPersonChange(TObject *Sender);
-	void __fastcall Edit_ComPoliticInstallChange(TObject *Sender);
-	void __fastcall Edit_ComContrUSBChange(TObject *Sender);
-	void __fastcall Edit_ComMultiUSERSChange(TObject *Sender);
-	void __fastcall CheckBox_PoliticInstallClick(TObject *Sender);
-	void __fastcall CheckBox_ContrUSBClick(TObject *Sender);
-	void __fastcall CheckBox_MultiUSERSClick(TObject *Sender);
 	void __fastcall EditPurposeChange(TObject *Sender);
 	void __fastcall BtnClearPCClick(TObject *Sender);
 	void __fastcall Gruber_MiniClick(TObject *Sender);
@@ -278,6 +275,10 @@ __published:	// IDE-managed Components
 	//void __fastcall CheckBox1Click(TObject *Sender);
 	void __fastcall Button_CheckDefectionClick(TObject *Sender);
 	void __fastcall Gruber_USBClick(TObject *Sender);
+	void __fastcall ComboBox_PoliticInstallChange(TObject *Sender);
+	void __fastcall ComboBox_ContrUSBChange(TObject *Sender);
+	void __fastcall ComboBox_MultiUSERSChange(TObject *Sender);
+	void __fastcall CheckListBox_SPZClickCheck(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 public:		// User declarations

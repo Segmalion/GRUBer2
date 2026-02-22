@@ -87,14 +87,11 @@ void blockGrub(bool i) {
 	Form1->Edit_InRespon->Enabled = !i;
 	Form1->Edit_InAdminBP->Enabled = !i;
 	//-----
-	Form1->Edit_ComPoliticInstall->Enabled = !i;
-	Form1->Edit_ComContrUSB->Enabled = !i;
-	Form1->Edit_ComMultiUSERS->Enabled = !i;
+	Form1->ComboBox_PoliticInstall->Enabled = !i;
+	Form1->ComboBox_ContrUSB->Enabled = !i;
+	Form1->ComboBox_MultiUSERS->Enabled = !i;
 	Form1->EditLicWin->Enabled = !i;
 	Form1->EditLicOffice->Enabled = !i;
-	Form1->CheckBox_PoliticInstall->Enabled = !i;
-	Form1->CheckBox_ContrUSB->Enabled = !i;
-	Form1->CheckBox_MultiUSERS->Enabled = !i;
 	//-----
 	Form1->EditGrubUser->Enabled = !i;
 	Form1->CheckBoxOldGrub->Enabled = !i;
@@ -385,9 +382,9 @@ bool job_license(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\license.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування license.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\Info-License-to-File.bat";
+	UnicodeString app32 = curDir.getToolFull() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
 	UnicodeString app64 = NULL;
-	UnicodeString arg = "\""+ outFilePath + "\"";
+	UnicodeString arg = "-pass -log \""+ outFilePath + "\"";
 	RunApp lic {app32, app64, arg};
 	lic.run();
 //	printLogDebug(lic.errorString());

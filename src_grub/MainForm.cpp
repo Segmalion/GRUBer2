@@ -55,7 +55,7 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 1;
+extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 3;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -258,9 +258,20 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 {
 	PageControl_SetInfo->TabIndex = 0;
 	PageControl_InfoTabs->TabIndex = 0;
+	// === проверка на необходимые файлы и папки
+	if(checkConfigFileExist()) printLogDebug("Config fille OK");
+	else {
+		UnicodeString text = "Не вистачае файлів...";
+		UnicodeString formCaption = "Щось пішло попі*ді...";
+		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_OK) == IDOK) {
+			exit(0);
+		}
+	}
 	// === выводим настройки & сохраненую инфу об АРМ
 	setConfigToForm(curConfig);
 	setInfoArmToForm(curPC);
+	printLogDebug("{Count}=" + UnicodeString(Form1->CheckListBox_SPZ->Items->Count));
+	//printLogDebug("{Count}=" + (Form1->CheckListBox_SPZ->Items->Strings[2]));
 	/* === */
 	if (x64() && (appPath() == GetCurrentDir() + "\\GRUBer_x32.exe")) {
 		UnicodeString setApp = GetCurrentDir() + "\\GRUBer_x64.exe";
@@ -383,7 +394,7 @@ void __fastcall TForm1::BtnParserOpenClick(TObject *Sender)
 // === провека лицензий
 void __fastcall TForm1::BtnLicenseClick(TObject *Sender)
 {
-	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\INFO-license-run.bat";
+	UnicodeString setApp = curDir.getToolFull() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // === общее инфо
@@ -606,29 +617,18 @@ void __fastcall TForm1::Edit_InAdminBPChange(TObject *Sender) // <===
 {
 	curPC.setInAdminBP(Edit_InAdminBP->Text);
 }
-void __fastcall TForm1::Edit_ComPoliticInstallChange(TObject *Sender)
+// -----
+void __fastcall TForm1::ComboBox_PoliticInstallChange(TObject *Sender)
 {
-	curPC.setComPoliticInstall(Edit_ComPoliticInstall->Text);
+	curPC.set_lgpo(ComboBox_PoliticInstall->Text);
 }
-void __fastcall TForm1::Edit_ComContrUSBChange(TObject *Sender)
+void __fastcall TForm1::ComboBox_ContrUSBChange(TObject *Sender)
 {
-	curPC.setComContrUSB(Edit_ComContrUSB->Text);
+	curPC.set_controlUSB(ComboBox_ContrUSB->Text);
 }
-void __fastcall TForm1::Edit_ComMultiUSERSChange(TObject *Sender)
+void __fastcall TForm1::ComboBox_MultiUSERSChange(TObject *Sender)
 {
-   curPC.setComMultiUSERS(Edit_ComMultiUSERS->Text);
-}
-void __fastcall TForm1::CheckBox_PoliticInstallClick(TObject *Sender)
-{
-   curPC.setPoliticInstall(CheckBox_PoliticInstall->Checked);
-}
-void __fastcall TForm1::CheckBox_ContrUSBClick(TObject *Sender)
-{
-   curPC.setContrUSB(CheckBox_ContrUSB->Checked);
-}
-void __fastcall TForm1::CheckBox_MultiUSERSClick(TObject *Sender)
-{
-   curPC.setMultiUSERS(CheckBox_MultiUSERS->Checked);
+	curPC.set_multiUser(ComboBox_MultiUSERS->Text);
 }
 // -----
 void __fastcall TForm1::ShowSerialGenarateDblClick(TObject *Sender)
@@ -904,8 +904,6 @@ void __fastcall TForm1::EditPrefixPartitionChange(TObject *Sender)
 	curConfig.setPrefixPartition(EditPrefixPartition->Text);
     EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 {
 	EditPrefixPartition->Enabled=CheckBoxPrefixPartition->State;
@@ -917,6 +915,16 @@ void __fastcall TForm1::CheckBoxPrefixPartitionClick(TObject *Sender)
 void __fastcall TForm1::Button_CheckDefectionClick(TObject *Sender)
 {
 	checkDefection();
+}//--------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckListBox_SPZClickCheck(TObject *Sender)
+{
+	std::vector<UnicodeString> tm_vStr;
+	for (int i = 0; i < Form1->CheckListBox_SPZ->Items->Count; i++)
+		if(Form1->CheckListBox_SPZ->Checked[i])
+			tm_vStr.push_back(Form1->CheckListBox_SPZ->Items->Strings[i]);
+	curPC.set_spzInstal(tm_vStr);
 }
 //---------------------------------------------------------------------------
 

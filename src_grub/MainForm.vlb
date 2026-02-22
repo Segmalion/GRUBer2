@@ -179,7 +179,7 @@ Coordinates=210,280,126,58
 Coordinates=600,416,125,58
 
 []
-Coordinates=1684,584,135,58
+Coordinates=773,289,151,58
 Visible=True
 
 [GridPanel_Settings]
@@ -284,9 +284,6 @@ Coordinates=1034,674,116,58
 [ComboBox_forNumberARM]
 Coordinates=0,0,173,124
 
-[CheckBox_PoliticInstall]
-Coordinates=1277,443,149,58
-
 [Label_Phone]
 Coordinates=310,674,90,58
 
@@ -298,9 +295,6 @@ Coordinates=1357,828,53,58
 
 [GroupBox7]
 Coordinates=1268,770,79,58
-
-[Edit_ComContrUSB]
-Coordinates=30,335,128,58
 
 [Label10]
 Coordinates=936,770,60,58
@@ -353,14 +347,8 @@ Coordinates=191,674,118,58
 [TabSheet_Settings]
 Coordinates=1684,364,124,36
 
-[CheckBox_MultiUSERS]
-Coordinates=773,289,151,58
-
 [BtnApp_UsbTreeView]
 Coordinates=1505,617,141,58
-
-[CheckBox_ContrUSB]
-Coordinates=1505,771,137,58
 
 [GridPanel_ESETQuarantine]
 Coordinates=1143,1,176,58
@@ -440,9 +428,6 @@ Coordinates=1072,78,151,58
 [Label13]
 Coordinates=537,153,60,58
 
-[Edit_ComPoliticInstall]
-Coordinates=192,78,140,58
-
 [Label8]
 Coordinates=14,240,53,58
 
@@ -463,9 +448,6 @@ Coordinates=1072,289,167,58
 
 [Edit_InNumberDeclr]
 Coordinates=1505,463,130,58
-
-[Edit_ComMultiUSERS]
-Coordinates=1502,155,142,58
 
 [Label1]
 Coordinates=1021,897,53,58

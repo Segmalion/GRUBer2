@@ -92,7 +92,7 @@ void Arm::read_user() {
 }
 //генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrIniVersionNumber() {
-	const int iniVersionNumber = 3;
+	const int iniVersionNumber = 4;
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[iniVersion]");
 	mStr.push_back("version=" + UnicodeString(iniVersionNumber));
@@ -142,22 +142,20 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrub() {
 	mStr.push_back("licOfficeID=" + UnicodeString(licOfficeID));
 	mStr.push_back("respon=" + respon);
 	mStr.push_back("purpose=" + purpose);
-	mStr.push_back("place=" + place); // <===
-	mStr.push_back("phone=" + phone); // <===
+	mStr.push_back("place=" + place);
+	mStr.push_back("phone=" + phone);
 	mStr.push_back("inNumberARM=" + inNumberARM);
 	mStr.push_back("inNumberHDD=" + inNumberHDD);
 	mStr.push_back("inNumberDeclr=" + inNumberDeclr);
 	mStr.push_back("inNumberFormulyar=" + inNumberFormulyar);
 	mStr.push_back("inNumberWork=" + inNumberWork);
 	mStr.push_back("inNumberPerson=" + inNumberPerson);
-	mStr.push_back("inRespon=" + inRespon); // <===
-	mStr.push_back("inAdminBP=" + inAdminBP); // <===
-	mStr.push_back("comPoliticInstall=" + comPoliticInstall);
-	mStr.push_back("comContrUSB=" + comContrUSB);
-	mStr.push_back("comMultiUSERS=" + comMultiUSERS);
-	mStr.push_back("politicInstall=" + UnicodeString(politicInstall));
-	mStr.push_back("contrUSB=" + UnicodeString(contrUSB));
-	mStr.push_back("multiUSERS=" + UnicodeString(multiUSERS));
+	mStr.push_back("inRespon=" + inRespon);
+	mStr.push_back("inAdminBP=" + inAdminBP);
+	mStr.push_back("lgpo=" + lgpo);             //<---
+	mStr.push_back("controlUSB=" + controlUSB); //<---
+	mStr.push_back("multiUser=" + multiUser);   //<---
+	mStr.push_back("spzInstal=" + strGenFromVStr(spzInstal)); //<---
 	return mStr;
 }
 std::vector<UnicodeString> Arm::mStrLastGrub() {
@@ -199,7 +197,7 @@ bool Arm::readFromFile() {
 		histGr.user = findParam(file, "[lastGrub]", "lastGrubUser");
 		partition = findParam(file, "[infoGrubARM]", "partition");
 		classID = findParam(file, "[infoGrubARM]", "classID").ToIntDef(0);
-		categoryID = findParam(file, "[infoGrubARM]", "categoryID").ToIntDef(0); //?
+		categoryID = findParam(file, "[infoGrubARM]", "categoryID").ToIntDef(0);
 		licWindowsID = findParam(file, "[infoGrubARM]", "licWindowsID").ToIntDef(0);
 		licOfficeID = findParam(file, "[infoGrubARM]", "licOfficeID").ToIntDef(0);
 		className = findParam(file, "[infoGrubARM]", "className");
@@ -214,16 +212,15 @@ bool Arm::readFromFile() {
 		inNumberFormulyar = findParam(file, "[infoGrubARM]", "inNumberFormulyar");
 		inNumberWork = findParam(file, "[infoGrubARM]", "inNumberWork");
 		inNumberPerson = findParam(file, "[infoGrubARM]", "inNumberPerson");
-		comPoliticInstall = findParam(file, "[infoGrubARM]", "comPoliticInstall");
-		comContrUSB = findParam(file, "[infoGrubARM]", "comContrUSB");
-		comMultiUSERS = findParam(file, "[infoGrubARM]", "comMultiUSERS");
-		politicInstall = findParam(file, "[infoGrubARM]", "politicInstall").ToIntDef(0);
-		contrUSB = findParam(file, "[infoGrubARM]", "contrUSB").ToIntDef(0);
-		multiUSERS = findParam(file, "[infoGrubARM]", "multiUSERS").ToIntDef(0);
 		eset.autoUpdate = findParam(file, "[infoESET]", "autoUpdate").ToIntDef(1);
 		eset.dirMirror = findParam(file, "[infoESET]", "dirMirror");
 		coment = findCategory(file, "[comment]");
 		// версия --2--
+		if (vers <= 3) {
+			lgpo = findParam(file, "[infoGrubARM]", "comPoliticInstall");
+			controlUSB = findParam(file, "[infoGrubARM]", "comContrUSB");
+			multiUser = findParam(file, "[infoGrubARM]", "comMultiUSERS");
+        }
 		if (vers == 1) {
 			number_UVs = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
         }
@@ -249,6 +246,12 @@ bool Arm::readFromFile() {
 		}
 		if (vers >= 3) {
 			categoryNameShort = findParam(file, "[infoGrubARM]", "categoryNameShort");
+		}
+		if (vers >= 4) {
+			lgpo = findParam(file, "[infoGrubARM]", "lgpo");			 //<--
+			controlUSB = findParam(file, "[infoGrubARM]", "controlUSB"); //<--
+			multiUser = findParam(file, "[infoGrubARM]", "multiUser");   //<--
+			spzInstal = vStrGenFromStr(findParam(file, "[infoGrubARM]", "spzInstal"));//<---
 		}
 		return true;
 	}
@@ -306,8 +309,8 @@ void Arm::setLicWindows(UnicodeString str, int i) { licWindowsName = str; licWin
 void Arm::setLicOffice(UnicodeString str, int i) { licOfficeName = str; licOfficeID = i; }
 void Arm::setRespon(UnicodeString str) { respon = str; }
 void Arm::setPurpose(UnicodeString str) { purpose = str; }
-void Arm::setPlace(UnicodeString str) { place = str; } // <===
-void Arm::setPhone(UnicodeString str) { phone = str; } // <===
+void Arm::setPlace(UnicodeString str) { place = str; }
+void Arm::setPhone(UnicodeString str) { phone = str; }
 // коментарий
 void Arm::setComent(std::vector<UnicodeString> vStr) { coment = vStr; }
 // есет
@@ -322,15 +325,13 @@ void Arm::setInNumberDeclr (UnicodeString str) { inNumberDeclr=str; }
 void Arm::setInNumberFormulyar (UnicodeString str) { inNumberFormulyar=str; }
 void Arm::setInNumberWork (UnicodeString str) { inNumberWork=str; }
 void Arm::setInNumberPerson (UnicodeString str) { inNumberPerson=str; }
-void Arm::setInRespon (UnicodeString str) { inRespon = str; } // <===
-void Arm::setInAdminBP (UnicodeString str) { inAdminBP = str; } // <===
+void Arm::setInRespon (UnicodeString str) { inRespon = str; }
+void Arm::setInAdminBP (UnicodeString str) { inAdminBP = str; }
 // ---
-void Arm::setComPoliticInstall (UnicodeString str) { comPoliticInstall=str; }
-void Arm::setComContrUSB (UnicodeString str) { comContrUSB=str; }
-void Arm::setComMultiUSERS (UnicodeString str) { comMultiUSERS=str; }
-void Arm::setPoliticInstall (bool i) { politicInstall = i; }
-void Arm::setContrUSB (bool i) { contrUSB = i; }
-void Arm::setMultiUSERS (bool i) { multiUSERS = i; }
+void Arm::set_lgpo (UnicodeString str) { lgpo=str; }             //<--
+void Arm::set_controlUSB (UnicodeString str) { controlUSB=str; } //<--
+void Arm::set_multiUser (UnicodeString str) { multiUser=str; }   //<--
+void Arm::set_spzInstal (std::vector<UnicodeString> vStr) { spzInstal=vStr; } //<--
 //---------------------------------------------------------------------------
 /* геттери */
 UnicodeString Arm::getDesktopName() { return desktopName; }
@@ -347,8 +348,8 @@ int Arm::getClassID() { return classID; }
 int Arm::getCategoryID() { return categoryID; }
 UnicodeString Arm::getRespon() { return errCheck(respon); }
 UnicodeString Arm::getPurpose() { return errCheck(purpose); }
-UnicodeString Arm::getPlace() { return errCheck(place); } // <===
-UnicodeString Arm::getPhone() { return errCheck(phone); } // <===
+UnicodeString Arm::getPlace() { return errCheck(place); }
+UnicodeString Arm::getPhone() { return errCheck(phone); }
 // коментарий
 std::vector<UnicodeString> Arm::getComent() { return coment; }
 UnicodeString Arm::getComentStr() {
@@ -374,15 +375,13 @@ UnicodeString Arm::getInNumberDeclr() { return errCheck(inNumberDeclr); }
 UnicodeString Arm::getInNumberFormulyar() { return errCheck(inNumberFormulyar); }
 UnicodeString Arm::getInNumberWork() { return errCheck(inNumberWork); }
 UnicodeString Arm::getInNumberPerson() { return errCheck(inNumberPerson); }
-UnicodeString Arm::getInRespon() { return errCheck(inRespon); }// <===
-UnicodeString Arm::getInAdminBP() { return errCheck(inAdminBP); }// <===
+UnicodeString Arm::getInRespon() { return errCheck(inRespon); }
+UnicodeString Arm::getInAdminBP() { return errCheck(inAdminBP); }
 // по настройкам
-UnicodeString Arm::getComPoliticInstall() { return errCheck(comPoliticInstall); }
-UnicodeString Arm::getComContrUSB() { return errCheck(comContrUSB); }
-UnicodeString Arm::getComMultiUSERS() { return errCheck(comMultiUSERS); }
-bool Arm::getPoliticInstall() { return politicInstall; }
-bool Arm::getContrUSB() { return contrUSB; }
-bool Arm::getMultiUSERS() { return multiUSERS; }
+UnicodeString Arm::get_lgpo() { return errCheck(lgpo); }			 //<--
+UnicodeString Arm::get_controlUSB() { return errCheck(controlUSB); } //<--
+UnicodeString Arm::get_multiUser() { return errCheck(multiUser); }   //<--
+std::vector<UnicodeString> Arm::get_spzInstal() { return spzInstal; } //<--
 // по лицензиям ПО
 int Arm::getLicWindowsID() { return licWindowsID; }
 int Arm::getLicOfficeID() { return licOfficeID; }

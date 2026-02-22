@@ -10,15 +10,19 @@ private:
 	bool debug, showLog, showEsetUpd;
 	bool newGrub, license;
 	bool oldGrubComent, oldGrubInfo, oldGrubNet, oldGrubUsb;
+	bool enablePrefixPartition;
 	short oldGrub, audit, esetLog;
+	short forNumberARMid;
 	UnicodeString grubUser;
-	std::vector<UnicodeString> partition;
-	std::vector<UnicodeString> armClass;
-	std::vector<UnicodeString> category;
 	UnicodeString configFile;
 	UnicodeString prefixPartition;
-	short forNumberARMid;
-	bool enablePrefixPartition;
+	std::vector<UnicodeString> partition;
+	std::vector<UnicodeString> lgpo;        //<==
+	std::vector<UnicodeString> usb;         //<==
+	std::vector<UnicodeString> user;        //<==
+	std::vector<UnicodeString> spz;         //<==
+	std::vector<UnicodeString> softBlackList; //<==
+	std::vector<UnicodeString> softWriteList; //<==
 	// функции
 	void readFileIni();
 public:
@@ -29,42 +33,50 @@ public:
 	bool getDebug();
 	bool getShowLog();
 	bool getShowEsetUpd();
-	short getOldGrub();
 	bool getOldGrubComent();
 	bool getOldGrubInfo();
 	bool getOldGrubNet();
 	bool getOldGrubUsb();
 	bool getNewGrub();
 	bool getLicense();
+	bool getEnablePrefixPartition();
+	short getOldGrub();
 	short getAudit();
 	short getEsetLog();
+	short get_forNumberARMid();
 	UnicodeString getUser();
-	std::vector<UnicodeString> getPartition();
-	std::vector<UnicodeString> getArmClass();
-	std::vector<UnicodeString> getCategory();
 	UnicodeString getPrefixPartition();
-	bool getEnablePrefixPartition();
-	short get_forNumberARMid(); // <===
+	std::vector<UnicodeString> getPartition();
+	std::vector<UnicodeString> get_lgpo(); //<--
+	std::vector<UnicodeString> get_usb();  //<--
+	std::vector<UnicodeString> get_user(); //<--
+	std::vector<UnicodeString> get_spz();  //<--
+	std::vector<UnicodeString> get_softBlackList(); //<--
+	std::vector<UnicodeString> get_softWriteList(); //<--
 	// сеттеры
 	void setDebug(bool i);
 	void setShowLog(bool i);
 	void setShowEsetUpd(bool i);
-	void setAudit(short i);
-	void setEsetLog(short i);
-	void setOldGrub(short i);
 	void setOldGrubComent(bool i);
 	void setOldGrubInfo(bool i);
 	void setOldGrubNet(bool i);
 	void setOldGrubUsb(bool i);
 	void setNewGrub(bool i);
 	void setLicense(bool i);
-	void setUser(UnicodeString str);
-	void setPartition(std::vector<UnicodeString> vStr);
-	void setArmClass(std::vector<UnicodeString> vStr);
-	void setCategory(std::vector<UnicodeString> vStr);
-	void setPrefixPartition(UnicodeString str);
-	void setEnablePrefixPartition(bool i);
+    void setEnablePrefixPartition(bool i);
 	void set_forNumberARMid(short i);
+	void setAudit(short i);
+	void setEsetLog(short i);
+	void setOldGrub(short i);
+	void setUser(UnicodeString str);
+	void setPrefixPartition(UnicodeString str);
+	void setPartition(std::vector<UnicodeString> vStr);
+	void set_lgpo(std::vector<UnicodeString> vStr); //<--
+	void set_usb(std::vector<UnicodeString> vStr); //<--
+	void set_user(std::vector<UnicodeString> vStr); //<--
+	void set_spz(std::vector<UnicodeString> vStr); //<--
+	void set_softBlackList(std::vector<UnicodeString> vStr); //<--
+	void set_softWriteList(std::vector<UnicodeString> vStr); //<--
 };
 //---------------------------------------------------------------------------
 #endif

@@ -1,13 +1,22 @@
 ﻿//---------------------------------------------------------------------------
 #pragma hdrstop
 
+#include <filesystem>
+
 #include "Fille.h"
 #include "Text.h"
 #include "RunApp.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-//---------------------------------------------------------------------------
 
+namespace fs = std::filesystem;
+//---------------------------------------------------------------------------
+bool checkConfigFileExist() {
+	fs::path p_curDir = fs::current_path();
+	fs::path p_configIni = p_curDir / "GRUBer.ini";
+	if(!exists(p_configIni)) return false;
+	return true;
+}
 patchList scanDirToFille(UnicodeString dir)
 {
 	patchList find;

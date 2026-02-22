@@ -162,8 +162,8 @@
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <LinkPackageImports>rtl.bpi;vcl.bpi;vclwinx.bpi;vclimg.bpi;bindengine.bpi</LinkPackageImports>
         <VerInfo_Debug>true</VerInfo_Debug>
+        <LinkPackageStatics>rtl.lib;vcl.lib;vclwinx.lib;vclimg.lib;bindengine.lib;vclx.lib</LinkPackageStatics>
         <Icon_MainIcon>GRUBer_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
@@ -188,20 +188,20 @@
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDSLIB)\$(PLATFORM)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
         <BCC_StackFrames>true</BCC_StackFrames>
-        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.1.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.1.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=</VerInfo_Keys>
         <Icon_MainIcon>GRUBer_Icon.ico</Icon_MainIcon>
-        <VerInfo_Build>1</VerInfo_Build>
-        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Build>3</VerInfo_Build>
         <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <LinkPackageStatics>rtl.lib;vcl.lib;vclwinx.lib;vclimg.lib;bindengine.lib;vclx.lib</LinkPackageStatics>
-        <VerInfo_Locale>1033</VerInfo_Locale>
         <Icon_MainIcon>GRUBer_Icon.ico</Icon_MainIcon>
-        <VerInfo_Build>1</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.1.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>3</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.1.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -237,7 +237,7 @@
             <BuildOrder>4</BuildOrder>
         </CppCompile>
         <CppCompile Include="Config.cpp">
-            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <VirtualFolder>{8701FF02-8B08-42DE-A343-88ECA155892A}</VirtualFolder>
             <DependentOn>Config.h</DependentOn>
             <BuildOrder>17</BuildOrder>
         </CppCompile>
