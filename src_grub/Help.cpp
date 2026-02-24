@@ -14,7 +14,7 @@ extern UnicodeString cmdEXE;
 void printLog(UnicodeString str)
 {
 	TDateTime* myTimeTemp = new TDateTime(Now());
-	UnicodeString logTime = myTimeTemp->FormatString("hh:nn:ss");
+	UnicodeString logTime = myTimeTemp->FormatString("hh:mm:ss");
 	str = "[" + logTime + "]" + str;
 	Form1->RichEdit_LOG->Lines->Add(str);
 	// Form1->RichEdit_LOG->SelAttributes->Color = clDefault;

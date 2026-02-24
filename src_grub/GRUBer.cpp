@@ -6,13 +6,13 @@
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
 #include <Vcl.Themes.hpp>
-USEFORM("PartitionForm.cpp", FormPartition);
 USEFORM("MainForm.cpp", Form1);
+USEFORM("PartitionForm.cpp", FormPartition);
 USEFORM("ComentForm.cpp", FormComent);
 USEFORM("ClearTemp.cpp", FormClearTempDir);
 USEFORM("About.cpp", FormAbout);
-USEFORM("FormSerial.cpp", Form_Serial);
 USEFORM("DialogDirExist.cpp", FormDirExist);
+USEFORM("FormSerial.cpp", Form_Serial);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {

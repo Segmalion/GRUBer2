@@ -128,7 +128,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet1
+        ActivePage = TabGRUBer
         Align = alClient
         Constraints.MaxHeight = 1050
         MultiLine = True
@@ -628,8 +628,8 @@
                 AlignWithMargins = True
                 Left = 188
                 Top = 5
-                Width = 234
-                Height = 30
+                Width = 271
+                Height = 40
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -644,6 +644,8 @@
                 Font.Style = [fsItalic]
                 ParentFont = False
                 Layout = tlCenter
+                ExplicitWidth = 234
+                ExplicitHeight = 30
               end
             end
           end
@@ -2097,7 +2099,7 @@
                 Margins.Bottom = 5
                 Anchors = []
                 Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWhite
+                Font.Color = clWindowText
                 Font.Height = -21
                 Font.Name = 'Segoe UI'
                 Font.Style = []
@@ -2143,6 +2145,12 @@
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Consolas'
+              Font.Style = []
+              ParentFont = False
               ReadOnly = True
               ScrollBars = ssVertical
               TabOrder = 1
@@ -2181,6 +2189,12 @@
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Consolas'
+              Font.Style = []
+              ParentFont = False
               ReadOnly = True
               ScrollBars = ssVertical
               TabOrder = 2

@@ -55,7 +55,7 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 3;
+extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 4;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -529,6 +529,7 @@ void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 		EditArmClass->ItemIndex = 1;
 	}
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+    curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
 }
 void __fastcall TForm1::EditResponChange(TObject *Sender)
 {

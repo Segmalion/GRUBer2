@@ -63,17 +63,17 @@ UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr) {
 UnicodeString curDate()
 {
 	TDateTime *myDate = new TDateTime(Now());
-	return myDate->FormatString("dd.mm.yy");
+	return myDate->FormatString("dd.MM.yy");
 }
 UnicodeString curTime()
 {
 	TDateTime* myTime = new TDateTime(Now());
-	return myTime->FormatString("hh:nn:ss");
+	return myTime->FormatString("HH:mm:ss");
 }
 UnicodeString curDateTime()
 {
 	TDateTime* myTime = new TDateTime(Now());
-	return myTime->FormatString("dd.mm.yy hh:nn:ss");
+	return myTime->FormatString("dd.MM.yy hh:mm:ss");
 }
 //---------------------------------------------------------------------------
 // Чистка строки имени папки от запрещеных символов

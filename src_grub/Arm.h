@@ -61,8 +61,37 @@ private:
 		UnicodeString lastUpdateDate, lastUpdateUser, lastUpdateArchive;
 	} eset;
 	struct histGrub {
-		UnicodeString date, user;
+        TDateTime date;
+		UnicodeString user;
 	} histGr;
+	std::vector <histGrub> allGrubDate;
+	struct ArmDevESET
+	{
+		std::vector<TDateTime> dateTime;
+		UnicodeString device_details;
+		UnicodeString serial;
+		short catNum = 0;
+		bool Status;
+	};
+	std::vector<ArmDevESET> devEset;
+	struct ArmDevUSB
+	{
+		TDateTime regDateTime1, regDateTime2;
+		UnicodeString name, description, type, serial;
+		UnicodeString nameDev, cat;
+		short catNum = 0;
+		bool know = false;
+		bool errN = false;
+	};
+	std::vector<ArmDevUSB> devUSB;
+	struct NetDevise
+	{
+		UnicodeString description;
+		UnicodeString ipAddress;
+		UnicodeString macAddress;
+		UnicodeString Status;
+	};
+	std::vector<NetDevise> netInterfase;
 	// === функции
 	// -- чтение из файла на ПК (c:\ProgramData\GRUBer\gruber_info.ini)
 	bool readFromFile();

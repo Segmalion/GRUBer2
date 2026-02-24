@@ -7,34 +7,16 @@
 #include "Help.h"
 #include "Text.h"
 
+#include "Config.h"
+
 #define MAX_KEY_LENGTH 255
 #define MAX_VALUE_NAME 16383
 
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-std::vector<UnicodeString> blockProgrammsNames =
-	{
-		"Radmin ", "Browsec", "Opera", "Tor Browser", "Яндекс", "UC Browser", "Rambler",
-		"FindFace", "FaceApp", "NewProfilePic", "LightShot", "Joxi", "Punto", "PROMT", "Бирмана",
-		"SiteAnalyzer", "AdGuard", "AIMP", "AOMEI ", "ArtMoney", "Bambu", "Cheat",
-		"UltimateDefrag", "Far Manager 3", "FBReader", "Flameshot", "WinRAR", "7-Zip",
-		"NoxPlayer", "Скриншотер", "Adobe Flash", "DriverPack", "IObit", "Ccleaner", "KMS",
-		"PVS-Studio", "ДМБ таймер", "ABBYY", "2ГИС", "MapsMe", "Сleversite", "JivoSite",
-		"Mail.ru", "Bitrix24", "Drive & Docs", "Telegram", "Viber", "DaOffice", "TikTok",
-		"VK.com", "Однокласники", "ONLYOFFICE", "DeskRoll ", "TeamViewer", "Radmin",
-		"Remote Utilities", "Ammyy", "DrWeb", "Kaspersky", "360 Total", "BAS", "BAF",
-		"OtelMS", "Bnovo", "1С", "iiko", "R-Keeper", "Alzex", "Парус", "MediaGet",
-		"utorrent", "µTorrent", "Transmission", "Utweb", "Download Studio", "qBittorent",
-		"Deluge", "BitTorrent", "Getcontact", "PokerStars", "IVI", "Wargaming.net",
-		"World of Tanks", "EveryLang", "FalconGaze", "Skillbox", "LinguaLeo", "R7-Office",
-		"MyOffice", "Yandex", "Key Management Service", "2gis", "Teamlab",
-		"Remote Manipulator System", "WOT"
-	};
-std::vector<UnicodeString> UnBlockProgrammsNames =
-	{
-		"Update for Windows", "LaserJet", "SQL Server", "HPSmartDeviceAgentBase",
-		"Update for x64-based Windows", "Basic", "ESET"
-	};
+extern Config curConfig;
+std::vector<UnicodeString> blockProgrammsNames;
+std::vector<UnicodeString> UnBlockProgrammsNames;
 //---------------------------------------------------------------------------
 std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
 	std::vector<program> tempListSoft;
@@ -140,6 +122,8 @@ std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
 std::vector<program> installSoft() {
 	std::vector<program> listSoft;
 	std::vector<program> sort_listSoft;
+	blockProgrammsNames = curConfig.get_softBlackList();
+	UnBlockProgrammsNames = curConfig.get_softWriteList();
 
 	HKEY hKey;
 

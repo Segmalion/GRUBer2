@@ -161,7 +161,7 @@ std::vector<UnicodeString> Arm::mStrInfoArmGrub() {
 std::vector<UnicodeString> Arm::mStrLastGrub() {
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[lastGrub]");
-	mStr.push_back("lastGrubDate=" + histGr.date);
+	mStr.push_back("lastGrubDate=" + histGr.date.FormatString("dd.MM.yy HH:mm"));
 	mStr.push_back("lastGrubUser=" + histGr.user);
 	return mStr;
 }
