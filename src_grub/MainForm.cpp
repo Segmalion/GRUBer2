@@ -33,6 +33,8 @@
 
 TForm1 *Form1;
 //---------------------------------------------------------------------------
+namespace fs = std::filesystem;
+
 //bool x64 = GetSystemWow64DirectoryW(nullptr, 0u);
 //bool x64run;
 //обявление переменных типа структуры
@@ -55,7 +57,7 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 4;
+extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 5;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -438,33 +440,58 @@ void __fastcall TForm1::CheckBox_ShowEsetUpdateClick(TObject *Sender)
 void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 {
 	bool oldUPDarch = 0; // 0-old 1-new
-	UnicodeString archUpd;
-	if (FileExists(GetCurrentDir() + "\\update.7z")) {
-		archUpd = GetCurrentDir() + "\\update.7z";
-	} else if (FileExists(GetCurrentDir() + "\\update_x32.upd")
-		 && FileExists(GetCurrentDir() + "\\update_x64.upd")) {
-		if (x64()) archUpd = GetCurrentDir() + "\\update_x64.upd";
-		else archUpd = GetCurrentDir() + "\\update_x32.upd";
+	//UnicodeString archUpd;
+	const fs::path curDirectory = fs::current_path();
+	const fs::path updArhOld = curDirectory / L"update.7z";
+	const fs::path updArhZIPx32 =  curDirectory / L"update_x32.zip";
+	const fs::path updArhZIPx64 =  curDirectory / L"update_x64.zip";
+	const fs::path updArhZSTDx32 = curDirectory / L"update_x32.tar.zstd";
+	const fs::path updArhZSTDx64 = curDirectory / L"update_x64.tar.zstd";
+	const fs::path esetUpdDir = curPC.getEsetDir().c_str();
+	fs::path updArhive;
+	bool zstd = false;
+
+	if (fs::exists(updArhZSTDx32) || fs::exists(updArhZSTDx64)) {
+		if (x64()) updArhive = updArhZSTDx64;
+		else updArhive = updArhZSTDx32;
+		zstd = true;
+	} else if (fs::exists(updArhZIPx32) || fs::exists(updArhZIPx64)) {
+		if (x64()) updArhive = updArhZIPx64;
+		else updArhive = updArhZIPx32;
+	} else if (fs::exists(updArhOld)) {
+		updArhive = updArhOld;
 	} else {
-		printLog("!!", "ESET-Update: Немає архіву з базами!");
+		printLog("!!", "ESET-Update: Немає архіву з базами! " + UnicodeString(curDirectory.c_str()));
 		return;
     }
-
+    if (!fs::exists(updArhive)) {
+		printLog("!!", "ESET-Update: Немає архіву з базами! " + UnicodeString(curDirectory.c_str()));
+		return;
+	}
 	printLog(">>", "ESET-Update: Оновленя бази Eset...");
 	BtnEsetUpdate->Enabled = false;
 	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
-	if (FileExists(curPC.getEsetDir() + "\\dll\\update.ver"))
-		deleteDir(curPC.getEsetDir());
+	if (fs::exists(esetUpdDir / L"dll\\update.ver"))
+		if(fs::remove_all(esetUpdDir)) fs::create_directory(esetUpdDir);
 	//запуск обновления
 	UnicodeString app32 = curDir.getToolFull() + "\\7zip\\32\\7za.exe";
 	UnicodeString app64 = curDir.getToolFull() + "\\7zip\\64\\7za.exe";
+	UnicodeString updArh = updArhive.wstring().c_str();
+	UnicodeString updDir = esetUpdDir.wstring().c_str();
+	UnicodeString arg = "x -y \"" + updArh + "\" -o\"" + updDir + "\"";
 	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\32\\7zG.exe";
 	if (curConfig.getShowEsetUpd()) app64 = curDir.getToolFull() + "\\7zip\\64\\7zG.exe";
-	RunApp esetBaseUnpack {
-		app32,
-		app64,
-		"x -y -o\"" + curPC.getEsetDir() + "\" \"" + archUpd};
+	RunApp esetBaseUnpack { app32, app64, arg };
 	esetBaseUnpack.run(!curConfig.getShowEsetUpd());
+	if(zstd) {
+		fs::path tar = esetUpdDir / updArhive.filename().replace_extension("");
+		updArh = tar.wstring().c_str();
+		arg = "x -y \"" + updArh + "\" -o\"" + updDir + "\"";
+		//printLog("**", "{ESET-arg}=" + arg);
+		RunApp esetBaseTarUnpack { app32, app64, arg };
+		esetBaseTarUnpack.run(!curConfig.getShowEsetUpd());
+		fs::remove(tar);
+	}
 	//------
 	if (esetBaseUnpack.checkErr()){
 		//ошибочка вышла...

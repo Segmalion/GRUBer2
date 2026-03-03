@@ -27,7 +27,7 @@ public:
 	UnicodeString errorString();
 	UnicodeString resultString();
 	bool checkErr();
-	// геттер
+	//сеттер
 
 };
 
