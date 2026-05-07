@@ -270,6 +270,10 @@
             <DependentOn>GetSMB.h</DependentOn>
             <BuildOrder>7</BuildOrder>
         </CppCompile>
+        <None Include="Global.h">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <BuildOrder>23</BuildOrder>
+        </None>
         <CppCompile Include="GRUBer.cpp">
             <BuildOrder>0</BuildOrder>
         </CppCompile>

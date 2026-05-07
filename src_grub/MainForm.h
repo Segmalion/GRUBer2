@@ -20,6 +20,9 @@
 
 #include <vector>
 //---------------------------------------------------------------------------
+
+#include "Global.h"
+
 class TForm1 : public TForm
 {
 __published:	// IDE-managed Components

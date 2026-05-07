@@ -2,22 +2,22 @@
 
 #ifndef DirH
 #define DirH
+
+#include "Global.h"
 //---------------------------------------------------------------------------
+
 class Dir {
 private:
-	UnicodeString progFull;
-	UnicodeString baseName, baseFull;
-	UnicodeString dateName, dateFull;
-	UnicodeString grubName, grubFull;
-	UnicodeString grubTemp;
+	//UnicodeString progFull;
+	fs::path p_grub, p_grubTemp, p_tool;
 public:
 	Dir();
 	void check();
 	//сеттеры
-	void setGrubFull(UnicodeString str);
+	void set_grubPath(UnicodeString str);
 	//геттеры
-	UnicodeString getGrubFull();
-	UnicodeString getToolFull();
-    UnicodeString get_grubTemp();
+	UnicodeString get_grubPath();
+	UnicodeString get_toolPath();
+	UnicodeString get_grubPathTemp();
 };
 #endif

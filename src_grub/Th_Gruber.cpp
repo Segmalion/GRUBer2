@@ -173,12 +173,12 @@ void __fastcall Th_Gruber::Execute()
 	UnicodeString GrubDir;
 	bool tempDir = Form1->CheckBox_TempDir->Checked;
 	if (tempDir) {
-		GrubDir = curDir.get_grubTemp();
+		GrubDir = curDir.get_grubPathTemp();
 		if (!DirectoryExists(GrubDir)) CreateDir(GrubDir);
 		else deleteDir(GrubDir, false);
-	} else GrubDir = curDir.getGrubFull();
+	} else GrubDir = curDir.get_grubPath();
 	// -> предупреждение о существующей папке
-	if (DirectoryExists(curDir.getGrubFull()) && checkDirExist) {
+	if (DirectoryExists(curDir.get_grubPath()) && checkDirExist) {
 		Synchronize([=]() {
 			FormDirExist->ShowDir->Text=(dirGrubStr);
 			FormDirExist->ShowModal();
@@ -221,7 +221,7 @@ void __fastcall Th_Gruber::Execute()
 					if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
 						// если находим папку граба, добавляем в список
 						std::wstring oldFile = unToStr(GrubDir + "\\" + sr.Name);
-						std::wstring newFile = unToStr(curDir.getGrubFull() + "\\" + sr.Name);
+						std::wstring newFile = unToStr(curDir.get_grubPath() + "\\" + sr.Name);
 						std::filesystem::rename(oldFile, newFile);
 					}
 				} while (!FindNext(sr)); // ищем пока не найдем все
@@ -316,7 +316,7 @@ bool job_info(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\info_ps1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування info_ps1.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\scripts\\info_ps1\\Run_toFile.bat";
+	UnicodeString app32 = curDir.get_toolPath() + "\\scripts\\info_ps1\\Run_toFile.bat";
 	UnicodeString arg = "\""+ outFilePath + "\"";
 	RunApp info {app32, NULL, arg};
 	info.run(); // RUN !!!
@@ -331,8 +331,8 @@ bool job_usb(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\usb.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування usb.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
-	UnicodeString app64 = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\USBDeview\\USBDeview_x32.exe";
+	UnicodeString app64 = curDir.get_toolPath() + "\\USBDeview\\USBDeview_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
 	RunApp usb {app32, app64, arg};
 	usb.run();
@@ -340,7 +340,7 @@ bool job_usb(UnicodeString dir) {
 	printLog(usb.resultString());
 	jobDone(countJob, ++curJob);
 	if (FileExists(outFilePath)) {
-		Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.getGrubFull());
+		Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.get_grubPath());
 	}
 	progressBarGo(pos += step, usb.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
@@ -350,8 +350,8 @@ bool job_net1(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\net1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування net1.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x32.exe";
-	UnicodeString app64 = curDir.getToolFull() + "\\Network\\NetworkInterfacesView_x64.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\Network\\NetworkInterfacesView_x32.exe";
+	UnicodeString app64 = curDir.get_toolPath() + "\\Network\\NetworkInterfacesView_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
 	RunApp net1 {app32, app64, arg};
 	net1.run();
@@ -366,7 +366,7 @@ bool job_net2(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\net2.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування net2.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\Network\\WifiHistoryView.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\Network\\WifiHistoryView.exe";
 	UnicodeString app64 = NULL;
 	UnicodeString arg = "/stext " + outFilePath + "\"";
 	RunApp net2 {app32, app64, arg};
@@ -382,7 +382,7 @@ bool job_license(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\license.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування license.txt...");
-	UnicodeString app32 = curDir.getToolFull() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
 	UnicodeString app64 = NULL;
 	UnicodeString arg = "-pass -log \""+ outFilePath + "\"";
 	RunApp lic {app32, app64, arg};
@@ -407,7 +407,7 @@ bool job_audit(UnicodeString dir) {
 		printLog("Генерування auditMin.html...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	UnicodeString app32 = curDir.getToolFull() + "\\WinAudit\\WinAudit.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\WinAudit\\WinAudit.exe";
 	UnicodeString app64 = NULL;
 	RunApp audit {app32, app64, arg};
 	audit.run();
@@ -423,11 +423,11 @@ bool job_diskInfo(UnicodeString dir) {
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування diskInfo.txt...");
 	UnicodeString app32 = NULL;
-	UnicodeString app64 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo64.exe";
+	UnicodeString app64 = curDir.get_toolPath() + "\\DiskInfo64\\DiskInfo64.exe";
 	UnicodeString arg = "/CopyExit :";
 	RunApp cdi {app32, app64, arg};
 	cdi.run();
-	UnicodeString f1 = curDir.getToolFull() + "\\DiskInfo64\\DiskInfo.txt";
+	UnicodeString f1 = curDir.get_toolPath() + "\\DiskInfo64\\DiskInfo.txt";
 	MoveFile(f1.c_str(), outFilePath.c_str());
 //	printLogDebug(cdi.errorString());
 	printLog(cdi.resultString());
@@ -449,7 +449,7 @@ bool job_esetLog(UnicodeString dir) {
 		printLog("Генерування eset-log-mini.zip...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	UnicodeString app32 = curDir.getToolFull() + "\\EsetLogCollector\\ESETLogCollector.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\EsetLogCollector\\ESETLogCollector.exe";
 	UnicodeString app64 = NULL;
 	RunApp esetLog {app32, app64, arg};
 	esetLog.run(false);

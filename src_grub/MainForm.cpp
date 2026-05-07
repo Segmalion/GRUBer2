@@ -33,7 +33,6 @@
 
 TForm1 *Form1;
 //---------------------------------------------------------------------------
-namespace fs = std::filesystem;
 
 //обявление переменных типа структуры
 Config curConfig;
@@ -85,7 +84,7 @@ std::vector<UnicodeString> fileInfoGrub() {
 	return vStr;
 }
 void changeEditDirColor() {
-	if(DirectoryExists(curDir.getGrubFull())) {
+	if(DirectoryExists(curDir.get_grubPath())) {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
 		if (!grubActive) Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer вже зібрано!";
@@ -94,8 +93,8 @@ void changeEditDirColor() {
 		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
 		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
 	}
-	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.getGrubFull());
-	Form1->BtnParserOpen->Enabled = FileExists(curDir.getGrubFull() + "\\usb.txt");
+	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.get_grubPath());
+	Form1->BtnParserOpen->Enabled = FileExists(curDir.get_grubPath() + "\\usb.txt");
 }
 void RestartApplicationRunas()
 {
@@ -305,7 +304,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	checkDefection();
 	// --- заполняем строку с именем папки граба
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-	if (DirectoryExists(curDir.getGrubFull())) {
+	if (DirectoryExists(curDir.get_grubPath())) {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
 	} else {
@@ -329,7 +328,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 //---------------------------------------------------------------------------
 /* КНОПКИ */
 // === запуск Граба
-void __fastcall TForm1::BtnGruberRunClick(TObject *Sender) //Запуск Граба
+void __fastcall TForm1::BtnGruberRunClick(TObject *Sender)
 {
 	if (th_Gruber_run == false) {
 		checkDirExist = true;
@@ -367,7 +366,7 @@ void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
 // === открыть папку Граба
 void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
 {
-	ShellExecuteW(NULL, L"open", curDir.getGrubFull().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	ShellExecuteW(NULL, L"open", curDir.get_grubPath().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // === остановка Граба
 // --- полная
@@ -389,19 +388,19 @@ void __fastcall TForm1::BtnSaveSetteingsClick(TObject *Sender)
 void __fastcall TForm1::BtnParserOpenClick(TObject *Sender)
 {
 	UnicodeString setApp = GetCurrentDir() + "\\GRUBer-Parser.exe";
-	UnicodeString setArg = "/run /b " + curDir.getGrubFull();
+	UnicodeString setArg = "/run /b " + curDir.get_grubPath();
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
 }
 // === провека лицензий
 void __fastcall TForm1::BtnLicenseClick(TObject *Sender)
 {
-	UnicodeString setApp = curDir.getToolFull() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
+	UnicodeString setApp = curDir.get_toolPath() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // === общее инфо
 void __fastcall TForm1::BtnInfoClick(TObject *Sender)
 {
-	UnicodeString setApp = curDir.getToolFull() + "\\scripts\\info_ps1\\Run.bat";
+	UnicodeString setApp = curDir.get_toolPath() + "\\scripts\\info_ps1\\Run.bat";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // === about form
@@ -473,13 +472,13 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	if (fs::exists(esetUpdDir / L"dll\\update.ver"))
 		if(fs::remove_all(esetUpdDir)) fs::create_directory(esetUpdDir);
 	//запуск обновления
-	UnicodeString app32 = curDir.getToolFull() + "\\7zip\\32\\7za.exe";
-	UnicodeString app64 = curDir.getToolFull() + "\\7zip\\64\\7za.exe";
+	UnicodeString app32 = curDir.get_toolPath() + "\\7zip\\32\\7za.exe";
+	UnicodeString app64 = curDir.get_toolPath() + "\\7zip\\64\\7za.exe";
 	UnicodeString updArh = updArhive.wstring().c_str();
 	UnicodeString updDir = esetUpdDir.wstring().c_str();
 	UnicodeString arg = "x -y \"" + updArh + "\" -o\"" + updDir + "\"";
-	if (curConfig.getShowEsetUpd()) app32 = curDir.getToolFull() + "\\7zip\\32\\7zG.exe";
-	if (curConfig.getShowEsetUpd()) app64 = curDir.getToolFull() + "\\7zip\\64\\7zG.exe";
+	if (curConfig.getShowEsetUpd()) app32 = curDir.get_toolPath() + "\\7zip\\32\\7zG.exe";
+	if (curConfig.getShowEsetUpd()) app64 = curDir.get_toolPath() + "\\7zip\\64\\7zG.exe";
 	RunApp esetBaseUnpack { app32, app64, arg };
 	esetBaseUnpack.run(!curConfig.getShowEsetUpd());
 	if(zstd) {
@@ -598,8 +597,8 @@ void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 {
 	UnicodeString dirGrub = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 	UnicodeString dirEdit = EditDirGrubName->Text;
-	if (dirGrub != dirEdit) curDir.setGrubFull(dirEdit);
-	else curDir.setGrubFull(dirGrub);
+	if (dirGrub != dirEdit) curDir.set_grubPath(dirEdit);
+	else curDir.set_grubPath(dirGrub);
 	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
 }
 void __fastcall TForm1::EditGrubUserChange(TObject *Sender)
@@ -789,8 +788,8 @@ void __fastcall TForm1::BtnApp_HWiNFOClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO64.exe";
-	else setApp = curDir.getToolFull() + "\\HWiNFO\\HWiNFO32.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\HWiNFO\\HWiNFO64.exe";
+	else setApp = curDir.get_toolPath() + "\\HWiNFO\\HWiNFO32.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -798,23 +797,23 @@ void __fastcall TForm1::BtnApp_CPUZClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x64.exe";
-	else setApp = curDir.getToolFull() + "\\CPU-Z\\cpuz_x32.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\CPU-Z\\cpuz_x64.exe";
+	else setApp = curDir.get_toolPath() + "\\CPU-Z\\cpuz_x32.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 void __fastcall TForm1::BtnApp_GPUZClick(TObject *Sender)
 {
 	LPCWSTR oper = L"open";
-	UnicodeString setApp = curDir.getToolFull() + "\\GPU-Z\\GPU-Z.2.60.0.exe";
+	UnicodeString setApp = curDir.get_toolPath() + "\\GPU-Z\\GPU-Z.2.60.0.exe";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 void __fastcall TForm1::BtnApp_procexpClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp64.exe";
-	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\procexp.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\SysinternalsSuite\\procexp64.exe";
+	else setApp = curDir.get_toolPath() + "\\SysinternalsSuite\\procexp.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -822,8 +821,8 @@ void __fastcall TForm1::BtnApp_autorunsClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns64.exe";
-	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\Autoruns.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\SysinternalsSuite\\Autoruns64.exe";
+	else setApp = curDir.get_toolPath() + "\\SysinternalsSuite\\Autoruns.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -831,8 +830,8 @@ void __fastcall TForm1::BtnApp_tcpviewClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview64.exe";
-	else setApp = curDir.getToolFull() + "\\SysinternalsSuite\\tcpview.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\SysinternalsSuite\\tcpview64.exe";
+	else setApp = curDir.get_toolPath() + "\\SysinternalsSuite\\tcpview.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -841,14 +840,14 @@ void __fastcall TForm1::BtnApp_TotalClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD64.EXE";
-	else setApp = curDir.getToolFull() + "\\totalcmd\\TOTALCMD.EXE";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\totalcmd\\TOTALCMD64.EXE";
+	else setApp = curDir.get_toolPath() + "\\totalcmd\\TOTALCMD.EXE";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 void __fastcall TForm1::BtnApp_EverythingClick(TObject *Sender)
 {
-	UnicodeString setApp = curDir.getToolFull() + "\\Everything\\Everything.exe";
+	UnicodeString setApp = curDir.get_toolPath() + "\\Everything\\Everything.exe";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 //
@@ -856,8 +855,8 @@ void __fastcall TForm1::BtnApp_UscDevUClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x64.exe";
-	else setApp = curDir.getToolFull() + "\\USBDeview\\USBDeview_x32.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\USBDeview\\USBDeview_x64.exe";
+	else setApp = curDir.get_toolPath() + "\\USBDeview\\USBDeview_x32.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -865,8 +864,8 @@ void __fastcall TForm1::BtnApp_DeviceCleanupClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\DeviceCleanup\\x64\\DeviceCleanup.exe";
-	else setApp = curDir.getToolFull() + "\\DeviceCleanup\\Win32\\DeviceCleanup.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\DeviceCleanup\\x64\\DeviceCleanup.exe";
+	else setApp = curDir.get_toolPath() + "\\DeviceCleanup\\Win32\\DeviceCleanup.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -874,8 +873,8 @@ void __fastcall TForm1::BtnApp_UsbTreeViewClick(TObject *Sender)
 {
 	UnicodeString setApp;
 	LPCWSTR oper = L"open";
-	if (x64_sys()) setApp = curDir.getToolFull() + "\\UsbTreeView\\x64\\UsbTreeView.exe";
-	else setApp = curDir.getToolFull() + "\\UsbTreeView\\UsbTreeView.exe";
+	if (x64_sys()) setApp = curDir.get_toolPath() + "\\UsbTreeView\\x64\\UsbTreeView.exe";
+	else setApp = curDir.get_toolPath() + "\\UsbTreeView\\UsbTreeView.exe";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
@@ -884,7 +883,7 @@ void __fastcall TForm1::BtnKiberConsolOpenClick(TObject *Sender)
 {
     LPCWSTR oper = L"open";
 	if(CheckBox_RunAs->Checked) oper = L"runas";
-	UnicodeString setApp = curDir.getToolFull() + "\\KiberConsole.msc";
+	UnicodeString setApp = curDir.get_toolPath() + "\\KiberConsole.msc";
 	ShellExecuteW(NULL, oper, setApp.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 void __fastcall TForm1::Button_ControlPanelClick(TObject *Sender)

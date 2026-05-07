@@ -6,32 +6,29 @@
 #include "Text.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
+
+namespace fs = std::filesystem;
 //---------------------------------------------------------------------------
 // обявление
 Dir::Dir() {
-	progFull = GetCurrentDir();
-	baseName = "base";
-	dateName = "[" + curDate() + "]";
-	baseFull = progFull + "\\" + baseName;
-	dateFull = baseFull + "\\" + dateName;
-	grubTemp = "C:\\ProgramData\\GRUBer\\TempGRUB";
+	p_tool = fs::current_path() / "tool";
+	p_grubTemp = "C:\\ProgramData\\GRUBer\\TempGRUB";
 }
 //---------------------------------------------------------------------------
 // проверка директорий
 void Dir::check() {
-	if (!DirectoryExists(baseFull)) CreateDir(baseFull);
-	if (!DirectoryExists(dateFull)) CreateDir(dateFull);
-	if (!DirectoryExists(grubFull)) CreateDir(grubFull);
+	std::error_code ec;
+	fs::create_directories(p_grub, ec);
 }
 //---------------------------------------------------------------------------
 // геттеры
-UnicodeString Dir::getGrubFull() { return grubFull; }
-UnicodeString Dir::getToolFull() { return (progFull + "\\tool"); }
-UnicodeString Dir::get_grubTemp() { return grubTemp; }
-//---------------------------------------------------------------------------
+UnicodeString Dir::get_grubPath() { return UnicodeString(p_grub.c_str()); }
+UnicodeString Dir::get_toolPath() { return UnicodeString(p_tool.c_str()); }
+UnicodeString Dir::get_grubPathTemp() { return UnicodeString(p_grubTemp.c_str()); }
 // сеттеры
-void Dir::setGrubFull (UnicodeString str) {
-	grubName = str;
-	grubFull = dateFull + "\\" + grubName;
+void Dir::set_grubPath (UnicodeString grubName) {
+	UnicodeString dateName = "[" + curDate() + "]";
+	fs::path p_dateFull = fs::current_path() / "base" / dateName.c_str();
+	p_grub = p_dateFull / grubName.c_str();
 }
 //---------------------------------------------------------------------------
