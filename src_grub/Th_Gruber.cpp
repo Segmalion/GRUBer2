@@ -44,7 +44,7 @@ void progressBarStep() {
 	if (jb5 != 0) countJob += 2;   //net1.txt & net2.txt
 	if (jb6 != 0) countJob++;      //license.txt
 	if (jb7 != 0) countJob++;      //auditMin.html || auditMax.html
-	if (jb7 != 0 && x64() && IsAdminMode()) countJob++; //diskInfo.txt
+	if (jb7 != 0 && x64_sys() && IsAdminMode()) countJob++; //diskInfo.txt
 	if (jb8 != 0) countJob++;      //eset-log-mini.zip || eset-log-max.zip
 	printLogDebug("{countJob}=" + UnicodeString(countJob));
 	step = 100/(double)countJob;
@@ -210,7 +210,7 @@ void __fastcall Th_Gruber::Execute()
 	if (jb5 != 0 && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
 	if (jb6 != 0 && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
 	if (jb7 != 0 && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
-	if (jb7 != 0 && !stopBool && x64() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
+	if (jb7 != 0 && !stopBool && x64_sys() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
 	if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
 	// --
 	if (tempDir) {

@@ -149,7 +149,7 @@ std::vector<program> installSoft() {
 	}
 	RegCloseKey(hKey);
 
-	if (x64()) {
+	if (x64_sys()) {
 		LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);

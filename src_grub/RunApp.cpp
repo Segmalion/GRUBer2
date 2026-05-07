@@ -8,6 +8,7 @@
 #pragma package(smart_init)
 
 extern bool stopBool, passBool;
+
 //---------------------------------------------------------------------------
 bool RunApp::check() {
 	if(app.IsEmpty()) return false;
@@ -21,7 +22,7 @@ RunApp::RunApp(UnicodeString apSx32, UnicodeString apSx64, UnicodeString arS) {
 	arg = arS;
 	if (app64 == NULL) { app = app32; }
 	else {
-		if (x64()) app = app64;
+		if (x64_sys()) app = app64;
 		else app = app32;
 	}
 }

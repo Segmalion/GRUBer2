@@ -628,8 +628,8 @@
                 AlignWithMargins = True
                 Left = 188
                 Top = 5
-                Width = 271
-                Height = 40
+                Width = 234
+                Height = 30
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -644,8 +644,6 @@
                 Font.Style = [fsItalic]
                 ParentFont = False
                 Layout = tlCenter
-                ExplicitWidth = 234
-                ExplicitHeight = 30
               end
             end
           end

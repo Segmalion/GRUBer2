@@ -289,7 +289,6 @@ extern PACKAGE TForm1 *Form1;
 
 std::vector<UnicodeString> fileInfoGrub();
 void changeEditDirColor();
-UnicodeString appPath();
 void RestartApplicationRunas();
 
 void showSoft();
