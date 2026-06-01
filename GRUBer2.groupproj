@@ -6,7 +6,7 @@
         <Projects Include="src_grub\GRUBer.cbproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="src_libArm\linArm.cbproj">
+        <Projects Include="src_devLister\DeviceLister.cbproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -26,23 +26,23 @@
     <Target Name="GRUBer:Make">
         <MSBuild Projects="src_grub\GRUBer.cbproj" Targets="Make"/>
     </Target>
-    <Target Name="linArm">
-        <MSBuild Projects="src_libArm\linArm.cbproj"/>
+    <Target Name="DeviceLister">
+        <MSBuild Projects="src_devLister\DeviceLister.cbproj"/>
     </Target>
-    <Target Name="linArm:Clean">
-        <MSBuild Projects="src_libArm\linArm.cbproj" Targets="Clean"/>
+    <Target Name="DeviceLister:Clean">
+        <MSBuild Projects="src_devLister\DeviceLister.cbproj" Targets="Clean"/>
     </Target>
-    <Target Name="linArm:Make">
-        <MSBuild Projects="src_libArm\linArm.cbproj" Targets="Make"/>
+    <Target Name="DeviceLister:Make">
+        <MSBuild Projects="src_devLister\DeviceLister.cbproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="GRUBer;linArm"/>
+        <CallTarget Targets="GRUBer;DeviceLister"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="GRUBer:Clean;linArm:Clean"/>
+        <CallTarget Targets="GRUBer:Clean;DeviceLister:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="GRUBer:Make;linArm:Make"/>
+        <CallTarget Targets="GRUBer:Make;DeviceLister:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
