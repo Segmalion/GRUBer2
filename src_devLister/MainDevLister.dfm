@@ -16,6 +16,7 @@ object Form1: TForm1
   Font.Height = -21
   Font.Name = 'Segoe UI'
   Font.Style = []
+  Position = poDesigned
   Scaled = False
   PixelsPerInch = 168
   TextHeight = 30
@@ -32,7 +33,7 @@ object Form1: TForm1
     BevelOuter = bvNone
     ColumnCollection = <
       item
-        Value = 100.000000000000000000
+        Value = 100.00000000000000000
       end>
     ControlCollection = <
       item
@@ -58,18 +59,18 @@ object Form1: TForm1
     RowCollection = <
       item
         SizeStyle = ssAbsolute
-        Value = 250.000000000000000000
+        Value = 250.00000000000000000
       end
       item
-        Value = 100.000000000000000000
-      end
-      item
-        SizeStyle = ssAbsolute
-        Value = 90.000000000000000000
+        Value = 100.00000000000000000
       end
       item
         SizeStyle = ssAbsolute
-        Value = 40.000000000000000000
+        Value = 90.00000000000000000
+      end
+      item
+        SizeStyle = ssAbsolute
+        Value = 40.00000000000000000
       end
       item
         SizeStyle = ssAuto
@@ -111,22 +112,22 @@ object Form1: TForm1
       ColumnCollection = <
         item
           SizeStyle = ssAbsolute
-          Value = 300.000000000000000000
+          Value = 300.00000000000000000
         end
         item
           SizeStyle = ssAbsolute
-          Value = 300.000000000000000000
+          Value = 300.00000000000000000
         end
         item
           SizeStyle = ssAbsolute
-          Value = 300.000000000000000000
+          Value = 300.00000000000000000
         end
         item
           SizeStyle = ssAbsolute
-          Value = 300.000000000000000000
+          Value = 300.00000000000000000
         end
         item
-          Value = 100.000000000000000000
+          Value = 100.00000000000000000
         end>
       ControlCollection = <
         item
@@ -166,18 +167,18 @@ object Form1: TForm1
       RowCollection = <
         item
           SizeStyle = ssAbsolute
-          Value = 60.000000000000000000
+          Value = 40.00000000000000000
         end
         item
-          Value = 100.000000000000000000
+          Value = 100.00000000000000000
         end>
       TabOrder = 1
       object ListBox_Filter: TListBox
         AlignWithMargins = True
         Left = 6
-        Top = 66
+        Top = 46
         Width = 290
-        Height = 178
+        Height = 198
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -193,13 +194,15 @@ object Form1: TForm1
         MultiSelect = True
         TabOrder = 0
         OnClick = ListBox_FilterClick
+        ExplicitTop = 66
+        ExplicitHeight = 178
       end
       object Label1: TLabel
         AlignWithMargins = True
         Left = 6
         Top = 6
         Width = 290
-        Height = 50
+        Height = 30
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -208,7 +211,6 @@ object Form1: TForm1
         Caption = #1060#1110#1083#1100#1090#1088' '#1087#1086' '#1082#1083#1072#1089#1091' '#1087#1088#1080#1089#1090#1088#1086#1102':'
         Layout = tlCenter
         ExplicitWidth = 258
-        ExplicitHeight = 30
       end
       object GridPanel_FilterButton: TGridPanel
         Left = 601
@@ -223,7 +225,7 @@ object Form1: TForm1
         BevelOuter = bvNone
         ColumnCollection = <
           item
-            Value = 100.000000000000000000
+            Value = 100.00000000000000000
           end>
         ControlCollection = <
           item
@@ -248,16 +250,16 @@ object Form1: TForm1
           end>
         RowCollection = <
           item
-            Value = 25.000000000000000000
+            Value = 25.00000000000000000
           end
           item
-            Value = 25.000000000000000000
+            Value = 25.00000000000000000
           end
           item
-            Value = 25.000000000000000000
+            Value = 25.00000000000000000
           end
           item
-            Value = 25.000000000000000000
+            Value = 25.00000000000000000
           end>
         TabOrder = 1
         object Button_FilterContainerID: TButton
@@ -348,7 +350,7 @@ object Form1: TForm1
           ColumnCollection = <
             item
               SizeStyle = ssAbsolute
-              Value = 50.000000000000000000
+              Value = 50.00000000000000000
             end>
           ControlCollection = <
             item
@@ -378,19 +380,19 @@ object Form1: TForm1
             end>
           RowCollection = <
             item
-              Value = 20.000000000000000000
+              Value = 20.00000000000000000
             end
             item
-              Value = 20.000000000000000000
+              Value = 20.00000000000000000
             end
             item
-              Value = 20.000000000000000000
+              Value = 20.00000000000000000
             end
             item
-              Value = 20.000000000000000000
+              Value = 20.00000000000000000
             end
             item
-              Value = 20.000000000000000000
+              Value = 20.00000000000000000
             end>
           TabOrder = 0
           object CheckBox_FilterMotherboard: TCheckBox
@@ -486,7 +488,7 @@ object Form1: TForm1
         BevelOuter = bvNone
         ColumnCollection = <
           item
-            Value = 100.000000000000000000
+            Value = 100.00000000000000000
           end>
         ControlCollection = <
           item
@@ -507,14 +509,14 @@ object Form1: TForm1
         RowCollection = <
           item
             SizeStyle = ssAbsolute
-            Value = 100.000000000000000000
+            Value = 100.00000000000000000
           end
           item
             SizeStyle = ssAbsolute
-            Value = 100.000000000000000000
+            Value = 100.00000000000000000
           end
           item
-            Value = 100.000000000000000000
+            Value = 100.00000000000000000
           end>
         TabOrder = 3
         object GroupBox_CountErrSerial: TGroupBox
@@ -639,7 +641,11 @@ object Form1: TForm1
       Margins.Right = 5
       Margins.Bottom = 5
       Anchors = []
-      Panels = <>
+      Panels = <
+        item
+          Text = 'ROW:'
+          Width = 50
+        end>
     end
     object GridPanel_RunButton: TGridPanel
       Left = 0
@@ -654,16 +660,16 @@ object Form1: TForm1
       BevelOuter = bvNone
       ColumnCollection = <
         item
-          Value = 25.000000000000000000
+          Value = 25.00000000000000000
         end
         item
-          Value = 25.000000000000000000
+          Value = 25.00000000000000000
         end
         item
-          Value = 25.000000000000000000
+          Value = 25.00000000000000000
         end
         item
-          Value = 25.000000000000000000
+          Value = 25.00000000000000000
         end>
       ControlCollection = <
         item
@@ -675,13 +681,17 @@ object Form1: TForm1
           Column = 3
           Control = Button_SaveToJSON
           Row = 0
+        end
+        item
+          Column = 1
+          Control = Button_LoadFromJSON
+          Row = 0
         end>
       RowCollection = <
         item
-          Value = 100.000000000000000000
+          Value = 100.00000000000000000
         end>
       TabOrder = 3
-      ExplicitTop = 711
       object Button_DeviceUpdateCurPC: TButton
         AlignWithMargins = True
         Left = 5
@@ -708,10 +718,26 @@ object Form1: TForm1
         Margins.Right = 5
         Margins.Bottom = 5
         Align = alClient
-        Caption = 'Button_SaveToJSON'
+        Caption = #1047#1073#1077#1088#1077#1075#1090#1080' '#1087#1088#1080#1089#1090#1088#1086#1111' '#1074' '#1092#1072#1081#1083
         TabOrder = 1
-        ExplicitLeft = 901
-        ExplicitTop = 36
+        OnClick = Button_SaveToJSONClick
+      end
+      object Button_LoadFromJSON: TButton
+        AlignWithMargins = True
+        Left = 399
+        Top = 5
+        Width = 384
+        Height = 80
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Align = alClient
+        Caption = #1042#1110#1076#1086#1073#1088#1072#1079#1080#1090#1080' '#1087#1088#1080#1089#1090#1088#1086#1111' '#1079' '#1092#1072#1081#1083#1091
+        TabOrder = 2
+        OnClick = Button_LoadFromJSONClick
+        ExplicitLeft = 968
+        ExplicitTop = 56
         ExplicitWidth = 131
         ExplicitHeight = 44
       end
@@ -726,6 +752,8 @@ object Form1: TForm1
     Top = 602
   end
   object FDQuery1: TFDQuery
+    AfterOpen = FDQuery1AfterOpen
+    AfterRefresh = FDQuery1AfterOpen
     Connection = FDConnection1
     SQL.Strings = (
       '')
@@ -746,5 +774,13 @@ object Form1: TForm1
     OnTimer = Timer1Timer
     Left = 56
     Top = 518
+  end
+  object OpenDialog_FromJSON: TOpenDialog
+    Left = 1260
+    Top = 476
+  end
+  object SaveDialog_ToJSON: TSaveDialog
+    Left = 1120
+    Top = 476
   end
 end

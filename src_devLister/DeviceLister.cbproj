@@ -93,8 +93,8 @@
         <Icon_MainIcon>$(BDS)\bin\cbuilder_PROJECTICON.ico</Icon_MainIcon>
         <UWP_CppLogo44>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_150.png</UWP_CppLogo150>
-        <IncludePath>USB-LIST\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>USB-LIST\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\src_grub\;USB-LIST\;$(IncludePath)</IncludePath>
+        <ILINK_LibraryPath>..\src_grub\;USB-LIST\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <SanitizedProjectName>DeviceLister</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -198,6 +198,10 @@
             <FormType>dfm</FormType>
             <DependentOn>MainDevLister.h</DependentOn>
             <BuildOrder>2</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\src_grub\GetSMB.cpp">
+            <DependentOn>..\src_grub\GetSMB.h</DependentOn>
+            <BuildOrder>3</BuildOrder>
         </CppCompile>
         <FormResources Include="MainDevLister.dfm"/>
         <BuildConfiguration Include="Base">
@@ -313,9 +317,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName=".\Win64x\Debug\DeviceLister.pdb" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile LocalName=".\Win64x\Release\DeviceLister.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win64x">
-                        <RemoteName>DeviceLister.pdb</RemoteName>
+                        <RemoteName>DeviceLister.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

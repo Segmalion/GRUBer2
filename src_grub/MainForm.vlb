@@ -61,9 +61,6 @@ Coordinates=368,416,78,58
 [Label2]
 Coordinates=952,280,53,58
 
-[BtnParserOpen]
-Coordinates=992,212,103,58
-
 [GridPanel10]
 Coordinates=896,212,86,58
 
@@ -491,4 +488,7 @@ Coordinates=1080,924,86,58
 
 [GridPanel_EditInfoLic]
 Coordinates=1307,897,86,58
+
+[BtnDevListerOpen]
+Coordinates=992,212,103,58
 

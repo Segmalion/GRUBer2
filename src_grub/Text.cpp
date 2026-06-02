@@ -4,6 +4,8 @@
 #include "Text.h"
 #include "HashCRC32.h"
 #include <math.h>
+#include <System.SysUtils.hpp>
+#include <System.Zlib.hpp>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -23,6 +25,27 @@ UnicodeString GetHashCRC32(UnicodeString str) {
 	itoa(crc_value, outputString, 16);
 	hashCRC32 = UnicodeString(outputString).Insert("-",5);
 	return hashCRC32.UpperCase();
+}
+String GetFastHash_CRC32(const String& Input)
+{
+    if (Input.IsEmpty()) {
+        return L"00000000";
+    }
+
+    // Переводим UnicodeString в UTF-8 байты
+    RawByteString utf8Str = UTF8Encode(Input);
+
+    // bcc64x требует неконстантный указатель на байт.
+    // Используем const_cast, чтобы удовлетворить сигнатуру функции из System.Zlib.hpp
+    unsigned char* buffer = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(utf8Str.c_str()));
+
+    // Вычисляем CRC32
+    unsigned int crc = crc32(0, buffer, utf8Str.Length());
+
+    // Форматируем в 8-символьную шестнадцатеричную строку
+    String hexHash = Format(L"%.8X", ARRAYOFCONST((static_cast<int>(crc))));
+    hexHash.Insert(L"-", 5);
+	return hexHash;
 }
 //---------------------------------------------------------------------------
 /* UnicodeString в std::string */

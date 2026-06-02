@@ -53,7 +53,7 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 1, vers4 = 5;
+extern const short vers1 = 0, vers2 = 3, vers3 = 2, vers4 = 0;
 extern const UnicodeString versionApp = UnicodeString(vers1) + "."
 							  + UnicodeString(vers2) + "."
 							  + UnicodeString(vers3) + "."
@@ -94,7 +94,6 @@ void changeEditDirColor() {
 		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
 	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.get_grubPath());
-	Form1->BtnParserOpen->Enabled = FileExists(curDir.get_grubPath() + "\\usb.txt");
 }
 void RestartApplicationRunas()
 {
@@ -385,10 +384,16 @@ void __fastcall TForm1::BtnSaveSetteingsClick(TObject *Sender)
 	curConfig.saveFileIni();
 }
 // === запуск парсера
-void __fastcall TForm1::BtnParserOpenClick(TObject *Sender)
+void __fastcall TForm1::BtnDevListerOpenClick(TObject *Sender)
 {
-	UnicodeString setApp = GetCurrentDir() + "\\GRUBer-Parser.exe";
-	UnicodeString setArg = "/run /b " + curDir.get_grubPath();
+	UnicodeString setApp = GetCurrentDir() + "\\DeviceLister.exe";
+	short t_cat;
+	if (curPC.getCategoryID() == 0) t_cat = 0;
+	if (curPC.getCategoryID() >= 1 && curPC.getCategoryID() <= 3) t_cat = 1;
+	if (curPC.getCategoryID() == 4) t_cat = 2;
+	if (curPC.getCategoryID() == 5) t_cat = 3;
+	if (curPC.getCategoryID() == 6) t_cat = 4;
+	UnicodeString setArg = "-cat " + String(t_cat);
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_SHOWDEFAULT);
 }
 // === провека лицензий

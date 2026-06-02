@@ -7,7 +7,6 @@
 #include <initguid.h>
 #include <devpkey.h>      // Для DEVPKEY_Device_ContainerId
 #include <combaseapi.h>   // Для конвертации GUID в строку
-#include <filesystem>
 #include <algorithm>
 
 #include <devquery.h>
@@ -18,10 +17,16 @@
 #pragma comment(lib, "cfgmgr32.lib") // <-- Добавили для работы функции статуса
 
 #include <iostream>
-#include <map>
-#include <vector>
+
+#include <System.SysUtils.hpp>
+#include <System.Zlib.hpp>
+
+#include <System.JSON.hpp>
+#include <System.SysUtils.hpp>
+#include <System.IOUtils.hpp>
 
 #include "MainDevLister.h"
+#include "GetSMB.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -49,18 +54,38 @@ typedef VOID (WINAPI *PDevFreeObjectProperties)(
 TForm1 *Form1;
 
 short badCharSerial = 0;
-short catPC = 0;
+//short catPC = 0;
 double multipler;
 std::vector<deviceInfo> devicesList;
 std::vector<registeredUsb> regUsbList;
+
+std::map<UnicodeString, short> m_catNumber {
+		{"НТ", 1}, {"НТ-БП", 1}, {"НТ-ІСД", 1}, {"НТ-ЕКМ", 1}, {"Не Таємно", 1},
+		{"ДСК", 2},
+		{"Т", 3}, {"Таємно", 3},
+		{"ЦТ", 4}, {"Цілком Таємно", 4}
+};
+std::vector<UnicodeString> v_allertName {
+	"android", "MTP", "ADB"
+};
+indefPCtype indefPC;
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	ComboBox_CategPC->ItemIndex = indefPC.catPC;
+//    if (ComboBox_CategPC->OnChange) {
+//		ComboBox_CategPC->OnChange(ComboBox_CategPC);
+//	}
+	// Инициализация БД
+	createDB();
+    // Читает файл registered.txt
 	fs::path p_fileRegUsb = fs::current_path() / "registered.txt";
 	regUsbList = readRegUsbFile(p_fileRegUsb);
-	createDB();
-    Button_DeviceUpdateCurPCClick(this);
+	// Получаем инфу о ПК
+	getInfoPC();
+	// Наполняем БД инфой об устройствах с текущего ПК
+	Button_DeviceUpdateCurPCClick(this);
 }
 //---------------------------------------------------------------------------
 bool __fastcall TForm1::RemoveDeviceFromWindows(UnicodeString instanceId)
@@ -654,8 +679,14 @@ std::vector<deviceInfo> scanDevices() {
 		else if (dev.containerId != L"No Container" && dev.containerId != L"GUID Error" && !dev.containerId.IsEmpty()) {
 			dev.containerName = bestContainerNames[dev.containerId];
 		}
+	}
+
+	return v_tempDevList;
+}
+void checkRegDevice(std::vector<deviceInfo> &devList) {
+	for (auto& dev : devList) {
 		// ...проверяем серийники
-        bool find = false;
+		bool find = false;
 		for(auto& regUsb: regUsbList) { // файл reristered
 			find = CompareStr_DamerayLevenshtaine(dev.serialNumber, regUsb.serial);
 			if (find) {
@@ -685,8 +716,6 @@ std::vector<deviceInfo> scanDevices() {
 		}
 
 	}
-
-	return v_tempDevList;
 }
 /* Подключение к БД */
 void __fastcall TForm1::createDB() {
@@ -910,7 +939,7 @@ void __fastcall TForm1::UpdateClassFilterList()
 	tempQuery->Open();
 
     ListBox_Filter->Items->Clear();
-	ListBox_Filter->Items->Add("(Все классы)");
+	ListBox_Filter->Items->Add("(Усі класи пристроїв)");
 
     while (!tempQuery->Eof) {
 		ListBox_Filter->Items->Add(tempQuery->FieldByName("class_name")->AsString);
@@ -927,7 +956,7 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 	if(exists(p_file)) {
 		regUsbFile->LoadFromFile(p_file.c_str(), TEncoding::UTF8);
 	} else {
-		printLog(" [!] Нема registered.txt");
+		printLog("Немає registered.txt :(");
 		return tempRegUsbList;
 	}
 	// -- обрабатываем файл с извесными флешками, заполняем вектор "tempRegUsbList"
@@ -942,7 +971,7 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 		catch (const std::out_of_range& error) { tempRegUsb.catNumber = 0; }
 		tempRegUsbList.push_back(tempRegUsb);
 	}
-	printLog(UnicodeString(tempRegUsbList.size()));
+	printLog("Завантаженно " + UnicodeString(tempRegUsbList.size()) + " відомих пристроїв з файлу registered.txt");
 	return tempRegUsbList;
 }
 /* Сравнение текста с ошибкой */
@@ -1009,17 +1038,228 @@ bool compareStrInVector(UnicodeString &strFull, std::vector<UnicodeString> &v_st
 	}
 	return false;
 }
+/* ИНФО для ПК */
+String getFastHash_CRC32(const String& Input)
+{
+    if (Input.IsEmpty()) {
+        return L"00000000";
+    }
+
+    // Переводим UnicodeString в UTF-8 байты
+    RawByteString utf8Str = UTF8Encode(Input);
+
+    // bcc64x требует неконстантный указатель на байт.
+    // Используем const_cast, чтобы удовлетворить сигнатуру функции из System.Zlib.hpp
+    unsigned char* buffer = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(utf8Str.c_str()));
+
+    // Вычисляем CRC32
+    unsigned int crc = crc32(0, buffer, utf8Str.Length());
+
+    // Форматируем в 8-символьную шестнадцатеричную строку
+	String hexHash = Format(L"%.8X", ARRAYOFCONST((static_cast<int>(crc))));
+    hexHash.Insert(L"-", 5);
+	return hexHash;
+}
+void getInfoPC() {
+	DWORD bufCharCount = 32767;
+	TCHAR infoBuf[32767];
+	if( GetComputerName( infoBuf, &bufCharCount ) ) {
+		indefPC.desktopName = UnicodeString(infoBuf);
+	} else indefPC.desktopName = "ErrorNAME";
+	//indefPC.catPC = t_cat;
+	// получаем данные из SMB - serial
+	UnicodeString errSer[] = {
+		"To Be Filled By O.E.M.",
+		"Not Applicable",
+		"System Serial Number",
+		"Default string",
+		"serial number"
+	};
+	GetSMB g;
+	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
+	if (dataSMB == NULL) {
+		indefPC.sn_Main = "Помилка SMBIOS_DATA!";
+		indefPC.sn_UUID = "Помилка SMBIOS_DATA!";
+		indefPC.sn_serialMrb = "Помилка SMBIOS_DATA!";
+		indefPC.sn_CPUID = "Помилка SMBIOS_DATA!";
+	}
+	indefPC.sn_Main = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
+	indefPC.sn_UUID = g.GetBiosValue(dataSMB, SMB_TABLE_SYSTEM, 8, 16);
+	indefPC.sn_serialMrb = g.GetBiosString(dataSMB, SMB_TABLE_BASEBOARD, 7);
+	indefPC.sn_CPUID = g.GetBiosValue(dataSMB, SMB_TABLE_PROCESSOR, 8, 8);
+	UnicodeString toHash  = indefPC.sn_Main +
+							indefPC.sn_UUID +
+							indefPC.sn_serialMrb +
+							indefPC.sn_CPUID;
+//	unSerial = GetHashCRC32(toHash);
+	indefPC.sn_hash = getFastHash_CRC32(toHash);
+}
+/* Работа с JSON */
+bool SaveDataToJSON(const String& FilePath, const indefPCtype& indefPC, const std::vector<deviceInfo>& DataVector)
+{
+	// Используем std::unique_ptr для безопасного управления памятью корневого объекта
+	std::unique_ptr<TJSONObject> root(new TJSONObject());
+
+    try {
+        // 1. Создаем и заполняем объект устройства
+		TJSONObject* indeficatePC = new TJSONObject();
+		indeficatePC->AddPair("desktopName", indefPC.desktopName);
+		indeficatePC->AddPair("catPC", indefPC.catPC);
+		indeficatePC->AddPair("sn_Main", indefPC.sn_Main);
+		indeficatePC->AddPair("sn_serialMrb", indefPC.sn_serialMrb);
+		indeficatePC->AddPair("sn_UUID", indefPC.sn_UUID);
+		indeficatePC->AddPair("sn_CPUID", indefPC.sn_CPUID);
+		indeficatePC->AddPair("sn_hash", indefPC.sn_hash);
+
+        // Добавляем объект устройства в корень
+		root->AddPair("indef", indeficatePC);
+
+		// 2. Создаем массив для вектора данных
+        TJSONArray* dataArray = new TJSONArray();
+		for (const deviceInfo& record : DataVector) {
+            TJSONObject* recordObj = new TJSONObject();
+			recordObj->AddPair("className", record.className);
+			recordObj->AddPair("enumeratorName", record.enumeratorName);
+			recordObj->AddPair("friendlyName", record.friendlyName);
+			recordObj->AddPair("devDesc", record.devDesc);
+			recordObj->AddPair("devInstanceID", record.devInstanceID);
+			recordObj->AddPair("serialNumber", record.serialNumber);
+			recordObj->AddPair("status", record.status);
+			recordObj->AddPair("containerId", record.containerId);
+			recordObj->AddPair("containerName", record.containerName);
+//			recordObj->AddPair("regName", record.regName);
+//			recordObj->AddPair("regCatName", record.regCatName);
+//			recordObj->AddPair("regCatNumber", String(record.regCatNumber)); //short
+//			recordObj->AddPair("serialKnow", String(record.serialKnow)); //bool
+//			recordObj->AddPair("serialErr", String(record.serialErr));  //boll
+			recordObj->AddPair("lastConnect", FormatDateTime("dd.mm.yyyy hh:nn:ss", record.lastConnect));		   //DateTime
+			recordObj->AddPair("lastDisconnect", FormatDateTime("dd.mm.yyyy hh:nn:ss", record.lastDisconnect));     //DateTime
+			recordObj->AddPair("firstInstallDate", FormatDateTime("dd.mm.yyyy hh:nn:ss", record.firstInstallDate)); //DateTime
+
+            dataArray->AddElement(recordObj); // Массив забирает владение recordObj
+        }
+
+        // Добавляем массив в корень
+        root->AddPair("devices", dataArray);
+
+        // 3. Форматируем JSON в строку (превращаем в "красивый" вид с отступами)
+        // Если красивый вид не нужен, можно использовать просто root->ToString()
+        String jsonString = root->Format(2);
+
+        // 4. Записываем строку в файл (TFile автоматически создаст директории, если нужно)
+		TFile::WriteAllText(FilePath, jsonString, TEncoding::UTF8);
+
+        return true;
+    }
+    catch (const Exception& e) {
+        // Здесь можно обработать ошибку записи или формата
+        // OutputDebugString(e.Message.c_str());
+        return false;
+    }
+}
+bool LoadDataFromJSON(const UnicodeString& filePath)
+{
+	devicesList.clear();
+
+    // 1. Проверяем существование файла
+    if (!TFile::Exists(filePath)) {
+        printLog(L"Ошибка загрузки JSON: Файл не найден (" + filePath + L")");
+        return false;
+    }
+
+    try
+    {
+        // 2. Считываем весь текст из файла
+        UnicodeString jsonText = TFile::ReadAllText(filePath);
+
+        // 3. Парсим строку в корневой JSON-объект
+        std::unique_ptr<TJSONObject> rootObject(dynamic_cast<TJSONObject*>(TJSONObject::ParseJSONValue(jsonText)));
+
+        if (!rootObject) {
+            printLog(L"Ошибка загрузки JSON: Некорректный формат файла.");
+            return false;
+        }
+
+        // --- БЛОК 4: ЧТЕНИЕ МЕТАДАННЫХ КОМПЬЮТЕРА (indef) ---
+        TJSONObject* indefObj = dynamic_cast<TJSONObject*>(rootObject->Get(L"indef")->JsonValue);
+        if (indefObj) {
+            // Если вам нужно сохранить данные о чужом ПК в глобальные переменные вашей программы:
+            // indefPC.desktopName = indefObj->GetValue(L"desktopName")->Value();
+            // indefPC.catPC = indefObj->GetValue(L"catPC")->Value().ToIntDef(0);
+            // sn_hash = indefObj->GetValue(L"sn_hash")->Value();
+            printLog(L"Загружен лог компьютера: " + indefObj->GetValue(L"desktopName")->Value());
+        }
+
+        // --- БЛОК 5: ЧТЕНИЕ МАССИВА УСТРОЙСТВ (devices) ---
+        TJSONArray* devicesArray = dynamic_cast<TJSONArray*>(rootObject->Get(L"devices")->JsonValue);
+        if (!devicesArray) {
+            printLog(L"Ошибка JSON: Массив 'devices' не найден.");
+            return false;
+        }
+
+        // Лямбда-помощник для безопасного чтения дат из строк JSON обратно в TDateTime
+        auto parseJsonDate = [](UnicodeString dateStr) -> TDateTime {
+            if (dateStr.StartsWith(L"30.12.1899")) return 0.0; // Пустая системная дата Delphi
+            return StrToDateTimeDef(dateStr, 0.0);
+        };
+
+        // 6. Перебираем все элементы массива устройств
+        for (int i = 0; i < devicesArray->Count; i++)
+        {
+            TJSONObject* devObj = dynamic_cast<TJSONObject*>(devicesArray->Items[i]);
+            if (!devObj) continue;
+
+            deviceInfo dev;
+
+            // Безопасно вытаскиваем строковые значения по ключам
+            dev.className     = devObj->Values[L"className"]     ? devObj->Values[L"className"]->Value()     : L"";
+            dev.enumeratorName= devObj->Values[L"enumeratorName"]? devObj->Values[L"enumeratorName"]->Value(): L"";
+            dev.friendlyName  = devObj->Values[L"friendlyName"]  ? devObj->Values[L"friendlyName"]->Value()  : L"";
+            dev.devDesc       = devObj->Values[L"devDesc"]       ? devObj->Values[L"devDesc"]->Value()       : L"";
+            dev.devInstanceID = devObj->Values[L"devInstanceID"] ? devObj->Values[L"devInstanceID"]->Value() : L"";
+            dev.serialNumber  = devObj->Values[L"serialNumber"]  ? devObj->Values[L"serialNumber"]->Value()  : L"";
+            dev.status        = devObj->Values[L"status"]        ? devObj->Values[L"status"]->Value()        : L"";
+            dev.containerId   = devObj->Values[L"containerId"]   ? devObj->Values[L"containerId"]->Value()   : L"";
+            dev.containerName = devObj->Values[L"containerName"] ? devObj->Values[L"containerName"]->Value() : L"";
+
+            // Парсим даты обратно в честный TDateTime
+            UnicodeString lastConnectStr    = devObj->Values[L"lastConnect"]    ? devObj->Values[L"lastConnect"]->Value()    : L"";
+            UnicodeString lastDisconnectStr = devObj->Values[L"lastDisconnect"] ? devObj->Values[L"lastDisconnect"]->Value() : L"";
+            UnicodeString firstInstallStr   = devObj->Values[L"firstInstallDate"]? devObj->Values[L"firstInstallDate"]->Value(): L"";
+
+            dev.lastConnect      = parseJsonDate(lastConnectStr);
+            dev.lastDisconnect   = parseJsonDate(lastDisconnectStr);
+            dev.firstInstallDate = parseJsonDate(firstInstallStr);
+            dev.installDate      = 0.0; // Если в JSON её нет, ставим пустую
+
+            devicesList.push_back(dev);
+        }
+
+        printLog(L"Успешно распарсено устройств из JSON: " + IntToStr((int)devicesList.size()));
+        return true;
+    }
+    catch (const Exception& e)
+    {
+        printLog(L"Критическая ошибка при чтении JSON: " + e.Message);
+        return false;
+    }
+}
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 {
+	CheckBox_AutoUpdateDev->Checked = true;
+	CheckBox_AutoUpdateDev->Enabled = true;
+	Button_DelDevice->Enabled = true;
+
 	devicesList = scanDevices();
     if (devicesList.empty()) {
         printLog("Устройства не найдены.");
         return;
 	}
-	//UpdateClassFilterList();
+	checkRegDevice(devicesList);
 	vectorToBD(devicesList);
+    UpdateClassFilterList();
 	refrechDBGrid();
 	optimizeGridColumns(Form1->DBGrid1);
 	return;
@@ -1126,14 +1366,15 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
         FDQuery1->Filtered = false; // Отключаем перед применением нового
         FDQuery1->Filter = finalFilter;
         FDQuery1->Filtered = true;
-        printLog(L"Применен фильтр: " + finalFilter);
-    }
+		printLog(L"Применен фильтр: " + finalFilter);
+	}
+    FDQuery1AfterOpen(FDQuery1);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 {
-    ListBox_Filter->ClearSelection();
+	ListBox_Filter->ClearSelection();
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
         return;
@@ -1155,7 +1396,9 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
     // Формируем строку фильтра. QuotedStr автоматически обернет GUID в одинарные кавычки
     FDQuery1->Filter = L"containerId = " + QuotedStr(selectedContainerId);
 
-    FDQuery1->Filtered = true; // Включаем фильтр
+	FDQuery1->Filtered = true; // Включаем фильтр
+
+    FDQuery1AfterOpen(FDQuery1);
 
 	printLog(L"Отображаются устройства контейнера: " + selectedContainerId);
 }
@@ -1214,7 +1457,7 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
             grid->Canvas->Font->Color  = clBlack; // Стандартный черный текст
 		}
 		//Устройство с нарушением
-		if (devCat > catPC || compareStrInVector(devName, v_allertName) || compareStrInVector(devDescription, v_allertName))
+		if (devCat > indefPC.catPC || compareStrInVector(devName, v_allertName) || compareStrInVector(devDescription, v_allertName))
 		{
 			grid->Canvas->Brush->Color = (TColor)0x00D0D0FF; // Очень бледный красный
 		}
@@ -1242,10 +1485,10 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
         grid->Canvas->Font->Style = TFontStyles() << fsBold;
 	}
 	// нарушение категории
-	if ((Column->FieldName == L"regName" || Column->FieldName == L"regCatName") && devCat > catPC && !State.Contains(gdSelected))
+	if ((Column->FieldName == L"regName" || Column->FieldName == L"regCatName") && devCat > indefPC.catPC && !State.Contains(gdSelected))
 	{
 		grid->Canvas->Font->Color = clRed;
-        grid->Canvas->Font->Style = TFontStyles() << fsBold;
+		grid->Canvas->Font->Style = TFontStyles() << fsBold;
 	}
 	// нарушение в названии
 	if (Column->FieldName == L"friendly_name" && compareStrInVector(devName, v_allertName))
@@ -1269,8 +1512,8 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 
 void __fastcall TForm1::ComboBox_CategPCChange(TObject *Sender)
 {
-	try { catPC = m_catNumber.at(ComboBox_CategPC->Text); }
-	catch (const std::out_of_range& error) { catPC = 0; }
+	try { indefPC.catPC = m_catNumber.at(ComboBox_CategPC->Text); }
+	catch (const std::out_of_range& error) { indefPC.catPC = 0; }
     DBGrid1->Repaint();
 }
 //---------------------------------------------------------------------------
@@ -1355,7 +1598,8 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 	FDQuery1->Filter = L"serialKnow = " + QuotedStr("0") + " AND class_name = " + QuotedStr("DiskDrive") +
 		" AND serial_number IS NOT NULL AND serial_number <> ''";
 
-    FDQuery1->Filtered = true; // Включаем фильтр
+	FDQuery1->Filtered = true; // Включаем фильтр
+    FDQuery1AfterOpen(FDQuery1);
 
 	printLog(L"Отображаются только неизвесные USB устройства");
 }
@@ -1395,9 +1639,9 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
         nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
     }
 
-    // 3. Объединяем условия по именам и условие по категории (regCatNumber > catPC)
+	// 3. Объединяем условия по именам и условие по категории (regCatNumber > indefPC.catPC)
     // ВАЖНО: сверьте точное имя столбца категории в вашей БД (например, regCatNumber или devCat)
-    UnicodeString catCondition = L"regCatNumber > " + IntToStr(catPC);
+	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
 
     if (!nameConditions.IsEmpty())
     {
@@ -1419,7 +1663,82 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
     FDQuery1->Filter = filterStr;
 	FDQuery1->Filtered = true;
 
+    FDQuery1AfterOpen(FDQuery1);
+
     printLog(L"Применен alert-фильтр: " + filterStr);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button_SaveToJSONClick(TObject *Sender)
+{
+	SaveDialog_ToJSON->Filter = L"JSON файлы (*.json)|*.json|Все файлы (*.*)|*.*";
+	SaveDialog_ToJSON->FileName = L"devList.json";
+	if (SaveDialog_ToJSON->Execute()) {
+		UnicodeString selectedFile = SaveDialog_ToJSON->FileName;
+		SaveDataToJSON(selectedFile, indefPC, devicesList);
+		printLog(L"Устройства успешно записаны в файл: " + ExtractFileName(selectedFile));
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button_LoadFromJSONClick(TObject *Sender)
+{
+	// Настраиваем фильтр файлов для OpenDialog
+    OpenDialog_FromJSON->Filter = L"JSON файлы (*.json)|*.json|Все файлы (*.*)|*.*";
+    OpenDialog_FromJSON->FileName = L"devList.json";
+
+    if (OpenDialog_FromJSON->Execute())
+    {
+        UnicodeString selectedFile = OpenDialog_FromJSON->FileName;
+//		std::vector<deviceInfo> loadedDevices;
+
+		// 1. Вызываем нашу новую функцию чтения
+		if (LoadDataFromJSON(selectedFile))
+		{
+			checkRegDevice(devicesList);
+
+			CheckBox_AutoUpdateDev->Checked = false;
+			CheckBox_AutoUpdateDev->Enabled = false;
+			Button_DelDevice->Enabled = false;
+
+			// 2. Очищаем старую базу данных и записываем новые устройства из вектора
+			// (Ваш метод vectorToBD внутри содержит очистку или добавление)
+            vectorToBD(devicesList);
+
+			// 3. Обновляем визуальный список классов в ListBox_Filter
+			UpdateClassFilterList();
+
+			// 4. Принудительно обновляем DBGrid1
+			refrechDBGrid();
+			optimizeGridColumns(Form1->DBGrid1);
+
+			printLog(L"База данных успешно обновлена данными из файла: " + ExtractFileName(selectedFile));
+        }
+        else
+        {
+            MessageDlg(L"Не удалось загрузить данные из выбранного JSON-файла.", mtError, TMsgDlgButtons() << mbOK, 0);
+        }
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FDQuery1AfterOpen(TDataSet *DataSet)
+{
+    FDQuery1->FetchAll();
+	int rowCount = 0;
+
+    // 1. Если фильтр включен, берем количество отфильтрованных строк из Rows->Count
+    if (FDQuery1->Filtered && FDQuery1->SourceView && FDQuery1->SourceView->Rows)
+    {
+        rowCount = FDQuery1->SourceView->Rows->Count;
+    }
+    else
+    {
+        // 2. Если фильтра нет (показываются вообще все устройства),
+        // используем стандартный RecordCount
+        rowCount = FDQuery1->RecordCount;
+    }
+	StatusBar1->Panels->Items[0]->Text = "ROW: " + IntToStr(rowCount);
 }
 //---------------------------------------------------------------------------
 

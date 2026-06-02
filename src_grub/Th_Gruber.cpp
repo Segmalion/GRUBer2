@@ -328,20 +328,24 @@ bool job_info(UnicodeString dir) {
 	return !info.checkErr();
 }
 bool job_usb(UnicodeString dir) {
-	UnicodeString outFilePath = dir + "\\usb.txt";
+	short t_cat;
+	if (curPC.getCategoryID() == 0) t_cat = 0;
+	if (curPC.getCategoryID() >= 1 && curPC.getCategoryID() <= 3) t_cat = 1;
+	if (curPC.getCategoryID() == 4) t_cat = 2;
+	if (curPC.getCategoryID() == 5) t_cat = 3;
+	if (curPC.getCategoryID() == 6) t_cat = 4;
+
+	UnicodeString outFilePath = dir + "\\devList.json";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування usb.txt...");
-	UnicodeString app32 = curDir.get_toolPath() + "\\USBDeview\\USBDeview_x32.exe";
-	UnicodeString app64 = curDir.get_toolPath() + "\\USBDeview\\USBDeview_x64.exe";
-	UnicodeString arg = "/stext " + outFilePath + "\"";
+	printLog("Генерування devList.json...");
+	UnicodeString app32 = GetCurrentDir() + "\\DeviceLister.exe";
+	UnicodeString app64 = GetCurrentDir() + "\\DeviceLister.exe";
+	UnicodeString arg = "-silent \"" + outFilePath + "\" -cat " + String(t_cat);
 	RunApp usb {app32, app64, arg};
 	usb.run();
 //	printLogDebug(usb.errorString());
 	printLog(usb.resultString());
 	jobDone(countJob, ++curJob);
-	if (FileExists(outFilePath)) {
-		Form1->BtnParserOpen->Enabled = DirectoryExists(curDir.get_grubPath());
-	}
 	progressBarGo(pos += step, usb.checkErr());
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !usb.checkErr();

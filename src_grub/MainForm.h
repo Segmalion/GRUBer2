@@ -33,7 +33,7 @@ __published:	// IDE-managed Components
 	TTabSheet *TabGRUBer;
 	TGridPanel *GridPanelMain;
 	TButton *BtnGruberDirOpen;
-	TButton *BtnParserOpen;
+	TButton *BtnDevListerOpen;
 	TEdit *EditDirGrubName;
 	TButton *BtnGruberRun;
 	TButton *BtnGruberStop;
@@ -228,7 +228,7 @@ __published:	// IDE-managed Components
 	void __fastcall BtnEsetUpdateClick(TObject *Sender);
 	void __fastcall BtnEditEsetMirrorDirClick(TObject *Sender);
 	void __fastcall DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose);
-	void __fastcall BtnParserOpenClick(TObject *Sender);
+	void __fastcall BtnDevListerOpenClick(TObject *Sender);
 	void __fastcall BtnKiberConsolOpenClick(TObject *Sender);
 	void __fastcall BtnLicenseClick(TObject *Sender);
 	void __fastcall BtnInfoClick(TObject *Sender);

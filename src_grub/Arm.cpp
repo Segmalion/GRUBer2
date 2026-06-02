@@ -19,7 +19,7 @@ Arm::Arm()
 	TCHAR infoBuf[32767];
 	if( GetComputerName( infoBuf, &bufCharCount ) ) {
 		desktopName = UnicodeString(infoBuf);
-	} else desktopName = "Помилка!";
+	} else desktopName = "ErrorNAME";
 	// получаем данные из SMB - serial
 	UnicodeString errSer[] = {
 		"To Be Filled By O.E.M.",
@@ -50,7 +50,8 @@ Arm::Arm()
 							UUID +
 							serial_mrb +
 							CPUID;
-	unSerial = GetHashCRC32(toHash);
+//	unSerial = GetHashCRC32(toHash);
+	unSerial = GetFastHash_CRC32(toHash);
 	manufacturer = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 4);
 	productName  = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 5);
 	// установленый софт
@@ -92,7 +93,7 @@ void Arm::read_user() {
 }
 //генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrIniVersionNumber() {
-	const int iniVersionNumber = 4;
+	const int iniVersionNumber = 5;
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[iniVersion]");
 	mStr.push_back("version=" + UnicodeString(iniVersionNumber));

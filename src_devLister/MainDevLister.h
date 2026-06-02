@@ -8,9 +8,6 @@
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
 #include <Vcl.Grids.hpp>
-
-#include <cfgmgr32.h>
-#include <Vcl.ExtCtrls.hpp>
 #include <Data.DB.hpp>
 #include <FireDAC.Comp.Client.hpp>
 #include <FireDAC.Comp.DataSet.hpp>
@@ -32,10 +29,19 @@
 #include <FireDAC.Stan.Pool.hpp>
 #include <FireDAC.UI.Intf.hpp>
 #include <FireDAC.VCLUI.Wait.hpp>
+#include <Vcl.ComCtrls.hpp>
 #include <Vcl.DBGrids.hpp>
-#include <Vcl.DBCGrids.hpp>
-#include <Vcl.DBCtrls.hpp>
-#include <Vcl.ComCtrls.hpp> // Добавляем заголовок для CM_Get_DevNode_Status
+#include <Vcl.Dialogs.hpp>
+#include <Vcl.ExtCtrls.hpp>
+
+// --- ДОБАВЬТЕ ЭТИ СТРОКИ СЮДА ---
+#include <map>
+#include <vector>
+#include <filesystem>
+namespace fs = std::filesystem;
+// ---------------------------------
+
+#include <cfgmgr32.h> // Добавляем заголовок для CM_Get_DevNode_Status
 //---------------------------------------------------------------------------
 namespace fs = std::filesystem;
 struct deviceInfo {
@@ -63,18 +69,15 @@ struct registeredUsb {
 	UnicodeString catName;
 	short catNumber = 0;
 	UnicodeString serial;
-
 };
-std::map<UnicodeString, short> m_catNumber {
-		{"НТ", 1}, {"НТ-БП", 1}, {"НТ-ІСД", 1}, {"НТ-ЕКМ", 1}, {"Не Таємно", 1},
-		{"ДСК", 2},
-		{"Т", 3}, {"Таємно", 3},
-		{"ЦТ", 4}, {"Цілком Таємно", 4}
-};
-std::vector<UnicodeString> v_allertName {
-	"android", "MTP", "ADB"
+struct indefPCtype {
+	String desktopName, sn_Main, sn_UUID, sn_serialMrb, sn_CPUID, sn_hash;
+	short catPC;
 };
 
+extern std::map<UnicodeString, short> m_catNumber;
+extern std::vector<UnicodeString> v_allertName;
+extern indefPCtype indefPC;
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
 {
@@ -112,6 +115,9 @@ __published:	// IDE-managed Components
 	TButton *Button_ShowAllert;
 	TButton *Button_ShowUSB;
 	TButton *Button_SaveToJSON;
+	TOpenDialog *OpenDialog_FromJSON;
+	TSaveDialog *SaveDialog_ToJSON;
+	TButton *Button_LoadFromJSON;
 	void __fastcall Button_DeviceUpdateCurPCClick(TObject *Sender);
 	void __fastcall DBGrid1TitleClick(TColumn *Column);
 	void __fastcall ListBox_FilterClick(TObject *Sender);
@@ -126,6 +132,9 @@ __published:	// IDE-managed Components
 	void __fastcall Button_ShowUSBClick(TObject *Sender);
 	void __fastcall Button_ShowUnknowUSBClick(TObject *Sender);
 	void __fastcall Button_ShowAllertClick(TObject *Sender);
+	void __fastcall Button_SaveToJSONClick(TObject *Sender);
+	void __fastcall Button_LoadFromJSONClick(TObject *Sender);
+	void __fastcall FDQuery1AfterOpen(TDataSet *DataSet);
 private:	// User declarations
 	void __fastcall WndProc(Winapi::Messages::TMessage &Message) override;
 	bool __fastcall RemoveDeviceFromWindows(UnicodeString instanceId);
@@ -145,11 +154,18 @@ extern PACKAGE TForm1 *Form1;
 TDateTime fileTimeToDateTime (const FILETIME &ft);
 void printLog(UnicodeString str);
 std::vector<deviceInfo> scanDevices();
+void checkRegDevice(std::vector<deviceInfo> &devList);
 void optimizeGridColumns(TDBGrid* grid);
 std::vector<registeredUsb> readRegUsbFile(fs::path &p_file);
 short categoryStrToNum (UnicodeString catStr);
 bool CompareStr_DamerayLevenshtaine(const UnicodeString &m, const UnicodeString &n, short a=0);
 bool compareStrInSring(UnicodeString &strFull, UnicodeString &strSearch);
 bool compareStrInVector (UnicodeString &strFull, std::vector<UnicodeString> &v_str);
+
+String getFastHash_CRC32(const String& Input);
+void getInfoPC();
+
+bool SaveDataToJSON(const String& FilePath, const indefPCtype& indefPC, const std::vector<deviceInfo>& DataVector);
+bool LoadDataFromJSON(const UnicodeString& filePath);
 //---------------------------------------------------------------------------
 #endif

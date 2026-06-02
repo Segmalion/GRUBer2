@@ -16,6 +16,7 @@ UnicodeString curDateTime();
 UnicodeString fixDirName(UnicodeString str);
 UnicodeString byteToStr(long long i);
 UnicodeString GetHashCRC32(UnicodeString str);
+String GetFastHash_CRC32(const String& Input);
 UnicodeString errCheck(const UnicodeString &str);
 bool compareInSring(UnicodeString strFull, UnicodeString strSearch);
 //---------------------------------------------------------------------------
