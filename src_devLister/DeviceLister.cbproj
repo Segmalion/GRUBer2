@@ -193,6 +193,15 @@
             <BuildOrder>1</BuildOrder>
             <PCH>true</PCH>
         </PCHCompile>
+        <RcItem Include="FiraCode-Regular.ttf">
+            <ResourceType>FONT</ResourceType>
+            <ResourceId>1</ResourceId>
+        </RcItem>
+        <ResourceCompile Include="fonts.rc">
+            <ModuleName>fonts.rc</ModuleName>
+            <Form>fonts.res</Form>
+            <BuildOrder>4</BuildOrder>
+        </ResourceCompile>
         <CppCompile Include="MainDevLister.cpp">
             <Form>Form1</Form>
             <FormType>dfm</FormType>
@@ -320,6 +329,12 @@
                 <DeployFile LocalName=".\Win64x\Release\DeviceLister.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win64x">
                         <RemoteName>DeviceLister.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="FiraCode-Regular.ttf" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win64x">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

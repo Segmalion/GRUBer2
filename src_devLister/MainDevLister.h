@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+Ôªø//---------------------------------------------------------------------------
 
 #ifndef MainDevListerH
 #define MainDevListerH
@@ -33,15 +33,15 @@
 #include <Vcl.DBGrids.hpp>
 #include <Vcl.Dialogs.hpp>
 #include <Vcl.ExtCtrls.hpp>
+#include <Vcl.Menus.hpp>
 
-// --- ƒŒ¡¿¬‹“≈ ›“» —“–Œ » —ﬁƒ¿ ---
+// --- –î–û–ë–ê–í–¨–¢–ï –≠–¢–ò –°–¢–†–û–ö–ò –°–Æ–î–ê ---
 #include <map>
 #include <vector>
 #include <filesystem>
-namespace fs = std::filesystem;
 // ---------------------------------
 
-#include <cfgmgr32.h> // ƒÓ·‡‚ÎˇÂÏ Á‡„ÓÎÓ‚ÓÍ ‰Îˇ CM_Get_DevNode_Status
+#include <cfgmgr32.h> // –î–æ–±–∞–≤–ª—è–µ–º –∑–∞–≥–æ–ª–æ–≤–æ–∫ –¥–ª—è CM_Get_DevNode_Status
 //---------------------------------------------------------------------------
 namespace fs = std::filesystem;
 struct deviceInfo {
@@ -59,8 +59,8 @@ struct deviceInfo {
 	short regCatNumber = 0;
 	bool serialKnow = false;
 	bool serialErr  = false;
-	TDateTime firstInstallDate;  // <-- ƒŒ¡¿¬»À»: œÂ‚‡ˇ ÛÒÚ‡ÌÓ‚Í‡ ÛÒÚÓÈÒÚ‚‡
-	TDateTime installDate;       // <-- ƒŒ¡¿¬»À»: œÓÒÎÂ‰Ìˇˇ ÛÒÚ‡ÌÓ‚Í‡/Ó·ÌÓ‚ÎÂÌËÂ
+	TDateTime firstInstallDate;  // <-- –î–û–ë–ê–í–ò–õ–ò: –ü–µ—Ä–≤–∞—è —É—Å—Ç–∞–Ω–æ–≤–∫–∞ —É—Å—Ç—Ä–æ–π—Å—Ç–≤–∞
+	TDateTime installDate;       // <-- –î–û–ë–ê–í–ò–õ–ò: –ü–æ—Å–ª–µ–¥–Ω—è—è —É—Å—Ç–∞–Ω–æ–≤–∫–∞/–æ–±–Ω–æ–≤–ª–µ–Ω–∏–µ
 	TDateTime lastConnect;
 	TDateTime lastDisconnect;
 };
@@ -116,7 +116,7 @@ __published:	// IDE-managed Components
 	TButton *Button_ShowUSB;
 	TButton *Button_SaveToJSON;
 	TOpenDialog *OpenDialog_FromJSON;
-	TSaveDialog *SaveDialog_ToJSON;
+	TSaveDialog *SaveDialog_ToFile;
 	TButton *Button_LoadFromJSON;
 	void __fastcall Button_DeviceUpdateCurPCClick(TObject *Sender);
 	void __fastcall DBGrid1TitleClick(TColumn *Column);
@@ -135,6 +135,7 @@ __published:	// IDE-managed Components
 	void __fastcall Button_SaveToJSONClick(TObject *Sender);
 	void __fastcall Button_LoadFromJSONClick(TObject *Sender);
 	void __fastcall FDQuery1AfterOpen(TDataSet *DataSet);
+	void __fastcall FormDestroy(TObject *Sender);
 private:	// User declarations
 	void __fastcall WndProc(Winapi::Messages::TMessage &Message) override;
 	bool __fastcall RemoveDeviceFromWindows(UnicodeString instanceId);
@@ -143,10 +144,13 @@ private:	// User declarations
 	void __fastcall DelContainerDevice();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
-    void __fastcall createDB(); //ÔÓ‰ÍÎ˛˜ÂÌËÂ Í ¡ƒ
+    void __fastcall createDB(); //–ø–æ–¥–∫–ª—é—á–µ–Ω–∏–µ –∫ –ë–î
 	void __fastcall vectorToBD(std::vector<deviceInfo> &devicesList);
-    void __fastcall refrechDBGrid();
+	void __fastcall refrechDBGrid();
+	void __fastcall refrechDBGrid_USBonly();
+	void __fastcall optimizeGridColumns(TDBGrid* grid);
 	void __fastcall UpdateClassFilterList();
+	bool __fastcall SaveDataToDB(const String& FilePath);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
@@ -155,7 +159,6 @@ TDateTime fileTimeToDateTime (const FILETIME &ft);
 void printLog(UnicodeString str);
 std::vector<deviceInfo> scanDevices();
 void checkRegDevice(std::vector<deviceInfo> &devList);
-void optimizeGridColumns(TDBGrid* grid);
 std::vector<registeredUsb> readRegUsbFile(fs::path &p_file);
 short categoryStrToNum (UnicodeString catStr);
 bool CompareStr_DamerayLevenshtaine(const UnicodeString &m, const UnicodeString &n, short a=0);
@@ -167,5 +170,8 @@ void getInfoPC();
 
 bool SaveDataToJSON(const String& FilePath, const indefPCtype& indefPC, const std::vector<deviceInfo>& DataVector);
 bool LoadDataFromJSON(const UnicodeString& filePath);
+bool SaveDataToDB(const String& FilePath);
+
+bool LoadFontFromResource();
 //---------------------------------------------------------------------------
 #endif
