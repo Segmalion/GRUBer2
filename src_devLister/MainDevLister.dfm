@@ -687,23 +687,23 @@ object Form1: TForm1
     Connection = FDConnection1
     SQL.Strings = (
       '')
-    Left = 140
+    Left = 116
     Top = 602
   end
   object FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink
-    Left = 252
+    Left = 276
     Top = 602
   end
   object DataSource1: TDataSource
     DataSet = FDQuery1
-    Left = 426
+    Left = 450
     Top = 602
   end
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    Left = 56
-    Top = 518
+    Left = 32
+    Top = 602
   end
   object OpenDialog_FromJSON: TOpenDialog
     Left = 1176

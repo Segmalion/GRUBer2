@@ -59,6 +59,7 @@ short badCharSerial = 0;
 double multipler;
 std::vector<deviceInfo> devicesList;
 std::vector<registeredUsb> regUsbList;
+bool sqlFull;
 
 std::map<UnicodeString, short> m_catNumber {
 		{"НТ", 1}, {"НТ-БП", 1}, {"НТ-ІСД", 1}, {"НТ-ЕКМ", 1}, {"Не Таємно", 1},
@@ -755,6 +756,7 @@ void __fastcall TForm1::createDB() {
 			"serialErr INT"
 			");"
 		);
+		FDConnection1->Commit();
 	}
 	catch (const Exception &e) {
 		printLog("Ошибка БД: " + e.Message);
@@ -864,48 +866,18 @@ void __fastcall TForm1::vectorToBD(std::vector<deviceInfo> &devicesList) {
 	}
 }
 /* Вывод на TDBGrid */
-void __fastcall TForm1::refrechDBGrid() {
+void __fastcall TForm1::refrechDBGrid(String &sql) {
 	// Обновляем TDBGrid через FDQuery
 	try {
 		FDQuery1->Close(); // Закрываем предыдущий запрос
-		FDQuery1->SQL->Text =
-			"SELECT * FROM devices;";
+		FDQuery1->SQL->Text = sql;
 		FDQuery1->Open();  // Открываем — TDBGrid автоматически отобразит данные
 	}
 	catch (const Exception &e) {
 		printLog("Ошибка отображения данных: " + e.Message);
 	}
-}
-void __fastcall TForm1::refrechDBGrid_USBonly() {
-    	// Обновляем TDBGrid через FDQuery
-	try {
-		FDQuery1->Close(); // Закрываем предыдущий запрос
-		FDQuery1->SQL->Text =
-			"WITH RankedDevices AS (\n"
-			"SELECT\n"
-			"*,\n"
-			"ROW_NUMBER() OVER (PARTITION BY containerId\n"
-			"ORDER BY\n"
-			"class_name) as rn\n"
-			"FROM\n"
-			"devices\n"
-			"WHERE\n"
-			"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
-			")\n"
-			"SELECT\n"
-			"*\n"
-			"FROM\n"
-			"RankedDevices\n"
-			"WHERE\n"
-			"rn = 1\n"
-			"AND serial_number != \"\"\n"
-			"ORDER BY\n"
-			"class_name;\n";
-		FDQuery1->Open();  // Открываем — TDBGrid автоматически отобразит данные
-	}
-	catch (const Exception &e) {
-		printLog("Ошибка отображения данных: " + e.Message);
-	}
+    // украшает таблицу
+	optimizeGridColumns(Form1->DBGrid1);
 }
 /* Оптимизируем ширину столбцов TDBGrid */
 void __fastcall TForm1::optimizeGridColumns(TDBGrid* grid) {
@@ -1202,7 +1174,6 @@ void getInfoPC() {
 //	unSerial = GetHashCRC32(toHash);
 	indefPC.sn_hash = getFastHash_CRC32(toHash);
 }
-
 /* Работа с JSON */
 bool SaveDataToJSON(const String& FilePath, const indefPCtype& indefPC, const std::vector<deviceInfo>& DataVector)
 {
@@ -1414,28 +1385,70 @@ bool LoadFontFromResource()
 
     return false;
 }
-//---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+/* Обновление устройств с текущего ПК */
 void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 {
 	CheckBox_AutoUpdateDev->Checked = true;
 	CheckBox_AutoUpdateDev->Enabled = true;
 	Button_DelDevice->Enabled = true;
 
+	// сканируем устройства
 	devicesList = scanDevices();
-    if (devicesList.empty()) {
-        printLog("Устройства не найдены.");
-        return;
+	if (devicesList.empty()) {
+		printLog("Устройства не найдены.");
+		return;
 	}
+	// распознаем извесные флешки
 	checkRegDevice(devicesList);
+	// переносим в БД
 	vectorToBD(devicesList);
-    UpdateClassFilterList();
-	refrechDBGrid();
-	optimizeGridColumns(Form1->DBGrid1);
+	// обновляем фильтр "по классам устройств"
+	UpdateClassFilterList();
+	// выводим данные с БД в таблицу
+	String sql = "SELECT * FROM devices;";
+	sqlFull = true;
+	refrechDBGrid(sql);
+
 	return;
 }
-//---------------------------------------------------------------------------
+/* Обновление устройств с JSON */
+void __fastcall TForm1::Button_LoadFromJSONClick(TObject *Sender)
+{
+	// Настраиваем фильтр файлов для OpenDialog
+	OpenDialog_FromJSON->Filter = L"JSON файлы (*.json)|*.json|Все файлы (*.*)|*.*";
+	OpenDialog_FromJSON->FileName = L"devList.json";
 
+	if (OpenDialog_FromJSON->Execute())
+	{
+        UnicodeString selectedFile = OpenDialog_FromJSON->FileName;
+
+		if (LoadDataFromJSON(selectedFile))
+		{
+			CheckBox_AutoUpdateDev->Checked = false;
+			CheckBox_AutoUpdateDev->Enabled = false;
+			Button_DelDevice->Enabled = false;
+			// распознаем извесные флешки
+			checkRegDevice(devicesList);
+			// переносим в БД
+			vectorToBD(devicesList);
+			// обновляем фильтр "по классам устройств"
+			UpdateClassFilterList();
+			// выводим данные с БД в таблицу
+			String sql = "SELECT * FROM devices;";
+			sqlFull = true;
+			refrechDBGrid(sql);
+			printLog(L"База данных успешно обновлена данными из файла: " + ExtractFileName(selectedFile));
+        }
+		else
+		{
+			MessageDlg(L"Не удалось загрузить данные из выбранного JSON-файла.", mtError, TMsgDlgButtons() << mbOK, 0);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+/* СОРТИРОВКА таблицs по столбцу */
 void __fastcall TForm1::DBGrid1TitleClick(TColumn *Column)
 {
     // Проверяем, что датасет открыт и в нем есть данные
@@ -1466,7 +1479,7 @@ void __fastcall TForm1::DBGrid1TitleClick(TColumn *Column)
     FDQuery1->IndexName = indexName;
 }
 //---------------------------------------------------------------------------
-
+/* ФИЛЬТР общий по класам */
 void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
 {
 	if (!FDQuery1->Active) return;
@@ -1529,7 +1542,12 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
             // Берем классы в скобки и добавляем отсечение материнки
             finalFilter = L"(" + listboxFilter + L") AND " + mbFilter;
         }
-    }
+	}
+	if (sqlFull == false) {
+		String sql = "SELECT * FROM devices;";
+        sqlFull = true;
+		refrechDBGrid(sql);
+	}
 	// 4. Применяем итоговый фильтр к FireDAC
     if (finalFilter.IsEmpty())
     {
@@ -1537,7 +1555,7 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
         FDQuery1->Filtered = false;
         FDQuery1->Filter = L"";
         printLog(L"Фильтры сброшены. Показываются абсолютно все устройства.");
-    }
+	}
     else
     {
         FDQuery1->Filtered = false; // Отключаем перед применением нового
@@ -1548,9 +1566,131 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
     FDQuery1AfterOpen(FDQuery1);
 }
 //---------------------------------------------------------------------------
+/* ==== КНОПКИ ФИЛЬТРА ==== */
+/* ФИЛЬТР по всем флешкам */
+void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
+{
+	CheckBox_FilterMotherboard->Checked = false;
+	UnicodeString targetText = L"DiskDrive"; // Текст, который мы ищем
 
+	// Находим индекс строки
+	int index = ListBox_Filter->Items->IndexOf(targetText);
+
+	if (index != -1)
+	{
+		// 1. Очищаем любые старые выделения в ListBox (критично для MultiSelect)
+		ListBox_Filter->ClearSelection();
+
+		// 2. Явно выделяем нужный пункт синим цветом (работает для любого режима)
+		ListBox_Filter->Selected[index] = true;
+		ListBox_Filter->ItemIndex = index;
+
+		// 3. Возвращаем фокус на ListBox, чтобы Windows отрисовала выделение активным
+		ListBox_Filter->SetFocus();
+
+		// 4. Прокручиваем список к выделенному элементу, если он скрыт скроллом
+		ListBox_Filter->TopIndex = index;
+
+		// 5. Принудительно заставляем Windows перерисовать компонент прямо сейчас
+		ListBox_Filter->Update();
+
+		// 6. Вызываем вашу функцию фильтрации данных
+		ListBox_FilterClick(ListBox_Filter);
+	}
+	else
+	{
+		printLog(L"Пункт '" + targetText + L"' не найден в ListBox_Filter.");
+	}
+}
+/* ФИЛЬТР по неизвесным флешкам */
+void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
+{
+	Button_ShowUSBClick(this);
+	//ListBox_Filter->ClearSelection();
+	// 1. Убеждаемся, что запрос активен и в гриде есть данные
+    if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
+        return;
+	}
+
+	// Применяем фильтр к FireDAC
+    FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
+
+	// Формируем строку фильтра.
+	FDQuery1->Filter = L"serialKnow = " + QuotedStr("0") + " AND class_name = " + QuotedStr("DiskDrive") +
+		" AND serial_number IS NOT NULL AND serial_number <> ''";
+
+	FDQuery1->Filtered = true; // Включаем фильтр
+    FDQuery1AfterOpen(FDQuery1);
+
+	printLog(L"Отображаются только неизвесные USB устройства");
+}
+/* ФИЛЬТР по НАРУШЕНИЯМ */
+void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
+{
+	CheckBox_FilterMotherboard->Checked = false;
+	ListBox_Filter->ClearSelection();
+	// 1. Проверяем, активна ли таблица (DataSet)
+    if (!FDQuery1->Active) {
+        printLog(L"Фильтрация невозможна: FDQuery1 не активен.");
+        return;
+	}
+
+    // Отключаем фильтрацию перед формированием нового условия
+    FDQuery1->Filtered = false;
+
+    const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+    UnicodeString filterStr = L"";
+	UnicodeString nameConditions = L"";
+
+    // 2. Строим условия для поиска ключевых слов из вектора v_allertName
+    for (size_t i = 0; i < v_allertName.size(); ++i)
+    {
+        UnicodeString keyword = v_allertName[i].Trim();
+        if (keyword.IsEmpty()) continue;
+
+        // Экранируем одинарные кавычки в ключевом слове для безопасности фильтра FireDAC
+        keyword = StringReplace(keyword, L"'", L"''", TReplaceFlags() << rfReplaceAll);
+
+        if (!nameConditions.IsEmpty()) {
+            nameConditions += L" OR ";
+        }
+
+        // FireDAC поддерживает синтаксис LIKE с подстановочными знаками '%'
+        nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
+    }
+
+	// 3. Объединяем условия по именам и условие по категории (regCatNumber > indefPC.catPC)
+    // ВАЖНО: сверьте точное имя столбца категории в вашей БД (например, regCatNumber или devCat)
+	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
+
+    if (!nameConditions.IsEmpty())
+    {
+        // Итоговое условие: (Группа_Имен) OR (Категория)
+        filterStr = L"(" + nameConditions + L") OR (" + catCondition + L")";
+    }
+    else
+    {
+        // Если вектор слов пустой, фильтруем только по превышению категории
+		filterStr = catCondition;
+	}
+
+	if (!CheckBox_FilterMotherboard->Checked)
+	{
+		filterStr += L" AND containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
+	}
+
+    // 4. Применяем фильтр к набору данных
+    FDQuery1->Filter = filterStr;
+	FDQuery1->Filtered = true;
+
+    FDQuery1AfterOpen(FDQuery1);
+
+    printLog(L"Применен alert-фильтр: " + filterStr);
+}
+/* ФИЛЬТР по контейнеру */
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 {
+
 	ListBox_Filter->ClearSelection();
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
@@ -1565,7 +1705,14 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
     if (selectedContainerId.IsEmpty() || selectedContainerId == L"No Container" || selectedContainerId == L"GUID Error") {
         printLog(L"У выделенного устройства нет контейнера для фильтрации.");
         return;
-    }
+	}
+
+	// выводим данные с БД в таблицу
+	if(sqlFull == false) {
+		String sql = "SELECT * FROM devices;";
+        sqlFull = true;
+		refrechDBGrid(sql);
+	}
 
     // 4. Применяем фильтр к FireDAC
     FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
@@ -1580,7 +1727,7 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 	printLog(L"Отображаются устройства контейнера: " + selectedContainerId);
 }
 //---------------------------------------------------------------------------
-
+/* ФИЛЬТР по системным устройствам */
 void __fastcall TForm1::CheckBox_FilterMotherboardClick(TObject *Sender)
 {
 	// При клике на чекбокс просто вызываем пересчет общего фильтра
@@ -1723,129 +1870,6 @@ void __fastcall TForm1::Button_DelDeviceClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
-{
-	CheckBox_FilterMotherboard->Checked = false;
-	UnicodeString targetText = L"DiskDrive"; // Текст, который мы ищем
-
-	// Находим индекс строки
-	int index = ListBox_Filter->Items->IndexOf(targetText);
-
-	if (index != -1)
-	{
-		// 1. Очищаем любые старые выделения в ListBox (критично для MultiSelect)
-		ListBox_Filter->ClearSelection();
-
-		// 2. Явно выделяем нужный пункт синим цветом (работает для любого режима)
-		ListBox_Filter->Selected[index] = true;
-		ListBox_Filter->ItemIndex = index;
-
-		// 3. Возвращаем фокус на ListBox, чтобы Windows отрисовала выделение активным
-		ListBox_Filter->SetFocus();
-
-		// 4. Прокручиваем список к выделенному элементу, если он скрыт скроллом
-		ListBox_Filter->TopIndex = index;
-
-		// 5. Принудительно заставляем Windows перерисовать компонент прямо сейчас
-		ListBox_Filter->Update();
-
-		// 6. Вызываем вашу функцию фильтрации данных
-		ListBox_FilterClick(ListBox_Filter);
-	}
-	else
-	{
-		printLog(L"Пункт '" + targetText + L"' не найден в ListBox_Filter.");
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
-{
-	Button_ShowUSBClick(this);
-	//ListBox_Filter->ClearSelection();
-	// 1. Убеждаемся, что запрос активен и в гриде есть данные
-    if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
-        return;
-	}
-
-	// Применяем фильтр к FireDAC
-    FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
-
-	// Формируем строку фильтра.
-	FDQuery1->Filter = L"serialKnow = " + QuotedStr("0") + " AND class_name = " + QuotedStr("DiskDrive") +
-		" AND serial_number IS NOT NULL AND serial_number <> ''";
-
-	FDQuery1->Filtered = true; // Включаем фильтр
-    FDQuery1AfterOpen(FDQuery1);
-
-	printLog(L"Отображаются только неизвесные USB устройства");
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
-{
-	CheckBox_FilterMotherboard->Checked = false;
-	ListBox_Filter->ClearSelection();
-	// 1. Проверяем, активна ли таблица (DataSet)
-    if (!FDQuery1->Active) {
-        printLog(L"Фильтрация невозможна: FDQuery1 не активен.");
-        return;
-	}
-
-    // Отключаем фильтрацию перед формированием нового условия
-    FDQuery1->Filtered = false;
-
-    const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-    UnicodeString filterStr = L"";
-	UnicodeString nameConditions = L"";
-
-    // 2. Строим условия для поиска ключевых слов из вектора v_allertName
-    for (size_t i = 0; i < v_allertName.size(); ++i)
-    {
-        UnicodeString keyword = v_allertName[i].Trim();
-        if (keyword.IsEmpty()) continue;
-
-        // Экранируем одинарные кавычки в ключевом слове для безопасности фильтра FireDAC
-        keyword = StringReplace(keyword, L"'", L"''", TReplaceFlags() << rfReplaceAll);
-
-        if (!nameConditions.IsEmpty()) {
-            nameConditions += L" OR ";
-        }
-
-        // FireDAC поддерживает синтаксис LIKE с подстановочными знаками '%'
-        nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
-    }
-
-	// 3. Объединяем условия по именам и условие по категории (regCatNumber > indefPC.catPC)
-    // ВАЖНО: сверьте точное имя столбца категории в вашей БД (например, regCatNumber или devCat)
-	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
-
-    if (!nameConditions.IsEmpty())
-    {
-        // Итоговое условие: (Группа_Имен) OR (Категория)
-        filterStr = L"(" + nameConditions + L") OR (" + catCondition + L")";
-    }
-    else
-    {
-        // Если вектор слов пустой, фильтруем только по превышению категории
-		filterStr = catCondition;
-	}
-
-	if (!CheckBox_FilterMotherboard->Checked)
-	{
-		filterStr += L" AND containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
-	}
-
-    // 4. Применяем фильтр к набору данных
-    FDQuery1->Filter = filterStr;
-	FDQuery1->Filtered = true;
-
-    FDQuery1AfterOpen(FDQuery1);
-
-    printLog(L"Применен alert-фильтр: " + filterStr);
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TForm1::Button_SaveToJSONClick(TObject *Sender)
 {
 	SaveDialog_ToFile->Filter = L"JSON файлы (*.json)|*.json|SQLite DataBase (*.db)|*.db|Все файлы (*.*)|*.*";
@@ -1856,47 +1880,6 @@ void __fastcall TForm1::Button_SaveToJSONClick(TObject *Sender)
 		if(SaveDialog_ToFile->FilterIndex == 1) SaveDataToJSON(selectedFile, indefPC, devicesList);
 		if(SaveDialog_ToFile->FilterIndex == 2) SaveDataToDB(selectedFile);
 		printLog(L"Устройства успешно записаны в файл: " + ExtractFileName(selectedFile));
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TForm1::Button_LoadFromJSONClick(TObject *Sender)
-{
-	// Настраиваем фильтр файлов для OpenDialog
-    OpenDialog_FromJSON->Filter = L"JSON файлы (*.json)|*.json|Все файлы (*.*)|*.*";
-    OpenDialog_FromJSON->FileName = L"devList.json";
-
-    if (OpenDialog_FromJSON->Execute())
-    {
-        UnicodeString selectedFile = OpenDialog_FromJSON->FileName;
-//		std::vector<deviceInfo> loadedDevices;
-
-		// 1. Вызываем нашу новую функцию чтения
-		if (LoadDataFromJSON(selectedFile))
-		{
-			checkRegDevice(devicesList);
-
-			CheckBox_AutoUpdateDev->Checked = false;
-			CheckBox_AutoUpdateDev->Enabled = false;
-			Button_DelDevice->Enabled = false;
-
-			// 2. Очищаем старую базу данных и записываем новые устройства из вектора
-			// (Ваш метод vectorToBD внутри содержит очистку или добавление)
-            vectorToBD(devicesList);
-
-			// 3. Обновляем визуальный список классов в ListBox_Filter
-			UpdateClassFilterList();
-
-			// 4. Принудительно обновляем DBGrid1
-			refrechDBGrid();
-			optimizeGridColumns(Form1->DBGrid1);
-
-			printLog(L"База данных успешно обновлена данными из файла: " + ExtractFileName(selectedFile));
-        }
-        else
-        {
-            MessageDlg(L"Не удалось загрузить данные из выбранного JSON-файла.", mtError, TMsgDlgButtons() << mbOK, 0);
-        }
 	}
 }
 //---------------------------------------------------------------------------

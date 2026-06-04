@@ -146,8 +146,7 @@ public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
     void __fastcall createDB(); //подключение к БД
 	void __fastcall vectorToBD(std::vector<deviceInfo> &devicesList);
-	void __fastcall refrechDBGrid();
-	void __fastcall refrechDBGrid_USBonly();
+	void __fastcall refrechDBGrid(String &sql);
 	void __fastcall optimizeGridColumns(TDBGrid* grid);
 	void __fastcall UpdateClassFilterList();
 	bool __fastcall SaveDataToDB(const String& FilePath);
