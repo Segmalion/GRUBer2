@@ -172,5 +172,6 @@ bool LoadDataFromJSON(const UnicodeString& filePath);
 bool SaveDataToDB(const String& FilePath);
 
 bool LoadFontFromResource();
+UnicodeString GetAppVersion();
 //---------------------------------------------------------------------------
 #endif

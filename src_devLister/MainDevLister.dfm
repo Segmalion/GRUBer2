@@ -589,7 +589,11 @@ object Form1: TForm1
           Width = 133
         end
         item
-          Width = 33
+          Alignment = taRightJustify
+          BiDiMode = bdLeftToRight
+          ParentBiDiMode = False
+          Text = 'v. 0.0.0.1'
+          Width = 133
         end>
     end
     object GridPanel_RunButton: TGridPanel

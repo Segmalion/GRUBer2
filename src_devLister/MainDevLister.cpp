@@ -75,6 +75,10 @@ indefPCtype indefPC;
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	UnicodeString appVersion = GetAppVersion();
+	printLog(L"Программа запущена. Версия: " + appVersion);
+	StatusBar1->Panels->Items[1]->Text = ("v. " + appVersion + "     ");
+
 	ComboBox_CategPC->ItemIndex = indefPC.catPC;
     LoadFontFromResource();
 	// Инициализация БД
@@ -876,7 +880,7 @@ void __fastcall TForm1::refrechDBGrid(String &sql) {
 	catch (const Exception &e) {
 		printLog("Ошибка отображения данных: " + e.Message);
 	}
-    // украшает таблицу
+	// украшает таблицу
 	optimizeGridColumns(Form1->DBGrid1);
 }
 /* Оптимизируем ширину столбцов TDBGrid */
@@ -962,7 +966,8 @@ void __fastcall TForm1::optimizeGridColumns(TDBGrid* grid) {
 	setColumnVisible(L"serialErr", false);
 	setColumnVisible(L"last_install", false);
 	setColumnVisible(L"enumerator_name", false);
-	setColumnVisible(L"dev_instance_id", false); //dev_instance_id
+	setColumnVisible(L"dev_instance_id", false);
+	setColumnVisible(L"rn", false);
 }
 /* Заполняем фильтр по устройствам */
 void __fastcall TForm1::UpdateClassFilterList()
@@ -1385,7 +1390,42 @@ bool LoadFontFromResource()
 
     return false;
 }
+UnicodeString GetAppVersion()
+{
+    // Получаем полный путь к нашему запущенному .exe файлу
+    UnicodeString exeName = Application->ExeName;
+    DWORD dummy = 0;
 
+    // Узнаем размер данных о версии
+    DWORD size = GetFileVersionInfoSize(exeName.c_str(), &dummy);
+    if (size == 0) return L"1.0.0.0"; // Если версия не задана в настройках
+
+    // Выделяем память под данные (используем вектор для автоматической очистки памяти)
+    std::vector<BYTE> buffer(size);
+
+    // Считываем блок информации о версии
+    if (!GetFileVersionInfo(exeName.c_str(), 0, size, buffer.data())) {
+        return L"1.0.0.0";
+    }
+
+    VS_FIXEDFILEINFO* fileInfo = nullptr;
+    UINT fileInfoSize = 0;
+
+    // Извлекаем фиксированную структуру с номерами
+    if (VerQueryValue(buffer.data(), L"\\", (LPVOID*)&fileInfo, &fileInfoSize) && fileInfoSize > 0)
+    {
+        // Вытаскиваем мажорную, минорную версию, релиз и билд
+        int major = HIWORD(fileInfo->dwFileVersionMS);
+        int minor = LOWORD(fileInfo->dwFileVersionMS);
+        int release = HIWORD(fileInfo->dwFileVersionLS);
+        int build = LOWORD(fileInfo->dwFileVersionLS);
+
+        // Формируем красивую строку
+        return UnicodeString().sprintf(L"%d.%d.%d.%d", major, minor, release, build);
+    }
+
+    return L"Неизвестно";
+}
 //---------------------------------------------------------------------------
 /* Обновление устройств с текущего ПК */
 void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
@@ -1571,42 +1611,73 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
 void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Checked = false;
-	UnicodeString targetText = L"DiskDrive"; // Текст, который мы ищем
+	ListBox_Filter->ClearSelection();
 
-	// Находим индекс строки
-	int index = ListBox_Filter->Items->IndexOf(targetText);
+	// выводим данные с БД в таблицу
+	String sql =
+		"WITH RankedDevices AS (\n"
+		"SELECT\n"
+		"*,\n"
+		"ROW_NUMBER() OVER (PARTITION BY containerId\n"
+		"ORDER BY\n"
+		"class_name) as rn\n"
+		"FROM\n"
+		"devices\n"
+		"WHERE\n"
+		"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
+		")\n"
+		"SELECT\n"
+		"*\n"
+		"FROM\n"
+		"RankedDevices\n"
+		"WHERE\n"
+		"rn = 1\n"
+		"AND serial_number != \"\"\n"
+		"ORDER BY\n"
+		"class_name;\n";
+	sqlFull = false;
+	refrechDBGrid(sql);
 
-	if (index != -1)
-	{
-		// 1. Очищаем любые старые выделения в ListBox (критично для MultiSelect)
-		ListBox_Filter->ClearSelection();
+	// Очищаем фильтр в FireDAC
+	FDQuery1->Filtered = false;
+	FDQuery1->Filter = L"";
+	FDQuery1->Filtered = true;
 
-		// 2. Явно выделяем нужный пункт синим цветом (работает для любого режима)
-		ListBox_Filter->Selected[index] = true;
-		ListBox_Filter->ItemIndex = index;
-
-		// 3. Возвращаем фокус на ListBox, чтобы Windows отрисовала выделение активным
-		ListBox_Filter->SetFocus();
-
-		// 4. Прокручиваем список к выделенному элементу, если он скрыт скроллом
-		ListBox_Filter->TopIndex = index;
-
-		// 5. Принудительно заставляем Windows перерисовать компонент прямо сейчас
-		ListBox_Filter->Update();
-
-		// 6. Вызываем вашу функцию фильтрации данных
-		ListBox_FilterClick(ListBox_Filter);
-	}
-	else
-	{
-		printLog(L"Пункт '" + targetText + L"' не найден в ListBox_Filter.");
-	}
+	FDQuery1AfterOpen(FDQuery1);
+	printLog(L"Отображаются все USB устройства");
 }
 /* ФИЛЬТР по неизвесным флешкам */
 void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 {
-	Button_ShowUSBClick(this);
-	//ListBox_Filter->ClearSelection();
+    CheckBox_FilterMotherboard->Checked = false;
+	ListBox_Filter->ClearSelection();
+
+	if (sqlFull == true) {
+		String sql =
+			"WITH RankedDevices AS (\n"
+			"SELECT\n"
+			"*,\n"
+			"ROW_NUMBER() OVER (PARTITION BY containerId\n"
+			"ORDER BY\n"
+			"class_name) as rn\n"
+			"FROM\n"
+			"devices\n"
+			"WHERE\n"
+			"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
+			")\n"
+			"SELECT\n"
+			"*\n"
+			"FROM\n"
+			"RankedDevices\n"
+			"WHERE\n"
+			"rn = 1\n"
+			"AND serial_number != \"\"\n"
+			"ORDER BY\n"
+			"class_name;\n";
+		sqlFull = false;
+		refrechDBGrid(sql);
+	}
+
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
         return;
@@ -1616,7 +1687,7 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
     FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
 
 	// Формируем строку фильтра.
-	FDQuery1->Filter = L"serialKnow = " + QuotedStr("0") + " AND class_name = " + QuotedStr("DiskDrive") +
+	FDQuery1->Filter = L"serialKnow = " + QuotedStr("0") +
 		" AND serial_number IS NOT NULL AND serial_number <> ''";
 
 	FDQuery1->Filtered = true; // Включаем фильтр
@@ -1629,6 +1700,14 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Checked = false;
 	ListBox_Filter->ClearSelection();
+
+    // выводим данные с БД в таблицу
+	if(sqlFull == false) {
+		String sql = "SELECT * FROM devices;";
+		sqlFull = true;
+		refrechDBGrid(sql);
+	}
+
 	// 1. Проверяем, активна ли таблица (DataSet)
     if (!FDQuery1->Active) {
         printLog(L"Фильтрация невозможна: FDQuery1 не активен.");
@@ -1690,7 +1769,6 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 /* ФИЛЬТР по контейнеру */
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 {
-
 	ListBox_Filter->ClearSelection();
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
@@ -1710,19 +1788,19 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 	// выводим данные с БД в таблицу
 	if(sqlFull == false) {
 		String sql = "SELECT * FROM devices;";
-        sqlFull = true;
+		sqlFull = true;
 		refrechDBGrid(sql);
 	}
 
-    // 4. Применяем фильтр к FireDAC
-    FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
+	// 4. Применяем фильтр к FireDAC
+	FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
 
     // Формируем строку фильтра. QuotedStr автоматически обернет GUID в одинарные кавычки
-    FDQuery1->Filter = L"containerId = " + QuotedStr(selectedContainerId);
+	FDQuery1->Filter = L"containerId = " + QuotedStr(selectedContainerId);
 
 	FDQuery1->Filtered = true; // Включаем фильтр
 
-    FDQuery1AfterOpen(FDQuery1);
+	FDQuery1AfterOpen(FDQuery1);
 
 	printLog(L"Отображаются устройства контейнера: " + selectedContainerId);
 }
