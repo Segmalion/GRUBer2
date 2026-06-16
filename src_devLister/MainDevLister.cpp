@@ -89,6 +89,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	// Получаем инфу о ПК
 	getInfoPC();
 	// Наполняем БД инфой об устройствах с текущего ПК
+    sqlFull = true;
 	Button_DeviceUpdateCurPCClick(this);
 }
 void __fastcall TForm1::FormDestroy(TObject *Sender)
@@ -1447,8 +1448,29 @@ void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 	// обновляем фильтр "по классам устройств"
 	UpdateClassFilterList();
 	// выводим данные с БД в таблицу
-	String sql = "SELECT * FROM devices;";
-	sqlFull = true;
+	String sql;
+	if (sqlFull) 	sql = "SELECT * FROM devices;";
+	if (!sqlFull)   sql =
+		"WITH RankedDevices AS (\n"
+		"SELECT\n"
+		"*,\n"
+		"ROW_NUMBER() OVER (PARTITION BY containerId\n"
+		"ORDER BY\n"
+		"class_name) as rn\n"
+		"FROM\n"
+		"devices\n"
+		"WHERE\n"
+		"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
+		")\n"
+		"SELECT\n"
+		"*\n"
+		"FROM\n"
+		"RankedDevices\n"
+		"WHERE\n"
+		"rn = 1\n"
+		"AND serial_number != \"\"\n"
+		"ORDER BY\n"
+		"class_name;\n";
 	refrechDBGrid(sql);
 
 	return;
@@ -1614,29 +1636,31 @@ void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 	ListBox_Filter->ClearSelection();
 
 	// выводим данные с БД в таблицу
-	String sql =
-		"WITH RankedDevices AS (\n"
-		"SELECT\n"
-		"*,\n"
-		"ROW_NUMBER() OVER (PARTITION BY containerId\n"
-		"ORDER BY\n"
-		"class_name) as rn\n"
-		"FROM\n"
-		"devices\n"
-		"WHERE\n"
-		"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
-		")\n"
-		"SELECT\n"
-		"*\n"
-		"FROM\n"
-		"RankedDevices\n"
-		"WHERE\n"
-		"rn = 1\n"
-		"AND serial_number != \"\"\n"
-		"ORDER BY\n"
-		"class_name;\n";
-	sqlFull = false;
-	refrechDBGrid(sql);
+	if (sqlFull == true) {
+		String sql =
+			"WITH RankedDevices AS (\n"
+			"SELECT\n"
+			"*,\n"
+			"ROW_NUMBER() OVER (PARTITION BY containerId\n"
+			"ORDER BY\n"
+			"class_name) as rn\n"
+			"FROM\n"
+			"devices\n"
+			"WHERE\n"
+			"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
+			")\n"
+			"SELECT\n"
+			"*\n"
+			"FROM\n"
+			"RankedDevices\n"
+			"WHERE\n"
+			"rn = 1\n"
+			"AND serial_number != \"\"\n"
+			"ORDER BY\n"
+			"class_name;\n";
+		sqlFull = false;
+		refrechDBGrid(sql);
+	}
 
 	// Очищаем фильтр в FireDAC
 	FDQuery1->Filtered = false;
