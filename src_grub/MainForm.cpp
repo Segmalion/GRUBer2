@@ -53,11 +53,12 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 2, vers4 = 0;
-extern const UnicodeString versionApp = UnicodeString(vers1) + "."
-							  + UnicodeString(vers2) + "."
-							  + UnicodeString(vers3) + "."
-							  + UnicodeString(vers4);
+extern const short vers1 = 0, vers2 = 3, vers3 = 2, vers4 = 1;
+//extern const UnicodeString versionApp = UnicodeString(vers1) + "."
+//							  + UnicodeString(vers2) + "."
+//							  + UnicodeString(vers3) + "."
+//							  + UnicodeString(vers4);
+extern const UnicodeString versionApp = GetAppVersion();
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
 	std::vector<UnicodeString> vStr;
@@ -265,6 +266,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 			exit(1);
 		}
 	}
+	printLog(L"Программа запущена. Версия: v." + versionApp);
 	// === проверка на необходимые файлы и папки
 	if(exists(p_configIni)) printLogDebug("Config fille OK");
 	else {

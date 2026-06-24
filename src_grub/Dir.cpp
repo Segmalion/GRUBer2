@@ -16,13 +16,14 @@ Dir::Dir() {
 }
 //---------------------------------------------------------------------------
 // проверка директорий
-void Dir::check() {
+bool Dir::check() {
 	std::error_code ec;
-	fs::create_directories(p_grub, ec);
+	return fs::create_directories(p_grub, ec);
 }
 //---------------------------------------------------------------------------
 // геттеры
 UnicodeString Dir::get_grubPath() { return UnicodeString(p_grub.c_str()); }
+fs::path Dir::get_p_grubPath() { return p_grub.c_str(); }
 UnicodeString Dir::get_toolPath() { return UnicodeString(p_tool.c_str()); }
 UnicodeString Dir::get_grubPathTemp() { return UnicodeString(p_grubTemp.c_str()); }
 // сеттеры

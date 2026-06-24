@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   Caption = 'DeviceLister'
   ClientHeight = 633
-  ClientWidth = 902
+  ClientWidth = 901
   Color = clBtnFace
   Constraints.MinHeight = 398
   Constraints.MinWidth = 529
@@ -18,7 +18,7 @@ object Form1: TForm1
   object GridPanel_Main: TGridPanel
     Left = 0
     Top = 0
-    Width = 902
+    Width = 901
     Height = 633
     Align = alClient
     BevelOuter = bvNone
@@ -67,11 +67,13 @@ object Form1: TForm1
         SizeStyle = ssAuto
       end>
     TabOrder = 0
+    ExplicitWidth = 897
+    ExplicitHeight = 623
     object DBGrid1: TDBGrid
       AlignWithMargins = True
       Left = 3
       Top = 146
-      Width = 896
+      Width = 895
       Height = 410
       Align = alClient
       DataSource = DataSource1
@@ -94,7 +96,7 @@ object Form1: TForm1
     object GridPanel_Filter: TGridPanel
       Left = 0
       Top = 0
-      Width = 902
+      Width = 901
       Height = 143
       Align = alClient
       BevelOuter = bvLowered
@@ -162,6 +164,8 @@ object Form1: TForm1
           Value = 100.000000000000000000
         end>
       TabOrder = 1
+      ExplicitWidth = 513
+      ExplicitHeight = 82
       object ListBox_Filter: TListBox
         AlignWithMargins = True
         Left = 4
@@ -244,55 +248,51 @@ object Form1: TForm1
             Value = 25.000000000000000000
           end>
         TabOrder = 1
-        ExplicitLeft = 342
+        ExplicitWidth = 172
+        ExplicitHeight = 142
         object Button_FilterContainerID: TButton
           AlignWithMargins = True
           Left = 3
-          Top = 109
-          Width = 165
-          Height = 29
+          Top = 110
+          Width = 164
+          Height = 28
           Align = alClient
           Caption = #1042#1110#1076#1110#1073#1088#1072#1090#1080' '#1079#1072' '#1082#1086#1085#1090#1077#1081#1085#1077#1088#1086#1084
           TabOrder = 0
           OnClick = Button_FilterContainerIDClick
-          ExplicitWidth = 166
         end
         object Button_ShowUnknowUSB: TButton
           AlignWithMargins = True
           Left = 3
           Top = 38
-          Width = 165
-          Height = 30
+          Width = 164
+          Height = 29
           Align = alClient
           Caption = #1058#1110#1083#1100#1082#1110' '#1085#1077#1074#1110#1076#1086#1084#1110' '#1092#1083#1077#1096#1082#1080
           TabOrder = 1
           OnClick = Button_ShowUnknowUSBClick
-          ExplicitWidth = 166
         end
         object Button_ShowAllert: TButton
           AlignWithMargins = True
           Left = 3
           Top = 74
-          Width = 165
+          Width = 164
           Height = 29
           Align = alClient
           Caption = #1058#1110#1083#1100#1082#1080' '#1087#1086#1088#1091#1096#1077#1085#1103
           TabOrder = 2
           OnClick = Button_ShowAllertClick
-          ExplicitWidth = 166
         end
         object Button_ShowUSB: TButton
           AlignWithMargins = True
           Left = 3
           Top = 3
-          Width = 165
+          Width = 164
           Height = 29
           Align = alClient
           Caption = #1058#1110#1083#1100#1082#1080' '#1092#1083#1077#1096#1082#1080
           TabOrder = 3
           OnClick = Button_ShowUSBClick
-          ExplicitWidth = 166
-          ExplicitHeight = 30
         end
       end
       object GroupBox_FilterCheckBox: TGroupBox
@@ -304,12 +304,9 @@ object Form1: TForm1
         Align = alClient
         Caption = #1044#1086#1076#1072#1090#1082#1086#1074#1110' '#1085#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103':'
         TabOrder = 2
-        ExplicitLeft = 174
-        ExplicitTop = 3
-        ExplicitHeight = 136
         object GridPanel_FilterCheckBox: TGridPanel
           Left = 2
-          Top = 17
+          Top = 18
           Width = 161
           Height = 116
           Align = alClient
@@ -362,10 +359,6 @@ object Form1: TForm1
               Value = 20.000000000000000000
             end>
           TabOrder = 0
-          ExplicitLeft = 1
-          ExplicitTop = 18
-          ExplicitWidth = 163
-          ExplicitHeight = 117
           object CheckBox_FilterMotherboard: TCheckBox
             AlignWithMargins = True
             Left = 3
@@ -378,7 +371,6 @@ object Form1: TForm1
             State = cbChecked
             TabOrder = 0
             OnClick = CheckBox_FilterMotherboardClick
-            ExplicitHeight = 18
           end
           object CheckBox_WIP2: TCheckBox
             AlignWithMargins = True
@@ -390,20 +382,17 @@ object Form1: TForm1
             Caption = 'CheckBox_WIP2'
             Enabled = False
             TabOrder = 1
-            ExplicitHeight = 18
           end
           object CheckBox_WIP3: TCheckBox
             AlignWithMargins = True
             Left = 3
-            Top = 49
+            Top = 50
             Width = 159
-            Height = 18
+            Height = 16
             Align = alLeft
             Caption = 'CheckBox_WIP3'
             Enabled = False
             TabOrder = 2
-            ExplicitTop = 50
-            ExplicitHeight = 17
           end
           object CheckBox_WIP4: TCheckBox
             AlignWithMargins = True
@@ -427,7 +416,6 @@ object Form1: TForm1
             Checked = True
             State = cbChecked
             TabOrder = 4
-            ExplicitHeight = 18
           end
         end
       end
@@ -471,7 +459,9 @@ object Form1: TForm1
             Value = 100.000000000000000000
           end>
         TabOrder = 3
-        ExplicitLeft = 513
+        ExplicitLeft = 294
+        ExplicitWidth = 97
+        ExplicitHeight = 81
         object GroupBox_CountErrSerial: TGroupBox
           AlignWithMargins = True
           Left = 3
@@ -481,11 +471,12 @@ object Form1: TForm1
           Align = alClient
           Caption = #1050#1086#1083'-'#1074#1086'. '#1087#1086#1084#1080#1083#1086#1082' '#1074' S/N:'
           TabOrder = 0
+          ExplicitHeight = 50
           object TrackBar_CountErrSerial: TTrackBar
             Left = 2
-            Top = 17
+            Top = 18
             Width = 161
-            Height = 32
+            Height = 31
             Margins.Left = 6
             Margins.Top = 6
             Margins.Right = 6
@@ -501,9 +492,6 @@ object Form1: TForm1
             ThumbLength = 23
             TickMarks = tmBoth
             OnChange = TrackBar_CountErrSerialChange
-            ExplicitLeft = 1
-            ExplicitTop = 18
-            ExplicitWidth = 163
           end
         end
         object GroupBox_CategPC: TGroupBox
@@ -515,6 +503,9 @@ object Form1: TForm1
           Align = alClient
           Caption = #1050#1072#1090#1077#1075#1086#1088#1110#1103' '#1055#1050':'
           TabOrder = 1
+          ExplicitTop = 36
+          ExplicitWidth = 91
+          ExplicitHeight = 26
           object ComboBox_CategPC: TComboBox
             AlignWithMargins = True
             Left = 5
@@ -547,14 +538,16 @@ object Form1: TForm1
           Caption = #1042#1080#1076#1072#1083#1080#1090#1080' '#1087#1088#1080#1089#1090#1088#1110#1081'!'
           TabOrder = 2
           OnClick = Button_DelDeviceClick
-          ExplicitHeight = 22
+          ExplicitTop = 69
+          ExplicitWidth = 91
+          ExplicitHeight = 9
         end
       end
       object Memo_LOG: TMemo
         AlignWithMargins = True
         Left = 688
         Top = 4
-        Width = 210
+        Width = 209
         Height = 135
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
@@ -567,17 +560,16 @@ object Form1: TForm1
         ScrollBars = ssBoth
         TabOrder = 4
         WordWrap = False
-        ExplicitLeft = 687
-        ExplicitTop = 3
-        ExplicitWidth = 212
-        ExplicitHeight = 136
+        ExplicitLeft = 395
+        ExplicitWidth = 113
+        ExplicitHeight = 74
       end
     end
     object StatusBar1: TStatusBar
       Left = 0
-      Top = 610
-      Width = 902
-      Height = 23
+      Top = 611
+      Width = 901
+      Height = 22
       Anchors = []
       Panels = <
         item
@@ -591,11 +583,13 @@ object Form1: TForm1
           Text = 'v. 0.0.0.1'
           Width = 133
         end>
+      ExplicitTop = 333
+      ExplicitWidth = 513
     end
     object GridPanel_RunButton: TGridPanel
       Left = 0
       Top = 559
-      Width = 902
+      Width = 901
       Height = 51
       Align = alClient
       BevelOuter = bvNone
@@ -633,17 +627,19 @@ object Form1: TForm1
           Value = 100.000000000000000000
         end>
       TabOrder = 3
+      ExplicitTop = 313
+      ExplicitWidth = 513
+      ExplicitHeight = 29
       object Button_DeviceUpdateCurPC: TButton
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 220
+        Width = 219
         Height = 45
         Align = alClient
         Caption = #1054#1085#1086#1074#1080#1090#1080#13#10#1087#1088#1080#1089#1090#1088#1086#1111' '#1079' '#1087#1086#1090#1086#1095#1085#1086#1075#1086' '#1055#1050
         TabOrder = 0
         OnClick = Button_DeviceUpdateCurPCClick
-        ExplicitHeight = 46
       end
       object Button_SaveToJSON: TButton
         AlignWithMargins = True
@@ -655,9 +651,6 @@ object Form1: TForm1
         Caption = #1047#1073#1077#1088#1077#1075#1090#1080' '#1087#1088#1080#1089#1090#1088#1086#1111' '#1074' '#1092#1072#1081#1083
         TabOrder = 1
         OnClick = Button_SaveToJSONClick
-        ExplicitLeft = 679
-        ExplicitWidth = 220
-        ExplicitHeight = 46
       end
       object Button_LoadFromJSON: TButton
         AlignWithMargins = True
@@ -669,7 +662,6 @@ object Form1: TForm1
         Caption = #1042#1110#1076#1086#1073#1088#1072#1079#1080#1090#1080' '#1087#1088#1080#1089#1090#1088#1086#1111' '#1079' '#1092#1072#1081#1083#1091
         TabOrder = 2
         OnClick = Button_LoadFromJSONClick
-        ExplicitHeight = 46
       end
     end
   end

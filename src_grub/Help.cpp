@@ -66,6 +66,43 @@ bool IsAdminMode() {
 	 return fRet;
 }
 //---------------------------------------------------------------------------
+UnicodeString GetAppVersion()
+{
+    // Получаем полный путь к нашему запущенному .exe файлу
+    UnicodeString exeName = Application->ExeName;
+    DWORD dummy = 0;
+
+    // Узнаем размер данных о версии
+    DWORD size = GetFileVersionInfoSize(exeName.c_str(), &dummy);
+	if (size == 0) return L"1.0.0.1"; // Если версия не задана в настройках
+
+    // Выделяем память под данные (используем вектор для автоматической очистки памяти)
+    std::vector<BYTE> buffer(size);
+
+    // Считываем блок информации о версии
+    if (!GetFileVersionInfo(exeName.c_str(), 0, size, buffer.data())) {
+        return L"1.0.0.2";
+    }
+
+    VS_FIXEDFILEINFO* fileInfo = nullptr;
+    UINT fileInfoSize = 0;
+
+    // Извлекаем фиксированную структуру с номерами
+    if (VerQueryValue(buffer.data(), L"\\", (LPVOID*)&fileInfo, &fileInfoSize) && fileInfoSize > 0)
+    {
+        // Вытаскиваем мажорную, минорную версию, релиз и билд
+        int major = HIWORD(fileInfo->dwFileVersionMS);
+        int minor = LOWORD(fileInfo->dwFileVersionMS);
+        int release = HIWORD(fileInfo->dwFileVersionLS);
+        int build = LOWORD(fileInfo->dwFileVersionLS);
+
+        // Формируем красивую строку
+        return UnicodeString().sprintf(L"%d.%d.%d.%d", major, minor, release, build);
+    }
+
+    return L"Неизвестно";
+}
+//---------------------------------------------------------------------------
 void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
 	Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();

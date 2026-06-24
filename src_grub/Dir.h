@@ -12,11 +12,12 @@ private:
 	fs::path p_grub, p_grubTemp, p_tool;
 public:
 	Dir();
-	void check();
+	bool check();
 	//сеттеры
 	void set_grubPath(UnicodeString str);
 	//геттеры
 	UnicodeString get_grubPath();
+	fs::path get_p_grubPath();
 	UnicodeString get_toolPath();
 	UnicodeString get_grubPathTemp();
 };

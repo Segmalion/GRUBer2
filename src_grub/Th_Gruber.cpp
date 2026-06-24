@@ -102,6 +102,7 @@ void blockGrub(bool i) {
 	Form1->CheckBoxPrefixPartition->Enabled = !i;
 	Form1->EditPrefixPartition->Enabled = !i;
 	Form1->ComboBox_forNumberARM->Enabled = !i;
+	Form1->CheckListBox_SPZ->Enabled = !i;
 	//-----
 	if (i) Form1->BtnGruberRun->Caption = "Зачекай...";
 	else Form1->BtnGruberRun->Caption = "Запуск GRUBer";
@@ -115,7 +116,7 @@ __fastcall Th_Gruber::Th_Gruber(bool CreateSuspended)
 /* ОСНОВНОЙ КОД ГРАБА */
 void __fastcall Th_Gruber::Execute()
 {
-	FreeOnTerminate = true;
+    FreeOnTerminate = true;
 	// -> переменные
 	th_Gruber_run = true;
 	grubActive = true;
@@ -166,7 +167,7 @@ void __fastcall Th_Gruber::Execute()
 				Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
 				progressBarGo(100, true);
 			});
-            th_Gruber_run = false;
+			th_Gruber_run = false;
 			return;
 		}
 	}
@@ -197,36 +198,40 @@ void __fastcall Th_Gruber::Execute()
 	}
 	// -- запуск секундомера
 	auto start_time = std::chrono::steady_clock::now();
-	// -> создание папок
-    curDir.check();
-	changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
-	// -> генерация файлов
-	if (jb1 != 0 && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
-	if (jb1 != 0 && !stopBool) job_softFille(GrubDir);
-	if (jb2 != 0 && !stopBool) job_comTxt(GrubDir); 		//coment.txt
-	if (jb3 != 0 && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
-	if (jb4 != 0 && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
-	if (jb5 != 0 && !stopBool) bigErr *= job_net1(GrubDir); 	//net1.txt
-	if (jb5 != 0 && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
-	if (jb6 != 0 && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
-	if (jb7 != 0 && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
-	if (jb7 != 0 && !stopBool && x64_sys() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
-	if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
-	// --
-	if (tempDir) {
-        TSearchRec sr;
-		if (GrubDir.Length()) {
-			if (!FindFirst(GrubDir + "\\*.*", faAnyFile, sr)) {
-				do {
-					if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
-						// если находим папку граба, добавляем в список
-						std::wstring oldFile = unToStr(GrubDir + "\\" + sr.Name);
-						std::wstring newFile = unToStr(curDir.get_grubPath() + "\\" + sr.Name);
-						std::filesystem::rename(oldFile, newFile);
-					}
-				} while (!FindNext(sr)); // ищем пока не найдем все
+	// -> создание папок и проверка папки
+	if (!curDir.check()) {
+		printLog("!!", "Не вдалося створити папку для Грабу!!!");
+		bigErr = true;
+	} else {
+		changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
+		// -> генерация файлов
+		if (jb1 != 0 && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
+		if (jb1 != 0 && !stopBool) job_softFille(GrubDir);
+		if (jb2 != 0 && !stopBool) job_comTxt(GrubDir); 		//coment.txt
+		if (jb3 != 0 && !stopBool) bigErr *= job_info(GrubDir); 	//info.txt
+		if (jb4 != 0 && !stopBool) bigErr *= job_usb(GrubDir);    //usb.txt
+		if (jb5 != 0 && !stopBool) bigErr *= job_net1(GrubDir); 	//net1.txt
+		if (jb5 != 0 && !stopBool) bigErr *= job_net2(GrubDir); 	//net2.txt
+		if (jb6 != 0 && !stopBool) bigErr *= job_license(GrubDir); 	//license.txt
+		if (jb7 != 0 && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
+		if (jb7 != 0 && !stopBool && x64_sys() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
+		if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
+		// --
+		if (tempDir) {
+			TSearchRec sr;
+			if (GrubDir.Length()) {
+				if (!FindFirst(GrubDir + "\\*.*", faAnyFile, sr)) {
+					do {
+						if (!(sr.Name == "." || sr.Name == "..")) { // это не трогаем
+							// если находим папку граба, добавляем в список
+							std::wstring oldFile = unToStr(GrubDir + "\\" + sr.Name);
+							std::wstring newFile = unToStr(curDir.get_grubPath() + "\\" + sr.Name);
+							std::filesystem::rename(oldFile, newFile);
+						}
+					} while (!FindNext(sr)); // ищем пока не найдем все
+				}
+				FindClose(sr);
 			}
-			FindClose(sr);
 		}
 	}
 	// -> обработка ошибок
@@ -234,7 +239,7 @@ void __fastcall Th_Gruber::Execute()
 		Synchronize([this]() {
 			printLog("ER", "GRUBer виконано з помилками!");
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
-            progressBarGo(100, true);
+			progressBarGo(100, true);
 		});
 	} else {
 		Synchronize([this]() {
