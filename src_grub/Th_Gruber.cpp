@@ -56,12 +56,13 @@ void jobDone(short &c, short &n) {
 	Form1->StatusBar1->Panels->Items[0]->Text = str;
 }
 void progressBarGo(int i , bool err) {
-    if(stopBool == true || err == true) {
+//    if(stopBool == true || err == true) {
+	Form1->ProgressBar_Grub->Position = i;
+	Form1->Taskbar1->ProgressValue = i;
+    if(err) {
 		Form1->ProgressBar_Grub->State = (TProgressBarState) pbsError;
 		Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 4;
 	}
-    Form1->ProgressBar_Grub->Position = i;
-	Form1->Taskbar1->ProgressValue = i;
 }
 void blockGrub(bool i) {
 	Form1->BtnGruberRun->Enabled = !i;
@@ -199,9 +200,10 @@ void __fastcall Th_Gruber::Execute()
 	// -- запуск секундомера
 	auto start_time = std::chrono::steady_clock::now();
 	// -> создание папок и проверка папки
-	if (!curDir.check()) {
-		printLog("!!", "Не вдалося створити папку для Грабу!!!");
-		bigErr = true;
+	curDir.check();
+	if (!exists(curDir.get_p_grubPath())) {
+		printLog("!!", "Відсутня папка для Грабу!!!");
+		bigErr = false;
 	} else {
 		changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
 		// -> генерация файлов
@@ -237,13 +239,15 @@ void __fastcall Th_Gruber::Execute()
 	// -> обработка ошибок
 	if (!bigErr) {
 		Synchronize([this]() {
-			printLog("ER", "GRUBer виконано з помилками!");
+			if (stopBool) printLog("ER", "GRUBer зупиннено з помилками!");
+			else printLog("ER", "GRUBer виконано з помилками!");
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
 			progressBarGo(100, true);
 		});
 	} else {
 		Synchronize([this]() {
-			printLog("OK", "GRUBer виконано успішно!");
+			if (stopBool) printLog("OK", "GRUBer зупиненно!");
+			else printLog("OK", "GRUBer виконано успішно!");
 			//Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 		});
 	}
@@ -254,7 +258,7 @@ void __fastcall Th_Gruber::Execute()
 	// -> конец граба
 	grubActive = false;
 	Synchronize([=]() {
-		printLog("chrono", "Время выполнения: " + FloatToStrF(speedTimer, ffFixed, 4, 2));
+		printLogDebug("Час виконання: " + FloatToStrF(speedTimer, ffFixed, 4, 2) + "с.");
 		blockGrub(false);
 	});
     th_Gruber_run = false;

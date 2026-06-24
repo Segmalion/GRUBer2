@@ -266,7 +266,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 			exit(1);
 		}
 	}
-	printLog(L"Программа запущена. Версия: v." + versionApp);
 	// === проверка на необходимые файлы и папки
 	if(exists(p_configIni)) printLogDebug("Config fille OK");
 	else {
