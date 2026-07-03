@@ -19,6 +19,7 @@
 #include <Vcl.CheckLst.hpp>
 
 #include <vector>
+#include <set>
 //---------------------------------------------------------------------------
 
 #include "Global.h"
@@ -282,10 +283,14 @@ __published:	// IDE-managed Components
 	void __fastcall ComboBox_ContrUSBChange(TObject *Sender);
 	void __fastcall ComboBox_MultiUSERSChange(TObject *Sender);
 	void __fastcall CheckListBox_SPZClickCheck(TObject *Sender);
+	void __fastcall EditArmClassDrawItem(TWinControl *Control, int Index, TRect &Rect,
+          TOwnerDrawState State);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
+	std::set<int> DisabledItemsClass;
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
+	void SetItemClassEnabled(int index, bool enabled);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

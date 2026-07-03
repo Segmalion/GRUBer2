@@ -9,8 +9,8 @@
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'GRUBer'
-  ClientHeight = 1103
-  ClientWidth = 1416
+  ClientHeight = 1096
+  ClientWidth = 1414
   Color = clBtnFace
   Constraints.MinHeight = 621
   Constraints.MinWidth = 425
@@ -26,8 +26,8 @@
   object GridPanelMain: TGridPanel
     Left = 0
     Top = 0
-    Width = 1416
-    Height = 1103
+    Width = 1414
+    Height = 1096
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -62,8 +62,8 @@
     object GridPanel_forPage: TGridPanel
       Left = 0
       Top = 0
-      Width = 1416
-      Height = 1050
+      Width = 1414
+      Height = 1043
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -123,12 +123,12 @@
         Left = 15
         Top = 15
         Width = 680
-        Height = 633
+        Height = 626
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet1
+        ActivePage = TabGRUBer
         Align = alClient
         Constraints.MaxHeight = 1050
         MultiLine = True
@@ -145,7 +145,7 @@
             Left = 0
             Top = 0
             Width = 672
-            Height = 588
+            Height = 581
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -397,22 +397,25 @@
               Left = 209
               Top = 171
               Width = 454
-              Height = 38
+              Height = 36
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
-              Style = csDropDownList
+              Style = csOwnerDrawFixed
               DropDownCount = 15
+              ItemHeight = 30
               TabOrder = 1
               OnChange = EditArmClassChange
+              OnDrawItem = EditArmClassDrawItem
               Items.Strings = (
                 #1041#1077#1079' '#1082#1083#1072#1089#1091
                 #1040#1057'-1 ('#1041#1077#1079' '#1087#1110#1076#1082#1083#1102#1095#1077#1085#1085#1103')'
                 #1040#1057'-2 ('#1051#1086#1082#1072#1083#1100#1085#1072' '#1084#1077#1088#1077#1078#1072')'
                 #1040#1057'-3 ('#1043#1083#1086#1073#1072#1083#1100#1085#1072' '#1084#1077#1088#1077#1078#1072')'
                 #1040#1057'-3 ('#1042#1086#1088#1082#1083#1072#1091#1076')'
+                'AC-3 (Active Directory)'
                 #1051#1054#1054#1050)
             end
             object EditRespon: TEdit
@@ -435,7 +438,7 @@
               Left = 9
               Top = 441
               Width = 654
-              Height = 138
+              Height = 131
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -643,7 +646,6 @@
                 Font.Style = [fsItalic]
                 ParentFont = False
                 Layout = tlCenter
-                ExplicitLeft = 187
                 ExplicitWidth = 234
                 ExplicitHeight = 30
               end
@@ -661,7 +663,7 @@
             Left = 0
             Top = 0
             Width = 672
-            Height = 588
+            Height = 581
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -784,11 +786,11 @@
             TabOrder = 0
             DesignSize = (
               672
-              588)
+              581)
             object Label11: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 22
+              Top = 21
               Width = 244
               Height = 30
               Margins.Left = 5
@@ -801,7 +803,7 @@
             end
             object Edit_InNumberARM: TEdit
               Left = 278
-              Top = 18
+              Top = 17
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -816,7 +818,7 @@
             object Label13: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 95
+              Top = 94
               Width = 251
               Height = 30
               Margins.Left = 5
@@ -825,10 +827,11 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #1030#1085#1074#1077#1085#1090#1072#1088#1085#1080#1081' '#1085#1086#1084#1077#1088' '#1046#1052#1044':'
+              ExplicitTop = 95
             end
             object Edit_InNumberHDD: TEdit
               Left = 278
-              Top = 91
+              Top = 90
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -843,7 +846,7 @@
             object Label14: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 169
+              Top = 166
               Width = 135
               Height = 30
               Margins.Left = 5
@@ -852,11 +855,10 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #8470' '#1076#1077#1082#1083#1072#1088#1072#1094#1110#1111':'
-              ExplicitTop = 168
             end
             object Edit_InNumberDeclr: TEdit
               Left = 278
-              Top = 165
+              Top = 162
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -871,7 +873,7 @@
             object Label15: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 242
+              Top = 239
               Width = 154
               Height = 30
               Margins.Left = 5
@@ -880,11 +882,11 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #1060#1086#1088#1084#1091#1083#1103#1088' '#1040#1056#1052':'
-              ExplicitTop = 240
+              ExplicitTop = 236
             end
             object Edit_InNumberFormulyar: TEdit
               Left = 278
-              Top = 238
+              Top = 235
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -899,7 +901,7 @@
             object Label16: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 316
+              Top = 311
               Width = 220
               Height = 30
               Margins.Left = 5
@@ -908,11 +910,11 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #1046#1091#1088#1085#1072#1083' '#1086#1073#1083#1110#1082#1091' '#1088#1086#1073#1086#1090#1080':'
-              ExplicitTop = 313
+              ExplicitTop = 308
             end
             object Edit_InNumberWork: TEdit
               Left = 278
-              Top = 312
+              Top = 307
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -927,7 +929,7 @@
             object Label17: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 389
+              Top = 384
               Width = 232
               Height = 30
               Margins.Left = 5
@@ -936,12 +938,12 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #1057#1087#1080#1089#1086#1082' '#1076#1086#1087#1091#1097#1077#1085#1080#1093' '#1086#1089#1110#1073':'
-              ExplicitTop = 385
+              ExplicitTop = 380
             end
             object Edit_InNumberPerson: TEdit
               AlignWithMargins = True
               Left = 278
-              Top = 385
+              Top = 380
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -956,7 +958,7 @@
             object Label_Respon: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 463
+              Top = 457
               Width = 153
               Height = 30
               Margins.Left = 5
@@ -965,12 +967,12 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #1042#1110#1076#1087#1086#1074#1110#1076#1072#1083#1100#1085#1080#1081':'
-              ExplicitTop = 457
+              ExplicitTop = 452
             end
             object Edit_InRespon: TEdit
               AlignWithMargins = True
               Left = 278
-              Top = 459
+              Top = 453
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -985,7 +987,7 @@
             object Edit_InAdminBP: TEdit
               AlignWithMargins = True
               Left = 278
-              Top = 532
+              Top = 525
               Width = 380
               Height = 38
               Margins.Left = 5
@@ -1000,7 +1002,7 @@
             object Label_AdminBP: TLabel
               AlignWithMargins = True
               Left = 5
-              Top = 536
+              Top = 529
               Width = 145
               Height = 30
               Margins.Left = 5
@@ -1009,7 +1011,7 @@
               Margins.Bottom = 5
               Anchors = [akLeft]
               Caption = #1040#1076#1084#1110#1085' '#1041#1077#1079#1087#1077#1082#1080':'
-              ExplicitTop = 530
+              ExplicitTop = 523
             end
           end
         end
@@ -1024,7 +1026,7 @@
             Left = 0
             Top = 0
             Width = 672
-            Height = 588
+            Height = 581
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -1215,7 +1217,6 @@
                   Align = alClient
                   Caption = 'USB:'
                   Layout = tlCenter
-                  ExplicitTop = 57
                   ExplicitWidth = 42
                   ExplicitHeight = 30
                 end
@@ -1232,7 +1233,6 @@
                   Align = alClient
                   Caption = #1050#1086#1088#1080#1089#1090#1091#1074#1072#1095#1110':'
                   Layout = tlCenter
-                  ExplicitTop = 110
                   ExplicitWidth = 121
                   ExplicitHeight = 30
                 end
@@ -1345,7 +1345,6 @@
                   Margins.Bottom = 9
                   Align = alClient
                   Caption = #1051#1110#1094'. Office:'
-                  ExplicitTop = 65
                   ExplicitWidth = 104
                 end
                 object EditLicOffice: TComboBox
@@ -1375,7 +1374,7 @@
               Left = 420
               Top = 5
               Width = 247
-              Height = 578
+              Height = 571
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -1388,7 +1387,7 @@
                 Left = 7
                 Top = 37
                 Width = 233
-                Height = 534
+                Height = 527
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -1406,13 +1405,13 @@
         AlignWithMargins = True
         Left = 715
         Top = 15
-        Width = 686
-        Height = 1020
+        Width = 684
+        Height = 1013
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet_Settings
+        ActivePage = TabSheet_Info
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -1424,8 +1423,8 @@
           object GridPanel_Info: TGridPanel
             Left = 0
             Top = 0
-            Width = 678
-            Height = 975
+            Width = 676
+            Height = 968
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -1464,7 +1463,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 5
-              Width = 668
+              Width = 666
               Height = 114
               Margins.Left = 5
               Margins.Top = 5
@@ -1476,7 +1475,7 @@
               object GridPanel3: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 80
                 Margins.Left = 5
                 Margins.Top = 5
@@ -1524,7 +1523,7 @@
                   end>
                 TabOrder = 0
                 DesignSize = (
-                  664
+                  662
                   80)
                 object LabEdit_NumUVs: TLabeledEdit
                   Left = 8
@@ -1559,7 +1558,7 @@
                 object LabEdit_NumUVsO: TLabeledEdit
                   Left = 174
                   Top = 35
-                  Width = 150
+                  Width = 149
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1587,7 +1586,7 @@
                 object LabEdit_NumOK: TLabeledEdit
                   Left = 340
                   Top = 35
-                  Width = 149
+                  Width = 147
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1613,9 +1612,9 @@
                   Text = ''
                 end
                 object LabEdit_NumOKO: TLabeledEdit
-                  Left = 505
+                  Left = 504
                   Top = 35
-                  Width = 151
+                  Width = 150
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1646,7 +1645,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 129
-              Width = 668
+              Width = 666
               Height = 391
               Margins.Left = 5
               Margins.Top = 5
@@ -1659,7 +1658,7 @@
               object GridPanel_InfoArm: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 357
                 Margins.Left = 5
                 Margins.Top = 5
@@ -1743,7 +1742,7 @@
                   end>
                 TabOrder = 0
                 DesignSize = (
-                  664
+                  662
                   357)
                 object Label5: TLabel
                   Left = 0
@@ -1774,7 +1773,6 @@
                   Alignment = taCenter
                   Caption = #1047#1075#1077#1085#1077#1088#1086#1074#1072#1085#1080#1081#13#10#1089#1077#1088#1110#1081#1085#1080#1082':'
                   Layout = tlCenter
-                  ExplicitTop = 72
                   ExplicitWidth = 135
                   ExplicitHeight = 60
                 end
@@ -1791,14 +1789,13 @@
                   Alignment = taCenter
                   Caption = #1030#1084#39#1103' '#1040#1056#1052':'
                   Layout = tlCenter
-                  ExplicitTop = 144
                   ExplicitWidth = 93
                   ExplicitHeight = 30
                 end
                 object ShowSerial: TEdit
-                  Left = 177
+                  Left = 176
                   Top = 18
-                  Width = 479
+                  Width = 478
                   Height = 35
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1816,9 +1813,9 @@
                   Text = 'ShowSerial'
                 end
                 object ShowName: TEdit
-                  Left = 177
+                  Left = 176
                   Top = 161
-                  Width = 479
+                  Width = 478
                   Height = 35
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1836,9 +1833,9 @@
                   Text = 'ShowName'
                 end
                 object ShowSerialGenarate: TEdit
-                  Left = 177
+                  Left = 176
                   Top = 89
-                  Width = 479
+                  Width = 478
                   Height = 35
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1874,7 +1871,7 @@
                 end
                 object ShowManufacturer: TEdit
                   AlignWithMargins = True
-                  Left = 177
+                  Left = 176
                   Top = 232
                   Width = 479
                   Height = 35
@@ -1906,14 +1903,13 @@
                   Alignment = taCenter
                   Caption = #1052#1086#1076#1077#1083#1100':'
                   Layout = tlCenter
-                  ExplicitTop = 285
                   ExplicitWidth = 80
                   ExplicitHeight = 30
                 end
                 object ShowProductName: TEdit
-                  Left = 177
+                  Left = 176
                   Top = 304
-                  Width = 479
+                  Width = 478
                   Height = 35
                   Margins.Left = 5
                   Margins.Top = 5
@@ -1950,8 +1946,8 @@
           object GridPanel_CheckInfo: TGridPanel
             Left = 0
             Top = 0
-            Width = 678
-            Height = 975
+            Width = 676
+            Height = 968
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -2031,7 +2027,7 @@
             object GridPanel_ESETQuarantine: TGridPanel
               Left = 0
               Top = 0
-              Width = 678
+              Width = 676
               Height = 51
               Margins.Left = 5
               Margins.Top = 5
@@ -2066,13 +2062,13 @@
                 end>
               TabOrder = 0
               DesignSize = (
-                678
+                676
                 51)
               object Label_checkQuarantineEset_1: TLabel
                 AlignWithMargins = True
                 Left = 5
                 Top = 5
-                Width = 384
+                Width = 383
                 Height = 41
                 Margins.Left = 5
                 Margins.Top = 5
@@ -2093,9 +2089,9 @@
               end
               object Show_ESETQuarantine: TEdit
                 AlignWithMargins = True
-                Left = 401
+                Left = 400
                 Top = 6
-                Width = 269
+                Width = 268
                 Height = 38
                 Hint = '12312321'
                 Margins.Left = 5
@@ -2120,7 +2116,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 56
-              Width = 668
+              Width = 666
               Height = 41
               Margins.Left = 5
               Margins.Top = 5
@@ -2143,7 +2139,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 107
-              Width = 668
+              Width = 666
               Height = 149
               Margins.Left = 5
               Margins.Top = 5
@@ -2164,7 +2160,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 266
-              Width = 668
+              Width = 666
               Height = 41
               Margins.Left = 5
               Margins.Top = 5
@@ -2187,7 +2183,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 317
-              Width = 668
+              Width = 666
               Height = 149
               Margins.Left = 5
               Margins.Top = 5
@@ -2208,8 +2204,8 @@
             object Button_CheckDefection: TButton
               AlignWithMargins = True
               Left = 5
-              Top = 899
-              Width = 668
+              Top = 892
+              Width = 666
               Height = 71
               Margins.Left = 5
               Margins.Top = 5
@@ -2233,8 +2229,8 @@
             AlignWithMargins = True
             Left = 5
             Top = 5
-            Width = 668
-            Height = 965
+            Width = 666
+            Height = 958
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -2261,8 +2257,8 @@
           object GridPanel_Soft: TGridPanel
             Left = 0
             Top = 0
-            Width = 678
-            Height = 975
+            Width = 676
+            Height = 968
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -2333,7 +2329,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 5
-              Width = 668
+              Width = 666
               Height = 244
               Margins.Left = 5
               Margins.Top = 5
@@ -2345,7 +2341,7 @@
               object GridPanel9: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 210
                 Margins.Left = 5
                 Margins.Top = 5
@@ -2406,7 +2402,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2419,9 +2415,9 @@
                 end
                 object BtnApp_procexp: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2436,7 +2432,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 75
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2449,9 +2445,9 @@
                 end
                 object BtnApp_autoruns: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 75
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2466,7 +2462,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 145
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2479,9 +2475,9 @@
                 end
                 object BtnApp_tcpview: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 145
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2498,7 +2494,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 259
-              Width = 668
+              Width = 666
               Height = 104
               Margins.Left = 5
               Margins.Top = 5
@@ -2510,7 +2506,7 @@
               object GridPanel10: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 70
                 Margins.Left = 5
                 Margins.Top = 5
@@ -2545,7 +2541,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2558,9 +2554,9 @@
                 end
                 object BtnApp_Everything: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2577,7 +2573,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 373
-              Width = 668
+              Width = 666
               Height = 174
               Margins.Left = 5
               Margins.Top = 5
@@ -2589,7 +2585,7 @@
               object GridPanel14: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 140
                 Margins.Left = 5
                 Margins.Top = 5
@@ -2637,7 +2633,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2650,9 +2646,9 @@
                 end
                 object BtnApp_DeviceCleanup: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2667,7 +2663,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 75
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2680,9 +2676,9 @@
                 end
                 object Button4: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 75
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2699,8 +2695,8 @@
               AlignWithMargins = True
               Left = 5
               Top = 925
-              Width = 668
-              Height = 45
+              Width = 666
+              Height = 38
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -2715,7 +2711,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 557
-              Width = 668
+              Width = 666
               Height = 244
               Margins.Left = 5
               Margins.Top = 5
@@ -2727,7 +2723,7 @@
               object GridPanel_SettingsPC: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 210
                 Margins.Left = 5
                 Margins.Top = 5
@@ -2788,7 +2784,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2801,9 +2797,9 @@
                 end
                 object Button_ControlPanel: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2818,7 +2814,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 75
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2831,9 +2827,9 @@
                 end
                 object Button_msconfig: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 75
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2848,7 +2844,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 145
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2861,9 +2857,9 @@
                 end
                 object Button_ResMon: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 145
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2880,7 +2876,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 811
-              Width = 668
+              Width = 666
               Height = 104
               Margins.Left = 5
               Margins.Top = 5
@@ -2892,7 +2888,7 @@
               object GridPanel_ConsoleUtil: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
+                Width = 662
                 Height = 70
                 Margins.Left = 5
                 Margins.Top = 5
@@ -2927,7 +2923,7 @@
                   AlignWithMargins = True
                   Left = 5
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2940,9 +2936,9 @@
                 end
                 object BtnLicense: TButton
                   AlignWithMargins = True
-                  Left = 337
+                  Left = 336
                   Top = 5
-                  Width = 322
+                  Width = 321
                   Height = 60
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2967,8 +2963,8 @@
           object GridPanel_Settings: TGridPanel
             Left = 0
             Top = 0
-            Width = 678
-            Height = 975
+            Width = 676
+            Height = 968
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
@@ -3021,7 +3017,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 5
-              Width = 668
+              Width = 666
               Height = 429
               Margins.Left = 5
               Margins.Top = 5
@@ -3234,7 +3230,7 @@
               AlignWithMargins = True
               Left = 5
               Top = 444
-              Width = 668
+              Width = 666
               Height = 170
               Margins.Left = 5
               Margins.Top = 5
@@ -3296,8 +3292,8 @@
             end
             object GridPanel15: TGridPanel
               Left = 0
-              Top = 865
-              Width = 678
+              Top = 858
+              Width = 676
               Height = 110
               Margins.Left = 5
               Margins.Top = 5
@@ -3339,9 +3335,9 @@
               TabOrder = 2
               object BtnAboutGruber: TButton
                 AlignWithMargins = True
-                Left = 344
+                Left = 343
                 Top = 60
-                Width = 329
+                Width = 328
                 Height = 45
                 Hint = #1055#1088#1086' GRUBer'
                 Margins.Left = 5
@@ -3360,7 +3356,7 @@
                 AlignWithMargins = True
                 Left = 5
                 Top = 60
-                Width = 329
+                Width = 328
                 Height = 45
                 Margins.Left = 5
                 Margins.Top = 5
@@ -3375,7 +3371,7 @@
                 AlignWithMargins = True
                 Left = 5
                 Top = 5
-                Width = 668
+                Width = 666
                 Height = 45
                 Margins.Left = 5
                 Margins.Top = 5
@@ -3391,8 +3387,8 @@
               AlignWithMargins = True
               Left = 5
               Top = 624
-              Width = 668
-              Height = 236
+              Width = 666
+              Height = 229
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
@@ -3403,8 +3399,8 @@
               object GridPanel4: TGridPanel
                 Left = 2
                 Top = 32
-                Width = 664
-                Height = 202
+                Width = 662
+                Height = 195
                 Margins.Left = 5
                 Margins.Top = 5
                 Margins.Right = 5
@@ -3457,7 +3453,7 @@
                   AlignWithMargins = True
                   Left = 209
                   Top = 5
-                  Width = 450
+                  Width = 448
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
@@ -3481,7 +3477,7 @@
       object ProgressBar_Grub: TProgressBar
         AlignWithMargins = True
         Left = 15
-        Top = 967
+        Top = 960
         Width = 680
         Height = 68
         Margins.Left = 5
@@ -3497,7 +3493,7 @@
       end
       object GridPanel_forButGrub: TGridPanel
         Left = 10
-        Top = 663
+        Top = 656
         Width = 690
         Height = 289
         Margins.Left = 5
@@ -3692,8 +3688,8 @@
     end
     object StatusBar1: TStatusBar
       Left = 0
-      Top = 1050
-      Width = 1416
+      Top = 1043
+      Width = 1414
       Height = 53
       Margins.Left = 5
       Margins.Top = 5

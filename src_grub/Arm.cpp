@@ -8,7 +8,7 @@
 #include "Text.h"
 #include "GetSMB.h"
 
-//---------------------------------------------------------------------------
+//===========================================================================
 #pragma package(smart_init)
 /* конструктор */
 Arm::Arm()
@@ -285,7 +285,7 @@ bool Arm::readFromFile() {
 	}
 	return false;
 }
-//---------------------------------------------------------------------------
+//---[сеттери]------------------------------------------------------------------------
 /* сеттери */
 // ручной ввод по компу
 void Arm::set_useForNumberARMid(short i) { useForNumberARMid = i; }
@@ -333,8 +333,7 @@ void Arm::set_lgpo (UnicodeString str) { lgpo=str; }             //<--
 void Arm::set_controlUSB (UnicodeString str) { controlUSB=str; } //<--
 void Arm::set_multiUser (UnicodeString str) { multiUser=str; }   //<--
 void Arm::set_spzInstal (std::vector<UnicodeString> vStr) { spzInstal=vStr; } //<--
-//---------------------------------------------------------------------------
-/* геттери */
+//---[геттери]---------------------------------------------------------------
 UnicodeString Arm::getDesktopName() { return desktopName; }
 // ручной ввод по компу
 short Arm::get_useForNumberARMid() { return useForNumberARMid; }
@@ -393,4 +392,4 @@ std::vector<program> Arm::get_softInstall() { return softInstall; }
 std::vector<program> Arm::get_softBlock() { return softBlock; }
 // пользователи
 std::vector<User> Arm::get_users() { return users; }
-//---------------------------------------------------------------------------
+//===========================================================================

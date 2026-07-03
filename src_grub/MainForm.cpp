@@ -53,11 +53,6 @@ struct defection {
 	bool eset;
 } curDefection;
 //---------------------------------------------------------------------------
-extern const short vers1 = 0, vers2 = 3, vers3 = 2, vers4 = 1;
-//extern const UnicodeString versionApp = UnicodeString(vers1) + "."
-//							  + UnicodeString(vers2) + "."
-//							  + UnicodeString(vers3) + "."
-//							  + UnicodeString(vers4);
 extern const UnicodeString versionApp = GetAppVersion();
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
@@ -256,8 +251,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	PageControl_InfoTabs->TabIndex = 0;
 	fs::path p_curDir = fs::current_path();
 	fs::path p_configIni = p_curDir / "GRUBer.ini";
-	printLogDebug("{SYS-x64} = " + UnicodeString(x64_sys()));
-	printLogDebug("{APP-x64} = " + UnicodeString(x64_app()));
 	// === запуск правильной разрядности
 	if (x64_sys() == true && x64_app() == false) {
 		fs::path p_app_x64 = p_curDir / "GRUBer_x64.exe";
@@ -266,6 +259,11 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 			exit(1);
 		}
 	}
+    // === выводим настройки & сохраненую инфу об АРМ
+	setConfigToForm(curConfig);
+	setInfoArmToForm(curPC);
+	printLogDebug("{SYS-x64} = " + UnicodeString(x64_sys()));
+	printLogDebug("{APP-x64} = " + UnicodeString(x64_app()));
 	// === проверка на необходимые файлы и папки
 	if(exists(p_configIni)) printLogDebug("Config fille OK");
 	else {
@@ -275,9 +273,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 			exit(0);
 		}
 	}
-	// === выводим настройки & сохраненую инфу об АРМ
-	setConfigToForm(curConfig);
-	setInfoArmToForm(curPC);
 	/* === проверка прав админа === */
 	UnicodeString admMode;
 	if(IsAdminMode()) {
@@ -542,6 +537,10 @@ void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 }
 void __fastcall TForm1::EditArmClassChange(TObject *Sender)
 {
+	if (DisabledItemsClass.count(EditArmClass->ItemIndex)) {
+        // Если элемент заблокирован, отменяем выбор
+		EditArmClass->ItemIndex = -1;
+	}
 	curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
 }
 void __fastcall TForm1::EditCategoryChange(TObject *Sender)
@@ -957,6 +956,35 @@ void __fastcall TForm1::CheckListBox_SPZClickCheck(TObject *Sender)
 		if(Form1->CheckListBox_SPZ->Checked[i])
 			tm_vStr.push_back(Form1->CheckListBox_SPZ->Items->Strings[i]);
 	curPC.set_spzInstal(tm_vStr);
+}
+//---------------------------------------------------------------------------
+void TForm1::SetItemClassEnabled(int index, bool enabled)
+{
+    if (enabled) {
+		DisabledItemsClass.erase(index);
+    } else {
+		DisabledItemsClass.insert(index);
+    }
+	EditArmClass->Invalidate(); // Перерисовываем список, чтобы изменения вступили в силу
+}
+
+void __fastcall TForm1::EditArmClassDrawItem(TWinControl *Control, int Index, TRect &Rect,
+          TOwnerDrawState State)
+{
+	TComboBox *cb = static_cast<TComboBox*>(Control);
+	bool isDisabled = (DisabledItemsClass.find(Index) != DisabledItemsClass.end());
+
+    // Рисуем фон (синий, если выбран, иначе системный цвет)
+    if (State.Contains(odSelected)) {
+        cb->Canvas->Brush->Color = clHighlight;
+        cb->Canvas->Font->Color = clHighlightText;
+    } else {
+        cb->Canvas->Brush->Color = clWindow;
+        cb->Canvas->Font->Color = isDisabled ? clGray : clWindowText;
+    }
+
+    cb->Canvas->FillRect(Rect);
+	cb->Canvas->TextOut(Rect.Left + 2, Rect.Top, cb->Items->Strings[Index]);
 }
 //---------------------------------------------------------------------------
 

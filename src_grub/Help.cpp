@@ -168,8 +168,8 @@ void setInfoArmToForm(Arm &curPC) {
 		}
 	}
 	//---
-	Form1->EditArmClass->ItemIndex = curPC.getClassID();
-	Form1->EditCategory->ItemIndex = curPC.getCategoryID();
+	Form1->EditArmClass->ItemIndex = Form1->EditArmClass->Items->IndexOf(curPC.getClassName());
+	Form1->EditCategory->ItemIndex = Form1->EditCategory->Items->IndexOf(curPC.getCategoryName());
 	Form1->EditLicWin->Text    = curPC.getLicWindowsName();
 	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
 	Form1->EditRespon->Text    = curPC.getRespon();
