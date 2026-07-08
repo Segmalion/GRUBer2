@@ -118,6 +118,7 @@ __published:	// IDE-managed Components
 	TOpenDialog *OpenDialog_FromJSON;
 	TSaveDialog *SaveDialog_ToFile;
 	TButton *Button_LoadFromJSON;
+	TButton *Button_ShowAll;
 	void __fastcall Button_DeviceUpdateCurPCClick(TObject *Sender);
 	void __fastcall DBGrid1TitleClick(TColumn *Column);
 	void __fastcall ListBox_FilterClick(TObject *Sender);
@@ -136,6 +137,7 @@ __published:	// IDE-managed Components
 	void __fastcall Button_LoadFromJSONClick(TObject *Sender);
 	void __fastcall FDQuery1AfterOpen(TDataSet *DataSet);
 	void __fastcall FormDestroy(TObject *Sender);
+	void __fastcall Button_ShowAllClick(TObject *Sender);
 private:	// User declarations
 	void __fastcall WndProc(Winapi::Messages::TMessage &Message) override;
 	bool __fastcall RemoveDeviceFromWindows(UnicodeString instanceId);

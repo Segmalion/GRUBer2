@@ -201,7 +201,7 @@ bool Arm::readFromFile() {
 		categoryID = findParam(file, "[infoGrubARM]", "categoryID").ToIntDef(0);
 		licWindowsID = findParam(file, "[infoGrubARM]", "licWindowsID").ToIntDef(0);
 		licOfficeID = findParam(file, "[infoGrubARM]", "licOfficeID").ToIntDef(0);
-		className = findParam(file, "[infoGrubARM]", "className");
+
 		categoryName = findParam(file, "[infoGrubARM]", "categoryName");
 		licWindowsName = findParam(file, "[infoGrubARM]", "licWindowsName");
 		licOfficeName = findParam(file, "[infoGrubARM]", "licOfficeName");
@@ -216,6 +216,12 @@ bool Arm::readFromFile() {
 		eset.autoUpdate = findParam(file, "[infoESET]", "autoUpdate").ToIntDef(1);
 		eset.dirMirror = findParam(file, "[infoESET]", "dirMirror");
 		coment = findCategory(file, "[comment]");
+		// class FIX
+		classID = findParam(file, "[infoGrubARM]", "classID").ToIntDef(0);
+		className = findParam(file, "[infoGrubARM]", "className");
+		if (className == "АС-1") className = "АС-1 (Без підключення)";
+		if (className == "АС-2") className = "АС-2 (Локальна мережа)";
+		if (className == "АС-3") className = "АС-3 (Глобальна мережа)";
 		// версия --2--
 		if (vers <= 3) {
 			lgpo = findParam(file, "[infoGrubARM]", "comPoliticInstall");

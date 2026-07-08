@@ -220,6 +220,7 @@ void __fastcall Th_Gruber::Execute()
 		if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
 		// --
 		if (tempDir) {
+			Synchronize([this]() { printLog("Перенесеня файлів в папку граба..."); });
 			TSearchRec sr;
 			if (GrubDir.Length()) {
 				if (!FindFirst(GrubDir + "\\*.*", faAnyFile, sr)) {
@@ -234,6 +235,7 @@ void __fastcall Th_Gruber::Execute()
 				}
 				FindClose(sr);
 			}
+            printLog("OK", "Файли перенесенно!");
 		}
 	}
 	// -> обработка ошибок

@@ -537,27 +537,12 @@ void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 }
 void __fastcall TForm1::EditArmClassChange(TObject *Sender)
 {
-	if (DisabledItemsClass.count(EditArmClass->ItemIndex)) {
-        // Если элемент заблокирован, отменяем выбор
-		EditArmClass->ItemIndex = -1;
-	}
 	curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
 }
 void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 {
 	short indx = EditCategory->ItemIndex;
 	curPC.setCategory(EditCategory->Items->Strings[indx], indx);
-	if (indx == 0 || indx == 2 || indx == 3 || indx == 4) {
-		EditArmClass->Enabled = true;
-		if (indx == 0) EditArmClass->ItemIndex = 0;
-		if (indx == 2) EditArmClass->ItemIndex = 3;
-		if (indx == 3) EditArmClass->ItemIndex = 2;
-        if (indx == 4) EditArmClass->ItemIndex = 1;
-	}
-	else {
-		EditArmClass->Enabled = false;
-		EditArmClass->ItemIndex = 1;
-	}
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
     curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
 }
@@ -947,7 +932,6 @@ void __fastcall TForm1::Button_CheckDefectionClick(TObject *Sender)
 {
 	checkDefection();
 }//--------------------------------------------------------------------------
-//---------------------------------------------------------------------------
 
 void __fastcall TForm1::CheckListBox_SPZClickCheck(TObject *Sender)
 {
@@ -956,35 +940,6 @@ void __fastcall TForm1::CheckListBox_SPZClickCheck(TObject *Sender)
 		if(Form1->CheckListBox_SPZ->Checked[i])
 			tm_vStr.push_back(Form1->CheckListBox_SPZ->Items->Strings[i]);
 	curPC.set_spzInstal(tm_vStr);
-}
-//---------------------------------------------------------------------------
-void TForm1::SetItemClassEnabled(int index, bool enabled)
-{
-    if (enabled) {
-		DisabledItemsClass.erase(index);
-    } else {
-		DisabledItemsClass.insert(index);
-    }
-	EditArmClass->Invalidate(); // Перерисовываем список, чтобы изменения вступили в силу
-}
-
-void __fastcall TForm1::EditArmClassDrawItem(TWinControl *Control, int Index, TRect &Rect,
-          TOwnerDrawState State)
-{
-	TComboBox *cb = static_cast<TComboBox*>(Control);
-	bool isDisabled = (DisabledItemsClass.find(Index) != DisabledItemsClass.end());
-
-    // Рисуем фон (синий, если выбран, иначе системный цвет)
-    if (State.Contains(odSelected)) {
-        cb->Canvas->Brush->Color = clHighlight;
-        cb->Canvas->Font->Color = clHighlightText;
-    } else {
-        cb->Canvas->Brush->Color = clWindow;
-        cb->Canvas->Font->Color = isDisabled ? clGray : clWindowText;
-    }
-
-    cb->Canvas->FillRect(Rect);
-	cb->Canvas->TextOut(Rect.Left + 2, Rect.Top, cb->Items->Strings[Index]);
 }
 //---------------------------------------------------------------------------
 

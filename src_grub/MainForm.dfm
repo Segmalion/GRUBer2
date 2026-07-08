@@ -397,18 +397,16 @@
               Left = 209
               Top = 171
               Width = 454
-              Height = 36
+              Height = 38
               Margins.Left = 5
               Margins.Top = 5
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
-              Style = csOwnerDrawFixed
+              Style = csDropDownList
               DropDownCount = 15
-              ItemHeight = 30
               TabOrder = 1
               OnChange = EditArmClassChange
-              OnDrawItem = EditArmClassDrawItem
               Items.Strings = (
                 #1041#1077#1079' '#1082#1083#1072#1089#1091
                 #1040#1057'-1 ('#1041#1077#1079' '#1087#1110#1076#1082#1083#1102#1095#1077#1085#1085#1103')'
@@ -444,6 +442,12 @@
               Margins.Right = 5
               Margins.Bottom = 5
               Align = alClient
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Consolas'
+              Font.Style = []
+              ParentFont = False
               ScrollBars = ssVertical
               TabOrder = 4
               WordWrap = False
@@ -1411,7 +1415,7 @@
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        ActivePage = TabSheet_Info
+        ActivePage = TabSheet_Log
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -3222,7 +3226,7 @@
                 Margins.Top = 5
                 Margins.Right = 5
                 Margins.Bottom = 5
-                Caption = 'CheckBox_TempDir'
+                Caption = #1043#1088#1072#1073' '#1074' '#1090#1080#1084#1095#1072#1089#1086#1074#1091' '#1090#1077#1082#1091
                 TabOrder = 12
               end
             end

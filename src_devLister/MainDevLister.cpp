@@ -59,6 +59,7 @@ short badCharSerial = 0;
 double multipler;
 std::vector<deviceInfo> devicesList;
 std::vector<registeredUsb> regUsbList;
+String sql_type = "full";
 bool sqlFull;
 
 std::map<UnicodeString, short> m_catNumber {
@@ -71,6 +72,19 @@ std::vector<UnicodeString> v_allertName {
 	"android", "MTP", "ADB"
 };
 indefPCtype indefPC;
+String sql_usb =
+	"SELECT *\n"
+	"FROM (\n"
+	"SELECT *,\n"
+	"ROW_NUMBER() OVER (\n"
+	"PARTITION BY containerId\n"
+	"ORDER BY (serial_number IS NULL OR serial_number = '') ASC, id DESC\n"
+	") as rn\n"
+	"FROM devices\n"
+	"WHERE class_name IN ('SCSIAdapter', 'USB', 'WPD', 'DiskDrive', 'Volume')\n"
+	")\n"
+	"WHERE rn = 1;\n";
+String sql_all = "SELECT * FROM devices;";
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
@@ -1017,7 +1031,7 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 	printLog("Завантаженно " + UnicodeString(tempRegUsbList.size()) + " відомих пристроїв з файлу registered.txt");
 	return tempRegUsbList;
 }
-/* Сравнение текста с ошибкой */
+/* Сравнение текста с возможной ошибкой */
 bool CompareStr_DamerayLevenshtaine(const UnicodeString &m, const UnicodeString &n, short a)
 {
 // 1. Приводим к нижнему регистру для корректного сравнения "MTP" и "mtp"
@@ -1428,7 +1442,14 @@ UnicodeString GetAppVersion()
     return L"Неизвестно";
 }
 //---------------------------------------------------------------------------
+
 /* Обновление устройств с текущего ПК */
+void DeviceUpdate_ARM () {
+
+}
+void DeviceUpdate_JSON () {
+
+}
 void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 {
 	CheckBox_AutoUpdateDev->Checked = true;
@@ -1562,10 +1583,7 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
 			}
 			if (value == "(USB пристрої)")
 			{
-				listboxFilter = L"class_name = " + QuotedStr(L"USB");
-				listboxFilter += L" OR class_name = " + QuotedStr(L"WPD");
-				listboxFilter += L" OR class_name = " + QuotedStr(L"DiskDrive");
-				listboxFilter += L" OR class_name = " + QuotedStr(L"Volume");
+				listboxFilter = L"class_name IN ('SCSIAdapter', 'USB', 'WPD', 'DiskDrive', 'Volume')";
 				break;
 			}
 
@@ -1579,7 +1597,7 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
 
     // 2. Проверяем состояние Чекбокса (фильтр по материнской плате)
     UnicodeString finalFilter = L"";
-    const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
     UnicodeString mbFilter = L"";
 
     // Если ЧЕКБОКС СНЯТ: Исключаем системный контейнер
@@ -1621,14 +1639,31 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
     else
     {
         FDQuery1->Filtered = false; // Отключаем перед применением нового
-        FDQuery1->Filter = finalFilter;
-        FDQuery1->Filtered = true;
+		FDQuery1->Filter = finalFilter;
+		FDQuery1->Filtered = true;
 		printLog(L"Применен фильтр: " + finalFilter);
 	}
     FDQuery1AfterOpen(FDQuery1);
 }
 //---------------------------------------------------------------------------
 /* ==== КНОПКИ ФИЛЬТРА ==== */
+/* Скинуть все ФИЛЬТРы */
+void __fastcall TForm1::Button_ShowAllClick(TObject *Sender)
+{
+	ListBox_Filter->ClearSelection();
+    if(sql_type != "all") {
+		sql_type = "all";
+		refrechDBGrid(sql_all);
+	}
+
+	// Очищаем фильтр в FireDAC
+	FDQuery1->Filtered = false;
+	FDQuery1->Filter = L"";
+	FDQuery1->Filtered = true;
+
+	FDQuery1AfterOpen(FDQuery1);
+	printLog(L"Сброс всех фильтров");
+}
 /* ФИЛЬТР по всем флешкам */
 void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 {
@@ -1636,35 +1671,22 @@ void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 	ListBox_Filter->ClearSelection();
 
 	// выводим данные с БД в таблицу
-	if (sqlFull == true) {
-		String sql =
-			"WITH RankedDevices AS (\n"
-			"SELECT\n"
-			"*,\n"
-			"ROW_NUMBER() OVER (PARTITION BY containerId\n"
-			"ORDER BY\n"
-			"class_name) as rn\n"
-			"FROM\n"
-			"devices\n"
-			"WHERE\n"
-			"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
-			")\n"
-			"SELECT\n"
-			"*\n"
-			"FROM\n"
-			"RankedDevices\n"
-			"WHERE\n"
-			"rn = 1\n"
-			"AND serial_number != \"\"\n"
-			"ORDER BY\n"
-			"class_name;\n";
-		sqlFull = false;
-		refrechDBGrid(sql);
+	if (sql_type != "usb") {
+		sql_type = "usb";
+		refrechDBGrid(sql_usb);
 	}
 
 	// Очищаем фильтр в FireDAC
 	FDQuery1->Filtered = false;
-	FDQuery1->Filter = L"";
+
+	String mb_filter;
+	if (!CheckBox_FilterMotherboard->Checked)
+	{
+		const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+		mb_filter = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
+	}
+	if (mb_filter.IsEmpty()) FDQuery1->Filter = L"";
+	else FDQuery1->Filter = mb_filter;
 	FDQuery1->Filtered = true;
 
 	FDQuery1AfterOpen(FDQuery1);
@@ -1676,30 +1698,9 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
     CheckBox_FilterMotherboard->Checked = false;
 	ListBox_Filter->ClearSelection();
 
-	if (sqlFull == true) {
-		String sql =
-			"WITH RankedDevices AS (\n"
-			"SELECT\n"
-			"*,\n"
-			"ROW_NUMBER() OVER (PARTITION BY containerId\n"
-			"ORDER BY\n"
-			"class_name) as rn\n"
-			"FROM\n"
-			"devices\n"
-			"WHERE\n"
-			"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
-			")\n"
-			"SELECT\n"
-			"*\n"
-			"FROM\n"
-			"RankedDevices\n"
-			"WHERE\n"
-			"rn = 1\n"
-			"AND serial_number != \"\"\n"
-			"ORDER BY\n"
-			"class_name;\n";
-		sqlFull = false;
-		refrechDBGrid(sql);
+	if (sql_type != "usb") {
+		sql_type = "usb";
+		refrechDBGrid(sql_usb);
 	}
 
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
@@ -1711,10 +1712,18 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
     FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
 
 	// Формируем строку фильтра.
-	FDQuery1->Filter = L"serialKnow = " + QuotedStr("0") +
+	String mb_filter, filter;
+	filter = L"serialKnow = " + QuotedStr("0") +
 		" AND serial_number IS NOT NULL AND serial_number <> ''";
-
+	if (!CheckBox_FilterMotherboard->Checked)
+	{
+		const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+		mb_filter = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
+	}
+	if (mb_filter.IsEmpty()) FDQuery1->Filter = filter;
+	else FDQuery1->Filter = filter + " AND " + mb_filter;
 	FDQuery1->Filtered = true; // Включаем фильтр
+
     FDQuery1AfterOpen(FDQuery1);
 
 	printLog(L"Отображаются только неизвесные USB устройства");
@@ -1726,10 +1735,9 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 	ListBox_Filter->ClearSelection();
 
     // выводим данные с БД в таблицу
-	if(sqlFull == false) {
-		String sql = "SELECT * FROM devices;";
-		sqlFull = true;
-		refrechDBGrid(sql);
+	if(sql_type != "all") {
+		sql_type = "all";
+		refrechDBGrid(sql_all);
 	}
 
 	// 1. Проверяем, активна ли таблица (DataSet)
@@ -1810,10 +1818,9 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 	}
 
 	// выводим данные с БД в таблицу
-	if(sqlFull == false) {
-		String sql = "SELECT * FROM devices;";
-		sqlFull = true;
-		refrechDBGrid(sql);
+	if(sql_type != "all") {
+		sql_type = "all";
+		refrechDBGrid(sql_all);
 	}
 
 	// 4. Применяем фильтр к FireDAC
@@ -2004,5 +2011,7 @@ void __fastcall TForm1::FDQuery1AfterOpen(TDataSet *DataSet)
     }
 	StatusBar1->Panels->Items[0]->Text = "ROW: " + IntToStr(rowCount);
 }
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 
