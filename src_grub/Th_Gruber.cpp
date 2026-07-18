@@ -53,18 +53,34 @@ void jobDone(short &c, short &n) {
 	UnicodeString str;
 	if (c > n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + "]GRUBer запущено...";
 	else if (c == n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + "]GRUBer зібрано!!!";
-	Form1->StatusBar1->Panels->Items[0]->Text = str;
+	// jobDone дергается из каждого job_* шага граба, т.е. из фонового потока -
+	// правим StatusBar только через главный поток.
+	auto setStatus = [str]() { Form1->StatusBar1->Panels->Items[0]->Text = str; };
+	if (GetCurrentThreadId() == MainThreadID) setStatus();
+	else TThread::Synchronize(NULL, setStatus);
 }
 void progressBarGo(int i , bool err) {
-//    if(stopBool == true || err == true) {
-	Form1->ProgressBar_Grub->Position = i;
-	Form1->Taskbar1->ProgressValue = i;
-    if(err) {
-		Form1->ProgressBar_Grub->State = (TProgressBarState) pbsError;
-		Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 4;
-	}
+	// progressBarGo дергается из каждого job_* шага граба, т.е. из фонового
+	// потока Th_Gruber - правим ProgressBar/Taskbar только через главный поток.
+	auto setProgress = [i, err]() {
+		Form1->ProgressBar_Grub->Position = i;
+		Form1->Taskbar1->ProgressValue = i;
+		if(err) {
+			Form1->ProgressBar_Grub->State = (TProgressBarState) pbsError;
+			Form1->Taskbar1->ProgressState = (TTaskBarProgressState) 4;
+		}
+	};
+	if (GetCurrentThreadId() == MainThreadID) setProgress();
+	else TThread::Synchronize(NULL, setProgress);
 }
 void blockGrub(bool i) {
+	// На сегодня blockGrub всегда вызывается изнутри Synchronize(...) в
+	// Th_Gruber::Execute(), но на случай будущих вызовов "напрямую" из
+	// фонового потока - страхуемся тем же способом.
+	if (GetCurrentThreadId() != MainThreadID) {
+		TThread::Synchronize(NULL, [i]() { blockGrub(i); });
+		return;
+	}
 	Form1->BtnGruberRun->Enabled = !i;
 	Form1->BtnGruberStop->Enabled = i;
 	//Form1->GroupBox_SetingsGRUB->Enabled = !i;
@@ -149,7 +165,9 @@ void __fastcall Th_Gruber::Execute()
 		progressBarGo(pos);
 	});
 	// --- проверка нарушений
-	checkDefection();
+	// checkDefection() обновляет Memo1/Memo2 и цвета Label на форме - это
+	// вызов из фонового потока, поэтому маршалим его на главный поток.
+	Synchronize([this]() { checkDefection(); });
 	// ...
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Synchronize([=]() {
@@ -205,7 +223,9 @@ void __fastcall Th_Gruber::Execute()
 		printLog("!!", "Відсутня папка для Грабу!!!");
 		bigErr = false;
 	} else {
-		changeEditDirColor(); //смена заливки поля "папки граба" и активация кнопок
+		// changeEditDirColor() красит EditDirGrubName и включает BtnGruberDirOpen
+		// на форме - вызов идёт из фонового потока, поэтому через Synchronize.
+		Synchronize([this]() { changeEditDirColor(); }); //смена заливки поля "папки граба" и активация кнопок
 		// -> генерация файлов
 		if (jb1 != 0 && !stopBool) job_infoFille(GrubDir);			//gruber_info.txt
 		if (jb1 != 0 && !stopBool) job_softFille(GrubDir);

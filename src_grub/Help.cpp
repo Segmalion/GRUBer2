@@ -11,31 +11,46 @@
 extern UnicodeString cmdEXE;
 //---------------------------------------------------------------------------
 /* Вывод логов */
+// ВАЖНО: printLog/printLogDebug могут вызываться как из главного потока (UI),
+// так и из фонового потока Th_Gruber. Прямая работа с VCL-компонентами
+// (Form1->RichEdit_LOG, Form1->CheckBoxDebug) из не-главного потока запрещена
+// правилами VCL и может приводить к падениям/повреждению UI. Поэтому весь
+// доступ к элементам формы промаркирован через TThread::Synchronize, если
+// вызов происходит не из главного потока. Если же вызов уже идёт из
+// главного потока (обычный UI-обработчик) - лишний Synchronize не делается,
+// компонент обновляется напрямую.
 void printLog(UnicodeString str)
 {
-	TDateTime* myTimeTemp = new TDateTime(Now());
-	UnicodeString logTime = myTimeTemp->FormatString("hh:mm:ss");
-	str = "[" + logTime + "]" + str;
-	Form1->RichEdit_LOG->Lines->Add(str);
-	// Form1->RichEdit_LOG->SelAttributes->Color = clDefault;
-    /*
-    //длина поточ.строки
-	int iStr = Form1->RichEdit_LOG->Lines->Count;
-	int startPos = 0, stopPos = 0;
-	//id начала строки и конца
-	int strStart = Form1->RichEdit_LOG->Perform(EM_LINEINDEX, iStr-1, 0);
-	int strStop  = Form1->RichEdit_LOG->Lines->Strings[iStr-1].Length();
-	//выделение символов строки
-	Form1->RichEdit_LOG->SelStart = strStart + startPos;
-	Form1->RichEdit_LOG->SelLength = strStop - (startPos + stopPos);
-	//задание цвета
-	Form1->RichEdit_LOG->SelAttributes->Color = (TColor) 0x008080F0;
-	*/
+	UnicodeString logTime = TDateTime(Now()).FormatString("hh:mm:ss");
+	UnicodeString line = "[" + logTime + "]" + str;
+	auto addLine = [line]() {
+		Form1->RichEdit_LOG->Lines->Add(line);
+		// Form1->RichEdit_LOG->SelAttributes->Color = clDefault;
+		/*
+		//длина поточ.строки
+		int iStr = Form1->RichEdit_LOG->Lines->Count;
+		int startPos = 0, stopPos = 0;
+		//id начала строки и конца
+		int strStart = Form1->RichEdit_LOG->Perform(EM_LINEINDEX, iStr-1, 0);
+		int strStop  = Form1->RichEdit_LOG->Lines->Strings[iStr-1].Length();
+		//выделение символов строки
+		Form1->RichEdit_LOG->SelStart = strStart + startPos;
+		Form1->RichEdit_LOG->SelLength = strStop - (startPos + stopPos);
+		//задание цвета
+		Form1->RichEdit_LOG->SelAttributes->Color = (TColor) 0x008080F0;
+		*/
+	};
+	if (GetCurrentThreadId() == MainThreadID) addLine();
+	else TThread::Synchronize(NULL, addLine);
 }
 void printLogDebug(UnicodeString str)
 {
-	if (Form1->CheckBoxDebug->Checked == false) return;
-	else printLog("[DEBUG]" + str);
+	bool debugOn = false;
+	auto readDebug = [&debugOn]() { debugOn = Form1->CheckBoxDebug->Checked; };
+	if (GetCurrentThreadId() == MainThreadID) readDebug();
+	else TThread::Synchronize(NULL, readDebug);
+	if (!debugOn) return;
+	printLog("[DEBUG]" + str);
 }
 void printLog(UnicodeString info, UnicodeString str)
 {
