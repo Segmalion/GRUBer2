@@ -165,9 +165,10 @@ void __fastcall Th_Gruber::Execute()
 		progressBarGo(pos);
 	});
 	// --- проверка нарушений
-	// checkDefection() обновляет Memo1/Memo2 и цвета Label на форме - это
-	// вызов из фонового потока, поэтому маршалим его на главный поток.
-	Synchronize([this]() { checkDefection(); });
+	// Тяжёлая часть (обход диска: софт/пользователи/карантин ESET) остаётся
+	// в фоновом потоке - в Synchronize маршалим только обновление UI.
+	DefectionResult defRes = computeDefection();
+	Synchronize([this, defRes]() { applyDefectionLabels(defRes); });
 	// ...
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Synchronize([=]() {

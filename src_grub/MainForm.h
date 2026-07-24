@@ -296,6 +296,49 @@ std::vector<UnicodeString> fileInfoGrub();
 void changeEditDirColor();
 void RestartApplicationRunas();
 
+// ---------------------------------------------------------------------------
+// Разделение проверки "нарушений" (soft/users/eset quarantine) на:
+//  - "тяжёлую" часть без обращения к VCL (compute*) - можно спокойно вызывать
+//    из фонового потока (Th_Gruber), т.к. она только читает диск/данные и
+//    ничего не пишет в форму;
+//  - "лёгкую" часть (apply*), которая только обновляет Memo/Label на форме и
+//    обязана вызываться из главного потока (через Synchronize).
+// Старые showSoft()/showUsers()/checkEsetQuarantine()/checkDefection()
+// сохранены как есть (compute+apply вместе) для существующих мест вызова
+// из главного потока (конструктор формы, обработчик кнопки).
+// ---------------------------------------------------------------------------
+struct SoftDefectionResult {
+	std::vector<UnicodeString> lines;
+	bool bad = false;
+};
+struct UsersDefectionResult {
+	std::vector<UnicodeString> lines;
+	bool bad = false;
+};
+struct EsetDefectionResult {
+	int countTotal = 0;
+	int countSys = 0;
+	int countUser = 0;
+	bool bad = false;
+};
+struct DefectionResult {
+	SoftDefectionResult soft;
+	UsersDefectionResult users;
+	EsetDefectionResult eset;
+};
+
+// "тяжёлые" части - без VCL, безопасны для вызова из фонового потока
+SoftDefectionResult computeSoftDefection();
+UsersDefectionResult computeUsersDefection();
+EsetDefectionResult computeEsetDefection();
+DefectionResult computeDefection();
+
+// "лёгкие" части - трогают Form1, вызывать только из главного потока
+void applySoftDefection(const SoftDefectionResult &r);
+void applyUsersDefection(const UsersDefectionResult &r);
+void applyEsetDefection(const EsetDefectionResult &r);
+void applyDefectionLabels(const DefectionResult &r);
+
 void showSoft();
 void showUsers();
 void checkDefection ();

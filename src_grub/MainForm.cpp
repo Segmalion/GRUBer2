@@ -101,25 +101,27 @@ void RestartApplicationRunas()
 		exit(1);
 	} else printLogDebug("Не вдалося перезапустити ГРАБер з правами адміна :(");
 }
-void showSoft() {
-	bool i;
-	std::vector<UnicodeString> sortList;
+// ---------------------------------------------------------------------------
+// "Тяжёлые" части - без обращения к Form1/VCL. Можно безопасно вызывать из
+// фонового потока (Th_Gruber), результат затем маршалится в главный поток.
+// ---------------------------------------------------------------------------
+SoftDefectionResult computeSoftDefection() {
+	SoftDefectionResult res;
 	std::vector<program> blockedInstalledSoft = curPC.get_softBlock();
-	Form1->Memo1->Clear();
 	if (blockedInstalledSoft.size() == 0) {
-		Form1->Memo1->Lines->Add("Не знайдено!");
-		curDefection.soft = false;
+		res.bad = false;
 	} else {
-		for(auto soft: blockedInstalledSoft) sortToVector(sortList, soft.name);
-		for(auto str: sortList) Form1->Memo1->Lines->Add(str);
-		curDefection.soft = true;
+		for(auto soft: blockedInstalledSoft) sortToVector(res.lines, soft.name);
+		res.bad = true;
 	}
+	return res;
 }
-void showUsers() {
+UsersDefectionResult computeUsersDefection() {
+	UsersDefectionResult res;
 	std::vector<User> usersList = curPC.get_users();
-	Form1->Memo2->Clear();
-	if (usersList.size() == 0) Form1->Memo2->Lines->Add("Нема юзерів... О_о");
-	else {
+	if (usersList.size() == 0) {
+		res.bad = false; // curDefection.user не трогаем - как и в исходном коде
+	} else {
 		short admin_t = 0, user_t = 0, guest_t = 0;
 		for(auto user: usersList) {
 			UnicodeString str;
@@ -138,14 +140,16 @@ void showUsers() {
 			str = str + user.name;
 			if (!(user.fullName.IsEmpty() || user.fullName == user.name)) str = str + " ("+ user.fullName + ")";
 			if (user.password_age > 42 && user.priv != "ADMIN") str = str + " [Days PASS - " + user.password_age + "]";
-			Form1->Memo2->Lines->Add(str);
+			res.lines.push_back(str);
 		}
-		if (admin_t == 1 && (user_t + guest_t) > 0) curDefection.user = false;
-		if (admin_t == 1 && (user_t + guest_t) == 0) curDefection.user = true;
-		if (admin_t > 1) curDefection.user = true;
+		if (admin_t == 1 && (user_t + guest_t) > 0) res.bad = false;
+		if (admin_t == 1 && (user_t + guest_t) == 0) res.bad = true;
+		if (admin_t > 1) res.bad = true;
 	}
+	return res;
 }
-void checkEsetQuarantine() {
+EsetDefectionResult computeEsetDefection() {
+	EsetDefectionResult res;
 	UnicodeString dirSysQuarantine  = "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\ESET\\ESET Security\\Quarantine\\";
 	UnicodeString dirUserQuarantine = "AppData\\Local\\ESET\\ESET Security\\Quarantine\\";
 	patchList sysList, userList;
@@ -171,7 +175,7 @@ void checkEsetQuarantine() {
 			}
 		} while (!FindNext(srUser)); // ищем пока не найдем все
 	FindClose(srUser);
-	// --- готовим список всех файлов во временых папках ---
+	// --- готовим список всех файлов во временых папках (самая долгая часть - обход диска) ---
 	// папка системного карантина
 	patchList temp = scanDirToFille(dirSysQuarantine);
 	sysList.list.insert(sysList.list.end(), temp.list.begin(), temp.list.end());
@@ -189,34 +193,59 @@ void checkEsetQuarantine() {
 	// подщет файлов в карантине
 	int countSysQuarantineFille = 0;
 	int countUserQuarantineFille = 0;
-	int countQuarantineFille = 0;
 	for (auto file: sysList.list) {
 		if (!(compareInSring(file.str, "INFO.NQI") || file.dir)) countSysQuarantineFille ++;
 	}
 	for (auto file: userList.list) {
 		if (!(compareInSring(file.str, "INFO.NQI") || file.dir)) countUserQuarantineFille ++;
 	}
-	countSysQuarantineFille = countSysQuarantineFille / 3;
-	countUserQuarantineFille = countUserQuarantineFille / 3;
-	countQuarantineFille = countSysQuarantineFille + countUserQuarantineFille;
-	// вывод информации по карантину
-	if (countQuarantineFille > 0) {
-		Form1->Show_ESETQuarantine->Text = UnicodeString(countQuarantineFille);
-		UnicodeString str = "В системі " + UnicodeString(countSysQuarantineFille)
-			+ ", у користувачів " + UnicodeString(countUserQuarantineFille) + "...";
-		Form1->Show_ESETQuarantine->Hint = str;
-		curDefection.eset = true;
-	} else {
-		Form1->Show_ESETQuarantine->Text = "0";
-		UnicodeString str = "Карантин порожній!";
-		Form1->Show_ESETQuarantine->Hint = str;
-        curDefection.eset = false;
+	res.countSys = countSysQuarantineFille / 3;
+	res.countUser = countUserQuarantineFille / 3;
+	res.countTotal = res.countSys + res.countUser;
+	res.bad = res.countTotal > 0;
+	return res;
+}
+DefectionResult computeDefection() {
+	DefectionResult res;
+	res.soft = computeSoftDefection();
+	res.users = computeUsersDefection();
+	res.eset = computeEsetDefection();
+	return res;
+}
+// ---------------------------------------------------------------------------
+// "Лёгкие" части - только запись в Form1, вызывать исключительно из главного
+// потока (внутри Synchronize, если исходный вызов идёт из Th_Gruber).
+// ---------------------------------------------------------------------------
+void applySoftDefection(const SoftDefectionResult &r) {
+	Form1->Memo1->Clear();
+	if (r.lines.empty()) Form1->Memo1->Lines->Add("Не знайдено!");
+	else for(auto str: r.lines) Form1->Memo1->Lines->Add(str);
+	curDefection.soft = r.bad;
+}
+void applyUsersDefection(const UsersDefectionResult &r) {
+	Form1->Memo2->Clear();
+	if (r.lines.empty()) Form1->Memo2->Lines->Add("Нема юзерів... О_о");
+	else {
+		for(auto str: r.lines) Form1->Memo2->Lines->Add(str);
+		curDefection.user = r.bad;
 	}
 }
-void checkDefection() {
-	showSoft();
-	showUsers();
-    checkEsetQuarantine();
+void applyEsetDefection(const EsetDefectionResult &r) {
+	if (r.countTotal > 0) {
+		Form1->Show_ESETQuarantine->Text = UnicodeString(r.countTotal);
+		UnicodeString str = "В системі " + UnicodeString(r.countSys)
+			+ ", у користувачів " + UnicodeString(r.countUser) + "...";
+		Form1->Show_ESETQuarantine->Hint = str;
+	} else {
+		Form1->Show_ESETQuarantine->Text = "0";
+		Form1->Show_ESETQuarantine->Hint = "Карантин порожній!";
+	}
+	curDefection.eset = r.bad;
+}
+void applyDefectionLabels(const DefectionResult &r) {
+	applySoftDefection(r.soft);
+	applyUsersDefection(r.users);
+	applyEsetDefection(r.eset);
 	Form1->PageControl_InfoTabs->Pages[1]->Caption = u"Перевірки"; // \uE10A(B) - все норм
 	if (curDefection.soft || curDefection.user || curDefection.eset) {
 		Form1->PageControl_InfoTabs->Pages[1]->Caption = u"\uE10AПеревірки\uE10A"; // \uE10A(B) - все норм
@@ -242,6 +271,22 @@ void checkDefection() {
 		Form1->Label_checkQuarantineEset_1->Font->Color = (TColor)clWindowText;
 		Form1->Label_checkQuarantineEset_1->Font->Style = TFontStyles() >> fsBold;
 	}
+}
+// ---------------------------------------------------------------------------
+// Обёртки "compute+apply вместе" - оставлены для существующих мест вызова
+// из главного потока (конструктор формы, обработчик кнопки). Никого не ломают.
+// ---------------------------------------------------------------------------
+void showSoft() {
+	applySoftDefection(computeSoftDefection());
+}
+void showUsers() {
+	applyUsersDefection(computeUsersDefection());
+}
+void checkEsetQuarantine() {
+	applyEsetDefection(computeEsetDefection());
+}
+void checkDefection() {
+	applyDefectionLabels(computeDefection());
 }
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
