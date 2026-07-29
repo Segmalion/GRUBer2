@@ -205,6 +205,7 @@ __published:	// IDE-managed Components
 	TLabel *Label19;
 	TLabel *Label20;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
+	void __fastcall CheckBox_TempDirClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
 	void __fastcall EditPartitionChange(TObject *Sender);
 	void __fastcall EditArmClassChange(TObject *Sender);

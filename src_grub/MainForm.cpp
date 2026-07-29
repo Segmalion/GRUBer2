@@ -734,6 +734,10 @@ void __fastcall TForm1::CheckBoxDebugClick(TObject *Sender)
 {
 	curConfig.setDebug(CheckBoxDebug->Checked);
 }
+void __fastcall TForm1::CheckBox_TempDirClick(TObject *Sender)
+{
+	curConfig.setTempDir(CheckBox_TempDir->Checked);
+}
 void __fastcall TForm1::CheckBoxAuditClick(TObject *Sender)
 {
 	// 0 - off, 1 - full, 2 - mini

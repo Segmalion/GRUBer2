@@ -33,6 +33,9 @@ void Config::readFileIni() {
 		// showEsetUpd
 		findStr = findParam(infoFille, "[settings]", "showEsetUpd");
 		if(findStr == 0 || findStr == 1) showEsetUpd = findStr.ToInt();
+		// tempDir
+		findStr = findParam(infoFille, "[settings]", "tempDir");
+		if(findStr == 0 || findStr == 1) tempDir = findStr.ToInt();
 		// grubUser
 		findStr = findParam(infoFille, "[settings]", "grubUser");
 		if(findStr != "0") grubUser = findStr;
@@ -105,6 +108,7 @@ void Config::saveFileIni() {
 	infoFille->Add("debug=" + UnicodeString(debug));
 	infoFille->Add("showLog=" + UnicodeString(showLog));
 	infoFille->Add("showEsetUpd=" + UnicodeString(showEsetUpd));
+	infoFille->Add("tempDir=" + UnicodeString(tempDir));
 	infoFille->Add("grubUser=" + grubUser);
 	infoFille->Add("prefixPartition=" + prefixPartition);
 	infoFille->Add("enablePrefixPartition=" + UnicodeString(enablePrefixPartition));
@@ -152,6 +156,7 @@ short Config::checkOldGrubState() {
 bool Config::getDebug()			{ return debug; }
 bool Config::getShowLog() 		{ return showLog; }
 bool Config::getShowEsetUpd()	{ return showEsetUpd; }
+bool Config::getTempDir()		{ return tempDir; }
 bool Config::getOldGrubComent() { return oldGrubComent; };
 bool Config::getOldGrubInfo()   { return oldGrubInfo; };
 bool Config::getOldGrubNet()    { return oldGrubNet; };
@@ -176,6 +181,7 @@ std::vector<UnicodeString> Config::get_softWriteList() { return softWriteList; }
 void Config::setDebug(bool i)   { debug = i; }
 void Config::setShowLog(bool i) { showLog = i; }
 void Config::setShowEsetUpd(bool i) { showEsetUpd = i; }
+void Config::setTempDir(bool i) { tempDir = i; }
 void Config::setOldGrubComent(bool i) { oldGrubComent = i; }
 void Config::setOldGrubInfo(bool i)   { oldGrubInfo = i; }
 void Config::setOldGrubNet(bool i)    { oldGrubNet = i; }

@@ -123,6 +123,7 @@ UnicodeString GetAppVersion()
 void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxDebug->Checked = curConfig.getDebug();
 	Form1->CheckBox_ShowEsetUpdate->Checked = curConfig.getShowEsetUpd();
+	Form1->CheckBox_TempDir->Checked = curConfig.getTempDir();
 	Form1->EditGrubUser->Text = curConfig.getUser();
 	Form1->CheckBoxOldGrub->State = (TCheckBoxState)curConfig.getOldGrub();
 	Form1->ComentTxt->Checked = curConfig.getOldGrubComent();

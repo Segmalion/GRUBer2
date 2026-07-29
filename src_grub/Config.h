@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 
 #ifndef ConfigH
 #define ConfigH
@@ -8,6 +8,7 @@
 class Config {
 private:
 	bool debug, showLog, showEsetUpd;
+	bool tempDir;
 	bool newGrub, license;
 	bool oldGrubComent, oldGrubInfo, oldGrubNet, oldGrubUsb;
 	bool enablePrefixPartition;
@@ -23,16 +24,17 @@ private:
 	std::vector<UnicodeString> spz;         //<==
 	std::vector<UnicodeString> softBlackList; //<==
 	std::vector<UnicodeString> softWriteList; //<==
-	// ôóíêöèè
+	// Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸
 	void readFileIni();
 public:
 	Config();
 	void saveFileIni();
 	short checkOldGrubState();
-	// ãåòòåðû
+	// Ð³ÐµÑ‚Ñ‚ÐµÑ€Ñ‹
 	bool getDebug();
 	bool getShowLog();
 	bool getShowEsetUpd();
+	bool getTempDir();
 	bool getOldGrubComent();
 	bool getOldGrubInfo();
 	bool getOldGrubNet();
@@ -53,10 +55,11 @@ public:
 	std::vector<UnicodeString> get_spz();  //<--
 	std::vector<UnicodeString> get_softBlackList(); //<--
 	std::vector<UnicodeString> get_softWriteList(); //<--
-	// ñåòòåðû
+	// ÑÐµÑ‚Ñ‚ÐµÑ€Ñ‹
 	void setDebug(bool i);
 	void setShowLog(bool i);
 	void setShowEsetUpd(bool i);
+	void setTempDir(bool i);
 	void setOldGrubComent(bool i);
 	void setOldGrubInfo(bool i);
 	void setOldGrubNet(bool i);

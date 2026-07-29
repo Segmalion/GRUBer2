@@ -3394,6 +3394,7 @@
                 Margins.Bottom = 4
                 Caption = #1043#1088#1072#1073' '#1074' '#1090#1080#1084#1095#1072#1089#1086#1074#1091' '#1090#1077#1082#1091
                 TabOrder = 12
+                OnClick = CheckBox_TempDirClick
               end
             end
             object GroupBox_SetingsESET: TGroupBox
