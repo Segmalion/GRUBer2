@@ -85,18 +85,15 @@ UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr) {
 /* Дата и время */
 UnicodeString curDate()
 {
-	TDateTime *myDate = new TDateTime(Now());
-	return myDate->FormatString("dd.MM.yy");
+	return TDateTime(Now()).FormatString("dd.MM.yy");
 }
 UnicodeString curTime()
 {
-	TDateTime* myTime = new TDateTime(Now());
-	return myTime->FormatString("HH:mm:ss");
+	return TDateTime(Now()).FormatString("HH:mm:ss");
 }
 UnicodeString curDateTime()
 {
-	TDateTime* myTime = new TDateTime(Now());
-	return myTime->FormatString("dd.MM.yy hh:mm:ss");
+	return TDateTime(Now()).FormatString("dd.MM.yy hh:mm:ss");
 }
 //---------------------------------------------------------------------------
 // Чистка строки имени папки от запрещеных символов

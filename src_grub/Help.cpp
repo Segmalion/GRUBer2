@@ -1,6 +1,8 @@
 ﻿//---------------------------------------------------------------------------
 #pragma hdrstop
 
+#include <memory>
+
 #include "Help.h"
 #include "Text.h"
 #include "Fille.h"
@@ -228,7 +230,7 @@ bool infoSetToFille(Arm &curPC)
 {
 	const UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
 	const UnicodeString file = "gruber_info.ini";
-	TStringList *infoFille = new TStringList;
+	std::unique_ptr<TStringList> infoFille(new TStringList);
 	/* формирование файла */
 	// раздел версии файла
 	for(auto str : curPC.mStrIniVersionNumber()) infoFille->Add(str);

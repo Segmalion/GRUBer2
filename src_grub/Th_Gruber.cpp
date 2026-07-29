@@ -3,6 +3,7 @@
 #include <System.hpp>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 #pragma hdrstop
 
 #include "Th_Gruber.h"
@@ -291,7 +292,7 @@ bool job_infoFille(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\gruber_info.ini";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування gruber_info.ini...");
-	TStringList *infoFille = new TStringList;
+	std::unique_ptr<TStringList> infoFille(new TStringList);
 	for(auto str : fileInfoGrub()) infoFille->Add (str);
 	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 	printLog("Файл СТВОРЕННО!");
@@ -306,7 +307,7 @@ bool job_softFille(UnicodeString dir) {
 	std::vector<UnicodeString> sortList_block;
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування soft_all.txt...");
-	TStringList *softAllFille = new TStringList;
+	std::unique_ptr<TStringList> softAllFille(new TStringList);
 	for(auto soft : curPC.get_softInstall()) sortToVector(sortList_all, soft.name);
 	for(auto str: sortList_all) softAllFille->Add (str);
 	softAllFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
@@ -316,7 +317,7 @@ bool job_softFille(UnicodeString dir) {
 		outFilePath = dir + "\\soft_block.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування soft_block.txt...");
-		TStringList *softBlockFille = new TStringList;
+		std::unique_ptr<TStringList> softBlockFille(new TStringList);
 		for(auto soft : curPC.get_softBlock()) sortToVector(sortList_block, soft.name);
 		for(auto str: sortList_block) softBlockFille->Add (str);
 		softBlockFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
@@ -332,7 +333,7 @@ bool job_comTxt(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\coment.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування coment.txt...");
-	TStringList *comTxt = new TStringList;
+	std::unique_ptr<TStringList> comTxt(new TStringList);
 	comTxt->Add(curPC.getComentStr());
 	comTxt->Add(curPC.getRespon());
 	comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));

@@ -2,6 +2,8 @@
 
 #pragma hdrstop
 
+#include <memory>
+
 #include "Config.h"
 #include "Text.h"
 //---------------------------------------------------------------------------
@@ -19,7 +21,8 @@ void Config::readFileIni() {
 	if (FileExists(configFile))
 	{
 		UnicodeString findStr;
-		TStringList *infoFille = new TStringList;
+		std::unique_ptr<TStringList> infoFilleOwner(new TStringList);
+		TStringList *infoFille = infoFilleOwner.get();
 		infoFille->LoadFromFile(configFile, TEncoding::UTF8);
 		// debug
 		findStr = findParam(infoFille, "[settings]", "debug");
@@ -95,7 +98,7 @@ void Config::readFileIni() {
 	}
 }
 void Config::saveFileIni() {
-	TStringList *infoFille = new TStringList;
+	std::unique_ptr<TStringList> infoFille(new TStringList);
 	/* формирование файла */
 	// раздел
 	infoFille->Add("[settings]");

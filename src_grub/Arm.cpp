@@ -2,6 +2,8 @@
 
 #pragma hdrstop
 
+#include <memory>
+
 //#include "MainForm.h"
 //#include "Help.h"
 #include "Arm.h"
@@ -189,7 +191,8 @@ bool Arm::readFromFile() {
 	UnicodeString dir = "C:\\ProgramData\\GRUBer\\";
 	//новый INI файл
 	if (FileExists(dir + "gruber_info.ini")) {
-		TStringList *file = new TStringList;
+		std::unique_ptr<TStringList> fileOwner(new TStringList);
+		TStringList *file = fileOwner.get();
 		file->LoadFromFile(dir + "gruber_info.ini", TEncoding::UTF8);
 		// определение версии файла
 		int vers = findParam(file, "[iniVersion]", "version").ToIntDef(1);
@@ -264,7 +267,7 @@ bool Arm::readFromFile() {
 	}
 	//старые файлы
 	if (FileExists(dir + "info_001.dat")) {
-		TStringList *infoDatIm = new TStringList;
+		std::unique_ptr<TStringList> infoDatIm(new TStringList);
 		infoDatIm->LoadFromFile(dir + "info_001.dat", TEncoding::UTF8);
 		number_UVs = (infoDatIm->Strings[1]).ToIntDef(0);
 		partition = infoDatIm->Strings[2];
