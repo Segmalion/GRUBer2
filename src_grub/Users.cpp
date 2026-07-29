@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -51,11 +51,11 @@ std::vector<User> currentUsers() {
 			/*
 			UnicodeString name;
 			UnicodeString fullName;
-			unsigned int password_age;  // íàñêîëüêî ñòàð ïàðîëü
-			UnicodeString priv; 		// ïðèâèëåãèè - GUEST, USER, ADMIN
+			unsigned int password_age;  // Ð½Ð°ÑÐºÐ¾Ð»ÑŒÐºÐ¾ ÑÑ‚Ð°Ñ€ Ð¿Ð°Ñ€Ð¾Ð»ÑŒ
+			UnicodeString priv; 		// Ð¿Ñ€Ð¸Ð²Ð¸Ð»ÐµÐ³Ð¸Ð¸ - GUEST, USER, ADMIN
 			bool flags_ACCOUNTDISABLE, flags_LOCKOUT, flags_DONT_EXPIRE_PASSWD, flags_PASSWORD_EXPIRED;
-			unsigned int password_expired;      // âðåìÿ ñ óñòàðåâàíèÿ ïàðîëÿ
-			unsigned int logon_bad, logon_good; // êîë-âî âõîäà â ñèñòåìó
+			unsigned int password_expired;      // Ð²Ñ€ÐµÐ¼Ñ Ñ ÑƒÑÑ‚Ð°Ñ€ÐµÐ²Ð°Ð½Ð¸Ñ Ð¿Ð°Ñ€Ð¾Ð»Ñ
+			unsigned int logon_bad, logon_good; // ÐºÐ¾Ð»-Ð²Ð¾ Ð²Ñ…Ð¾Ð´Ð° Ð² ÑÐ¸ÑÑ‚ÐµÐ¼Ñƒ
 			*/
 			tempUser.name = user->usri3_name;
 			tempUser.fullName = user->usri3_full_name;

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #ifndef UsersH
 #define UsersH
@@ -10,11 +10,11 @@
 struct User {
 	UnicodeString name;
 	UnicodeString fullName;
-	unsigned int password_age;  // насколько стар пароль
-	UnicodeString priv; 		// привилегии - GUEST, USER, ADMIN
+	unsigned int password_age;  // РЅР°СЃРєРѕР»СЊРєРѕ СЃС‚Р°СЂ РїР°СЂРѕР»СЊ
+	UnicodeString priv; 		// РїСЂРёРІРёР»РµРіРёРё - GUEST, USER, ADMIN
 	bool flags_ACCOUNTDISABLE, flags_LOCKOUT, flags_DONT_EXPIRE_PASSWD, flags_PASSWORD_EXPIRED;
-	unsigned int password_expired;      // время с устаревания пароля
-	unsigned int logon_bad, logon_good; // кол-во входа в систему
+	unsigned int password_expired;      // РІСЂРµРјСЏ СЃ СѓСЃС‚Р°СЂРµРІР°РЅРёСЏ РїР°СЂРѕР»СЏ
+	unsigned int logon_bad, logon_good; // РєРѕР»-РІРѕ РІС…РѕРґР° РІ СЃРёСЃС‚РµРјСѓ
 };
 
 std::vector<User> currentUsers();

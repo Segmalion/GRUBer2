@@ -1,4 +1,4 @@
-#ifndef GetSMBH
+п»ї#ifndef GetSMBH
 #define GetSMBH
 
 
@@ -9,7 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-//Переменные для SMB
+//РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ SMB
 
 #define SMB_TABLE_BIOS              0
 #define SMB_TABLE_SYSTEM            1
@@ -26,7 +26,7 @@
 #define SMB_TABLE_MEM_DEVICE        17
 #define SMB_TABLE_END_OF_TABLE      127
 
-// Структуры
+// РЎС‚СЂСѓРєС‚СѓСЂС‹
 
 typedef struct _RawSmbiosData
 {

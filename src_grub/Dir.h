@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 
 #ifndef DirH
 #define DirH
@@ -13,9 +13,9 @@ private:
 public:
 	Dir();
 	bool check();
-	//сеттеры
+	//СЃРµС‚С‚РµСЂС‹
 	void set_grubPath(UnicodeString str);
-	//геттеры
+	//РіРµС‚С‚РµСЂС‹
 	UnicodeString get_grubPath();
 	fs::path get_p_grubPath();
 	UnicodeString get_toolPath();
