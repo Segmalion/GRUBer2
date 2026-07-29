@@ -107,6 +107,7 @@ void RestartApplicationRunas()
 // ---------------------------------------------------------------------------
 SoftDefectionResult computeSoftDefection() {
 	SoftDefectionResult res;
+	curPC.read_soft();
 	std::vector<program> blockedInstalledSoft = curPC.get_softBlock();
 	if (blockedInstalledSoft.size() == 0) {
 		res.bad = false;
@@ -118,6 +119,7 @@ SoftDefectionResult computeSoftDefection() {
 }
 UsersDefectionResult computeUsersDefection() {
 	UsersDefectionResult res;
+    curPC.read_user();
 	std::vector<User> usersList = curPC.get_users();
 	if (usersList.size() == 0) {
 		res.bad = false; // curDefection.user не трогаем - как и в исходном коде
@@ -142,9 +144,19 @@ UsersDefectionResult computeUsersDefection() {
 			if (user.password_age > 42 && user.priv != "ADMIN") str = str + " [Days PASS - " + user.password_age + "]";
 			res.lines.push_back(str);
 		}
-		if (admin_t == 1 && (user_t + guest_t) > 0) res.bad = false;
-		if (admin_t == 1 && (user_t + guest_t) == 0) res.bad = true;
-		if (admin_t > 1) res.bad = true;
+		if (curPC.getCategoryName() == "Особистий") {
+			res.bad = false;
+		} else {
+			if (admin_t == 1 && curPC.getClassName() != "ЛООК") {
+				if ((user_t ) > 0 ) {
+					res.bad = false;
+				} else res.bad = true;
+			} else if (admin_t == 2 && curPC.getClassName() == "ЛООК") {
+				if ((user_t) > 0 ) {
+					res.bad = false;
+				} else res.bad = true;
+			} else res.bad = true;
+		}
 	}
 	return res;
 }
@@ -248,6 +260,7 @@ void applyDefectionLabels(const DefectionResult &r) {
 	applyEsetDefection(r.eset);
 	Form1->PageControl_InfoTabs->Pages[1]->Caption = u"Перевірки"; // \uE10A(B) - все норм
 	if (curDefection.soft || curDefection.user || curDefection.eset) {
+//		short i = curDefection.soft + curDefection.user + curDefection.eset;
 		Form1->PageControl_InfoTabs->Pages[1]->Caption = u"\uE10AПеревірки\uE10A"; // \uE10A(B) - все норм
 	}
 	if (curDefection.soft) {
@@ -583,13 +596,15 @@ void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 void __fastcall TForm1::EditArmClassChange(TObject *Sender)
 {
 	curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
+    checkDefection();
 }
 void __fastcall TForm1::EditCategoryChange(TObject *Sender)
 {
 	short indx = EditCategory->ItemIndex;
 	curPC.setCategory(EditCategory->Items->Strings[indx], indx);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
-    curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
+	curPC.setClass(EditArmClass->Text, EditArmClass->ItemIndex);
+    checkDefection();
 }
 void __fastcall TForm1::EditResponChange(TObject *Sender)
 {
