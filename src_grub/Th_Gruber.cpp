@@ -4,6 +4,7 @@
 #include <chrono>
 #include <filesystem>
 #include <memory>
+#include <atomic>
 #pragma hdrstop
 
 #include "Th_Gruber.h"
@@ -24,12 +25,13 @@
 extern Config curConfig;
 extern Arm curPC;
 extern Dir curDir;
-extern bool th_Gruber_run;
-extern bool th_Gruber_runMini, th_Gruber_runUSB;
-extern bool stopBool, passBool, dirGrubRewrite, gruberStart;
-extern bool grubActive;
+extern std::atomic<bool> th_Gruber_run;
+extern std::atomic<bool> th_Gruber_runMini, th_Gruber_runUSB;
+extern std::atomic<bool> stopBool, passBool;
+extern bool dirGrubRewrite, gruberStart;
+extern std::atomic<bool> grubActive;
 double pos, step;
-extern bool checkDirExist;
+extern std::atomic<bool> checkDirExist;
 bool jb1, jb2, jb3, jb4, jb5, jb6;
 short jb7, jb8;
 short countJob, curJob;
@@ -142,7 +144,10 @@ void __fastcall Th_Gruber::Execute()
 	stopBool = false;
 	passBool = false;
 	bool bigErr = true;
-	UnicodeString dirGrubStr = Form1->EditDirGrubName->Text;
+	// Form1->EditDirGrubName->Text - звернення до VCL-контролу, тому читаємо
+	// його через Synchronize (Execute() виконується у фоновому потоці).
+	UnicodeString dirGrubStr;
+	Synchronize([&dirGrubStr]() { dirGrubStr = Form1->EditDirGrubName->Text; });
 	// -> переменные JOB
 	jb1 = curConfig.getNewGrub();
 	jb2 = curConfig.getOldGrubComent();
@@ -193,7 +198,8 @@ void __fastcall Th_Gruber::Execute()
 		}
 	}
 	UnicodeString GrubDir;
-	bool tempDir = Form1->CheckBox_TempDir->Checked;
+	bool tempDir;
+	Synchronize([&tempDir]() { tempDir = Form1->CheckBox_TempDir->Checked; });
 	if (tempDir) {
 		GrubDir = curDir.get_grubPathTemp();
 		if (!DirectoryExists(GrubDir)) CreateDir(GrubDir);

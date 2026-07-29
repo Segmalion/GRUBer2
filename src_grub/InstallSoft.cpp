@@ -95,6 +95,9 @@ std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
 			cdata = sizeof(buffer);
 			retCode = RegQueryValueEx(hSubkey,L"DisplayName",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
+					// RegQueryValueEx не гарантує null-termination, якщо рядок в реєстрі
+					// точно заповнює буфер - примусово термінуємо, щоб не читати за межі.
+					buffer[255] = L'\0';
 					soft.name = buffer;
 					//soft.name = soft.name + " {" + UnicodeString(achKey) + "}";
 			}
@@ -102,12 +105,14 @@ std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
 			cdata = sizeof(buffer);
 			retCode = RegQueryValueEx(hSubkey,L"DisplayVersion",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
+					buffer[255] = L'\0';
 					soft.version = buffer;
 			}
 
 			cdata = sizeof(buffer);
 			retCode = RegQueryValueEx(hSubkey,L"Publisher",NULL,&type,(LPBYTE)buffer,&cdata);
 			if(retCode == ERROR_SUCCESS){
+					buffer[255] = L'\0';
 					soft.publisher = buffer;
 			}
 			if (!soft.name.IsEmpty()) { // Добавляем, только если есть название
@@ -127,50 +132,44 @@ std::vector<program> installSoft() {
 
 	HKEY hKey;
 
+	// Если один из путей реестра недоступний (напр. немає Wow6432Node на цій
+	// системі) - пропускаємо лише його, а не перериваємо весь збір списку ПО.
 	LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
-	if (lResult != ERROR_SUCCESS) {
-		return listSoft;
-	} else {
+	if (lResult == ERROR_SUCCESS) {
 		std::vector<program> GlobalListSoft = read_hKey(hKey, "Global");
 		listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
+		RegCloseKey(hKey);
 	}
-	RegCloseKey(hKey);
 
 	lResult = RegOpenKeyEx(HKEY_CURRENT_USER,
 								L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 								0, KEY_READ, &hKey);
-	if (lResult != ERROR_SUCCESS) {
-		return listSoft;
-	} else {
+	if (lResult == ERROR_SUCCESS) {
 		std::vector<program> GlobalListSoft = read_hKey(hKey, "CurentUser");
 		listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
+		RegCloseKey(hKey);
 	}
-	RegCloseKey(hKey);
 
 	if (x64_sys()) {
-		LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+		lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);
-		if (lResult != ERROR_SUCCESS) {
-			return listSoft;
-		} else {
+		if (lResult == ERROR_SUCCESS) {
 			std::vector<program> GlobalListSoft = read_hKey(hKey, "Global(x32)");
 			listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
+			RegCloseKey(hKey);
 		}
-		RegCloseKey(hKey);
 
 		lResult = RegOpenKeyEx(HKEY_CURRENT_USER,
 									L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 									0, KEY_READ, &hKey);
-		if (lResult != ERROR_SUCCESS) {
-			return listSoft;
-		} else {
+		if (lResult == ERROR_SUCCESS) {
 			std::vector<program> GlobalListSoft = read_hKey(hKey, "CurentUser(x32)");
 			listSoft.insert(listSoft.end(), GlobalListSoft.begin(), GlobalListSoft.end());
+			RegCloseKey(hKey);
 		}
-		RegCloseKey(hKey);
 	}
 	return listSoft;
 }

@@ -56,6 +56,7 @@ Arm::Arm()
 	unSerial = GetFastHash_CRC32(toHash);
 	manufacturer = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 4);
 	productName  = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 5);
+	LocalFree(dataSMB); // GetSmbiosData() виділяє буфер через LocalAlloc
 	// установленый софт
 	read_soft();
 	// пользователи системы

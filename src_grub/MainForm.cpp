@@ -5,6 +5,7 @@
 #include <thread> // Required for std::this_thread::sleep_for
 #include <chrono> // Required for std::chrono::seconds
 #include <filesystem>
+#include <atomic>
 #pragma hdrstop
 
 #include "MainForm.h"
@@ -40,12 +41,19 @@ Arm curPC;
 Dir curDir;
 //обявление переменных
 UnicodeString cmdEXE, curentDate;
-bool th_Gruber_run=0, th_ClearFile_run=0, th_EsetUpdate_run=0;
-bool th_Gruber_runMini, th_Gruber_runUSB;
-bool stopBool=0, passBool=0, dirGrubRewrite, gruberStart=0;
-bool checkDirExist;
+// Флаги нижче читаються/пишуться як з головного потоку, так і з фонового
+// (Th_Gruber/Th_ClearFile) без Synchronize - std::atomic<bool> замість bool
+// прибирає data race на цих прапорцях (пор. з compute/apply-розділенням
+// для доступу до VCL, описаним у CLAUDE.md).
+std::atomic<bool> th_Gruber_run{false}, th_ClearFile_run{false};
+bool th_EsetUpdate_run=0; // наразі ніде більше не використовується
+std::atomic<bool> th_Gruber_runMini{false}, th_Gruber_runUSB{false};
+std::atomic<bool> stopBool{false}, passBool{false};
+bool dirGrubRewrite; // пишеться в Synchronize(), уже синхронізовано ним
+bool gruberStart=0;  // читається/пишеться лише з головного потоку
+std::atomic<bool> checkDirExist{false};
 std::vector<UnicodeString> vStrPartition;
-bool grubActive = 0;
+std::atomic<bool> grubActive{false};
 extern std::vector<UnicodeString> blockProgrammsNames;
 struct defection {
 	bool user;

@@ -1,6 +1,7 @@
 ﻿//---------------------------------------------------------------------------
 
 #include <vcl.h>
+#include <atomic>
 #pragma hdrstop
 
 #include "ClearTemp.h"
@@ -13,7 +14,7 @@ TFormClearTempDir *FormClearTempDir;
 //---------------------------------------------------------------------------
 patchList fullList, tempList, recycleList;
 bool newOpenFormClean;
-extern bool th_ClearFile_run;
+extern std::atomic<bool> th_ClearFile_run;
 //---------------------------------------------------------------------------
 __fastcall TFormClearTempDir::TFormClearTempDir(TComponent* Owner)
 	: TForm(Owner)

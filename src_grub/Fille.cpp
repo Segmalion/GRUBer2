@@ -124,9 +124,11 @@ bool fileOpen(UnicodeString str)
 void cacls(UnicodeString str)
 {
 	UnicodeString setApp = "C:\\Windows\\System32\\cacls.exe";
-	UnicodeString setArg = str + " /t /e /g Users:c\"";
+	// Шлях до файлу обов'язково в лапках - інакше пробіли в шляху ламають
+	// розбір аргументів cacls.exe.
+	UnicodeString setArg = "\"" + str + "\" /t /e /g Users:c";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_HIDE);
-	setArg = str + " /t /e /g Пользователи:c\"";
+	setArg = "\"" + str + "\" /t /e /g Пользователи:c";
 	ShellExecuteW(NULL, L"open", setApp.c_str(), setArg.c_str(), NULL, SW_HIDE);
 }
 //---------------------------------------------------------------------------

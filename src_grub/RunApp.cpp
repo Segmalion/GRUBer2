@@ -2,12 +2,14 @@
 
 #pragma hdrstop
 
+#include <atomic>
+
 #include "RunApp.h"
 #include "Help.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-extern bool stopBool, passBool;
+extern std::atomic<bool> stopBool, passBool;
 
 //---------------------------------------------------------------------------
 bool RunApp::check() {
@@ -33,7 +35,6 @@ void RunApp::run(bool h, bool r) {
 	if (h == false) hide = 1;
 	runas = r;
 	if (!check()) return;
-	HINSTANCE errRun;
 	DWORD exitCode;
 	bool passBoolTmp = false;
 	//параметры для запуска
@@ -49,7 +50,8 @@ void RunApp::run(bool h, bool r) {
 	if (dir.IsEmpty()) ShExecInfoA.lpDirectory = NULL;
 				  else ShExecInfoA.lpDirectory = dir.c_str();
 	ShExecInfoA.nShow = hide;
-	ShExecInfoA.hInstApp = errRun;
+	//hInstApp - out-параметр, заповнюється самим ShellExecuteExW; не потрібно
+	//задавати його заздалегідь (ShExecInfoA вже обнулено через "= {0}").
 	//Запуск ПО
 	BOOL shellOk = ShellExecuteExW(&ShExecInfoA);
 	if (!shellOk) {

@@ -1,6 +1,7 @@
 ﻿//---------------------------------------------------------------------------
 
 #include <System.hpp>
+#include <atomic>
 #pragma hdrstop
 
 #include "Th_ClearFile.h"
@@ -26,7 +27,7 @@ std::vector<UnicodeString> dirListUser {
 };
 extern patchList fullList, tempList, recycleList;
 extern bool newOpenFormClean;
-extern bool th_ClearFile_run;
+extern std::atomic<bool> th_ClearFile_run;
 //---------------------------------------------------------------------------
 __fastcall Th_ClearFile::Th_ClearFile(bool CreateSuspended)
 	: TThread(CreateSuspended)
