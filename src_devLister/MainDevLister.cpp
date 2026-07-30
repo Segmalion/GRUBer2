@@ -173,18 +173,20 @@ bool __fastcall TForm1::RemoveContainerDevicesFromWindows(UnicodeString targetCo
         return false;
     }
 
+    // ЖЁСТКАЯ ЗАЩИТА: системный контейнер материнской платы нельзя удалять целиком никогда,
+    // даже если проверка выше по стеку (DelContainerDevice) будет обойдена или изменена.
+    const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+    if (targetContainerId == SYSTEM_CONTAINER_ID) {
+        printLog(L"Ошибка: попытка группового удаления системного контейнера материнской платы заблокирована.");
+        return false;
+    }
+
     // 1. Получаем список ВСЕХ устройств в системе (включая отключенные)
     HDEVINFO hDevInfo = SetupDiGetClassDevsW(NULL, NULL, NULL, DIGCF_ALLCLASSES);
     if (hDevInfo == INVALID_HANDLE_VALUE) {
         printLog(L"Ошибка SetupDiClassDevs: " + SysErrorMessage(GetLastError()));
         return false;
     }
-
-    SP_DEVINFO_DATA devInfoData;
-    devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-    DWORD deviceIndex = 0;
-    int deletedCount = 0;
-    int errorCount = 0;
 
     // Подгружаем cfgmgr32.dll для чтения DEVPKEY_Device_ContainerId у каждого устройства
     HMODULE hCfgMgr = LoadLibraryW(L"cfgmgr32.dll");
@@ -203,19 +205,14 @@ bool __fastcall TForm1::RemoveContainerDevicesFromWindows(UnicodeString targetCo
         return false;
     }
 
-    // 2. Цикл перебора всех устройств компьютера
-    while (SetupDiEnumDeviceInfo(hDevInfo, deviceIndex, &devInfoData))
-    {
-        deviceIndex++;
-
-        // Получаем Instance ID текущего проверяемого устройства
+    // Вспомогательная функция: узнать ЖИВОЙ (актуальный на данный момент) Container ID устройства
+    auto getLiveContainerId = [&](SP_DEVINFO_DATA &devData) -> UnicodeString {
         wchar_t instanceIdBuf[512] = L"";
-        if (!SetupDiGetDeviceInstanceIdW(hDevInfo, &devInfoData, instanceIdBuf, 512, NULL)) {
-            continue;
+        if (!SetupDiGetDeviceInstanceIdW(hDevInfo, &devData, instanceIdBuf, 512, NULL)) {
+            return L"";
         }
         UnicodeString currentInstanceId = UnicodeString(instanceIdBuf);
 
-        // Запрашиваем у Windows Container ID для этого Instance ID
         DEVPROPCOMPKEY reqKey[] = { { DEVPKEY_Device_ContainerId, DEVPROP_STORE_SYSTEM, NULL } };
         ULONG propCount = 0;
         const DEVPROPERTY* properties = NULL;
@@ -232,26 +229,61 @@ bool __fastcall TForm1::RemoveContainerDevicesFromWindows(UnicodeString targetCo
             }
             pDevFreeObjectProperties(propCount, properties);
         }
+        return currentContainerId;
+    };
 
-        // 3. Если Container ID совпал — удаляем это конкретное устройство из ОС Windows
-        if (currentContainerId == targetContainerId)
+    SP_DEVINFO_DATA devInfoData;
+    devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+
+    // === ПРОХОД 1: ЖИВАЯ проверка у ОС — нет ли в контейнере устройства, подключенного ПРЯМО СЕЙЧАС ===
+    // Кэш в SQLite (быстрая проверка в DelContainerDevice) мог устареть с момента последнего
+    // сканирования, поэтому непосредственно перед физическим удалением состояние
+    // опрашивается заново через CM_Get_DevNode_Status.
+    DWORD deviceIndex = 0;
+    bool liveConnectedFound = false;
+    while (SetupDiEnumDeviceInfo(hDevInfo, deviceIndex, &devInfoData))
+    {
+        deviceIndex++;
+        if (getLiveContainerId(devInfoData) != targetContainerId) continue;
+
+        ULONG devStatus = 0, devProblem = 0;
+        if (CM_Get_DevNode_Status(&devStatus, &devProblem, devInfoData.DevInst, 0) == CR_SUCCESS) {
+            liveConnectedFound = true;
+            break;
+        }
+    }
+
+    if (liveConnectedFound) {
+        printLog(L"Отмена удаления: устройство из этого контейнера подключено ПРЯМО СЕЙЧАС (живая проверка ОС). Отключите оборудование физически и повторите попытку.");
+        FreeLibrary(hCfgMgr);
+        SetupDiDestroyDeviceInfoList(hDevInfo);
+        return false;
+    }
+
+    // === ПРОХОД 2: физическое удаление — только если проход 1 подтвердил, что всё отключено ===
+    deviceIndex = 0;
+    int deletedCount = 0;
+    int errorCount = 0;
+    while (SetupDiEnumDeviceInfo(hDevInfo, deviceIndex, &devInfoData))
+    {
+        deviceIndex++;
+        if (getLiveContainerId(devInfoData) != targetContainerId) continue;
+
+        SP_REMOVEDEVICE_PARAMS rmParams;
+        rmParams.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
+        rmParams.ClassInstallHeader.InstallFunction = DIF_REMOVE;
+        rmParams.Scope = DI_REMOVEDEVICE_GLOBAL;
+        rmParams.HwProfile = 0;
+
+        if (SetupDiSetClassInstallParamsW(hDevInfo, &devInfoData, &rmParams.ClassInstallHeader, sizeof(rmParams)))
         {
-            SP_REMOVEDEVICE_PARAMS rmParams;
-            rmParams.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
-            rmParams.ClassInstallHeader.InstallFunction = DIF_REMOVE;
-            rmParams.Scope = DI_REMOVEDEVICE_GLOBAL;
-            rmParams.HwProfile = 0;
-
-            if (SetupDiSetClassInstallParamsW(hDevInfo, &devInfoData, &rmParams.ClassInstallHeader, sizeof(rmParams)))
-            {
-                if (SetupDiCallClassInstaller(DIF_REMOVE, hDevInfo, &devInfoData)) {
-                    deletedCount++;
-                } else {
-                    errorCount++;
-                }
+            if (SetupDiCallClassInstaller(DIF_REMOVE, hDevInfo, &devInfoData)) {
+                deletedCount++;
             } else {
                 errorCount++;
             }
+        } else {
+            errorCount++;
         }
     }
 
@@ -315,6 +347,15 @@ void __fastcall TForm1::DelContainerDevice() {
 
     if (containerId.IsEmpty() || containerId == L"No Container" || containerId == L"GUID Error") {
         MessageDlg(L"У выбранного устройства нет валидного Контейнера для группового удаления.", mtError, TMsgDlgButtons() << mbOK, 0);
+        return;
+    }
+
+    // 2.1. ЗАЩИТА: системный контейнер материнской платы удалять целиком нельзя —
+    // это фактически все ключевые устройства ПК (чипсет, USB-контроллеры и т.д.)
+    const UnicodeString SYSTEM_CONTAINER_ID_GUARD = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+    if (containerId.UpperCase().Trim() == SYSTEM_CONTAINER_ID_GUARD) {
+        MessageDlg(L"Нельзя удалять системный контейнер материнской платы — это выведет из строя ключевые устройства ПК.",
+                   mtError, TMsgDlgButtons() << mbOK, 0);
         return;
     }
 
