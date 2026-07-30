@@ -1322,13 +1322,21 @@ bool LoadDataFromJSON(const UnicodeString& filePath)
         }
 
         // --- БЛОК 4: ЧТЕНИЕ МЕТАДАННЫХ КОМПЬЮТЕРА (indef) ---
+        // ВАЖНО: перезаписываем indefPC данными ИЗ ЗАГРУЖЕННОГО ФАЙЛА. Без этого indefPC
+        // (в частности catPC — категория секретности) оставался бы от локального ПК, и
+        // вся логика "нарушение категорії" (regCatNumber > indefPC.catPC) сравнивала бы
+        // устройства чужого ПК с неправильным порогом.
         TJSONObject* indefObj = dynamic_cast<TJSONObject*>(rootObject->Get(L"indef")->JsonValue);
         if (indefObj) {
-            // Если вам нужно сохранить данные о чужом ПК в глобальные переменные вашей программы:
-            // indefPC.desktopName = indefObj->GetValue(L"desktopName")->Value();
-            // indefPC.catPC = indefObj->GetValue(L"catPC")->Value().ToIntDef(0);
-            // sn_hash = indefObj->GetValue(L"sn_hash")->Value();
-            printLog(L"Загружен лог компьютера: " + indefObj->GetValue(L"desktopName")->Value());
+            indefPC.desktopName  = indefObj->Values[L"desktopName"]  ? indefObj->Values[L"desktopName"]->Value()  : L"";
+            indefPC.catPC        = indefObj->Values[L"catPC"]        ? (short)indefObj->Values[L"catPC"]->Value().ToIntDef(0) : 0;
+            indefPC.sn_Main      = indefObj->Values[L"sn_Main"]      ? indefObj->Values[L"sn_Main"]->Value()      : L"";
+            indefPC.sn_serialMrb = indefObj->Values[L"sn_serialMrb"] ? indefObj->Values[L"sn_serialMrb"]->Value() : L"";
+            indefPC.sn_UUID      = indefObj->Values[L"sn_UUID"]      ? indefObj->Values[L"sn_UUID"]->Value()      : L"";
+            indefPC.sn_CPUID     = indefObj->Values[L"sn_CPUID"]     ? indefObj->Values[L"sn_CPUID"]->Value()     : L"";
+            indefPC.sn_hash      = indefObj->Values[L"sn_hash"]      ? indefObj->Values[L"sn_hash"]->Value()      : L"";
+
+            printLog(L"Загружен лог компьютера: " + indefPC.desktopName + L" (категорія: " + IntToStr(indefPC.catPC) + L")");
         }
 
         // --- БЛОК 5: ЧТЕНИЕ МАССИВА УСТРОЙСТВ (devices) ---
@@ -1553,6 +1561,8 @@ void __fastcall TForm1::Button_LoadFromJSONClick(TObject *Sender)
 			CheckBox_AutoUpdateDev->Checked = false;
 			CheckBox_AutoUpdateDev->Enabled = false;
 			Button_DelDevice->Enabled = false;
+			// синхронизируем комбобокс категорії з даними ЗАГРУЖЕНОГО ПК (indefPC уже обновлен в LoadDataFromJSON)
+			ComboBox_CategPC->ItemIndex = indefPC.catPC;
 			// распознаем извесные флешки
 			checkRegDevice(devicesList);
 			// переносим в БД
