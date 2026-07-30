@@ -1456,6 +1456,11 @@
                 Column = 0
                 Control = GroupBox_NetInfo
                 Row = 2
+              end
+              item
+                Column = 0
+                Control = GroupBox_EsetInfo
+                Row = 3
               end>
             RowCollection = <
               item
@@ -1468,6 +1473,10 @@
               end
               item
                 Value = 100.000000000000000000
+              end
+              item
+                SizeStyle = ssAbsolute
+                Value = 89.000000000000000000
               end>
             TabOrder = 0
             object GroupBox_Number: TGroupBox
@@ -2175,6 +2184,94 @@
                   ReadOnly = True
                   TabOrder = 3
                   Text = 'ShowNetStatus'
+                end
+              end
+            end
+            object GroupBox_EsetInfo: TGroupBox
+              AlignWithMargins = True
+              Left = 4
+              Top = 702
+              Width = 474
+              Height = 89
+              Margins.Left = 4
+              Margins.Top = 4
+              Margins.Right = 4
+              Margins.Bottom = 4
+              Align = alClient
+              Caption = #1040#1042#1055#1047' '#1110#1085#1092#1086':'
+              TabOrder = 3
+              object GridPanel_EsetInfo: TGridPanel
+                Left = 2
+                Top = 22
+                Width = 470
+                Height = 65
+                Margins.Left = 4
+                Margins.Top = 4
+                Margins.Right = 4
+                Margins.Bottom = 4
+                Align = alClient
+                BevelOuter = bvNone
+                ColumnCollection = <
+                  item
+                    Value = 25.521466109939610000
+                  end
+                  item
+                    Value = 74.478533890060390000
+                  end>
+                ControlCollection = <
+                  item
+                    Column = 0
+                    Control = Label_EsetID
+                    Row = 0
+                  end
+                  item
+                    Column = 1
+                    Control = ShowEsetID
+                    Row = 0
+                  end>
+                RowCollection = <
+                  item
+                    Value = 100.000000000000000000
+                  end>
+                TabOrder = 0
+                DesignSize = (
+                  470
+                  65)
+                object Label_EsetID: TLabel
+                  Left = 0
+                  Top = 0
+                  Width = 120
+                  Height = 65
+                  Margins.Left = 4
+                  Margins.Top = 4
+                  Margins.Right = 4
+                  Margins.Bottom = 4
+                  Align = alClient
+                  Alignment = taCenter
+                  Caption = 'ESET ID:'
+                  Layout = tlCenter
+                  ExplicitWidth = 64
+                  ExplicitHeight = 20
+                end
+                object ShowEsetID: TEdit
+                  Left = 124
+                  Top = 19
+                  Width = 341
+                  Height = 27
+                  Margins.Left = 4
+                  Margins.Top = 4
+                  Margins.Right = 4
+                  Margins.Bottom = 4
+                  Anchors = []
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -16
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  TabOrder = 0
+                  Text = 'ShowEsetID'
                 end
               end
             end

@@ -7,6 +7,7 @@
 #include "Text.h"
 #include "Fille.h"
 #include "MainForm.h"
+#include "Eset.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -229,6 +230,8 @@ void setInfoArmToForm(Arm &curPC) {
 	for (auto &a : curPC.get_netAdapters()) Form1->ShowNetName->Items->Add(a.name);
 	if (Form1->ShowNetName->Items->Count > 0) Form1->ShowNetName->ItemIndex = 0;
 	updateNetAdapterFields();
+
+	Form1->ShowEsetID->Text = getEsetProductInstanceID();
 	//infoSetToFille(curPC);
 //...
 }

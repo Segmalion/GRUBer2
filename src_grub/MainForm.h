@@ -200,6 +200,10 @@ __published:	// IDE-managed Components
 	TEdit *ShowNetIP;
 	TEdit *ShowNetMAC;
 	TEdit *ShowNetStatus;
+	TGroupBox *GroupBox_EsetInfo;
+	TGridPanel *GridPanel_EsetInfo;
+	TLabel *Label_EsetID;
+	TEdit *ShowEsetID;
 	TButton *Button_CheckDefection;
 	TMenuItem *Gruber_USB;
 	TGroupBox *GroupBox1;
