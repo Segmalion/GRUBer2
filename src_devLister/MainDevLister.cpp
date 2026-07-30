@@ -1059,15 +1059,47 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 		return tempRegUsbList;
 	}
 	// -- обрабатываем файл с извесными флешками, заполняем вектор "tempRegUsbList"
+	int lineNumber = 0;
 	for (auto strRegUsb: regUsbFile) {
-		registeredUsb tempRegUsb;
-		UnicodeString tempStr = strRegUsb.SubString(0,strRegUsb.LastDelimiter("#")-1);
+		lineNumber++;
+		UnicodeString line = strRegUsb.Trim();
+		if (line.IsEmpty()) continue; // порожні рядки (наприклад, останній рядок файлу) — не помилка
 
-		tempRegUsb.catName = strRegUsb.SubString(strRegUsb.LastDelimiter("#")+1, strRegUsb.Length());
-		tempRegUsb.serial = tempStr.SubString(tempStr.LastDelimiter("#")+1, tempStr.Length());
-		tempRegUsb.name = tempStr.SubString(0, tempStr.LastDelimiter("#")-1);
+		// Очікуваний формат рядка: "Ім'я#Серійник#Категорія"
+		int lastHash = line.LastDelimiter(L"#");
+		if (lastHash <= 0) {
+			printLog(L"Помилка в registered.txt, рядок " + IntToStr(lineNumber) +
+					 L": немає роздільника '#' (\"" + line + L"\") — рядок пропущено.");
+			continue;
+		}
+		UnicodeString tempStr = line.SubString(1, lastHash - 1);
+		UnicodeString catName = line.SubString(lastHash + 1, line.Length());
+
+		int midHash = tempStr.LastDelimiter(L"#");
+		if (midHash <= 0) {
+			printLog(L"Помилка в registered.txt, рядок " + IntToStr(lineNumber) +
+					 L": очікується формат Ім'я#Серійник#Категорія (\"" + line + L"\") — рядок пропущено.");
+			continue;
+		}
+		UnicodeString name   = tempStr.SubString(1, midHash - 1);
+		UnicodeString serial = tempStr.SubString(midHash + 1, tempStr.Length());
+
+		if (name.IsEmpty() || serial.IsEmpty() || catName.IsEmpty()) {
+			printLog(L"Помилка в registered.txt, рядок " + IntToStr(lineNumber) +
+					 L": порожнє ім'я, серійник або категорія (\"" + line + L"\") — рядок пропущено.");
+			continue;
+		}
+
+		registeredUsb tempRegUsb;
+		tempRegUsb.name = name;
+		tempRegUsb.serial = serial;
+		tempRegUsb.catName = catName;
 		try { tempRegUsb.catNumber = m_catNumber.at(tempRegUsb.catName); }
-		catch (const std::out_of_range& error) { tempRegUsb.catNumber = 0; }
+		catch (const std::out_of_range& error) {
+			tempRegUsb.catNumber = 0;
+			printLog(L"Попередження в registered.txt, рядок " + IntToStr(lineNumber) +
+					 L": невідома категорія \"" + catName + L"\" (встановлено 0).");
+		}
 		tempRegUsbList.push_back(tempRegUsb);
 	}
 	printLog("Завантаженно " + UnicodeString(tempRegUsbList.size()) + " відомих пристроїв з файлу registered.txt");
