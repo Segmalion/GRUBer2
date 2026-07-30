@@ -1050,7 +1050,7 @@ void __fastcall TForm1::UpdateClassFilterList()
 /* Читаем registered.txt */
 std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 	std::vector<registeredUsb> tempRegUsbList;
-	TStringList *regUsbFile = new TStringList;
+	std::unique_ptr<TStringList> regUsbFile(new TStringList);
 	// Читаем файл
 	if(exists(p_file)) {
 		regUsbFile->LoadFromFile(p_file.c_str(), TEncoding::UTF8);
@@ -1060,7 +1060,7 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 	}
 	// -- обрабатываем файл с извесными флешками, заполняем вектор "tempRegUsbList"
 	int lineNumber = 0;
-	for (auto strRegUsb: regUsbFile) {
+	for (auto strRegUsb: regUsbFile.get()) {
 		lineNumber++;
 		UnicodeString line = strRegUsb.Trim();
 		if (line.IsEmpty()) continue; // порожні рядки (наприклад, останній рядок файлу) — не помилка
