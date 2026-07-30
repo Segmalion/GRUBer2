@@ -6,6 +6,7 @@
 
 #include "InstallSoft.h"
 #include "Users.h"
+#include "Net.h"
 //---------------------------------------------------------------------------
 class Arm {
 private:
@@ -92,6 +93,10 @@ private:
 		UnicodeString Status;
 	};
 	std::vector<NetDevise> netInterfase;
+	// усі фізичні мережеві адаптери (LAN/WAN/USB), активні й неактивні -
+	// оновлюється при кожному запуску в read_net(); для неактивних lastActive
+	// зберігається з попереднього разу, коли адаптер ще був активним.
+	std::vector<NetAdapterInfo> netAdapters;
 	// === функции
 	// -- чтение из файла на ПК (c:\ProgramData\GRUBer\gruber_info.ini)
 	bool readFromFile();
@@ -102,12 +107,14 @@ public:
 	UnicodeString dirGrubName(UnicodeString prfPart, bool enPrfPart);
 	void read_soft();
 	void read_user();
+	void read_net();
 	std::vector<UnicodeString> mStrIniVersionNumber();
 	std::vector<UnicodeString> mStrInfoArm();
 	std::vector<UnicodeString> mStrSerial();
 	std::vector<UnicodeString> mStrNumberARM();
 	std::vector<UnicodeString> mStrInfoArmGrub();
 	std::vector<UnicodeString> mStrInfoArmEset();
+	std::vector<UnicodeString> mStrInfoArmNet();
 	std::vector<UnicodeString> mStrLastGrub();
 	UnicodeString lastGrub();
 	// === сеттери
@@ -190,6 +197,9 @@ public:
 
 	UnicodeString get_manufacturer();
 	UnicodeString get_productName();
+
+	// усі фізичні мережеві адаптери
+	std::vector<NetAdapterInfo> get_netAdapters();
 
 	bool getPoliticInstall();
 	bool getContrUSB();

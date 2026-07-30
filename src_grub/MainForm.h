@@ -190,6 +190,16 @@ __published:	// IDE-managed Components
 	TEdit *ShowManufacturer;
 	TLabel *Label4;
 	TEdit *ShowProductName;
+	TGroupBox *GroupBox_NetInfo;
+	TGridPanel *GridPanel_NetInfo;
+	TLabel *Label_NetName;
+	TLabel *Label_NetIP;
+	TLabel *Label_NetMAC;
+	TLabel *Label_NetStatus;
+	TComboBox *ShowNetName;
+	TEdit *ShowNetIP;
+	TEdit *ShowNetMAC;
+	TEdit *ShowNetStatus;
 	TButton *Button_CheckDefection;
 	TMenuItem *Gruber_USB;
 	TGroupBox *GroupBox1;
@@ -277,6 +287,7 @@ __published:	// IDE-managed Components
 	void __fastcall Edit_InAdminBPChange(TObject *Sender);
 	void __fastcall ComboBox_forNumberARMChange(TObject *Sender);
 	void __fastcall ShowSerialGenarateDblClick(TObject *Sender);
+	void __fastcall ShowNetNameChange(TObject *Sender);
 	//void __fastcall CheckBox1Click(TObject *Sender);
 	void __fastcall Button_CheckDefectionClick(TObject *Sender);
 	void __fastcall Gruber_USBClick(TObject *Sender);
@@ -295,6 +306,8 @@ extern PACKAGE TForm1 *Form1;
 
 std::vector<UnicodeString> fileInfoGrub();
 void changeEditDirColor();
+// оновлює ShowNetIP/ShowNetMAC/ShowNetStatus за адаптером, обраним в ShowNetName
+void updateNetAdapterFields();
 void RestartApplicationRunas();
 
 // ---------------------------------------------------------------------------

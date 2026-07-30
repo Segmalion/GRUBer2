@@ -79,6 +79,8 @@ std::vector<UnicodeString> fileInfoGrub() {
 	for(auto str : curPC.mStrInfoArmGrub()) vStr.push_back(str);
 	// раздел об ESET
 	for(auto str : curPC.mStrInfoArmEset()) vStr.push_back(str);
+	// раздел о сетевом соединении
+	for(auto str : curPC.mStrInfoArmNet()) vStr.push_back(str);
 	// раздел коментария
 	vStr.push_back("[comment]");
 	for (auto str : curPC.getComent()) {
@@ -98,6 +100,32 @@ void changeEditDirColor() {
 		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
 	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.get_grubPath());
+}
+// Оновлює ShowNetIP/ShowNetMAC/ShowNetStatus відповідно до адаптера,
+// обраного зараз в ShowNetName (індекс у списку відповідає curPC.get_netAdapters()).
+void updateNetAdapterFields() {
+	std::vector<NetAdapterInfo> adapters = curPC.get_netAdapters();
+	int idx = Form1->ShowNetName->ItemIndex;
+	if (idx < 0 || idx >= (int)adapters.size()) {
+		Form1->ShowNetIP->Text = "";
+		Form1->ShowNetMAC->Text = "";
+		Form1->ShowNetStatus->Text = "";
+		return;
+	}
+	NetAdapterInfo &a = adapters[idx];
+	Form1->ShowNetIP->Text = a.ip;
+	Form1->ShowNetMAC->Text = a.mac;
+	if (a.active) {
+		Form1->ShowNetStatus->Text = "Активне";
+	} else if (a.lastActive == TDateTime(0.0)) {
+		Form1->ShowNetStatus->Text = "Неактивне";
+	} else {
+		Form1->ShowNetStatus->Text = "Неактивне (з " + a.lastActive.FormatString("dd.MM.yy HH:mm") + ")";
+	}
+}
+void __fastcall TForm1::ShowNetNameChange(TObject *Sender)
+{
+	updateNetAdapterFields();
 }
 void RestartApplicationRunas()
 {

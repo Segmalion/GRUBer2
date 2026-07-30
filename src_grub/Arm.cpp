@@ -3,6 +3,7 @@
 #pragma hdrstop
 
 #include <memory>
+#include <algorithm>
 
 //#include "MainForm.h"
 //#include "Help.h"
@@ -61,6 +62,8 @@ Arm::Arm()
 	read_soft();
 	// пользователи системы
     read_user();
+	// поточне мережеве з'єднання
+	read_net();
 }
 //---------------------------------------------------------------------------
 /* функции */
@@ -93,6 +96,35 @@ void Arm::read_soft() {
 }
 void Arm::read_user() {
 	users = currentUsers();
+}
+// Перечитуємо усі фізичні адаптери з системи. Для кожного активного зараз -
+// оновлюємо дату останньої активності на "зараз". Для неактивних - шукаємо
+// цей самий адаптер (за MAC) серед раніше збережених (readFromFile() вже
+// виконано в конструкторі раніше) і успадковуємо його lastActive, тобто
+// показуємо "коли він востаннє був активним".
+void Arm::read_net() {
+	std::vector<NetAdapterInfo> live = getAllNetAdapters();
+	std::vector<NetAdapterInfo> prevAdapters = netAdapters;
+	std::vector<NetAdapterInfo> merged;
+	for (auto entry : live) {
+		if (entry.active) {
+			entry.lastActive = Now();
+		} else if (!entry.mac.IsEmpty()) {
+			for (auto &prev : prevAdapters) {
+				if (prev.mac == entry.mac) {
+					entry.lastActive = prev.lastActive;
+					break;
+				}
+			}
+		}
+		merged.push_back(entry);
+	}
+	// активні - першими, далі за іменем
+	std::sort(merged.begin(), merged.end(), [](const NetAdapterInfo &a, const NetAdapterInfo &b) {
+		if (a.active != b.active) return a.active > b.active;
+		return a.name < b.name;
+	});
+	netAdapters = merged;
 }
 //генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrIniVersionNumber() {
@@ -179,6 +211,19 @@ std::vector<UnicodeString> Arm::mStrInfoArmEset() {
 	mStr.push_back("lastUpdateArchive=");
 	return mStr;
 }
+std::vector<UnicodeString> Arm::mStrInfoArmNet() {
+	std::vector<UnicodeString> mStr;
+	for (size_t i = 0; i < netAdapters.size(); i++) {
+		NetAdapterInfo &a = netAdapters[i];
+		mStr.push_back("[net-" + UnicodeString((int)(i + 1)) + "]");
+		mStr.push_back("name=" + a.name);
+		mStr.push_back("ip=" + a.ip);
+		mStr.push_back("mac=" + a.mac);
+		mStr.push_back("active=" + UnicodeString((int)a.active));
+		mStr.push_back("lastActive=" + (a.lastActive == TDateTime(0.0) ? UnicodeString("") : a.lastActive.FormatString("dd.MM.yy HH:mm")));
+	}
+	return mStr;
+}
 //генерация строки с датой последнего Граба
 UnicodeString Arm::lastGrub() {
 	UnicodeString str = histGr.date;
@@ -219,6 +264,24 @@ bool Arm::readFromFile() {
 		inNumberPerson = findParam(file, "[infoGrubARM]", "inNumberPerson");
 		eset.autoUpdate = findParam(file, "[infoESET]", "autoUpdate").ToIntDef(1);
 		eset.dirMirror = findParam(file, "[infoESET]", "dirMirror");
+		// мережеві адаптери - секції [net-1], [net-2]... поки є ім'я в секції
+		netAdapters.clear();
+		for (int netIdx = 1; ; netIdx++) {
+			UnicodeString netSection = "[net-" + UnicodeString(netIdx) + "]";
+			UnicodeString netName = errCheck(findParam(file, netSection, "name"));
+			if (netName.IsEmpty()) break; // секції більше немає
+			NetAdapterInfo netEntry;
+			netEntry.name = netName;
+			netEntry.ip = errCheck(findParam(file, netSection, "ip"));
+			netEntry.mac = errCheck(findParam(file, netSection, "mac"));
+			netEntry.active = errCheck(findParam(file, netSection, "active")).ToIntDef(0);
+			// findParam повертає "ERROR" якщо ключа нема - errCheck() прибирає
+			// це до порожнього рядка, щоб TDateTime не впав на спробі
+			// розпарсити "ERROR" як дату.
+			UnicodeString netLastActiveStr = errCheck(findParam(file, netSection, "lastActive"));
+			if (!netLastActiveStr.IsEmpty()) netEntry.lastActive = netLastActiveStr;
+			netAdapters.push_back(netEntry);
+		}
 		coment = findCategory(file, "[comment]");
 		// class FIX
 		classID = findParam(file, "[infoGrubARM]", "classID").ToIntDef(0);
@@ -375,6 +438,8 @@ UnicodeString Arm::getCPUID() { return CPUID; }
 UnicodeString Arm::getUnSerial() { return unSerial; }
 UnicodeString Arm::get_manufacturer() { return manufacturer; }
 UnicodeString Arm::get_productName() { return productName; }
+// усі фізичні мережеві адаптери
+std::vector<NetAdapterInfo> Arm::get_netAdapters() { return netAdapters; }
 // есет
 UnicodeString Arm::getEsetDir() { return eset.dirMirror; }
 bool Arm::getEsetAutoUpdate() { return eset.autoUpdate; }

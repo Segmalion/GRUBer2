@@ -224,6 +224,11 @@ void setInfoArmToForm(Arm &curPC) {
 	Form1->ShowSerialGenarate->Text = curPC.getUnSerial();
 	Form1->ShowManufacturer->Text = curPC.get_manufacturer();
 	Form1->ShowProductName->Text = curPC.get_productName();
+
+	Form1->ShowNetName->Items->Clear();
+	for (auto &a : curPC.get_netAdapters()) Form1->ShowNetName->Items->Add(a.name);
+	if (Form1->ShowNetName->Items->Count > 0) Form1->ShowNetName->ItemIndex = 0;
+	updateNetAdapterFields();
 	//infoSetToFille(curPC);
 //...
 }
@@ -245,6 +250,8 @@ bool infoSetToFille(Arm &curPC)
 	for(auto str : curPC.mStrInfoArmGrub()) infoFille->Add(str);
 	// раздел об ESET
 	for(auto str : curPC.mStrInfoArmEset()) infoFille->Add(str);
+	// раздел о сетевом соединении
+	for(auto str : curPC.mStrInfoArmNet()) infoFille->Add(str);
 	// раздел коментария
    infoFille->Add("[comment]");
 	for (auto i : curPC.getComent()) {
