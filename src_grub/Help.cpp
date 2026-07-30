@@ -232,6 +232,7 @@ void setInfoArmToForm(Arm &curPC) {
 	updateNetAdapterFields();
 
 	Form1->ShowEsetID->Text = getEsetProductInstanceID();
+	Form1->Button_EsetLogsDir->Enabled = DirectoryExists(getEsetLogsDir());
 	//infoSetToFille(curPC);
 //...
 }

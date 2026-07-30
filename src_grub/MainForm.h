@@ -202,7 +202,7 @@ __published:	// IDE-managed Components
 	TEdit *ShowNetStatus;
 	TGroupBox *GroupBox_EsetInfo;
 	TGridPanel *GridPanel_EsetInfo;
-	TLabel *Label_EsetID;
+	TButton *Button_EsetLogsDir;
 	TEdit *ShowEsetID;
 	TButton *Button_CheckDefection;
 	TMenuItem *Gruber_USB;
@@ -231,6 +231,7 @@ __published:	// IDE-managed Components
 	void __fastcall EditLicOfficeChange(TObject *Sender);
 	void __fastcall EditGrubUserChange(TObject *Sender);
 	void __fastcall BtnGruberDirOpenClick(TObject *Sender);
+	void __fastcall Button_EsetLogsDirClick(TObject *Sender);
 	void __fastcall BtnGruberStopClick(TObject *Sender);
 	void __fastcall CheckBoxAuditClick(TObject *Sender);
 	void __fastcall CheckBoxEsetLogClick(TObject *Sender);

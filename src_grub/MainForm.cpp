@@ -26,6 +26,7 @@
 #include "Help.h"
 #include "Text.h"
 #include "Fille.h"
+#include "Eset.h"
 
 #include "Th_Gruber.h"
 //---------------------------------------------------------------------------
@@ -456,6 +457,11 @@ void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
 void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
 {
 	ShellExecuteW(NULL, L"open", curDir.get_grubPath().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+// === открыть папку логов ESET Management Agent
+void __fastcall TForm1::Button_EsetLogsDirClick(TObject *Sender)
+{
+	ShellExecuteW(NULL, L"open", getEsetLogsDir().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // === остановка Граба
 // --- полная

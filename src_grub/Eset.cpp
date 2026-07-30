@@ -8,10 +8,15 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
+UnicodeString getEsetLogsDir()
+{
+	return "c:\\ProgramData\\ESET\\RemoteAdministrator\\Agent\\EraAgentApplicationData\\Logs\\";
+}
+
 UnicodeString getEsetProductInstanceID()
 {
 	UnicodeString notFound = "Не знайдено";
-	UnicodeString filePath = "c:\\ProgramData\\ESET\\RemoteAdministrator\\Agent\\EraAgentApplicationData\\Logs\\trace.log";
+	UnicodeString filePath = getEsetLogsDir() + "trace.log";
 	UnicodeString marker = "ProductInstanceID:";
 
 	if (!FileExists(filePath)) return notFound;
