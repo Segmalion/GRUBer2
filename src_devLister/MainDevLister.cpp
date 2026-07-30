@@ -1029,7 +1029,9 @@ void __fastcall TForm1::optimizeGridColumns(TDBGrid* grid) {
 /* Заполняем фильтр по устройствам */
 void __fastcall TForm1::UpdateClassFilterList()
 {
-	TFDQuery* tempQuery = new TFDQuery(NULL);
+	// std::unique_ptr гарантирует delete даже если Open() бросит исключение
+	// (например, при повреждённой/занятой БД) — раньше tempQuery в этом случае утекал.
+	std::unique_ptr<TFDQuery> tempQuery(new TFDQuery(NULL));
 	tempQuery->Connection = FDConnection1;
 
     // Выбираем только уникальные классы из базы
@@ -1044,8 +1046,6 @@ void __fastcall TForm1::UpdateClassFilterList()
 		ListBox_Filter->Items->Add(tempQuery->FieldByName("class_name")->AsString);
         tempQuery->Next();
 	}
-
-	delete tempQuery;
 }
 /* Читаем registered.txt */
 std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
