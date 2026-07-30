@@ -97,8 +97,9 @@ __fastcall TForm1::TForm1(TComponent* Owner)
     LoadFontFromResource();
 	// Инициализация БД
 	createDB();
-    // Читает файл registered.txt
-	fs::path p_fileRegUsb = fs::current_path() / "registered.txt";
+    // Читает файл registered.txt из каталога самого exe (а не из текущего рабочего
+    // каталога, который зависит от способа запуска и может отличаться от каталога программы)
+	fs::path p_fileRegUsb = fs::path(ExtractFilePath(Application->ExeName).c_str()) / "registered.txt";
 	regUsbList = readRegUsbFile(p_fileRegUsb);
 	// Получаем инфу о ПК
 	getInfoPC();
