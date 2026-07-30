@@ -2244,10 +2244,6 @@
                   Enabled = False
                   TabOrder = 1
                   OnClick = Button_EsetLogsDirClick
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 168
-                  ExplicitHeight = 79
                 end
                 object ShowEsetID: TEdit
                   Left = 175
@@ -2304,11 +2300,6 @@
             ControlCollection = <
               item
                 Column = 0
-                Control = GridPanel_ESETQuarantine
-                Row = 0
-              end
-              item
-                Column = 0
                 Control = Label_DefectionUser
                 Row = 1
               end
@@ -2331,6 +2322,11 @@
                 Column = 0
                 Control = Button_CheckDefection
                 Row = 6
+              end
+              item
+                Column = 0
+                Control = GroupBox_installAVPZ
+                Row = 0
               end>
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWhite
@@ -2341,7 +2337,7 @@
             RowCollection = <
               item
                 SizeStyle = ssAbsolute
-                Value = 50.000000000000000000
+                Value = 140.000000000000000000
               end
               item
                 SizeStyle = ssAbsolute
@@ -2367,98 +2363,10 @@
                 Value = 81.000000000000000000
               end>
             TabOrder = 0
-            object GridPanel_ESETQuarantine: TGridPanel
-              Left = 0
-              Top = 0
-              Width = 676
-              Height = 50
-              Margins.Left = 6
-              Margins.Top = 6
-              Margins.Right = 6
-              Margins.Bottom = 6
-              Align = alClient
-              BevelOuter = bvNone
-              ColumnCollection = <
-                item
-                  Value = 58.070761609198890000
-                end
-                item
-                  Value = 41.929238390801110000
-                end>
-              ControlCollection = <
-                item
-                  Column = 0
-                  Control = Label_checkQuarantineEset_1
-                  Row = 0
-                end
-                item
-                  Column = 1
-                  Control = Show_ESETQuarantine
-                  Row = 0
-                end>
-              RowCollection = <
-                item
-                  Value = 100.000000000000000000
-                end
-                item
-                  SizeStyle = ssAuto
-                end>
-              TabOrder = 0
-              DesignSize = (
-                676
-                50)
-              object Label_checkQuarantineEset_1: TLabel
-                AlignWithMargins = True
-                Left = 6
-                Top = 6
-                Width = 381
-                Height = 38
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                Align = alClient
-                Caption = #1047#1085#1072#1081#1076#1077#1085#1085#1086' '#1092#1072#1081#1083#1110#1074' '#1074' '#1082#1072#1088#1072#1085#1090#1080#1085#1110' ESET:'
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -21
-                Font.Name = 'Segoe UI'
-                Font.Style = []
-                ParentFont = False
-                Layout = tlCenter
-                StyleElements = [seClient, seBorder]
-                ExplicitWidth = 346
-                ExplicitHeight = 30
-              end
-              object Show_ESETQuarantine: TEdit
-                AlignWithMargins = True
-                Left = 400
-                Top = 6
-                Width = 269
-                Height = 38
-                Hint = '12312321'
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                Anchors = []
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -21
-                Font.Name = 'Segoe UI'
-                Font.Style = []
-                ParentFont = False
-                ParentShowHint = False
-                ReadOnly = True
-                ShowHint = True
-                TabOrder = 0
-                Text = '[WIP] ESETQuarantine'
-              end
-            end
             object Label_DefectionUser: TLabel
               AlignWithMargins = True
               Left = 6
-              Top = 56
+              Top = 146
               Width = 664
               Height = 38
               Margins.Left = 6
@@ -2481,7 +2389,7 @@
             object Memo2: TMemo
               AlignWithMargins = True
               Left = 6
-              Top = 106
+              Top = 196
               Width = 664
               Height = 148
               Margins.Left = 6
@@ -2497,12 +2405,12 @@
               ParentFont = False
               ReadOnly = True
               ScrollBars = ssVertical
-              TabOrder = 1
+              TabOrder = 0
             end
             object Label_DefectionSoft: TLabel
               AlignWithMargins = True
               Left = 6
-              Top = 266
+              Top = 356
               Width = 664
               Height = 38
               Margins.Left = 6
@@ -2525,7 +2433,7 @@
             object Memo1: TMemo
               AlignWithMargins = True
               Left = 6
-              Top = 316
+              Top = 406
               Width = 664
               Height = 148
               Margins.Left = 6
@@ -2541,7 +2449,7 @@
               ParentFont = False
               ReadOnly = True
               ScrollBars = ssVertical
-              TabOrder = 2
+              TabOrder = 1
               WordWrap = False
             end
             object Button_CheckDefection: TButton
@@ -2556,8 +2464,241 @@
               Margins.Bottom = 6
               Align = alClient
               Caption = #1055#1086#1074#1090#1086#1088#1085#1072' '#1087#1077#1088#1077#1074#1110#1088#1082#1072
-              TabOrder = 3
+              TabOrder = 2
               OnClick = Button_CheckDefectionClick
+            end
+            object GroupBox_installAVPZ: TGroupBox
+              AlignWithMargins = True
+              Left = 5
+              Top = 5
+              Width = 666
+              Height = 130
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Align = alClient
+              Caption = #1055#1077#1088#1077#1074#1110#1088#1082#1072' '#1040#1042#1055#1047':'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -21
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+              TabOrder = 3
+              object GridPanel_installAVPZ: TGridPanel
+                Left = 2
+                Top = 32
+                Width = 662
+                Height = 96
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Align = alClient
+                BevelOuter = bvNone
+                ColumnCollection = <
+                  item
+                    SizeStyle = ssAbsolute
+                    Value = 280.000000000000000000
+                  end
+                  item
+                    Value = 100.000000000000000000
+                  end
+                  item
+                    SizeStyle = ssAbsolute
+                    Value = 220.000000000000000000
+                  end>
+                ControlCollection = <
+                  item
+                    Column = 0
+                    Control = CheckBox_installAvpzESET
+                    Row = 0
+                  end
+                  item
+                    Column = 1
+                    Control = CheckBox_installAvpzRDsensor
+                    Row = 0
+                  end
+                  item
+                    Column = 2
+                    Control = CheckBox_installAvpzTRELIX
+                    Row = 0
+                  end
+                  item
+                    Column = 0
+                    ColumnSpan = 3
+                    Control = GridPanel_ESETQuarantine
+                    Row = 1
+                  end>
+                RowCollection = <
+                  item
+                    Value = 50.000000000000000000
+                  end
+                  item
+                    Value = 50.000000000000000000
+                  end>
+                TabOrder = 0
+                object CheckBox_installAvpzESET: TCheckBox
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 5
+                  Width = 270
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Caption = 'ESET Endpoint Security'
+                  Checked = True
+                  State = cbChecked
+                  TabOrder = 0
+                  OnClick = CheckBox_installAvpzESETClick
+                end
+                object CheckBox_installAvpzRDsensor: TCheckBox
+                  AlignWithMargins = True
+                  Left = 285
+                  Top = 5
+                  Width = 152
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Caption = 'RDsensor'
+                  TabOrder = 1
+                  OnClick = CheckBox_installAvpzESETClick
+                end
+                object CheckBox_installAvpzTRELIX: TCheckBox
+                  AlignWithMargins = True
+                  Left = 447
+                  Top = 5
+                  Width = 210
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Caption = 'HXagent (TRELIX)'
+                  TabOrder = 2
+                  OnClick = CheckBox_installAvpzESETClick
+                end
+                object GridPanel_ESETQuarantine: TGridPanel
+                  Left = 0
+                  Top = 48
+                  Width = 662
+                  Height = 48
+                  Margins.Left = 6
+                  Margins.Top = 6
+                  Margins.Right = 6
+                  Margins.Bottom = 6
+                  Align = alClient
+                  Anchors = []
+                  BevelOuter = bvNone
+                  ColumnCollection = <
+                    item
+                      Value = 100.000000000000000000
+                    end
+                    item
+                      SizeStyle = ssAbsolute
+                      Value = 220.000000000000000000
+                    end
+                    item
+                      SizeStyle = ssAbsolute
+                      Value = 60.000000000000000000
+                    end>
+                  ControlCollection = <
+                    item
+                      Column = 0
+                      Control = Label_checkQuarantineEset_1
+                      Row = 0
+                    end
+                    item
+                      Column = 1
+                      Control = Show_ESETQuarantine
+                      Row = 0
+                    end
+                    item
+                      Column = 2
+                      Control = Button_OpenQuarantine
+                      Row = 0
+                    end>
+                  RowCollection = <
+                    item
+                      Value = 100.000000000000000000
+                    end>
+                  TabOrder = 3
+                  DesignSize = (
+                    662
+                    48)
+                  object Label_checkQuarantineEset_1: TLabel
+                    AlignWithMargins = True
+                    Left = 6
+                    Top = 6
+                    Width = 370
+                    Height = 36
+                    Margins.Left = 6
+                    Margins.Top = 6
+                    Margins.Right = 6
+                    Margins.Bottom = 6
+                    Align = alClient
+                    Caption = #1047#1085#1072#1081#1076#1077#1085#1085#1086' '#1092#1072#1081#1083#1110#1074' '#1074' '#1082#1072#1088#1072#1085#1090#1080#1085#1110' ESET:'
+                    Font.Charset = DEFAULT_CHARSET
+                    Font.Color = clWindowText
+                    Font.Height = -21
+                    Font.Name = 'Segoe UI'
+                    Font.Style = []
+                    ParentFont = False
+                    Layout = tlCenter
+                    StyleElements = [seClient, seBorder]
+                    ExplicitWidth = 346
+                    ExplicitHeight = 30
+                  end
+                  object Show_ESETQuarantine: TEdit
+                    AlignWithMargins = True
+                    Left = 398
+                    Top = 6
+                    Width = 187
+                    Height = 38
+                    Hint = '12312321'
+                    Margins.Left = 6
+                    Margins.Top = 6
+                    Margins.Right = 6
+                    Margins.Bottom = 6
+                    Anchors = [akLeft, akTop, akRight, akBottom]
+                    Font.Charset = DEFAULT_CHARSET
+                    Font.Color = clWindowText
+                    Font.Height = -21
+                    Font.Name = 'Segoe UI'
+                    Font.Style = []
+                    ParentFont = False
+                    ParentShowHint = False
+                    ReadOnly = True
+                    ShowHint = True
+                    TabOrder = 0
+                    Text = '[WIP] ESETQuarantine'
+                  end
+                  object Button_OpenQuarantine: TButton
+                    AlignWithMargins = True
+                    Left = 607
+                    Top = 5
+                    Width = 50
+                    Height = 38
+                    Margins.Left = 5
+                    Margins.Top = 5
+                    Margins.Right = 5
+                    Margins.Bottom = 5
+                    Align = alClient
+                    Caption = '...'
+                    Enabled = False
+                    TabOrder = 1
+                    OnClick = Button_OpenQuarantineClick
+                  end
+                end
+              end
             end
           end
         end

@@ -60,7 +60,19 @@ struct defection {
 	bool user;
 	bool soft;
 	bool eset;
+	std::vector<UnicodeString> quarantineDirs; // папки карантину ESET, де знайдено файли
 } curDefection;
+// CheckBox_installAvpz* - "тільки читання": OnClick відкочує ручні кліки
+// користувача (див. CheckBox_installAvpzESETClick), але сам відкат теж
+// відбувається через Checked, тому програмне оновлення стану мусить
+// проходити через цей прапорець, інакше OnClick від власного присвоєння
+// відкотить щойно встановлене значення назад.
+static bool avpzCheckBoxProgrammaticSet = false;
+static void setReadOnlyCheckBox(TCheckBox *cb, bool value) {
+	avpzCheckBoxProgrammaticSet = true;
+	cb->Checked = value;
+	avpzCheckBoxProgrammaticSet = false;
+}
 //---------------------------------------------------------------------------
 extern const UnicodeString versionApp = GetAppVersion();
 //---------------------------------------------------------------------------
@@ -152,6 +164,11 @@ SoftDefectionResult computeSoftDefection() {
 		for(auto soft: blockedInstalledSoft) sortToVector(res.lines, soft.name);
 		res.bad = true;
 	}
+	for (auto soft: curPC.get_softInstall()) {
+		if (compareInSring(soft.name, "ESET Endpoint Security")) res.esetInstalled = true;
+		if (compareInSring(soft.name, "ESET Rogue Detection Sensor")) res.rdSensorInstalled = true;
+		if (compareInSring(soft.name, "Trellix Endpoint Security (HX) Agent")) res.trellixInstalled = true;
+	}
 	return res;
 }
 UsersDefectionResult computeUsersDefection() {
@@ -233,11 +250,17 @@ EsetDefectionResult computeEsetDefection() {
 	sysList.size += temp.size;
 	// папки карантина пользователей
 	for (auto userDir: userDirList) {
-		patchList temp = scanDirToFille(userDir + "\\" + dirUserQuarantine);
+		UnicodeString qDir = userDir + "\\" + dirUserQuarantine;
+		patchList temp = scanDirToFille(qDir);
 		userList.list.insert(userList.list.end(), temp.list.begin(), temp.list.end());
 		userList.countDir += temp.countDir;
 		userList.countFille += temp.countFille;
 		userList.size += temp.size;
+		int countThisUserFille = 0;
+		for (auto file: temp.list) {
+			if (!(compareInSring(file.str, "INFO.NQI") || file.dir)) countThisUserFille ++;
+		}
+		if (countThisUserFille / 3 > 0) res.quarantineDirs.push_back(qDir);
 	}
 	// подщет файлов в карантине
 	int countSysQuarantineFille = 0;
@@ -252,6 +275,7 @@ EsetDefectionResult computeEsetDefection() {
 	res.countUser = countUserQuarantineFille / 3;
 	res.countTotal = res.countSys + res.countUser;
 	res.bad = res.countTotal > 0;
+	if (res.countSys > 0) res.quarantineDirs.insert(res.quarantineDirs.begin(), dirSysQuarantine);
 	return res;
 }
 DefectionResult computeDefection() {
@@ -270,6 +294,9 @@ void applySoftDefection(const SoftDefectionResult &r) {
 	if (r.lines.empty()) Form1->Memo1->Lines->Add("Не знайдено!");
 	else for(auto str: r.lines) Form1->Memo1->Lines->Add(str);
 	curDefection.soft = r.bad;
+	setReadOnlyCheckBox(Form1->CheckBox_installAvpzESET, r.esetInstalled);
+	setReadOnlyCheckBox(Form1->CheckBox_installAvpzRDsensor, r.rdSensorInstalled);
+	setReadOnlyCheckBox(Form1->CheckBox_installAvpzTRELIX, r.trellixInstalled);
 }
 void applyUsersDefection(const UsersDefectionResult &r) {
 	Form1->Memo2->Clear();
@@ -290,6 +317,8 @@ void applyEsetDefection(const EsetDefectionResult &r) {
 		Form1->Show_ESETQuarantine->Hint = "Карантин порожній!";
 	}
 	curDefection.eset = r.bad;
+	curDefection.quarantineDirs = r.quarantineDirs;
+	Form1->Button_OpenQuarantine->Enabled = !r.quarantineDirs.empty();
 }
 void applyDefectionLabels(const DefectionResult &r) {
 	applySoftDefection(r.soft);
@@ -462,6 +491,13 @@ void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
 void __fastcall TForm1::Button_EsetLogsDirClick(TObject *Sender)
 {
 	ShellExecuteW(NULL, L"open", getEsetLogsDir().c_str(), NULL, NULL, SW_SHOWDEFAULT);
+}
+// === открыть папки карантина ESET, где реально найдены файлы
+void __fastcall TForm1::Button_OpenQuarantineClick(TObject *Sender)
+{
+	for (auto &dir: curDefection.quarantineDirs) {
+		ShellExecuteW(NULL, L"open", dir.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+	}
 }
 // === остановка Граба
 // --- полная
@@ -1046,6 +1082,19 @@ void __fastcall TForm1::CheckListBox_SPZClickCheck(TObject *Sender)
 		if(Form1->CheckListBox_SPZ->Checked[i])
 			tm_vStr.push_back(Form1->CheckListBox_SPZ->Items->Strings[i]);
 	curPC.set_spzInstal(tm_vStr);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CheckBox_installAvpzESETClick(TObject *Sender)
+{
+	// avpzCheckBoxProgrammaticSet - зараз йде програмне оновлення (setReadOnlyCheckBox),
+	// відкат не потрібен. Інакше - TCheckBox::Checked сам генерує повторний
+	// OnClick, тому без цього прапорця відкат нижче зациклюється в
+	// нескінченну рекурсію (Stack Overflow).
+	if (avpzCheckBoxProgrammaticSet) return;
+	avpzCheckBoxProgrammaticSet = true;
+	((TCheckBox*)Sender)->Checked = !((TCheckBox*)Sender)->Checked;
+	avpzCheckBoxProgrammaticSet = false;
 }
 //---------------------------------------------------------------------------
 

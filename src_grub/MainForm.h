@@ -218,6 +218,12 @@ __published:	// IDE-managed Components
 	TLabel *Label18;
 	TLabel *Label19;
 	TLabel *Label20;
+	TGroupBox *GroupBox_installAVPZ;
+	TGridPanel *GridPanel_installAVPZ;
+	TCheckBox *CheckBox_installAvpzESET;
+	TCheckBox *CheckBox_installAvpzRDsensor;
+	TCheckBox *CheckBox_installAvpzTRELIX;
+	TButton *Button_OpenQuarantine;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall CheckBox_TempDirClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
@@ -232,6 +238,7 @@ __published:	// IDE-managed Components
 	void __fastcall EditGrubUserChange(TObject *Sender);
 	void __fastcall BtnGruberDirOpenClick(TObject *Sender);
 	void __fastcall Button_EsetLogsDirClick(TObject *Sender);
+	void __fastcall Button_OpenQuarantineClick(TObject *Sender);
 	void __fastcall BtnGruberStopClick(TObject *Sender);
 	void __fastcall CheckBoxAuditClick(TObject *Sender);
 	void __fastcall CheckBoxEsetLogClick(TObject *Sender);
@@ -300,6 +307,7 @@ __published:	// IDE-managed Components
 	void __fastcall ComboBox_ContrUSBChange(TObject *Sender);
 	void __fastcall ComboBox_MultiUSERSChange(TObject *Sender);
 	void __fastcall CheckListBox_SPZClickCheck(TObject *Sender);
+	void __fastcall CheckBox_installAvpzESETClick(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	std::set<int> DisabledItemsClass;
@@ -329,6 +337,10 @@ void RestartApplicationRunas();
 struct SoftDefectionResult {
 	std::vector<UnicodeString> lines;
 	bool bad = false;
+	// наявність конкретних АВПЗ-агентів серед встановленого софту
+	bool esetInstalled = false;
+	bool rdSensorInstalled = false;
+	bool trellixInstalled = false;
 };
 struct UsersDefectionResult {
 	std::vector<UnicodeString> lines;
@@ -339,6 +351,7 @@ struct EsetDefectionResult {
 	int countSys = 0;
 	int countUser = 0;
 	bool bad = false;
+	std::vector<UnicodeString> quarantineDirs; // папки карантину, де реально знайдено файли
 };
 struct DefectionResult {
 	SoftDefectionResult soft;
