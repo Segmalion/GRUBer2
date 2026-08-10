@@ -34,6 +34,7 @@
 #include <Vcl.Dialogs.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Menus.hpp>
+#include <Vcl.Mask.hpp>
 
 // --- ДОБАВЬТЕ ЭТИ СТРОКИ СЮДА ---
 #include <map>
@@ -127,6 +128,7 @@ __published:	// IDE-managed Components
 	TSaveDialog *SaveDialog_ToFile;
 	TButton *Button_LoadFromJSON;
 	TButton *Button_ShowAll;
+	TLabeledEdit *LabeledEdit_SearchSN;
 	void __fastcall Button_DeviceUpdateCurPCClick(TObject *Sender);
 	void __fastcall DBGrid1TitleClick(TColumn *Column);
 	void __fastcall ListBox_FilterClick(TObject *Sender);
@@ -135,6 +137,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBox_SNnotNULLClick(TObject *Sender);
 	void __fastcall CheckBox_ShowKnowUSBClick(TObject *Sender);
 	void __fastcall CheckBox_OnlyOneSNClick(TObject *Sender);
+	void __fastcall LabeledEdit_SearchSNChange(TObject *Sender);
 	void __fastcall TrackBar_CountErrSerialChange(TObject *Sender);
 	void __fastcall DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect, int DataCol,
           TColumn *Column, TGridDrawState State);

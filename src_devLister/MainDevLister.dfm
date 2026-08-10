@@ -447,7 +447,6 @@ object Form1: TForm1
             Caption = #1058#1110#1083#1100#1082#1080' '#1079' '#1085#1072#1103#1074#1085#1080#1084' SN'
             TabOrder = 1
             OnClick = CheckBox_SNnotNULLClick
-            ExplicitLeft = 5
           end
           object CheckBox_ShowKnowUSB: TCheckBox
             AlignWithMargins = True
@@ -463,7 +462,6 @@ object Form1: TForm1
             Caption = #1058#1110#1083#1100#1082#1110' '#1074#1110#1076#1086#1084#1110' USB'
             TabOrder = 2
             OnClick = CheckBox_ShowKnowUSBClick
-            ExplicitLeft = 8
           end
           object CheckBox_OnlyOneSN: TCheckBox
             AlignWithMargins = True
@@ -476,10 +474,9 @@ object Form1: TForm1
             Margins.Right = 6
             Margins.Bottom = 6
             Align = alLeft
-            Caption = #1058#1110#1083#1100#1082#1110' '#1086#1076#1080#1085' SN'
+            Caption = #1055#1088#1080#1073#1088#1072#1090#1080' '#1076#1091#1073#1083#1110' SN'
             TabOrder = 3
             OnClick = CheckBox_OnlyOneSNClick
-            ExplicitLeft = 8
           end
           object CheckBox_AutoUpdateDev: TCheckBox
             AlignWithMargins = True
@@ -676,7 +673,6 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 5
         OnClick = Button_ShowAllClick
-        ExplicitTop = 8
       end
     end
     object StatusBar1: TStatusBar
@@ -741,12 +737,21 @@ object Form1: TForm1
           Column = 1
           Control = Button_LoadFromJSON
           Row = 0
+        end
+        item
+          Column = 2
+          Control = LabeledEdit_SearchSN
+          Row = 0
         end>
       RowCollection = <
         item
           Value = 100.000000000000000000
+        end
+        item
+          SizeStyle = ssAuto
         end>
       TabOrder = 3
+      ExplicitTop = 982
       object Button_DeviceUpdateCurPC: TButton
         AlignWithMargins = True
         Left = 6
@@ -791,6 +796,31 @@ object Form1: TForm1
         Caption = #1042#1110#1076#1086#1073#1088#1072#1079#1080#1090#1080' '#1087#1088#1080#1089#1090#1088#1086#1111' '#1079' '#1092#1072#1081#1083#1091
         TabOrder = 2
         OnClick = Button_LoadFromJSONClick
+      end
+      object LabeledEdit_SearchSN: TLabeledEdit
+        AlignWithMargins = True
+        Left = 792
+        Top = 47
+        Width = 384
+        Height = 38
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Align = alBottom
+        EditLabel.Width = 205
+        EditLabel.Height = 30
+        EditLabel.Margins.Left = 5
+        EditLabel.Margins.Top = 5
+        EditLabel.Margins.Right = 5
+        EditLabel.Margins.Bottom = 5
+        EditLabel.Caption = #1055#1086#1096#1091#1082' '#1079#1072' SN:'
+        TabOrder = 3
+        Text = ''
+        OnChange = LabeledEdit_SearchSNChange
+        ExplicitLeft = 238
+        ExplicitTop = 91
+        ExplicitWidth = 212
       end
     end
   end

@@ -1464,7 +1464,7 @@ bool __fastcall TForm1::SaveDataToDB(const String& filePath) {
 // ------------
 /* Строит содержимое txt-выгрузки для ESET по текущему (уже отфильтрованному по
    всем активным фильтрам) выводу FDQuery1. Первая строка — фиксированный заголовок
-   плагина, дальше по строке на устройство: ,,serial_number,friendly_name. Строки
+   плагина, дальше по строке на устройство: ,,serial_number,regName. Строки
    с пустым серийным номером и повторы уже встречавшегося серийного номера
    не сохраняются. */
 UnicodeString __fastcall TForm1::BuildEsetTxtContent()
@@ -1487,7 +1487,7 @@ UnicodeString __fastcall TForm1::BuildEsetTxtContent()
 			if (!serial.IsEmpty() && seenSerials.find(serial) == seenSerials.end())
 			{
 				seenSerials[serial] = true;
-				UnicodeString description = FDQuery1->FieldByName(L"friendly_name")->AsString.Trim();
+				UnicodeString description = FDQuery1->FieldByName(L"regName")->AsString.Trim();
 				content += L",," + serial + L"," + description + L"\r\n";
 			}
 			FDQuery1->Next();
@@ -2026,6 +2026,14 @@ void __fastcall TForm1::CheckBox_OnlyOneSNClick(TObject *Sender)
 	ApplyDBGridFilter();
 }
 //---------------------------------------------------------------------------
+/* ПОИСК по серийному номеру — не фильтр, а подсветка совпадающих строк в текущем
+   выводе (см. DBGrid1DrawColumnCell); срабатывает автоматически при каждом
+   изменении поля. */
+void __fastcall TForm1::LabeledEdit_SearchSNChange(TObject *Sender)
+{
+	DBGrid1->Repaint();
+}
+//---------------------------------------------------------------------------
 
 void __fastcall TForm1::TrackBar_CountErrSerialChange(TObject *Sender)
 {
@@ -2044,6 +2052,7 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 	UnicodeString devStatus = grid->DataSource->DataSet->FieldByName(L"status")->AsString;
 	UnicodeString devClass  = grid->DataSource->DataSet->FieldByName(L"class_name")->AsString;
 	UnicodeString devName  = grid->DataSource->DataSet->FieldByName(L"friendly_name")->AsString;
+	UnicodeString devSerial = grid->DataSource->DataSet->FieldByName(L"serial_number")->AsString;
 	UnicodeString devDescription  = grid->DataSource->DataSet->FieldByName(L"dev_desc")->AsString;
 	short devCat  = grid->DataSource->DataSet->FieldByName(L"regCatNumber")->AsInteger;
 	short devKnow = grid->DataSource->DataSet->FieldByName(L"serialKnow")->AsInteger;
@@ -2076,6 +2085,14 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 		if (devCat > indefPC.catPC || compareStrInVector(devName, v_allertName) || compareStrInVector(devDescription, v_allertName))
 		{
 			grid->Canvas->Brush->Color = (TColor)0x00D0D0FF; // Очень бледный красный
+		}
+
+		// Подсветка совпадения с полем поиска по серийному номеру (LabeledEdit_SearchSN) —
+		// имеет наивысший приоритет среди фоновых подсветок этой строки
+		UnicodeString searchSN = LabeledEdit_SearchSN->Text.Trim();
+		if (!searchSN.IsEmpty() && devSerial.UpperCase().Pos(searchSN.UpperCase()) > 0)
+		{
+			grid->Canvas->Brush->Color = (TColor)0x0000FFFF; // Ярко-желтый (BGR)
 		}
 
     }
