@@ -1462,6 +1462,68 @@ bool __fastcall TForm1::SaveDataToDB(const String& filePath) {
 	}
 }
 // ------------
+/* Строит содержимое txt-выгрузки для ESET по текущему (уже отфильтрованному по
+   всем активным фильтрам) выводу FDQuery1. Первая строка — фиксированный заголовок
+   плагина, дальше по строке на устройство: ,,serial_number,friendly_name. Строки
+   с пустым серийным номером и повторы уже встречавшегося серийного номера
+   не сохраняются. */
+UnicodeString __fastcall TForm1::BuildEsetTxtContent()
+{
+	UnicodeString content =
+		L"# {\"product\":\"endpoint\",\"version\":\"10.1.2050\","
+		L"\"path\":\"plugins.01000e00.settings.groups.1.params\","
+		L"\"columns\":[\"vendor\",\"model\",\"serial\",\"description\"]}\r\n";
+
+	std::map<UnicodeString, bool> seenSerials;
+
+	TBookmark bm = FDQuery1->GetBookmark();
+	FDQuery1->DisableControls();
+	try
+	{
+		FDQuery1->First();
+		while (!FDQuery1->Eof)
+		{
+			UnicodeString serial = FDQuery1->FieldByName(L"serial_number")->AsString.Trim();
+			if (!serial.IsEmpty() && seenSerials.find(serial) == seenSerials.end())
+			{
+				seenSerials[serial] = true;
+				UnicodeString description = FDQuery1->FieldByName(L"friendly_name")->AsString.Trim();
+				content += L",," + serial + L"," + description + L"\r\n";
+			}
+			FDQuery1->Next();
+		}
+	}
+	__finally
+	{
+		if (FDQuery1->BookmarkValid(bm)) {
+			FDQuery1->GotoBookmark(bm);
+		}
+		FDQuery1->FreeBookmark(bm);
+		FDQuery1->EnableControls();
+	}
+
+	return content;
+}
+bool __fastcall TForm1::SaveDataToEsetTxt(const String& FilePath)
+{
+	if (!FDQuery1->Active) {
+		printLog(L"Ошибка сохранения: FDQuery1 не активен.");
+		return false;
+	}
+
+	try
+	{
+		UnicodeString content = BuildEsetTxtContent();
+		TFile::WriteAllText(FilePath, content, TEncoding::UTF8);
+		return true;
+	}
+	catch (const Exception &e)
+	{
+		printLog(L"Ошибка сохранения ESET txt: " + e.Message);
+		return false;
+	}
+}
+// ------------
 bool LoadFontFromResource()
 {
     // 1. Находим ресурс в собственном .exe модуле
@@ -2127,7 +2189,7 @@ void __fastcall TForm1::Button_SaveToJSONClick(TObject *Sender)
 		bool saved = false;
 		if (SaveDialog_ToFile->FilterIndex == 1)      saved = SaveDataToJSON(selectedFile, indefPC, devicesList);
 		else if (SaveDialog_ToFile->FilterIndex == 2) saved = SaveDataToDB(selectedFile);
-		else if (SaveDialog_ToFile->FilterIndex == 3) printLog(L"Экспорт в txt для КП ESET пока не реализован.");
+		else if (SaveDialog_ToFile->FilterIndex == 3) saved = SaveDataToEsetTxt(selectedFile);
 		else                                          printLog(L"Сохранение в этом формате не поддерживается.");
 
 		if (saved) printLog(L"Устройства успешно записаны в файл: " + ExtractFileName(selectedFile));

@@ -163,6 +163,7 @@ private:	// User declarations
 	UnicodeString __fastcall BuildUnknownUsbFilterCondition();
 	UnicodeString __fastcall BuildAlertFilterCondition();
 	UnicodeString __fastcall BuildOnlyOneSNFilterCondition();
+	UnicodeString __fastcall BuildEsetTxtContent();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
     void __fastcall createDB(); //подключение к БД
@@ -172,6 +173,7 @@ public:		// User declarations
 	void __fastcall UpdateClassFilterList();
 	void __fastcall ApplyDBGridFilter();
 	bool __fastcall SaveDataToDB(const String& FilePath);
+	bool __fastcall SaveDataToEsetTxt(const String& FilePath);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
