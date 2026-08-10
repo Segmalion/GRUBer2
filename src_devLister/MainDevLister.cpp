@@ -1758,7 +1758,12 @@ UnicodeString __fastcall TForm1::BuildAlertFilterCondition()
 	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
 
 	if (!nameConditions.IsEmpty()) {
-		return L"(" + nameConditions + L") OR (" + catCondition + L")";
+		// Совпадение по имени/классу не считается нарушением для устройств, вбудованих у
+		// материнську плату (containerId = системний) — виключає хибні спрацювання на
+		// штатні Bluetooth/Wi-Fi модулі ноутбука/ПК, чиї назви часто містять ці слова.
+		const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+		return L"((" + nameConditions + L") AND containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID) +
+			L") OR (" + catCondition + L")";
 	}
 	return catCondition;
 }
@@ -2091,9 +2096,18 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 	UnicodeString devName  = grid->DataSource->DataSet->FieldByName(L"friendly_name")->AsString;
 	UnicodeString devSerial = grid->DataSource->DataSet->FieldByName(L"serial_number")->AsString;
 	UnicodeString devDescription  = grid->DataSource->DataSet->FieldByName(L"dev_desc")->AsString;
+	UnicodeString devContainerId = grid->DataSource->DataSet->FieldByName(L"containerId")->AsString;
 	short devCat  = grid->DataSource->DataSet->FieldByName(L"regCatNumber")->AsInteger;
 	short devKnow = grid->DataSource->DataSet->FieldByName(L"serialKnow")->AsInteger;
 	short devErr  = grid->DataSource->DataSet->FieldByName(L"serialErr")->AsInteger;
+
+	// Совпадение с v_allertName не считается нарушением для устройств, встроенных в
+	// материнскую плату (containerId = системный) — исключает ложные срабатывания на
+	// штатные Bluetooth/Wi-Fi модули ноутбука/ПК, чьи названия часто содержат эти слова.
+	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+	bool isBuiltIn = (devContainerId == SYSTEM_CONTAINER_ID);
+	bool nameMatchesAlert = !isBuiltIn && compareStrInVector(devName, v_allertName);
+	bool descMatchesAlert = !isBuiltIn && compareStrInVector(devDescription, v_allertName);
 
     // 3. Проверяем, выделена ли эта строка пользователем (кликнули ли по ней мышкой).
     // Если строка выделена, мы НЕ должны менять её фон на серый или белый,
@@ -2119,7 +2133,7 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
             grid->Canvas->Font->Color  = clBlack; // Стандартный черный текст
 		}
 		//Устройство с нарушением
-		if (devCat > indefPC.catPC || compareStrInVector(devName, v_allertName) || compareStrInVector(devDescription, v_allertName))
+		if (devCat > indefPC.catPC || nameMatchesAlert || descMatchesAlert)
 		{
 			grid->Canvas->Brush->Color = (TColor)0x00D0D0FF; // Очень бледный красный
 		}
@@ -2161,13 +2175,13 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
 	}
 	// нарушение в названии
-	if (Column->FieldName == L"friendly_name" && compareStrInVector(devName, v_allertName))
+	if (Column->FieldName == L"friendly_name" && nameMatchesAlert)
 	{
 		grid->Canvas->Font->Color = clRed;
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
 //		grid->Canvas->Brush->Color = (TColor)0x00D0D0FF;
 	}
-	if (Column->FieldName == L"dev_desc" && compareStrInVector(devDescription, v_allertName))
+	if (Column->FieldName == L"dev_desc" && descMatchesAlert)
 	{
 		grid->Canvas->Font->Color = clRed;
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
