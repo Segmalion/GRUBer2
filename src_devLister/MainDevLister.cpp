@@ -2142,6 +2142,7 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 		else if (nameMatchesAlert || descMatchesAlert)
 		{
 			grid->Canvas->Brush->Color = (TColor)0x00B2E0FF; // Очень бледный оранжевый — нарушение по названию
+			grid->Canvas->Font->Color  = (TColor)0x00334065; // Темно-коричневый текст
 		}
 
 		// Подсветка совпадения с полем поиска по серийному номеру (LabeledEdit_SearchSN) —
