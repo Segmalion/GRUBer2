@@ -74,6 +74,14 @@ struct indefPCtype {
 	String desktopName, sn_Main, sn_UUID, sn_serialMrb, sn_CPUID, sn_hash;
 	short catPC;
 };
+// --- Режим активного "основного" фильтра (Show*/FilterContainerID кнопки) ---
+enum TMainFilterMode {
+	mfmAll,          // Button_ShowAllClick — без ограничений (sql_all)
+	mfmUsb,          // Button_ShowUSBClick — дедуп по containerId, USB-классы (sql_usb)
+	mfmUnknownUsb,   // Button_ShowUnknowUSBClick — sql_usb + serialKnow=0
+	mfmAlert,        // Button_ShowAllertClick — sql_all + v_allertName/regCatNumber
+	mfmContainer     // Button_FilterContainerIDClick — sql_all + containerId=X
+};
 
 extern std::map<UnicodeString, short> m_catNumber;
 extern std::vector<UnicodeString> v_allertName;
@@ -97,7 +105,7 @@ __published:	// IDE-managed Components
 	TGroupBox *GroupBox_FilterCheckBox;
 	TGridPanel *GridPanel_FilterCheckBox;
 	TCheckBox *CheckBox_FilterMotherboard;
-	TCheckBox *CheckBox_WIP2;
+	TCheckBox *CheckBox_SNnotNULL;
 	TCheckBox *CheckBox_WIP3;
 	TCheckBox *CheckBox_WIP4;
 	TCheckBox *CheckBox_AutoUpdateDev;
@@ -124,6 +132,8 @@ __published:	// IDE-managed Components
 	void __fastcall ListBox_FilterClick(TObject *Sender);
 	void __fastcall Button_FilterContainerIDClick(TObject *Sender);
 	void __fastcall CheckBox_FilterMotherboardClick(TObject *Sender);
+	void __fastcall CheckBox_SNnotNULLClick(TObject *Sender);
+	void __fastcall CheckBox_WIP3Click(TObject *Sender);
 	void __fastcall TrackBar_CountErrSerialChange(TObject *Sender);
 	void __fastcall DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect, int DataCol,
           TColumn *Column, TGridDrawState State);
@@ -144,6 +154,13 @@ private:	// User declarations
 	bool __fastcall RemoveContainerDevicesFromWindows(UnicodeString targetContainerId);
 	void __fastcall DelDevice();
 	void __fastcall DelContainerDevice();
+	// --- состояние активного основного фильтра (Show*/FilterContainerID кнопки) ---
+	TMainFilterMode m_activeFilterMode;
+	UnicodeString m_activeFilterCondition;
+	void __fastcall SetActiveFilter(TMainFilterMode mode, const UnicodeString &condition);
+	String __fastcall GetBaseSqlForMode(TMainFilterMode mode);
+	UnicodeString __fastcall BuildUnknownUsbFilterCondition();
+	UnicodeString __fastcall BuildAlertFilterCondition();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
     void __fastcall createDB(); //подключение к БД
@@ -151,6 +168,7 @@ public:		// User declarations
 	void __fastcall refrechDBGrid(String &sql);
 	void __fastcall optimizeGridColumns(TDBGrid* grid);
 	void __fastcall UpdateClassFilterList();
+	void __fastcall ApplyDBGridFilter();
 	bool __fastcall SaveDataToDB(const String& FilePath);
 };
 //---------------------------------------------------------------------------

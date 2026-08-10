@@ -53,15 +53,16 @@ typedef VOID (WINAPI *PDevFreeObjectProperties)(
 //---------------------------------------------------------------------------
 TForm1 *Form1;
 
+//---------------------------------------------------------------------------
 HANDLE g_FontHandle = NULL;
 short badCharSerial = 0;
 //short catPC = 0;
 double multipler;
 std::vector<deviceInfo> devicesList;
 std::vector<registeredUsb> regUsbList;
-String sql_type = "full";
-bool sqlFull;
 
+//bool sqlFull;
+//---------------------------------------------------------------------------
 std::map<UnicodeString, short> m_catNumber {
 		{"НТ", 1}, {"НТ-БП", 1}, {"НТ-ІСД", 1}, {"НТ-ЕКМ", 1}, {"Не Таємно", 1},
 		{"ДСК", 2},
@@ -72,6 +73,7 @@ std::vector<UnicodeString> v_allertName {
 	"android", "MTP", "ADB"
 };
 indefPCtype indefPC;
+//---------------------------------------------------------------------------
 String sql_usb =
 	"SELECT *\n"
 	"FROM (\n"
@@ -89,6 +91,9 @@ String sql_all = "SELECT * FROM devices;";
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	// Исходное состояние "основного" фильтра — как у Button_ShowAllClick
+	SetActiveFilter(mfmAll, L"");
+
 	UnicodeString appVersion = GetAppVersion();
 	printLog(L"Программа запущена. Версия: " + appVersion);
 	StatusBar1->Panels->Items[1]->Text = ("v. " + appVersion + "     ");
@@ -104,7 +109,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	// Получаем инфу о ПК
 	getInfoPC();
 	// Наполняем БД инфой об устройствах с текущего ПК
-    sqlFull = true;
 	Button_DeviceUpdateCurPCClick(this);
 }
 void __fastcall TForm1::FormDestroy(TObject *Sender)
@@ -1537,8 +1541,6 @@ void DeviceUpdate_JSON () {
 }
 void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 {
-	CheckBox_AutoUpdateDev->Checked = true;
-	CheckBox_AutoUpdateDev->Enabled = true;
 	Button_DelDevice->Enabled = true;
 
 	// сканируем устройства
@@ -1553,31 +1555,11 @@ void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 	vectorToBD(devicesList);
 	// обновляем фильтр "по классам устройств"
 	UpdateClassFilterList();
+	// синхронизируем состояние активного основного фильтра, чтобы последующий клик
+	// по доп.фильтру (ListBox_Filter/чекбоксы) не унаследовал устаревший режим
+	SetActiveFilter(mfmAll, L"");
 	// выводим данные с БД в таблицу
-	String sql;
-	if (sqlFull) 	sql = "SELECT * FROM devices;";
-	if (!sqlFull)   sql =
-		"WITH RankedDevices AS (\n"
-		"SELECT\n"
-		"*,\n"
-		"ROW_NUMBER() OVER (PARTITION BY containerId\n"
-		"ORDER BY\n"
-		"class_name) as rn\n"
-		"FROM\n"
-		"devices\n"
-		"WHERE\n"
-		"class_name IN ('USB', 'WPD', 'DiskDrive', 'Volume')\n"
-		")\n"
-		"SELECT\n"
-		"*\n"
-		"FROM\n"
-		"RankedDevices\n"
-		"WHERE\n"
-		"rn = 1\n"
-		"AND serial_number != \"\"\n"
-		"ORDER BY\n"
-		"class_name;\n";
-	refrechDBGrid(sql);
+	refrechDBGrid(sql_all);
 
 	return;
 }
@@ -1596,6 +1578,7 @@ void __fastcall TForm1::Button_LoadFromJSONClick(TObject *Sender)
 		{
 			CheckBox_AutoUpdateDev->Checked = false;
 			CheckBox_AutoUpdateDev->Enabled = false;
+			Timer1->Enabled = false; // отменяем не сработавший debounce, чтобы он не всплыл поверх загруженного снимка
 			Button_DelDevice->Enabled = false;
 			// синхронизируем комбобокс категорії з даними ЗАГРУЖЕНОГО ПК (indefPC уже обновлен в LoadDataFromJSON)
 			ComboBox_CategPC->ItemIndex = indefPC.catPC;
@@ -1605,10 +1588,10 @@ void __fastcall TForm1::Button_LoadFromJSONClick(TObject *Sender)
 			vectorToBD(devicesList);
 			// обновляем фильтр "по классам устройств"
 			UpdateClassFilterList();
+			// синхронизируем состояние активного основного фильтра (см. Button_DeviceUpdateCurPCClick)
+			SetActiveFilter(mfmAll, L"");
 			// выводим данные с БД в таблицу
-			String sql = "SELECT * FROM devices;";
-			sqlFull = true;
-			refrechDBGrid(sql);
+			refrechDBGrid(sql_all);
 			printLog(L"База данных успешно обновлена данными из файла: " + ExtractFileName(selectedFile));
         }
 		else
@@ -1649,23 +1632,84 @@ void __fastcall TForm1::DBGrid1TitleClick(TColumn *Column)
     FDQuery1->IndexName = indexName;
 }
 //---------------------------------------------------------------------------
-/* ФИЛЬТР общий по класам */
-void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
+/* Фиксирует активный основной фильтр (режим + SQL-условие) без побочных эффектов —
+   вызывается из обработчиков кнопок Show* / FilterContainerID и из мест, где нужно
+   синхронизировать состояние без применения фильтра (Button_DeviceUpdateCurPCClick,
+   Button_LoadFromJSONClick, конструктор). */
+void __fastcall TForm1::SetActiveFilter(TMainFilterMode mode, const UnicodeString &condition)
 {
+	m_activeFilterMode = mode;
+	m_activeFilterCondition = condition;
+}
+/* Базовый SQL под активный основной режим: USB-режимы используют sql_usb (дедуп по
+   containerId), остальные — sql_all. */
+String __fastcall TForm1::GetBaseSqlForMode(TMainFilterMode mode)
+{
+	switch (mode)
+	{
+		case mfmUsb:
+		case mfmUnknownUsb:
+			return sql_usb;
+		default:
+			return sql_all;
+	}
+}
+/* Условие для режима "неизвестные USB": serialKnow=0 и непустой серийный номер. */
+UnicodeString __fastcall TForm1::BuildUnknownUsbFilterCondition()
+{
+	return L"serialKnow = " + QuotedStr("0") +
+		L" AND serial_number IS NOT NULL AND serial_number <> ''";
+}
+/* Условие для режима "нарушения": совпадение по class_name/friendly_name из
+   v_allertName ИЛИ regCatNumber выше текущей категории ПК (indefPC.catPC). */
+UnicodeString __fastcall TForm1::BuildAlertFilterCondition()
+{
+	UnicodeString nameConditions = L"";
+	for (size_t i = 0; i < v_allertName.size(); ++i)
+	{
+		UnicodeString keyword = v_allertName[i].Trim();
+		if (keyword.IsEmpty()) continue;
+
+		keyword = StringReplace(keyword, L"'", L"''", TReplaceFlags() << rfReplaceAll);
+
+		if (!nameConditions.IsEmpty()) {
+			nameConditions += L" OR ";
+		}
+		nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
+	}
+
+	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
+
+	if (!nameConditions.IsEmpty()) {
+		return L"(" + nameConditions + L") OR (" + catCondition + L")";
+	}
+	return catCondition;
+}
+//---------------------------------------------------------------------------
+/* ОБЩИЙ ФИЛЬТР для FDQuery1: активный основной фильтр (кнопки Show* / FilterContainerID) +
+   классы (ListBox) + материнская плата + пустой серийный номер (CheckBox_SNnotNULL) +
+   дубли серийных номеров (CheckBox_WIP3). */
+void __fastcall TForm1::ApplyDBGridFilter()
+{
+	// Выбираем базовый SQL под активный основной режим и переоткрываем датасет
+	String baseSql = GetBaseSqlForMode(m_activeFilterMode);
+	refrechDBGrid(baseSql);
+
 	if (!FDQuery1->Active) return;
 
-    UnicodeString listboxFilter = L"";
+	FDQuery1->Filtered = false;
 
-	// 1. Собираем условия из ListBox (фильтр по классам)
-    for (int i = 0; i < ListBox_Filter->Items->Count; i++)
-    {
-        if (ListBox_Filter->Selected[i])
-        {
-            UnicodeString value = ListBox_Filter->Items->Strings[i];
+	// 1. Условия из ListBox (фильтр по классам)
+	UnicodeString listboxFilter = L"";
+	for (int i = 0; i < ListBox_Filter->Items->Count; i++)
+	{
+		if (ListBox_Filter->Selected[i])
+		{
+			UnicodeString value = ListBox_Filter->Items->Strings[i];
 
 			if (value == "(Усі класи)")
 			{
-				listboxFilter = L""; // Сбрасываем фильтр классов
+				listboxFilter = L"";
 				break;
 			}
 			if (value == "(USB пристрої)")
@@ -1674,144 +1718,153 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
 				break;
 			}
 
-            if (!listboxFilter.IsEmpty()) {
-                listboxFilter += L" OR ";
-            }
+			if (!listboxFilter.IsEmpty()) {
+				listboxFilter += L" OR ";
+			}
 
 			listboxFilter += L"class_name = " + QuotedStr(value);
 		}
-    }
+	}
+	if (!listboxFilter.IsEmpty()) {
+		listboxFilter = L"(" + listboxFilter + L")";
+	}
 
-    // 2. Проверяем состояние Чекбокса (фильтр по материнской плате)
-    UnicodeString finalFilter = L"";
+	// 2. Чекбокс фильтра по материнской плате
 	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-    UnicodeString mbFilter = L"";
-
-    // Если ЧЕКБОКС СНЯТ: Исключаем системный контейнер
-    // (Если чекбокс установлен, mbFilter остается пустой строкой = показываем всё)
+	UnicodeString mbFilter = L"";
 	if (!CheckBox_FilterMotherboard->Checked)
 	{
 		mbFilter = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
 	}
 
-    // 3. Объединяем оба фильтра
-    if (mbFilter.IsEmpty())
-    {
-        // Чекбокс стоит, фильтровать по материнке не нужно. Берем только список классов.
-        finalFilter = listboxFilter;
-    }
-    else
-    {
-        // Чекбокс снят.
-        if (listboxFilter.IsEmpty()) {
-            finalFilter = mbFilter; // Выбрано "Все классы", но материнку скрываем
-        } else {
-            // Берем классы в скобки и добавляем отсечение материнки
-            finalFilter = L"(" + listboxFilter + L") AND " + mbFilter;
-        }
+	// 3. Чекбокс CheckBox_WIP2 — отключить строки с пустым серийным номером
+	UnicodeString emptySerialFilter = L"";
+	if (CheckBox_SNnotNULL->Checked)
+	{
+		emptySerialFilter = L"serial_number IS NOT NULL AND serial_number <> ''";
 	}
-	if (sqlFull == false) {
-		String sql = "SELECT * FROM devices;";
-        sqlFull = true;
-		refrechDBGrid(sql);
+
+	// 4. Чекбокс CheckBox_WIP3 — отключить дубли серийных номеров
+	UnicodeString dupSerialFilter = L"";
+	if (CheckBox_WIP3->Checked)
+	{
+		// Считаем, сколько раз встречается каждый непустой серийный номер
+		// в текущем (незафильтрованном) наборе данных
+		std::map<UnicodeString, int> serialCount;
+
+		TBookmark bm = FDQuery1->GetBookmark();
+		FDQuery1->DisableControls();
+		try
+		{
+			FDQuery1->First();
+			while (!FDQuery1->Eof)
+			{
+				UnicodeString sn = FDQuery1->FieldByName(L"serial_number")->AsString.Trim();
+				if (!sn.IsEmpty()) {
+					serialCount[sn]++;
+				}
+				FDQuery1->Next();
+			}
+		}
+		__finally
+		{
+			if (FDQuery1->BookmarkValid(bm)) {
+				FDQuery1->GotoBookmark(bm);
+			}
+			FDQuery1->FreeBookmark(bm);
+			FDQuery1->EnableControls();
+		}
+
+		UnicodeString dupList = L"";
+		for (std::map<UnicodeString, int>::iterator it = serialCount.begin(); it != serialCount.end(); ++it)
+		{
+			if (it->second > 1)
+			{
+				if (!dupList.IsEmpty()) {
+					dupList += L",";
+				}
+				dupList += QuotedStr(it->first);
+			}
+		}
+		if (!dupList.IsEmpty()) {
+			dupSerialFilter = L"serial_number NOT IN (" + dupList + L")";
+		}
 	}
-	// 4. Применяем итоговый фильтр к FireDAC
-    if (finalFilter.IsEmpty())
-    {
-        // Если выбрано "Все классы" И чекбокс установлен
-        FDQuery1->Filtered = false;
-        FDQuery1->Filter = L"";
-        printLog(L"Фильтры сброшены. Показываются абсолютно все устройства.");
+
+	// 5. Объединяем условие активного основного фильтра (Show*/FilterContainerID) с
+	// доп.фильтрами через AND — основной фильтр теперь всегда учитывается
+	std::vector<UnicodeString> parts;
+	if (!m_activeFilterCondition.IsEmpty()) parts.push_back(m_activeFilterCondition);
+	if (!listboxFilter.IsEmpty()) parts.push_back(listboxFilter);
+	if (!mbFilter.IsEmpty()) parts.push_back(mbFilter);
+	if (!emptySerialFilter.IsEmpty()) parts.push_back(emptySerialFilter);
+	if (!dupSerialFilter.IsEmpty()) parts.push_back(dupSerialFilter);
+
+	UnicodeString finalFilter = L"";
+	for (size_t i = 0; i < parts.size(); ++i)
+	{
+		if (!finalFilter.IsEmpty()) {
+			finalFilter += L" AND ";
+		}
+		finalFilter += parts[i];
 	}
-    else
-    {
-        FDQuery1->Filtered = false; // Отключаем перед применением нового
+
+	if (finalFilter.IsEmpty())
+	{
+		FDQuery1->Filtered = false;
+		FDQuery1->Filter = L"";
+		printLog(L"Фильтры сброшены. Показываются абсолютно все устройства.");
+	}
+	else
+	{
+		FDQuery1->Filtered = false; // Отключаем перед применением нового
 		FDQuery1->Filter = finalFilter;
 		FDQuery1->Filtered = true;
 		printLog(L"Применен фильтр: " + finalFilter);
 	}
-    FDQuery1AfterOpen(FDQuery1);
+	FDQuery1AfterOpen(FDQuery1);
+}
+//---------------------------------------------------------------------------
+/* ФИЛЬТР общий по класам */
+void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
+{
+	ApplyDBGridFilter();
 }
 //---------------------------------------------------------------------------
 /* ==== КНОПКИ ФИЛЬТРА ==== */
 /* Скинуть все ФИЛЬТРы */
 void __fastcall TForm1::Button_ShowAllClick(TObject *Sender)
 {
+	CheckBox_FilterMotherboard->Checked = true;
+	CheckBox_SNnotNULL->Checked = false;
 	ListBox_Filter->ClearSelection();
-    if(sql_type != "all") {
-		sql_type = "all";
-		refrechDBGrid(sql_all);
-	}
 
-	// Очищаем фильтр в FireDAC
-	FDQuery1->Filtered = false;
-	FDQuery1->Filter = L"";
-	FDQuery1->Filtered = true;
+	SetActiveFilter(mfmAll, L"");
+	ApplyDBGridFilter();
 
-	FDQuery1AfterOpen(FDQuery1);
 	printLog(L"Сброс всех фильтров");
 }
 /* ФИЛЬТР по всем флешкам */
 void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Checked = false;
+	CheckBox_SNnotNULL->Checked = false;
 	ListBox_Filter->ClearSelection();
 
-	// выводим данные с БД в таблицу
-	if (sql_type != "usb") {
-		sql_type = "usb";
-		refrechDBGrid(sql_usb);
-	}
+	SetActiveFilter(mfmUsb, L"");
+	ApplyDBGridFilter();
 
-	// Очищаем фильтр в FireDAC
-	FDQuery1->Filtered = false;
-
-	String mb_filter;
-	if (!CheckBox_FilterMotherboard->Checked)
-	{
-		const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-		mb_filter = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
-	}
-	if (mb_filter.IsEmpty()) FDQuery1->Filter = L"";
-	else FDQuery1->Filter = mb_filter;
-	FDQuery1->Filtered = true;
-
-	FDQuery1AfterOpen(FDQuery1);
 	printLog(L"Отображаются все USB устройства");
 }
 /* ФИЛЬТР по неизвесным флешкам */
 void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 {
-    CheckBox_FilterMotherboard->Checked = false;
+	CheckBox_FilterMotherboard->Checked = false;
+	CheckBox_SNnotNULL->Checked = false;
 	ListBox_Filter->ClearSelection();
 
-	if (sql_type != "usb") {
-		sql_type = "usb";
-		refrechDBGrid(sql_usb);
-	}
-
-	// 1. Убеждаемся, что запрос активен и в гриде есть данные
-    if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
-        return;
-	}
-
-	// Применяем фильтр к FireDAC
-    FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
-
-	// Формируем строку фильтра.
-	String mb_filter, filter;
-	filter = L"serialKnow = " + QuotedStr("0") +
-		" AND serial_number IS NOT NULL AND serial_number <> ''";
-	if (!CheckBox_FilterMotherboard->Checked)
-	{
-		const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-		mb_filter = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
-	}
-	if (mb_filter.IsEmpty()) FDQuery1->Filter = filter;
-	else FDQuery1->Filter = filter + " AND " + mb_filter;
-	FDQuery1->Filtered = true; // Включаем фильтр
-
-    FDQuery1AfterOpen(FDQuery1);
+	SetActiveFilter(mfmUnknownUsb, BuildUnknownUsbFilterCondition());
+	ApplyDBGridFilter();
 
 	printLog(L"Отображаются только неизвесные USB устройства");
 }
@@ -1819,71 +1872,13 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Checked = false;
+	CheckBox_SNnotNULL->Checked = false;
 	ListBox_Filter->ClearSelection();
 
-    // выводим данные с БД в таблицу
-	if(sql_type != "all") {
-		sql_type = "all";
-		refrechDBGrid(sql_all);
-	}
+	SetActiveFilter(mfmAlert, BuildAlertFilterCondition());
+	ApplyDBGridFilter();
 
-	// 1. Проверяем, активна ли таблица (DataSet)
-    if (!FDQuery1->Active) {
-        printLog(L"Фильтрация невозможна: FDQuery1 не активен.");
-        return;
-	}
-
-    // Отключаем фильтрацию перед формированием нового условия
-    FDQuery1->Filtered = false;
-
-    const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-    UnicodeString filterStr = L"";
-	UnicodeString nameConditions = L"";
-
-    // 2. Строим условия для поиска ключевых слов из вектора v_allertName
-    for (size_t i = 0; i < v_allertName.size(); ++i)
-    {
-        UnicodeString keyword = v_allertName[i].Trim();
-        if (keyword.IsEmpty()) continue;
-
-        // Экранируем одинарные кавычки в ключевом слове для безопасности фильтра FireDAC
-        keyword = StringReplace(keyword, L"'", L"''", TReplaceFlags() << rfReplaceAll);
-
-        if (!nameConditions.IsEmpty()) {
-            nameConditions += L" OR ";
-        }
-
-        // FireDAC поддерживает синтаксис LIKE с подстановочными знаками '%'
-        nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
-    }
-
-	// 3. Объединяем условия по именам и условие по категории (regCatNumber > indefPC.catPC)
-    // ВАЖНО: сверьте точное имя столбца категории в вашей БД (например, regCatNumber или devCat)
-	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
-
-    if (!nameConditions.IsEmpty())
-    {
-        // Итоговое условие: (Группа_Имен) OR (Категория)
-        filterStr = L"(" + nameConditions + L") OR (" + catCondition + L")";
-    }
-    else
-    {
-        // Если вектор слов пустой, фильтруем только по превышению категории
-		filterStr = catCondition;
-	}
-
-	if (!CheckBox_FilterMotherboard->Checked)
-	{
-		filterStr += L" AND containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
-	}
-
-    // 4. Применяем фильтр к набору данных
-    FDQuery1->Filter = filterStr;
-	FDQuery1->Filtered = true;
-
-    FDQuery1AfterOpen(FDQuery1);
-
-    printLog(L"Применен alert-фильтр: " + filterStr);
+	printLog(L"Применен alert-фильтр (клас/ім'я зі списку порушень або категорія вища за поточну)");
 }
 /* ФИЛЬТР по контейнеру */
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
@@ -1894,7 +1889,8 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
         return;
     }
 
-    // 2. Получаем Container ID выделенной строки (текущей записи)
+    // 2. Получаем Container ID выделенной строки (текущей записи) — ОБЯЗАТЕЛЬНО до
+    // вызова ApplyDBGridFilter()/refrechDBGrid(), которые переоткроют датасет и собьют текущую позицию
     // ВАЖНО: Замените "containerId" на точное имя этого поля в вашей таблице SQLite!
     UnicodeString selectedContainerId = FDQuery1->FieldByName(L"containerId")->AsString;
 
@@ -1904,21 +1900,8 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
         return;
 	}
 
-	// выводим данные с БД в таблицу
-	if(sql_type != "all") {
-		sql_type = "all";
-		refrechDBGrid(sql_all);
-	}
-
-	// 4. Применяем фильтр к FireDAC
-	FDQuery1->Filtered = false; // Обязательно отключаем перед изменением
-
-    // Формируем строку фильтра. QuotedStr автоматически обернет GUID в одинарные кавычки
-	FDQuery1->Filter = L"containerId = " + QuotedStr(selectedContainerId);
-
-	FDQuery1->Filtered = true; // Включаем фильтр
-
-	FDQuery1AfterOpen(FDQuery1);
+	SetActiveFilter(mfmContainer, L"containerId = " + QuotedStr(selectedContainerId));
+	ApplyDBGridFilter();
 
 	printLog(L"Отображаются устройства контейнера: " + selectedContainerId);
 }
@@ -1927,7 +1910,19 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 void __fastcall TForm1::CheckBox_FilterMotherboardClick(TObject *Sender)
 {
 	// При клике на чекбокс просто вызываем пересчет общего фильтра
-	ListBox_FilterClick(this);
+	ApplyDBGridFilter();
+}
+//---------------------------------------------------------------------------
+/* ФИЛЬТР по пустому серийному номеру */
+void __fastcall TForm1::CheckBox_SNnotNULLClick(TObject *Sender)
+{
+	ApplyDBGridFilter();
+}
+//---------------------------------------------------------------------------
+/* ФИЛЬТР по дублям серийного номера */
+void __fastcall TForm1::CheckBox_WIP3Click(TObject *Sender)
+{
+	ApplyDBGridFilter();
 }
 //---------------------------------------------------------------------------
 
@@ -2041,6 +2036,7 @@ void __fastcall TForm1::ComboBox_CategPCChange(TObject *Sender)
 void __fastcall TForm1::Timer1Timer(TObject *Sender)
 {
 	Timer1->Enabled = false; // Выключаем таймер
+	if (!CheckBox_AutoUpdateDev->Checked) return; // Автообновление могли выключить, пока таймер уже был взведён (например, во время загрузки JSON)
     printLog(L"Система Windows сообщила об изменении оборудования. Обновляю список...");
 	Button_DeviceUpdateCurPCClick(this); // Обновляем данные
 }
@@ -2068,14 +2064,23 @@ void __fastcall TForm1::Button_DelDeviceClick(TObject *Sender)
 
 void __fastcall TForm1::Button_SaveToJSONClick(TObject *Sender)
 {
-	SaveDialog_ToFile->Filter = L"JSON файлы (*.json)|*.json|SQLite DataBase (*.db)|*.db|Все файлы (*.*)|*.*";
+	String t_str =
+		"Слепок всех устройств в JSON файл (*.json)|*.json|"
+		"Слепок всех устройств в SQLite DataBase (*.db)|*.db|"
+		"Выгрузка для КП ESET (*.txt)|*.txt|"
+		"Все файлы (*.*)|*.*";
+	SaveDialog_ToFile->Filter = t_str.c_str();
 	SaveDialog_ToFile->DefaultExt = L"json";
 	SaveDialog_ToFile->FileName = L"devList";
 	if (SaveDialog_ToFile->Execute()) {
 		UnicodeString selectedFile = SaveDialog_ToFile->FileName;
-		if(SaveDialog_ToFile->FilterIndex == 1) SaveDataToJSON(selectedFile, indefPC, devicesList);
-		if(SaveDialog_ToFile->FilterIndex == 2) SaveDataToDB(selectedFile);
-		printLog(L"Устройства успешно записаны в файл: " + ExtractFileName(selectedFile));
+		bool saved = false;
+		if (SaveDialog_ToFile->FilterIndex == 1)      saved = SaveDataToJSON(selectedFile, indefPC, devicesList);
+		else if (SaveDialog_ToFile->FilterIndex == 2) saved = SaveDataToDB(selectedFile);
+		else if (SaveDialog_ToFile->FilterIndex == 3) printLog(L"Экспорт в txt для КП ESET пока не реализован.");
+		else                                          printLog(L"Сохранение в этом формате не поддерживается.");
+
+		if (saved) printLog(L"Устройства успешно записаны в файл: " + ExtractFileName(selectedFile));
 	}
 }
 //---------------------------------------------------------------------------
