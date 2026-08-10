@@ -2029,7 +2029,18 @@ void __fastcall TForm1::ComboBox_CategPCChange(TObject *Sender)
 {
 	try { indefPC.catPC = m_catNumber.at(ComboBox_CategPC->Text); }
 	catch (const std::out_of_range& error) { indefPC.catPC = 0; }
-    DBGrid1->Repaint();
+
+	// Alert-условие зависит от indefPC.catPC (regCatNumber > indefPC.catPC) —
+	// если сейчас активен режим "нарушения", пересчитываем его и переприменяем фильтр
+	if (m_activeFilterMode == mfmAlert)
+	{
+		SetActiveFilter(mfmAlert, BuildAlertFilterCondition());
+		ApplyDBGridFilter();
+	}
+	else
+	{
+		DBGrid1->Repaint();
+	}
 }
 //---------------------------------------------------------------------------
 
