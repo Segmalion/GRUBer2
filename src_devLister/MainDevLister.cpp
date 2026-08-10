@@ -1184,9 +1184,10 @@ bool CompareStr_DamerayLevenshtaine(const UnicodeString &m, const UnicodeString 
         int DB = 0;
         for (int j = 1; j <= nL; ++j) {
 
-            // Защита от выхода за пределы таблицы символов (на случай суррогатных пар)
-            wchar_t charM = (strM[i] < 65536) ? strM[i] : 0;
-            wchar_t charN = (strN[j] < 65536) ? strN[j] : 0;
+            // wchar_t на Windows — 16-битный UTF-16 code unit, поэтому значение всегда
+            // укладывается в диапазон индексов таблицы DA (0..65535) без доп. проверок
+            wchar_t charM = strM[i];
+            wchar_t charN = strN[j];
 
             int i1 = DA[charN];
             int j1 = DB;
@@ -1206,7 +1207,7 @@ bool CompareStr_DamerayLevenshtaine(const UnicodeString &m, const UnicodeString 
             getH(i + 1, j + 1) = std::min({ substitution, deletion, insertion, transposition });
         }
 
-        wchar_t charM_idx = (strM[i] < 65536) ? strM[i] : 0;
+        wchar_t charM_idx = strM[i];
         DA[charM_idx] = i;
     }
 
