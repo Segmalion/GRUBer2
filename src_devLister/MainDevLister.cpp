@@ -86,7 +86,7 @@ std::vector<UnicodeString> v_allertName {
 	"WiFi", "WLAN", "802.11", "Wireless",
 	"TP-Link", "D-Link", "Netgear", "Mercusys", "Tenda",
 	"Ralink", "Atheros", "MediaTek", "Realtek RTL8188",
-	"Bluetooth",
+	//"Bluetooth",
 	"Modem", "3G", "4G", "LTE", "HSPA", "WWAN", "Mobile Broadband",
 	"Router", "Hotspot", "Tethering", "Access Point"
 };
@@ -1755,15 +1755,15 @@ UnicodeString __fastcall TForm1::BuildAlertFilterCondition()
 		nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
 	}
 
-	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC);
+	// Ни совпадение по имени/классу, ни превышение категории не считаются нарушением для
+	// устройств, встроенных в материнскую плату (containerId = системный) — исключает
+	// ложные срабатывания на штатные Bluetooth/Wi-Fi модули и прочее онбордовое "железо".
+	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+	UnicodeString notBuiltIn = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
+	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC) + L" AND " + notBuiltIn;
 
 	if (!nameConditions.IsEmpty()) {
-		// Совпадение по имени/классу не считается нарушением для устройств, вбудованих у
-		// материнську плату (containerId = системний) — виключає хибні спрацювання на
-		// штатні Bluetooth/Wi-Fi модулі ноутбука/ПК, чиї назви часто містять ці слова.
-		const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-		return L"((" + nameConditions + L") AND containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID) +
-			L") OR (" + catCondition + L")";
+		return L"((" + nameConditions + L") AND " + notBuiltIn + L") OR (" + catCondition + L")";
 	}
 	return catCondition;
 }
@@ -2101,13 +2101,14 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 	short devKnow = grid->DataSource->DataSet->FieldByName(L"serialKnow")->AsInteger;
 	short devErr  = grid->DataSource->DataSet->FieldByName(L"serialErr")->AsInteger;
 
-	// Совпадение с v_allertName не считается нарушением для устройств, встроенных в
-	// материнскую плату (containerId = системный) — исключает ложные срабатывания на
-	// штатные Bluetooth/Wi-Fi модули ноутбука/ПК, чьи названия часто содержат эти слова.
+	// Ни совпадение с v_allertName, ни превышение категории не считаются нарушением для
+	// устройств, встроенных в материнскую плату (containerId = системный) — исключает
+	// ложные срабатывания на штатные Bluetooth/Wi-Fi модули и прочее онбордовое "железо".
 	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
 	bool isBuiltIn = (devContainerId == SYSTEM_CONTAINER_ID);
 	bool nameMatchesAlert = !isBuiltIn && compareStrInVector(devName, v_allertName);
 	bool descMatchesAlert = !isBuiltIn && compareStrInVector(devDescription, v_allertName);
+	bool catViolation = !isBuiltIn && (devCat > indefPC.catPC);
 
     // 3. Проверяем, выделена ли эта строка пользователем (кликнули ли по ней мышкой).
     // Если строка выделена, мы НЕ должны менять её фон на серый или белый,
@@ -2133,7 +2134,7 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
             grid->Canvas->Font->Color  = clBlack; // Стандартный черный текст
 		}
 		//Устройство с нарушением
-		if (devCat > indefPC.catPC || nameMatchesAlert || descMatchesAlert)
+		if (catViolation || nameMatchesAlert || descMatchesAlert)
 		{
 			grid->Canvas->Brush->Color = (TColor)0x00D0D0FF; // Очень бледный красный
 		}
@@ -2169,7 +2170,7 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
         grid->Canvas->Font->Style = TFontStyles() << fsBold;
 	}
 	// нарушение категории
-	if ((Column->FieldName == L"regName" || Column->FieldName == L"regCatName") && devCat > indefPC.catPC && !State.Contains(gdSelected))
+	if ((Column->FieldName == L"regName" || Column->FieldName == L"regCatName") && catViolation && !State.Contains(gdSelected))
 	{
 		grid->Canvas->Font->Color = clRed;
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
