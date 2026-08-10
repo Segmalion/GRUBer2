@@ -1688,7 +1688,7 @@ UnicodeString __fastcall TForm1::BuildAlertFilterCondition()
 //---------------------------------------------------------------------------
 /* ОБЩИЙ ФИЛЬТР для FDQuery1: активный основной фильтр (кнопки Show* / FilterContainerID) +
    классы (ListBox) + материнская плата + пустой серийный номер (CheckBox_SNnotNULL) +
-   дубли серийных номеров (CheckBox_WIP3). */
+   известный серийный номер (CheckBox_ShowKnowUSB). */
 void __fastcall TForm1::ApplyDBGridFilter()
 {
 	// Выбираем базовый SQL под активный основной режим и переоткрываем датасет
@@ -1744,51 +1744,11 @@ void __fastcall TForm1::ApplyDBGridFilter()
 		emptySerialFilter = L"serial_number IS NOT NULL AND serial_number <> ''";
 	}
 
-	// 4. Чекбокс CheckBox_WIP3 — отключить дубли серийных номеров
-	UnicodeString dupSerialFilter = L"";
-	if (CheckBox_WIP3->Checked)
+	// 4. Чекбокс CheckBox_ShowKnowUSB — показывать только устройства с известным серийным номером
+	UnicodeString knownSerialFilter = L"";
+	if (CheckBox_ShowKnowUSB->Checked)
 	{
-		// Считаем, сколько раз встречается каждый непустой серийный номер
-		// в текущем (незафильтрованном) наборе данных
-		std::map<UnicodeString, int> serialCount;
-
-		TBookmark bm = FDQuery1->GetBookmark();
-		FDQuery1->DisableControls();
-		try
-		{
-			FDQuery1->First();
-			while (!FDQuery1->Eof)
-			{
-				UnicodeString sn = FDQuery1->FieldByName(L"serial_number")->AsString.Trim();
-				if (!sn.IsEmpty()) {
-					serialCount[sn]++;
-				}
-				FDQuery1->Next();
-			}
-		}
-		__finally
-		{
-			if (FDQuery1->BookmarkValid(bm)) {
-				FDQuery1->GotoBookmark(bm);
-			}
-			FDQuery1->FreeBookmark(bm);
-			FDQuery1->EnableControls();
-		}
-
-		UnicodeString dupList = L"";
-		for (std::map<UnicodeString, int>::iterator it = serialCount.begin(); it != serialCount.end(); ++it)
-		{
-			if (it->second > 1)
-			{
-				if (!dupList.IsEmpty()) {
-					dupList += L",";
-				}
-				dupList += QuotedStr(it->first);
-			}
-		}
-		if (!dupList.IsEmpty()) {
-			dupSerialFilter = L"serial_number NOT IN (" + dupList + L")";
-		}
+		knownSerialFilter = L"serialKnow = " + QuotedStr("1");
 	}
 
 	// 5. Объединяем условие активного основного фильтра (Show*/FilterContainerID) с
@@ -1798,7 +1758,7 @@ void __fastcall TForm1::ApplyDBGridFilter()
 	if (!listboxFilter.IsEmpty()) parts.push_back(listboxFilter);
 	if (!mbFilter.IsEmpty()) parts.push_back(mbFilter);
 	if (!emptySerialFilter.IsEmpty()) parts.push_back(emptySerialFilter);
-	if (!dupSerialFilter.IsEmpty()) parts.push_back(dupSerialFilter);
+	if (!knownSerialFilter.IsEmpty()) parts.push_back(knownSerialFilter);
 
 	UnicodeString finalFilter = L"";
 	for (size_t i = 0; i < parts.size(); ++i)
@@ -1919,8 +1879,8 @@ void __fastcall TForm1::CheckBox_SNnotNULLClick(TObject *Sender)
 	ApplyDBGridFilter();
 }
 //---------------------------------------------------------------------------
-/* ФИЛЬТР по дублям серийного номера */
-void __fastcall TForm1::CheckBox_WIP3Click(TObject *Sender)
+/* ФИЛЬТР по известному серийному номеру (serialKnow = 1) */
+void __fastcall TForm1::CheckBox_ShowKnowUSBClick(TObject *Sender)
 {
 	ApplyDBGridFilter();
 }

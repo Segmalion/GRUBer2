@@ -106,7 +106,7 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel_FilterCheckBox;
 	TCheckBox *CheckBox_FilterMotherboard;
 	TCheckBox *CheckBox_SNnotNULL;
-	TCheckBox *CheckBox_WIP3;
+	TCheckBox *CheckBox_ShowKnowUSB;
 	TCheckBox *CheckBox_WIP4;
 	TCheckBox *CheckBox_AutoUpdateDev;
 	TTrackBar *TrackBar_CountErrSerial;
@@ -133,7 +133,7 @@ __published:	// IDE-managed Components
 	void __fastcall Button_FilterContainerIDClick(TObject *Sender);
 	void __fastcall CheckBox_FilterMotherboardClick(TObject *Sender);
 	void __fastcall CheckBox_SNnotNULLClick(TObject *Sender);
-	void __fastcall CheckBox_WIP3Click(TObject *Sender);
+	void __fastcall CheckBox_ShowKnowUSBClick(TObject *Sender);
 	void __fastcall TrackBar_CountErrSerialChange(TObject *Sender);
 	void __fastcall DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect, int DataCol,
           TColumn *Column, TGridDrawState State);

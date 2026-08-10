@@ -80,8 +80,8 @@ object Form1: TForm1
       AlignWithMargins = True
       Left = 6
       Top = 257
-      Width = 1556
-      Height = 696
+      Width = 1562
+      Height = 713
       Margins.Left = 6
       Margins.Top = 6
       Margins.Right = 6
@@ -107,7 +107,7 @@ object Form1: TForm1
     object GridPanel_Filter: TGridPanel
       Left = 0
       Top = 0
-      Width = 1568
+      Width = 1574
       Height = 251
       Margins.Left = 6
       Margins.Top = 6
@@ -381,12 +381,12 @@ object Form1: TForm1
             end
             item
               Column = 0
-              Control = CheckBox_WIP2
+              Control = CheckBox_SNnotNULL
               Row = 1
             end
             item
               Column = 0
-              Control = CheckBox_WIP3
+              Control = CheckBox_ShowKnowUSB
               Row = 2
             end
             item
@@ -433,7 +433,7 @@ object Form1: TForm1
             TabOrder = 0
             OnClick = CheckBox_FilterMotherboardClick
           end
-          object CheckBox_WIP2: TCheckBox
+          object CheckBox_SNnotNULL: TCheckBox
             AlignWithMargins = True
             Left = 6
             Top = 47
@@ -444,11 +444,11 @@ object Form1: TForm1
             Margins.Right = 6
             Margins.Bottom = 6
             Align = alLeft
-            Caption = 'CheckBox_WIP2'
-            Enabled = False
+            Caption = #1058#1110#1083#1100#1082#1080' '#1079' '#1057'/'#1053
             TabOrder = 1
+            OnClick = CheckBox_SNnotNULLClick
           end
-          object CheckBox_WIP3: TCheckBox
+          object CheckBox_ShowKnowUSB: TCheckBox
             AlignWithMargins = True
             Left = 6
             Top = 87
@@ -459,9 +459,11 @@ object Form1: TForm1
             Margins.Right = 6
             Margins.Bottom = 6
             Align = alLeft
-            Caption = 'CheckBox_WIP3'
+            Caption = #1058#1110#1083#1100#1082#1110' '#1074#1110#1076#1086#1084#1110' USB'
             Enabled = False
             TabOrder = 2
+            OnClick = CheckBox_ShowKnowUSBClick
+            ExplicitLeft = 8
           end
           object CheckBox_WIP4: TCheckBox
             AlignWithMargins = True
@@ -474,7 +476,7 @@ object Form1: TForm1
             Margins.Right = 6
             Margins.Bottom = 6
             Align = alLeft
-            Caption = 'CheckBox_WIP4'
+            Caption = '[WIP] - - -'
             Enabled = False
             TabOrder = 3
           end
@@ -633,7 +635,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 1277
         Top = 7
-        Width = 284
+        Width = 290
         Height = 237
         Margins.Left = 6
         Margins.Top = 6
@@ -673,12 +675,13 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 5
         OnClick = Button_ShowAllClick
+        ExplicitTop = 8
       end
     end
     object StatusBar1: TStatusBar
       Left = 0
-      Top = 1053
-      Width = 1568
+      Top = 1070
+      Width = 1574
       Height = 37
       Margins.Left = 6
       Margins.Top = 6
@@ -700,8 +703,8 @@ object Form1: TForm1
     end
     object GridPanel_RunButton: TGridPanel
       Left = 0
-      Top = 959
-      Width = 1568
+      Top = 976
+      Width = 1574
       Height = 90
       Margins.Left = 6
       Margins.Top = 6
@@ -747,7 +750,7 @@ object Form1: TForm1
         AlignWithMargins = True
         Left = 6
         Top = 6
-        Width = 380
+        Width = 382
         Height = 78
         Margins.Left = 6
         Margins.Top = 6
@@ -760,9 +763,9 @@ object Form1: TForm1
       end
       object Button_SaveToJSON: TButton
         AlignWithMargins = True
-        Left = 1182
+        Left = 1187
         Top = 6
-        Width = 380
+        Width = 381
         Height = 78
         Margins.Left = 6
         Margins.Top = 6
@@ -775,9 +778,9 @@ object Form1: TForm1
       end
       object Button_LoadFromJSON: TButton
         AlignWithMargins = True
-        Left = 398
+        Left = 400
         Top = 6
-        Width = 380
+        Width = 381
         Height = 78
         Margins.Left = 6
         Margins.Top = 6
