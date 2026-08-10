@@ -2142,7 +2142,6 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 		else if (nameMatchesAlert || descMatchesAlert)
 		{
 			grid->Canvas->Brush->Color = (TColor)0x00B2E0FF; // Очень бледный оранжевый — нарушение по названию
-			grid->Canvas->Font->Color  = (TColor)0x00334065; // Темно-коричневый текст
 		}
 
 		// Подсветка совпадения с полем поиска по серийному номеру (LabeledEdit_SearchSN) —
@@ -2181,16 +2180,16 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 		grid->Canvas->Font->Color = clRed;
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
 	}
-	// нарушение в названии
+	// нарушение в названии — тёмно-коричневый текст именно в ячейке с тригерным словом
 	if (Column->FieldName == L"friendly_name" && nameMatchesAlert)
 	{
-		grid->Canvas->Font->Color = clRed;
+		grid->Canvas->Font->Color = (TColor)0x00334065; // Темно-коричневый
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
 //		grid->Canvas->Brush->Color = (TColor)0x00D0D0FF;
 	}
 	if (Column->FieldName == L"dev_desc" && descMatchesAlert)
 	{
-		grid->Canvas->Font->Color = clRed;
+		grid->Canvas->Font->Color = (TColor)0x00334065; // Темно-коричневый
 		grid->Canvas->Font->Style = TFontStyles() << fsBold;
 //		grid->Canvas->Brush->Color = (TColor)0x00D0D0FF;
 	}
