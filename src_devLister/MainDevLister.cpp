@@ -70,7 +70,25 @@ std::map<UnicodeString, short> m_catNumber {
 		{"ЦТ", 4}, {"Цілком Таємно", 4}
 };
 std::vector<UnicodeString> v_allertName {
-	"android", "MTP", "ADB"
+	// Подключення смартфонів (MTP/PTP/ADB/Fastboot-режими, драйвери виробників)
+	"android", "MTP", "ADB", "PTP", "Fastboot", "iPhone", "Apple Mobile Device",
+	"AndroidUsbDeviceClass",
+	"Samsung", "SM-", "Galaxy",
+	"Xiaomi", "Redmi",
+	"Huawei", "Honor",
+	"OPPO", "vivo", "OnePlus", "Realme",
+	"Pixel", "Nexus",
+	"Xperia",
+	"Motorola", "moto",
+	"HTC", "Nokia", "ZTE", "Meizu", "LG Mobile",
+	// Зовнішні мережеві пристрої (USB-Ethernet/Wi-Fi адаптери, модеми, роутери)
+	"Ethernet", "RNDIS", "ASIX", "Realtek USB GbE",
+	"WiFi", "WLAN", "802.11", "Wireless",
+	"TP-Link", "D-Link", "Netgear", "Mercusys", "Tenda",
+	"Ralink", "Atheros", "MediaTek", "Realtek RTL8188",
+	"Bluetooth",
+	"Modem", "3G", "4G", "LTE", "HSPA", "WWAN", "Mobile Broadband",
+	"Router", "Hotspot", "Tethering", "Access Point"
 };
 indefPCtype indefPC;
 //---------------------------------------------------------------------------
