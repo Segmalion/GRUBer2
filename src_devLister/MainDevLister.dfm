@@ -625,6 +625,12 @@ object Form1: TForm1
           Align = alClient
           Anchors = []
           Caption = #1042#1080#1076#1072#1083#1080#1090#1080' '#1087#1088#1080#1089#1090#1088#1110#1081'!'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clFirebrick
+          Font.Height = -21
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
           TabOrder = 2
           OnClick = Button_DelDeviceClick
         end
@@ -751,7 +757,6 @@ object Form1: TForm1
           SizeStyle = ssAuto
         end>
       TabOrder = 3
-      ExplicitTop = 982
       object Button_DeviceUpdateCurPC: TButton
         AlignWithMargins = True
         Left = 6
@@ -800,15 +805,15 @@ object Form1: TForm1
       object LabeledEdit_SearchSN: TLabeledEdit
         AlignWithMargins = True
         Left = 792
-        Top = 47
+        Top = 37
         Width = 384
         Height = 38
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
-        Margins.Bottom = 5
+        Margins.Bottom = 15
         Align = alBottom
-        EditLabel.Width = 205
+        EditLabel.Width = 128
         EditLabel.Height = 30
         EditLabel.Margins.Left = 5
         EditLabel.Margins.Top = 5
@@ -818,9 +823,6 @@ object Form1: TForm1
         TabOrder = 3
         Text = ''
         OnChange = LabeledEdit_SearchSNChange
-        ExplicitLeft = 238
-        ExplicitTop = 91
-        ExplicitWidth = 212
       end
     end
   end

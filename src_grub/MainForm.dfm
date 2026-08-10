@@ -1413,7 +1413,7 @@
         Margins.Top = 6
         Margins.Right = 6
         Margins.Bottom = 6
-        ActivePage = TabSheet_Info
+        ActivePage = TabSheet_CheckList
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -2305,7 +2305,7 @@
               end
               item
                 Column = 0
-                Control = Memo2
+                Control = Memo_Users
                 Row = 2
               end
               item
@@ -2386,7 +2386,7 @@
               ExplicitWidth = 253
               ExplicitHeight = 30
             end
-            object Memo2: TMemo
+            object Memo_Users: TMemo
               AlignWithMargins = True
               Left = 6
               Top = 196

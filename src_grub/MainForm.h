@@ -163,7 +163,7 @@ __published:	// IDE-managed Components
 	TLabel *Label_infoForNumberARM;
 	TCheckBox *CheckBox_TempDir;
 	TMemo *Memo1;
-	TMemo *Memo2;
+	TMemo *Memo_Users;
 	TGridPanel *GridPanel_Info;
 	TGridPanel *GridPanel3;
 	TGroupBox *GroupBox_Number;

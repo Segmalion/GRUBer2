@@ -299,10 +299,10 @@ void applySoftDefection(const SoftDefectionResult &r) {
 	setReadOnlyCheckBox(Form1->CheckBox_installAvpzTRELIX, r.trellixInstalled);
 }
 void applyUsersDefection(const UsersDefectionResult &r) {
-	Form1->Memo2->Clear();
-	if (r.lines.empty()) Form1->Memo2->Lines->Add("Нема юзерів... О_о");
+	Form1->Memo_Users->Clear();
+	if (r.lines.empty()) Form1->Memo_Users->Lines->Add("Нема юзерів... О_о");
 	else {
-		for(auto str: r.lines) Form1->Memo2->Lines->Add(str);
+		for(auto str: r.lines) Form1->Memo_Users->Lines->Add(str);
 		curDefection.user = r.bad;
 	}
 }
@@ -493,10 +493,12 @@ void __fastcall TForm1::Button_EsetLogsDirClick(TObject *Sender)
 	ShellExecuteW(NULL, L"open", getEsetLogsDir().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 // === открыть папки карантина ESET, где реально найдены файлы
+// (карантин лежит в системном каталоге, поэтому Проводник запускается с правами администратора)
 void __fastcall TForm1::Button_OpenQuarantineClick(TObject *Sender)
 {
 	for (auto &dir: curDefection.quarantineDirs) {
-		ShellExecuteW(NULL, L"open", dir.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+		UnicodeString setArg = L"\"" + dir + L"\"";
+		ShellExecuteW(NULL, L"runas", L"explorer.exe", setArg.c_str(), NULL, SW_SHOWDEFAULT);
 	}
 }
 // === остановка Граба
