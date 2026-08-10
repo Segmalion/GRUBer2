@@ -107,7 +107,7 @@ __published:	// IDE-managed Components
 	TCheckBox *CheckBox_FilterMotherboard;
 	TCheckBox *CheckBox_SNnotNULL;
 	TCheckBox *CheckBox_ShowKnowUSB;
-	TCheckBox *CheckBox_WIP4;
+	TCheckBox *CheckBox_OnlyOneSN;
 	TCheckBox *CheckBox_AutoUpdateDev;
 	TTrackBar *TrackBar_CountErrSerial;
 	TGridPanel *GridPanel_Else;
@@ -134,6 +134,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBox_FilterMotherboardClick(TObject *Sender);
 	void __fastcall CheckBox_SNnotNULLClick(TObject *Sender);
 	void __fastcall CheckBox_ShowKnowUSBClick(TObject *Sender);
+	void __fastcall CheckBox_OnlyOneSNClick(TObject *Sender);
 	void __fastcall TrackBar_CountErrSerialChange(TObject *Sender);
 	void __fastcall DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect, int DataCol,
           TColumn *Column, TGridDrawState State);
@@ -161,6 +162,7 @@ private:	// User declarations
 	String __fastcall GetBaseSqlForMode(TMainFilterMode mode);
 	UnicodeString __fastcall BuildUnknownUsbFilterCondition();
 	UnicodeString __fastcall BuildAlertFilterCondition();
+	UnicodeString __fastcall BuildOnlyOneSNFilterCondition();
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
     void __fastcall createDB(); //подключение к БД

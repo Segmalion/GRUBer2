@@ -391,7 +391,7 @@ object Form1: TForm1
             end
             item
               Column = 0
-              Control = CheckBox_WIP4
+              Control = CheckBox_OnlyOneSN
               Row = 3
             end
             item
@@ -444,9 +444,10 @@ object Form1: TForm1
             Margins.Right = 6
             Margins.Bottom = 6
             Align = alLeft
-            Caption = #1058#1110#1083#1100#1082#1080' '#1079' '#1057'/'#1053
+            Caption = #1058#1110#1083#1100#1082#1080' '#1079' '#1085#1072#1103#1074#1085#1080#1084' SN'
             TabOrder = 1
             OnClick = CheckBox_SNnotNULLClick
+            ExplicitLeft = 5
           end
           object CheckBox_ShowKnowUSB: TCheckBox
             AlignWithMargins = True
@@ -460,12 +461,11 @@ object Form1: TForm1
             Margins.Bottom = 6
             Align = alLeft
             Caption = #1058#1110#1083#1100#1082#1110' '#1074#1110#1076#1086#1084#1110' USB'
-            Enabled = False
             TabOrder = 2
             OnClick = CheckBox_ShowKnowUSBClick
             ExplicitLeft = 8
           end
-          object CheckBox_WIP4: TCheckBox
+          object CheckBox_OnlyOneSN: TCheckBox
             AlignWithMargins = True
             Left = 6
             Top = 128
@@ -476,9 +476,10 @@ object Form1: TForm1
             Margins.Right = 6
             Margins.Bottom = 6
             Align = alLeft
-            Caption = '[WIP] - - -'
-            Enabled = False
+            Caption = #1058#1110#1083#1100#1082#1110' '#1086#1076#1080#1085' SN'
             TabOrder = 3
+            OnClick = CheckBox_OnlyOneSNClick
+            ExplicitLeft = 8
           end
           object CheckBox_AutoUpdateDev: TCheckBox
             AlignWithMargins = True

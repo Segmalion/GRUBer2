@@ -1682,10 +1682,57 @@ UnicodeString __fastcall TForm1::BuildAlertFilterCondition()
 	}
 	return catCondition;
 }
+/* Условие для чекбокса "тільки один SN": идём по текущему (ещё не отфильтрованному)
+   набору данных и для каждого повторного вхождения непустого serial_number запоминаем
+   id строки — в итоге остаётся только первое вхождение каждого серийного номера. */
+UnicodeString __fastcall TForm1::BuildOnlyOneSNFilterCondition()
+{
+	if (!FDQuery1->Active) return L"";
+
+	std::map<UnicodeString, bool> seenSerials;
+	UnicodeString dupIds = L"";
+
+	TBookmark bm = FDQuery1->GetBookmark();
+	FDQuery1->DisableControls();
+	try
+	{
+		FDQuery1->First();
+		while (!FDQuery1->Eof)
+		{
+			UnicodeString sn = FDQuery1->FieldByName(L"serial_number")->AsString.Trim();
+			if (!sn.IsEmpty())
+			{
+				if (seenSerials.find(sn) != seenSerials.end())
+				{
+					if (!dupIds.IsEmpty()) {
+						dupIds += L",";
+					}
+					dupIds += FDQuery1->FieldByName(L"id")->AsString;
+				}
+				else
+				{
+					seenSerials[sn] = true;
+				}
+			}
+			FDQuery1->Next();
+		}
+	}
+	__finally
+	{
+		if (FDQuery1->BookmarkValid(bm)) {
+			FDQuery1->GotoBookmark(bm);
+		}
+		FDQuery1->FreeBookmark(bm);
+		FDQuery1->EnableControls();
+	}
+
+	if (dupIds.IsEmpty()) return L"";
+	return L"id NOT IN (" + dupIds + L")";
+}
 //---------------------------------------------------------------------------
 /* ОБЩИЙ ФИЛЬТР для FDQuery1: активный основной фильтр (кнопки Show* / FilterContainerID) +
    классы (ListBox) + материнская плата + пустой серийный номер (CheckBox_SNnotNULL) +
-   известный серийный номер (CheckBox_ShowKnowUSB). */
+   известный серийный номер (CheckBox_ShowKnowUSB) + только один SN (CheckBox_OnlyOneSN). */
 void __fastcall TForm1::ApplyDBGridFilter()
 {
 	// Выбираем базовый SQL под активный основной режим и переоткрываем датасет
@@ -1748,7 +1795,15 @@ void __fastcall TForm1::ApplyDBGridFilter()
 		knownSerialFilter = L"serialKnow = " + QuotedStr("1");
 	}
 
-	// 5. Объединяем условие активного основного фильтра (Show*/FilterContainerID) с
+	// 5. Чекбокс CheckBox_OnlyOneSN — убрать строки с дублирующимися серийными номерами,
+	// оставив только первое вхождение каждого SN
+	UnicodeString onlyOneSnFilter = L"";
+	if (CheckBox_OnlyOneSN->Checked)
+	{
+		onlyOneSnFilter = BuildOnlyOneSNFilterCondition();
+	}
+
+	// 6. Объединяем условие активного основного фильтра (Show*/FilterContainerID) с
 	// доп.фильтрами через AND — основной фильтр теперь всегда учитывается
 	std::vector<UnicodeString> parts;
 	if (!m_activeFilterCondition.IsEmpty()) parts.push_back(m_activeFilterCondition);
@@ -1756,6 +1811,7 @@ void __fastcall TForm1::ApplyDBGridFilter()
 	if (!mbFilter.IsEmpty()) parts.push_back(mbFilter);
 	if (!emptySerialFilter.IsEmpty()) parts.push_back(emptySerialFilter);
 	if (!knownSerialFilter.IsEmpty()) parts.push_back(knownSerialFilter);
+	if (!onlyOneSnFilter.IsEmpty()) parts.push_back(onlyOneSnFilter);
 
 	UnicodeString finalFilter = L"";
 	for (size_t i = 0; i < parts.size(); ++i)
@@ -1793,7 +1849,11 @@ void __fastcall TForm1::ListBox_FilterClick(TObject *Sender)
 void __fastcall TForm1::Button_ShowAllClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Checked = true;
+	CheckBox_FilterMotherboard->Enabled = true;
+	CheckBox_SNnotNULL->Enabled = true;
 	CheckBox_SNnotNULL->Checked = false;
+	CheckBox_ShowKnowUSB->Enabled = true;
+	CheckBox_ShowKnowUSB->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmAll, L"");
@@ -1805,7 +1865,11 @@ void __fastcall TForm1::Button_ShowAllClick(TObject *Sender)
 void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Checked = false;
+	CheckBox_FilterMotherboard->Enabled = false;
+	CheckBox_SNnotNULL->Enabled = true;
 	CheckBox_SNnotNULL->Checked = false;
+    CheckBox_ShowKnowUSB->Enabled = true;
+	CheckBox_ShowKnowUSB->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmUsb, L"");
@@ -1816,8 +1880,12 @@ void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 /* ФИЛЬТР по неизвесным флешкам */
 void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 {
+	CheckBox_FilterMotherboard->Enabled = false;
 	CheckBox_FilterMotherboard->Checked = false;
-	CheckBox_SNnotNULL->Checked = false;
+	CheckBox_SNnotNULL->Enabled = false;
+	CheckBox_SNnotNULL->Checked = true;
+	CheckBox_ShowKnowUSB->Enabled = false;
+	CheckBox_ShowKnowUSB->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmUnknownUsb, BuildUnknownUsbFilterCondition());
@@ -1828,8 +1896,12 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 /* ФИЛЬТР по НАРУШЕНИЯМ */
 void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 {
+	CheckBox_FilterMotherboard->Enabled = false;
 	CheckBox_FilterMotherboard->Checked = false;
-	CheckBox_SNnotNULL->Checked = false;
+	CheckBox_SNnotNULL->Enabled = false;
+	CheckBox_SNnotNULL->Checked = true;
+	CheckBox_ShowKnowUSB->Enabled = false;
+	CheckBox_ShowKnowUSB->Checked = true;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmAlert, BuildAlertFilterCondition());
@@ -1840,6 +1912,10 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 /* ФИЛЬТР по контейнеру */
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 {
+    CheckBox_FilterMotherboard->Enabled = true;
+	CheckBox_FilterMotherboard->Checked = true;
+	CheckBox_SNnotNULL->Enabled = true;
+	CheckBox_SNnotNULL->Checked = false;
 	ListBox_Filter->ClearSelection();
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
@@ -1878,6 +1954,12 @@ void __fastcall TForm1::CheckBox_SNnotNULLClick(TObject *Sender)
 //---------------------------------------------------------------------------
 /* ФИЛЬТР по известному серийному номеру (serialKnow = 1) */
 void __fastcall TForm1::CheckBox_ShowKnowUSBClick(TObject *Sender)
+{
+	ApplyDBGridFilter();
+}
+//---------------------------------------------------------------------------
+/* ФИЛЬТР по дублям серийного номера — оставляет только одну строку на каждый SN */
+void __fastcall TForm1::CheckBox_OnlyOneSNClick(TObject *Sender)
 {
 	ApplyDBGridFilter();
 }
