@@ -1916,6 +1916,8 @@ void __fastcall TForm1::Button_ShowAllClick(TObject *Sender)
 	CheckBox_SNnotNULL->Checked = false;
 	CheckBox_ShowKnowUSB->Enabled = true;
 	CheckBox_ShowKnowUSB->Checked = false;
+	CheckBox_OnlyOneSN->Enabled = true;
+	CheckBox_OnlyOneSN->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmAll, L"");
@@ -1932,6 +1934,8 @@ void __fastcall TForm1::Button_ShowUSBClick(TObject *Sender)
 	CheckBox_SNnotNULL->Checked = false;
     CheckBox_ShowKnowUSB->Enabled = true;
 	CheckBox_ShowKnowUSB->Checked = false;
+    CheckBox_OnlyOneSN->Enabled = true;
+	CheckBox_OnlyOneSN->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmUsb, L"");
@@ -1948,6 +1952,8 @@ void __fastcall TForm1::Button_ShowUnknowUSBClick(TObject *Sender)
 	CheckBox_SNnotNULL->Checked = true;
 	CheckBox_ShowKnowUSB->Enabled = false;
 	CheckBox_ShowKnowUSB->Checked = false;
+	CheckBox_OnlyOneSN->Enabled = false;
+	CheckBox_OnlyOneSN->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmUnknownUsb, BuildUnknownUsbFilterCondition());
@@ -1964,6 +1970,8 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 	CheckBox_SNnotNULL->Checked = true;
 	CheckBox_ShowKnowUSB->Enabled = false;
 	CheckBox_ShowKnowUSB->Checked = true;
+	CheckBox_OnlyOneSN->Enabled = false;
+	CheckBox_OnlyOneSN->Checked = true;
 	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmAlert, BuildAlertFilterCondition());
@@ -1974,18 +1982,19 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 /* ФИЛЬТР по контейнеру */
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 {
-    CheckBox_FilterMotherboard->Enabled = true;
-	CheckBox_FilterMotherboard->Checked = true;
-	CheckBox_SNnotNULL->Enabled = true;
-	CheckBox_SNnotNULL->Checked = false;
-	ListBox_Filter->ClearSelection();
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
         return;
     }
 
-    // 2. Получаем Container ID выделенной строки (текущей записи) — ОБЯЗАТЕЛЬНО до
-    // вызова ApplyDBGridFilter()/refrechDBGrid(), которые переоткроют датасет и собьют текущую позицию
+    // 2. Получаем Container ID выделенной строки (текущей записи) — ОБЯЗАТЕЛЬНО САМЫМ
+    // ПЕРВЫМ ДЕЛОМ, до любых изменений чекбоксов/ListBox ниже. Программное присвоение
+    // CheckBox->Checked, если оно реально меняет состояние, само вызывает OnClick этого
+    // чекбокса (TCustomCheckBox.SetState -> Click в VCL), а тот обработчик вызывает
+    // ApplyDBGridFilter()/refrechDBGrid(), которые переоткрывают датасет и сбрасывают
+    // текущую позицию курсора на первую запись — из-за этого раньше иногда бралась
+    // не выделенная пользователем строка, а первая (нестабильно, в зависимости от того,
+    // менялось ли состояние чекбоксов относительно предыдущего активного фильтра).
     // ВАЖНО: Замените "containerId" на точное имя этого поля в вашей таблице SQLite!
     UnicodeString selectedContainerId = FDQuery1->FieldByName(L"containerId")->AsString;
 
@@ -1994,6 +2003,16 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
         printLog(L"У выделенного устройства нет контейнера для фильтрации.");
         return;
 	}
+
+	CheckBox_FilterMotherboard->Enabled = true;
+	CheckBox_FilterMotherboard->Checked = true;
+	CheckBox_SNnotNULL->Enabled = true;
+	CheckBox_SNnotNULL->Checked = false;
+	CheckBox_ShowKnowUSB->Enabled = true;
+	CheckBox_ShowKnowUSB->Checked = false;
+	CheckBox_OnlyOneSN->Enabled = true;
+	CheckBox_OnlyOneSN->Checked = false;
+	ListBox_Filter->ClearSelection();
 
 	SetActiveFilter(mfmContainer, L"containerId = " + QuotedStr(selectedContainerId));
 	ApplyDBGridFilter();
