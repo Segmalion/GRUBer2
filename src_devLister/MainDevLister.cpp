@@ -2133,10 +2133,15 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
             grid->Canvas->Brush->Color = clWhite; // Стандартный белый фон
             grid->Canvas->Font->Color  = clBlack; // Стандартный черный текст
 		}
-		//Устройство с нарушением
-		if (catViolation || nameMatchesAlert || descMatchesAlert)
+		//Устройство с нарушением — разные цвета для разных типов нарушения.
+		// Нарушение по категории (важнее) перекрывает нарушение по названию, если оба сразу.
+		if (catViolation)
 		{
-			grid->Canvas->Brush->Color = (TColor)0x00D0D0FF; // Очень бледный красный
+			grid->Canvas->Brush->Color = (TColor)0x00D0D0FF; // Очень бледный красный — нарушение категории
+		}
+		else if (nameMatchesAlert || descMatchesAlert)
+		{
+			grid->Canvas->Brush->Color = (TColor)0x00B2E0FF; // Очень бледный оранжевый — нарушение по названию
 		}
 
 		// Подсветка совпадения с полем поиска по серийному номеру (LabeledEdit_SearchSN) —
