@@ -76,16 +76,8 @@ indefPCtype indefPC;
 //---------------------------------------------------------------------------
 String sql_usb =
 	"SELECT *\n"
-	"FROM (\n"
-	"SELECT *,\n"
-	"ROW_NUMBER() OVER (\n"
-	"PARTITION BY containerId\n"
-	"ORDER BY (serial_number IS NULL OR serial_number = '') ASC, id DESC\n"
-	") as rn\n"
 	"FROM devices\n"
-	"WHERE class_name IN ('SCSIAdapter', 'USB', 'WPD', 'DiskDrive', 'Volume')\n"
-	")\n"
-	"WHERE rn = 1;\n";
+	"WHERE class_name IN ('SCSIAdapter', 'USB', 'WPD', 'DiskDrive', 'Volume');";
 String sql_all = "SELECT * FROM devices;";
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
@@ -507,7 +499,10 @@ std::vector<deviceInfo> scanDevices() {
 				// 2. ПРОВЕРКА НА ОСТАВШИЕСЯ АМПЕРСАНДЫ
 				// Если после удаления хвоста в строке ВСЁ ЕЩЕ есть '&',
 				// значит это сгенерированный Windows системный путь (типа 5&23a0781b&0), а не серийник.
-				if (serial.Pos(L"&") > 0) {
+				// 3. ПРОВЕРКА НА ФИГУРНЫЕ СКОБКИ
+				// GUID-подобный сегмент пути (типа {45803BBA-7064-11F1-B39C-005056C00008}#00000003FFEF4000)
+				// — тоже не серийник, а сгенерированный Windows идентификатор.
+				if (serial.Pos(L"&") > 0 || serial.Pos(L"{") > 0 || serial.Pos(L"}") > 0) {
 					device.serialNumber = L""; // Очищаем мусор
 				} else {
 					device.serialNumber = serial; // Сохраняем чистый красивый серийник флешки!
