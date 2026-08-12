@@ -316,6 +316,10 @@ private:	// User declarations
 	// призначається кодом у конструкторі, щоб дизайнер форми не звіряв сигнатуру
 	// цього методу з .dfm і не показував хибну помилку "incompatible parameter list"
 	void __fastcall Grid_UsersDrawCell(TObject *Sender, int ACol, int ARow, const TRect &Rect, TGridDrawState State);
+	// теж призначається кодом, не через .dfm - з тієї ж причини, що й Grid_UsersDrawCell.
+	// Потрібен бо TCustomGrid при кастомній відмальовці (DefaultDrawing = False) не завжди
+	// самостійно перераховує Font/DefaultRowHeight при зміні DPI монітора.
+	void __fastcall Form1AfterMonitorDpiChanged(TObject *Sender, int OldDPI, int NewDPI);
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };

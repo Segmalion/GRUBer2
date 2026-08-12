@@ -142,6 +142,77 @@ void __fastcall TForm1::ShowNetNameChange(TObject *Sender)
 {
 	updateNetAdapterFields();
 }
+// Grid_Users малюється вручну (DefaultDrawing = False у Grid_UsersDrawCell),
+// тож при кастомній відмальовці TCustomGrid не завжди сам перераховує
+// Font/DefaultRowHeight при зміні DPI монітора - робимо це явно. Замість
+// хардкоджених дизайнерських значень (які "розсинхронізувались" би з .dfm при
+// першому ж пересохраненні форми в IDE на іншому DPI) один раз запам'ятовуємо
+// поточні (вже коректні на старті) Font.Height/DefaultRowHeight разом з PPI -
+// той самий підхід, що і для GridPanel нижче.
+static int gGridUsersBaselineFontHeight = 0;
+static int gGridUsersBaselineRowHeight = 0;
+static int gGridUsersBaselinePPI = 0;
+void captureGridUsersDpiBaseline() {
+	gGridUsersBaselineFontHeight = Form1->Grid_Users->Font->Height;
+	gGridUsersBaselineRowHeight = Form1->Grid_Users->DefaultRowHeight;
+	gGridUsersBaselinePPI = Form1->PixelsPerInch;
+}
+void applyGridUsersDpiScale() {
+	if (gGridUsersBaselinePPI == 0) return;
+	int ppi = Form1->PixelsPerInch;
+	Form1->Grid_Users->Font->Height = MulDiv(gGridUsersBaselineFontHeight, ppi, gGridUsersBaselinePPI);
+	Form1->Grid_Users->DefaultRowHeight = MulDiv(gGridUsersBaselineRowHeight, ppi, gGridUsersBaselinePPI);
+	Form1->Grid_Users->Invalidate();
+}
+// Форма майже суцільно зібрана з вкладених TGridPanel з рядками/колонками
+// SizeStyle = ssAbsolute (фіксовані пікселі при дизайнерському PPI). У
+// TCustomGridPanel є свій ChangeScale, але на практиці Value для ssAbsolute
+// не завжди коректно перераховується при зміні DPI монітора чи масштабу
+// екрана "на льоту" - через це ламається розмітка (напр. GridPanel_forButGrub).
+// Замість дизайнерських значень (яких для ~15 GridPanel по всій формі довелось
+// би витягувати з .dfm) один раз запам'ятовуємо поточні (вже коректні на
+// старті) Value та PPI, а при зміні DPI перераховуємо відносно цієї точки.
+struct AbsoluteCellBaseline {
+	TCellItem *item;
+	double baseValue;
+};
+static std::vector<AbsoluteCellBaseline> gGridPanelBaselines;
+static int gGridPanelBaselinePPI = 0;
+static void collectGridPanelAbsoluteCells(TControl *control) {
+	TGridPanel *panel = dynamic_cast<TGridPanel*>(control);
+	if (panel) {
+		for (int i = 0; i < panel->RowCollection->Count; i++) {
+			TCellItem *item = (*panel->RowCollection)[i];
+			if (item->SizeStyle == TSizeStyle::ssAbsolute)
+				gGridPanelBaselines.push_back({item, item->Value});
+		}
+		for (int i = 0; i < panel->ColumnCollection->Count; i++) {
+			TCellItem *item = (*panel->ColumnCollection)[i];
+			if (item->SizeStyle == TSizeStyle::ssAbsolute)
+				gGridPanelBaselines.push_back({item, item->Value});
+		}
+	}
+	TWinControl *winControl = dynamic_cast<TWinControl*>(control);
+	if (winControl) {
+		for (int i = 0; i < winControl->ControlCount; i++)
+			collectGridPanelAbsoluteCells(winControl->Controls[i]);
+	}
+}
+void captureGridPanelDpiBaselines() {
+	gGridPanelBaselines.clear();
+	collectGridPanelAbsoluteCells(Form1);
+	gGridPanelBaselinePPI = Form1->PixelsPerInch;
+}
+void rescaleGridPanelsForDpi() {
+	if (gGridPanelBaselinePPI == 0) return;
+	int ppi = Form1->PixelsPerInch;
+	for (auto &b: gGridPanelBaselines) b.item->Value = b.baseValue * ppi / gGridPanelBaselinePPI;
+}
+void __fastcall TForm1::Form1AfterMonitorDpiChanged(TObject *Sender, int OldDPI, int NewDPI)
+{
+	rescaleGridPanelsForDpi();
+	applyGridUsersDpiScale();
+}
 void RestartApplicationRunas()
 {
 	fs::path p_app;
@@ -424,6 +495,9 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	Grid_Users->Cells[5][0] = "Тип";
 	// підв'язано кодом, а не через .dfm, - див. коментар біля оголошення в MainForm.h
 	Grid_Users->OnDrawCell = Grid_UsersDrawCell;
+	OnAfterMonitorDpiChanged = Form1AfterMonitorDpiChanged;
+	captureGridUsersDpiBaseline();
+	applyGridUsersDpiScale();
 	fs::path p_curDir = fs::current_path();
 	fs::path p_configIni = p_curDir / "GRUBer.ini";
 	// === запуск правильной разрядности
@@ -494,6 +568,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
 	*/
 	gruberStart = 1;
+	captureGridPanelDpiBaselines();
 }
 //---------------------------------------------------------------------------
 /* КНОПКИ */
@@ -723,6 +798,8 @@ void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
 	curPC.setPartition(EditPartition->Text);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
+	bool knownPartition = EditPartition->Items->IndexOf(EditPartition->Text) >= 0;
+	EditPartition->Color = knownPartition ? clWindow : (TColor)0x00D0D0FF; // блідо-червоний, якщо значення не обране зі списку
 }
 void __fastcall TForm1::EditArmClassChange(TObject *Sender)
 {
