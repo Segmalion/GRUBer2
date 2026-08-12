@@ -168,6 +168,9 @@ void setInfoArmToForm(Arm &curPC) {
 		Form1->Edit_NumberARM->Enabled = true;
 	}
 	Form1->EditPartition->Text = curPC.getPartition();
+	// пряме присвоєння ->Text не викликає OnChange, тож підсвітку "нема у списку"
+	// доводиться запускати вручну для значення, завантаженого при старті
+	Form1->EditPartitionChange(Form1->EditPartition);
 	//---
 	if (!curPC.get_lgpo().IsEmpty())
 		Form1->ComboBox_PoliticInstall->Text = curPC.get_lgpo();  //<--
