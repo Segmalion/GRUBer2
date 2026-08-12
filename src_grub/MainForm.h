@@ -23,6 +23,7 @@
 //---------------------------------------------------------------------------
 
 #include "Global.h"
+#include "Users.h"
 
 class TForm1 : public TForm
 {
@@ -163,7 +164,7 @@ __published:	// IDE-managed Components
 	TLabel *Label_infoForNumberARM;
 	TCheckBox *CheckBox_TempDir;
 	TMemo *Memo1;
-	TMemo *Memo_Users;
+	TStringGrid *Grid_Users;
 	TGridPanel *GridPanel_Info;
 	TGridPanel *GridPanel3;
 	TGroupBox *GroupBox_Number;
@@ -311,6 +312,10 @@ __published:	// IDE-managed Components
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	std::set<int> DisabledItemsClass;
+	// не __published і не прив'язаний через .dfm (OnDrawCell = ...) навмисно:
+	// призначається кодом у конструкторі, щоб дизайнер форми не звіряв сигнатуру
+	// цього методу з .dfm і не показував хибну помилку "incompatible parameter list"
+	void __fastcall Grid_UsersDrawCell(TObject *Sender, int ACol, int ARow, const TRect &Rect, TGridDrawState State);
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };
@@ -343,7 +348,7 @@ struct SoftDefectionResult {
 	bool trellixInstalled = false;
 };
 struct UsersDefectionResult {
-	std::vector<UnicodeString> lines;
+	std::vector<User> users;
 	bool bad = false;
 };
 struct EsetDefectionResult {

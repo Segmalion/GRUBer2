@@ -2305,7 +2305,7 @@
               end
               item
                 Column = 0
-                Control = Memo_Users
+                Control = Grid_Users
                 Row = 2
               end
               item
@@ -2345,7 +2345,7 @@
               end
               item
                 SizeStyle = ssAbsolute
-                Value = 160.000000000000000000
+                Value = 260.000000000000000000
               end
               item
                 SizeStyle = ssAbsolute
@@ -2386,31 +2386,42 @@
               ExplicitWidth = 253
               ExplicitHeight = 30
             end
-            object Memo_Users: TMemo
+            object Grid_Users: TStringGrid
               AlignWithMargins = True
               Left = 6
               Top = 196
               Width = 664
-              Height = 148
+              Height = 248
               Margins.Left = 6
               Margins.Top = 6
               Margins.Right = 6
               Margins.Bottom = 6
               Align = alClient
+              ColCount = 6
+              DefaultRowHeight = 34
+              DefaultDrawing = False
+              FixedCols = 0
+              RowCount = 2
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clWindowText
-              Font.Height = -21
+              Font.Height = -18
               Font.Name = 'Consolas'
               Font.Style = []
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect]
               ParentFont = False
-              ReadOnly = True
-              ScrollBars = ssVertical
               TabOrder = 0
+              ColWidths = (
+                90
+                180
+                260
+                120
+                160
+                120)
             end
             object Label_DefectionSoft: TLabel
               AlignWithMargins = True
               Left = 6
-              Top = 356
+              Top = 456
               Width = 664
               Height = 38
               Margins.Left = 6
@@ -2433,7 +2444,7 @@
             object Memo1: TMemo
               AlignWithMargins = True
               Left = 6
-              Top = 406
+              Top = 506
               Width = 664
               Height = 148
               Margins.Left = 6

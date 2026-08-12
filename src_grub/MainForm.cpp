@@ -6,6 +6,7 @@
 #include <chrono> // Required for std::chrono::seconds
 #include <filesystem>
 #include <atomic>
+#include <System.DateUtils.hpp>
 #pragma hdrstop
 
 #include "MainForm.h"
@@ -61,6 +62,7 @@ struct defection {
 	bool soft;
 	bool eset;
 	std::vector<UnicodeString> quarantineDirs; // папки карантину ESET, де знайдено файли
+	std::vector<User> users; // повний список користувачів для таблиці Grid_Users (потрібен у Grid_UsersDrawCell)
 } curDefection;
 // CheckBox_installAvpz* - "тільки читання": OnClick відкочує ручні кліки
 // користувача (див. CheckBox_installAvpzESETClick), але сам відкат теж
@@ -180,24 +182,11 @@ UsersDefectionResult computeUsersDefection() {
 	} else {
 		short admin_t = 0, user_t = 0, guest_t = 0;
 		for(auto user: usersList) {
-			UnicodeString str;
-			if (user.priv == "ADMIN") {
-				str = "Admin: ";
-				admin_t++;
-			}
-			if (user.priv == "USER"){
-				str = "User:  ";
-				user_t++;
-			}
-			if (user.priv == "GUEST"){
-				str = "Guest: ";
-				guest_t++;
-			}
-			str = str + user.name;
-			if (!(user.fullName.IsEmpty() || user.fullName == user.name)) str = str + " ("+ user.fullName + ")";
-			if (user.password_age > 42 && user.priv != "ADMIN") str = str + " [Days PASS - " + user.password_age + "]";
-			res.lines.push_back(str);
+			if (user.priv == "ADMIN") admin_t++;
+			if (user.priv == "USER") user_t++;
+			if (user.priv == "GUEST") guest_t++;
 		}
+		res.users = usersList;
 		if (curPC.getCategoryName() == "Особистий") {
 			res.bad = false;
 		} else {
@@ -299,12 +288,65 @@ void applySoftDefection(const SoftDefectionResult &r) {
 	setReadOnlyCheckBox(Form1->CheckBox_installAvpzTRELIX, r.trellixInstalled);
 }
 void applyUsersDefection(const UsersDefectionResult &r) {
-	Form1->Memo_Users->Clear();
-	if (r.lines.empty()) Form1->Memo_Users->Lines->Add("Нема юзерів... О_о");
-	else {
-		for(auto str: r.lines) Form1->Memo_Users->Lines->Add(str);
+	TStringGrid *grid = Form1->Grid_Users;
+	curDefection.users = r.users; // потрібен у Grid_UsersDrawCell для підсвітки старого пароля
+	if (r.users.empty()) {
+		grid->RowCount = 2;
+		grid->Rows[1]->Clear();
+		grid->Cells[1][1] = "Нема юзерів... О_о";
+	} else {
+		grid->RowCount = (int)r.users.size() + 1;
+		int row = 1;
+		for (auto &user: r.users) {
+			UnicodeString priv = "Юзер";
+			if (user.priv == "ADMIN") priv = "Адмін";
+			else if (user.priv == "GUEST") priv = "Гість";
+			grid->Cells[0][row] = priv;
+			grid->Cells[1][row] = user.name;
+			grid->Cells[2][row] = user.fullName;
+			grid->Cells[3][row] = UnicodeString(user.password_age);
+			if (user.last_logon == 0) {
+				grid->Cells[4][row] = "ніколи";
+			} else {
+				TDateTime lastLogonDate = System::Dateutils::UnixToDateTime(user.last_logon, false);
+				grid->Cells[4][row] = lastLogonDate.FormatString("dd.MM.yy HH:mm");
+			}
+			grid->Cells[5][row] = user.accountType;
+			row++;
+		}
 		curDefection.user = r.bad;
 	}
+}
+// === підсвітка рядків таблиці юзерів: старий пароль (>42 днів) у не-адмінів - блідо-оранжевим
+void __fastcall TForm1::Grid_UsersDrawCell(TObject *Sender, int ACol, int ARow, const TRect &Rect, TGridDrawState State)
+{
+	TStringGrid *grid = (TStringGrid *)Sender;
+	bool warnAge = false;
+	if (ARow > 0 && ACol == 3) {
+		size_t dataIdx = (size_t)(ARow - 1);
+		if (dataIdx < curDefection.users.size()) {
+			const User &u = curDefection.users[dataIdx];
+			warnAge = u.password_age > 42 && u.priv != "ADMIN";
+		}
+	}
+	grid->Canvas->Font->Style = TFontStyles(); // Canvas спільний для всіх клітинок - стиль треба скидати щоразу
+	if (State.Contains(gdSelected)) {
+		grid->Canvas->Brush->Color = clHighlight;
+		grid->Canvas->Font->Color = clHighlightText;
+	} else if (ARow == 0) {
+		grid->Canvas->Brush->Color = clBtnFace;
+		grid->Canvas->Font->Color = clWindowText;
+	} else if (warnAge) {
+		grid->Canvas->Brush->Color = (TColor)0x00B2E0FF; // блідо-оранжевий
+		grid->Canvas->Font->Color  = (TColor)0x00334065; // темно-коричневий
+	} else {
+		grid->Canvas->Brush->Color = clWindow;
+		grid->Canvas->Font->Color = clWindowText;
+	}
+	grid->Canvas->FillRect(Rect);
+	UnicodeString text = grid->Cells[ACol][ARow];
+	int textTop = Rect.Top + (Rect.Height() - grid->Canvas->TextHeight(text)) / 2;
+	grid->Canvas->TextOut(Rect.Left + 4, textTop, text);
 }
 void applyEsetDefection(const EsetDefectionResult &r) {
 	if (r.countTotal > 0) {
@@ -373,6 +415,15 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 {
 	PageControl_SetInfo->TabIndex = 0;
 	PageControl_InfoTabs->TabIndex = 0;
+	// === заголовки таблиці юзерів (Grid_Users)
+	Grid_Users->Cells[0][0] = "Права";
+	Grid_Users->Cells[1][0] = "Логін";
+	Grid_Users->Cells[2][0] = "ПІБ";
+	Grid_Users->Cells[3][0] = "Вік пароля";
+	Grid_Users->Cells[4][0] = "Дата входу";
+	Grid_Users->Cells[5][0] = "Тип";
+	// підв'язано кодом, а не через .dfm, - див. коментар біля оголошення в MainForm.h
+	Grid_Users->OnDrawCell = Grid_UsersDrawCell;
 	fs::path p_curDir = fs::current_path();
 	fs::path p_configIni = p_curDir / "GRUBer.ini";
 	// === запуск правильной разрядности
