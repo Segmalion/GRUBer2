@@ -84,6 +84,29 @@ bool IsAdminMode() {
 	 return fRet;
 }
 //---------------------------------------------------------------------------
+/* Перевірка доступу на запис перед роботою з текою + попередження.
+   ТІЛЬКИ головний потік - звертається до Application->MessageBox і може
+   викликати RestartApplicationRunas() (перезапуск процесу). */
+bool warnIfNoAccess(UnicodeString path)
+{
+	if (hasWriteAccess(path)) return true;
+	if (IsAdminMode()) {
+		// вже під адміном, а прав нема - icacls у ensureDirWithAccess() чомусь
+		// не спрацював (напр. тека на диску лише для читання)
+		UnicodeString text = "Немає доступу на запис до теки:\n" + path;
+		UnicodeString formCaption = "Помилка доступу";
+		Application->MessageBox(text.c_str(), formCaption.c_str(), MB_OK);
+		return false;
+	}
+	UnicodeString text = "Немає прав на запис у теку:\n" + path +
+		"\nПерезапустити GRUBer з правами Адміністратора, щоб виправити права?";
+	UnicodeString formCaption = "Немає доступу до теки";
+	if (Application->MessageBox(text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
+		RestartApplicationRunas(); // exit(1), не повертається
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
 UnicodeString GetAppVersion()
 {
     // Получаем полный путь к нашему запущенному .exe файлу
@@ -266,9 +289,12 @@ bool infoSetToFille(Arm &curPC)
 	}
 	infoFille->Add("#stop");
 	/* конец формирования файла */
-	if (!DirectoryExists(dir)) CreateDir(dir); 			 // проверка наличия папки
+	// права на саму теку (не лише на файл) - щоб TempGRUB та інший вміст
+	// C:\ProgramData\GRUBer\, який з'явиться пізніше, успадкував доступ на запис
+	if (!DirectoryExists(dir)) ensureDirWithAccess(dir);
+	else cacls(dir);
 	infoFille->SaveToFile(dir + file, TEncoding::UTF8); // запись в файл
-	cacls(dir + file); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
+	cacls(dir + file); // права на сам файл
 	return true;
 }
 //---------------------------------------------------------------------------

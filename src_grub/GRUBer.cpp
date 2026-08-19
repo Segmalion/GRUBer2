@@ -13,6 +13,7 @@ USEFORM("ClearTemp.cpp", FormClearTempDir);
 USEFORM("About.cpp", FormAbout);
 USEFORM("DialogDirExist.cpp", FormDirExist);
 USEFORM("FormSerial.cpp", Form_Serial);
+USEFORM("FormQuarantine.cpp", FormQuarantine);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
@@ -27,6 +28,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->CreateForm(__classid(TFormClearTempDir), &FormClearTempDir);
 		Application->CreateForm(__classid(TFormAbout), &FormAbout);
 		Application->CreateForm(__classid(TForm_Serial), &Form_Serial);
+		Application->CreateForm(__classid(TFormQuarantine), &FormQuarantine);
 		Application->Run();
 	}
 	catch (Exception &exception)

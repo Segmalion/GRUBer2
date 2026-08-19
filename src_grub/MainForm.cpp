@@ -18,6 +18,7 @@
 #include "FormSerial.h"
 #include "InstallSoft.h"
 #include "Users.h"
+#include "FormQuarantine.h"
 
 #include "Arm.h"
 #include "Config.h"
@@ -216,7 +217,7 @@ void __fastcall TForm1::Form1AfterMonitorDpiChanged(TObject *Sender, int OldDPI,
 void RestartApplicationRunas()
 {
 	fs::path p_app;
-	if (x64_app() == true) p_app = fs::current_path() / "GRUBer_x64.exe";
+	if (x64_app() == true) p_app = fs::current_path() / "GRUBer.exe";
 	else p_app = fs::current_path() / "GRUBer_x32.exe";
 	if(exists(p_app)) {
 		ShellExecuteW(NULL, L"runas", p_app.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -502,7 +503,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	fs::path p_configIni = p_curDir / "GRUBer.ini";
 	// === запуск правильной разрядности
 	if (x64_sys() == true && x64_app() == false) {
-		fs::path p_app_x64 = p_curDir / "GRUBer_x64.exe";
+		fs::path p_app_x64 = p_curDir / "GRUBer.exe";
 		if(exists(p_app_x64)) {
 			ShellExecuteW(NULL, L"open", p_app_x64.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 			exit(1);
@@ -618,14 +619,17 @@ void __fastcall TForm1::Button_EsetLogsDirClick(TObject *Sender)
 {
 	ShellExecuteW(NULL, L"open", getEsetLogsDir().c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
-// === открыть папки карантина ESET, где реально найдены файлы
-// (карантин лежит в системном каталоге, поэтому Проводник запускается с правами администратора)
+// === показати вміст карантину ESET у власному вікні GRUBer.
+// Відкрити теку карантину в Провіднику виявилося неможливим (профіль SYSTEM,
+// і навіть штатне "Продовжити" в Провіднику відмовляє - див. історію вище в
+// git log цього файлу) - тому замість Провідника показуємо список файлів
+// напряму, тим самим FindFirstFile/scanDirToFille, яким GRUBer і так читає цю
+// теку для підрахунку кількості (computeEsetDefection) без жодних проблем.
 void __fastcall TForm1::Button_OpenQuarantineClick(TObject *Sender)
 {
-	for (auto &dir: curDefection.quarantineDirs) {
-		UnicodeString setArg = L"\"" + dir + L"\"";
-		ShellExecuteW(NULL, L"runas", L"explorer.exe", setArg.c_str(), NULL, SW_SHOWDEFAULT);
-	}
+	FormQuarantine->loadDirs(curDefection.quarantineDirs);
+	FormQuarantine->ShowModal();
+	checkEsetQuarantine(); // оновити лічильники/кнопку на головній формі, якщо щось видалили
 }
 // === остановка Граба
 // --- полная
@@ -734,8 +738,19 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	printLog(">>", "ESET-Update: Оновленя бази Eset...");
 	BtnEsetUpdate->Enabled = false;
 	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
+	// теку дзеркала могли раніше створити під іншим рівнем прав (адмін/юзер) -
+	// перевіряємо доступ ДО розпакування, інакше 7-Zip впирається в
+	// ACCESS_DENIED і зависає на власному діалозі помилки (RunApp чекає завершення
+	// процесу без таймауту)
+	UnicodeString esetUpdDirStr = esetUpdDir.wstring().c_str();
+	ensureDirWithAccess(esetUpdDirStr);
+	if (!warnIfNoAccess(esetUpdDirStr)) {
+		BtnEsetUpdate->Enabled = true;
+		StatusBar1->Panels->Items[1]->Text = " Немає доступу до теки ESET mirror!";
+		return;
+	}
 	if (fs::exists(esetUpdDir / L"dll\\update.ver"))
-		if(fs::remove_all(esetUpdDir)) fs::create_directory(esetUpdDir);
+		if(fs::remove_all(esetUpdDir)) ensureDirWithAccess(esetUpdDirStr);
 	//запуск обновления
 	UnicodeString app32 = curDir.get_toolPath() + "\\7zip\\32\\7za.exe";
 	UnicodeString app64 = curDir.get_toolPath() + "\\7zip\\64\\7za.exe";

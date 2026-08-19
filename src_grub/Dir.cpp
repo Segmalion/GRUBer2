@@ -4,6 +4,7 @@
 
 #include "Dir.h"
 #include "Text.h"
+#include "Fille.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
@@ -18,7 +19,11 @@ Dir::Dir() {
 // проверка директорий
 bool Dir::check() {
 	std::error_code ec;
-	return fs::create_directories(p_grub, ec);
+	bool created = fs::create_directories(p_grub, ec);
+	// теку могли раніше створити під іншим рівнем прав (адмін/юзер) - видаємо
+	// право на запис одразу, щоб наступний запис у неї не впирався в ACL
+	if (fs::exists(p_grub)) cacls(UnicodeString(p_grub.c_str()));
+	return created;
 }
 //---------------------------------------------------------------------------
 // геттеры

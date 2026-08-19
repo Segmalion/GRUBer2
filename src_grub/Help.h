@@ -26,6 +26,7 @@ void printLogDebug(UnicodeString str);
 void printLog(UnicodeString info, UnicodeString str);
 //---------------------------------------------------------------------------
 bool IsAdminMode();
+bool warnIfNoAccess(UnicodeString path);
 //---------------------------------------------------------------------------
 void setInfoArmToForm(Arm &curPC);
 void setConfigToForm(Config &curConfig);

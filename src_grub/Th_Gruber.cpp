@@ -133,6 +133,27 @@ __fastcall Th_Gruber::Th_Gruber(bool CreateSuspended)
 {
 }
 //---------------------------------------------------------------------------
+// Перевірка доступу на запис у теку граба, викликається з фонового потоку
+// Th_Gruber::Execute(). hasWriteAccess() - чиста файлова перевірка, без VCL,
+// безпечна напряму; попередження/перезапуск (warnIfNoAccess) потребує
+// головного потоку, тож іде через Synchronize - той самий прийом, що й
+// модалка FormDirExist трохи нижче в Execute().
+static bool ensureAccessOrStop(UnicodeString path, UnicodeString what)
+{
+	if (hasWriteAccess(path)) return true;
+	bool proceed = false;
+	TThread::Synchronize(NULL, [&]() { proceed = warnIfNoAccess(path); });
+	if (!proceed) {
+		TThread::Synchronize(NULL, [what]() {
+			blockGrub(false);
+			printLog("ER", "Немає прав на запис у " + what + "!");
+			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
+			progressBarGo(100, true);
+		});
+	}
+	return proceed;
+}
+//---------------------------------------------------------------------------
 /* ОСНОВНОЙ КОД ГРАБА */
 void __fastcall Th_Gruber::Execute()
 {
@@ -202,8 +223,12 @@ void __fastcall Th_Gruber::Execute()
 	Synchronize([&tempDir]() { tempDir = Form1->CheckBox_TempDir->Checked; });
 	if (tempDir) {
 		GrubDir = curDir.get_grubPathTemp();
-		if (!DirectoryExists(GrubDir)) CreateDir(GrubDir);
+		if (!DirectoryExists(GrubDir)) ensureDirWithAccess(GrubDir);
 		else deleteDir(GrubDir, false);
+		if (!ensureAccessOrStop(GrubDir, "теку Граба (temp)")) {
+			th_Gruber_run = false;
+			return;
+		}
 	} else GrubDir = curDir.get_grubPath();
 	// -> предупреждение о существующей папке
 	if (DirectoryExists(curDir.get_grubPath()) && checkDirExist) {
@@ -230,6 +255,9 @@ void __fastcall Th_Gruber::Execute()
 	if (!exists(curDir.get_p_grubPath())) {
 		printLog("!!", "Відсутня папка для Грабу!!!");
 		bigErr = false;
+	} else if (!ensureAccessOrStop(curDir.get_grubPath(), "теку Граба")) {
+		th_Gruber_run = false;
+		return;
 	} else {
 		// changeEditDirColor() красит EditDirGrubName и включает BtnGruberDirOpen
 		// на форме - вызов идёт из фонового потока, поэтому через Synchronize.
