@@ -21,6 +21,7 @@
   Font.Style = []
   Position = poDesigned
   StyleName = 'Windows'
+  OnShow = FormShow
   PixelsPerInch = 168
   TextHeight = 30
   object GridPanelMain: TGridPanel
@@ -600,7 +601,7 @@
                 end
                 item
                   Column = 1
-                  Control = Label_infoForNumberARM
+                  Control = ComboBox_CurStructur
                   Row = 0
                 end>
               RowCollection = <
@@ -630,28 +631,21 @@
                 OnChange = Edit_NumberARMChange
                 ExplicitHeight = 38
               end
-              object Label_infoForNumberARM: TLabel
+              object ComboBox_CurStructur: TComboBox
                 AlignWithMargins = True
                 Left = 189
                 Top = 6
                 Width = 270
-                Height = 41
+                Height = 38
                 Margins.Left = 6
                 Margins.Top = 6
                 Margins.Right = 6
                 Margins.Bottom = 6
                 Align = alClient
+                Style = csDropDownList
                 Anchors = []
-                Caption = 'Label_infoForNumberARM'
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowFrame
-                Font.Height = -21
-                Font.Name = 'Segoe UI'
-                Font.Style = [fsItalic]
-                ParentFont = False
-                Layout = tlCenter
-                ExplicitWidth = 234
-                ExplicitHeight = 30
+                TabOrder = 1
+                OnChange = ComboBox_CurStructurChange
               end
             end
           end
@@ -1413,7 +1407,7 @@
         Margins.Top = 6
         Margins.Right = 6
         Margins.Bottom = 6
-        ActivePage = TabSheet_CheckList
+        ActivePage = TabSheet_Settings
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -1440,29 +1434,20 @@
             ControlCollection = <
               item
                 Column = 0
-                Control = GroupBox_Number
+                Control = GroupBox_InfoARM
                 Row = 0
               end
               item
                 Column = 0
-                Control = GroupBox_InfoARM
+                Control = GroupBox_NetInfo
                 Row = 1
               end
               item
                 Column = 0
-                Control = GroupBox_NetInfo
-                Row = 2
-              end
-              item
-                Column = 0
                 Control = GroupBox_EsetInfo
-                Row = 3
+                Row = 2
               end>
             RowCollection = <
-              item
-                SizeStyle = ssAbsolute
-                Value = 125.000000000000000000
-              end
               item
                 SizeStyle = ssAbsolute
                 Value = 400.000000000000000000
@@ -1475,192 +1460,10 @@
                 Value = 125.000000000000000000
               end>
             TabOrder = 0
-            object GroupBox_Number: TGroupBox
-              AlignWithMargins = True
-              Left = 6
-              Top = 6
-              Width = 664
-              Height = 113
-              Margins.Left = 6
-              Margins.Top = 6
-              Margins.Right = 6
-              Margins.Bottom = 6
-              Align = alClient
-              Caption = #1042#1085#1091#1090#1088#1110#1096#1085#1110' '#1085#1086#1084#1077#1088#1072' '#1040#1056#1052':'
-              TabOrder = 0
-              object GridPanel3: TGridPanel
-                Left = 2
-                Top = 32
-                Width = 660
-                Height = 79
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                Align = alClient
-                BevelOuter = bvNone
-                ColumnCollection = <
-                  item
-                    Value = 25.000000000000000000
-                  end
-                  item
-                    Value = 25.000000000000000000
-                  end
-                  item
-                    Value = 25.000000000000000000
-                  end
-                  item
-                    Value = 25.000000000000000000
-                  end>
-                ControlCollection = <
-                  item
-                    Column = 0
-                    Control = LabEdit_NumUVs
-                    Row = 0
-                  end
-                  item
-                    Column = 1
-                    Control = LabEdit_NumUVsO
-                    Row = 0
-                  end
-                  item
-                    Column = 2
-                    Control = LabEdit_NumOK
-                    Row = 0
-                  end
-                  item
-                    Column = 3
-                    Control = LabEdit_NumOKO
-                    Row = 0
-                  end>
-                RowCollection = <
-                  item
-                    Value = 100.000000000000000000
-                  end>
-                TabOrder = 0
-                DesignSize = (
-                  660
-                  79)
-                object LabEdit_NumUVs: TLabeledEdit
-                  Left = 7
-                  Top = 35
-                  Width = 151
-                  Height = 38
-                  Margins.Left = 6
-                  Margins.Top = 6
-                  Margins.Right = 6
-                  Margins.Bottom = 6
-                  Anchors = [akLeft, akTop, akRight]
-                  EditLabel.Width = 82
-                  EditLabel.Height = 30
-                  EditLabel.Margins.Left = 6
-                  EditLabel.Margins.Top = 6
-                  EditLabel.Margins.Right = 6
-                  EditLabel.Margins.Bottom = 6
-                  EditLabel.Caption = #1059#1042'('#1089') "'#1055'"'
-                  EditLabel.Color = clBtnFace
-                  EditLabel.Font.Charset = DEFAULT_CHARSET
-                  EditLabel.Font.Color = clWindowFrame
-                  EditLabel.Font.Height = -21
-                  EditLabel.Font.Name = 'Segoe UI'
-                  EditLabel.Font.Style = [fsItalic]
-                  EditLabel.ParentColor = False
-                  EditLabel.ParentFont = False
-                  NumbersOnly = True
-                  ReadOnly = True
-                  TabOrder = 0
-                  Text = ''
-                end
-                object LabEdit_NumUVsO: TLabeledEdit
-                  Left = 173
-                  Top = 35
-                  Width = 149
-                  Height = 38
-                  Margins.Left = 6
-                  Margins.Top = 6
-                  Margins.Right = 6
-                  Margins.Bottom = 6
-                  Anchors = [akLeft, akTop, akRight]
-                  EditLabel.Width = 144
-                  EditLabel.Height = 30
-                  EditLabel.Margins.Left = 6
-                  EditLabel.Margins.Top = 6
-                  EditLabel.Margins.Right = 6
-                  EditLabel.Margins.Bottom = 6
-                  EditLabel.Caption = #1059#1042'('#1089')"'#1055'" '#1054#1043#1088#1051#1047
-                  EditLabel.Font.Charset = DEFAULT_CHARSET
-                  EditLabel.Font.Color = clWindowFrame
-                  EditLabel.Font.Height = -21
-                  EditLabel.Font.Name = 'Segoe UI'
-                  EditLabel.Font.Style = [fsItalic]
-                  EditLabel.ParentFont = False
-                  NumbersOnly = True
-                  ReadOnly = True
-                  TabOrder = 1
-                  Text = ''
-                end
-                object LabEdit_NumOK: TLabeledEdit
-                  Left = 339
-                  Top = 35
-                  Width = 147
-                  Height = 38
-                  Margins.Left = 6
-                  Margins.Top = 6
-                  Margins.Right = 6
-                  Margins.Bottom = 6
-                  Anchors = [akLeft, akTop, akRight]
-                  EditLabel.Width = 60
-                  EditLabel.Height = 30
-                  EditLabel.Margins.Left = 6
-                  EditLabel.Margins.Top = 6
-                  EditLabel.Margins.Right = 6
-                  EditLabel.Margins.Bottom = 6
-                  EditLabel.Caption = #1054#1050'"'#1055'"'
-                  EditLabel.Font.Charset = DEFAULT_CHARSET
-                  EditLabel.Font.Color = clWindowFrame
-                  EditLabel.Font.Height = -21
-                  EditLabel.Font.Name = 'Segoe UI'
-                  EditLabel.Font.Style = [fsItalic]
-                  EditLabel.ParentFont = False
-                  NumbersOnly = True
-                  ReadOnly = True
-                  TabOrder = 2
-                  Text = ''
-                end
-                object LabEdit_NumOKO: TLabeledEdit
-                  Left = 502
-                  Top = 35
-                  Width = 150
-                  Height = 38
-                  Margins.Left = 6
-                  Margins.Top = 6
-                  Margins.Right = 6
-                  Margins.Bottom = 6
-                  Anchors = [akLeft, akTop, akRight]
-                  EditLabel.Width = 128
-                  EditLabel.Height = 30
-                  EditLabel.Margins.Left = 6
-                  EditLabel.Margins.Top = 6
-                  EditLabel.Margins.Right = 6
-                  EditLabel.Margins.Bottom = 6
-                  EditLabel.Caption = #1054#1050'"'#1055'" '#1054#1043#1088#1051#1047
-                  EditLabel.Font.Charset = DEFAULT_CHARSET
-                  EditLabel.Font.Color = clWindowFrame
-                  EditLabel.Font.Height = -21
-                  EditLabel.Font.Name = 'Segoe UI'
-                  EditLabel.Font.Style = [fsItalic]
-                  EditLabel.ParentFont = False
-                  NumbersOnly = True
-                  ReadOnly = True
-                  TabOrder = 3
-                  Text = ''
-                end
-              end
-            end
             object GroupBox_InfoARM: TGroupBox
               AlignWithMargins = True
               Left = 6
-              Top = 131
+              Top = 6
               Width = 664
               Height = 388
               Margins.Left = 6
@@ -1670,7 +1473,7 @@
               Align = alClient
               Anchors = []
               Caption = #1030#1085#1092#1086' '#1087#1088#1086' '#1040#1056#1052':'
-              TabOrder = 1
+              TabOrder = 0
               object GridPanel_InfoArm: TGridPanel
                 Left = 2
                 Top = 32
@@ -1947,9 +1750,9 @@
             object GroupBox_NetInfo: TGroupBox
               AlignWithMargins = True
               Left = 6
-              Top = 531
+              Top = 406
               Width = 664
-              Height = 317
+              Height = 442
               Margins.Left = 6
               Margins.Top = 6
               Margins.Right = 6
@@ -1961,7 +1764,7 @@
                 Left = 2
                 Top = 32
                 Width = 660
-                Height = 283
+                Height = 408
                 Margins.Left = 6
                 Margins.Top = 6
                 Margins.Right = 6
@@ -2032,12 +1835,12 @@
                 TabOrder = 0
                 DesignSize = (
                   660
-                  283)
+                  408)
                 object Label_NetName: TLabel
                   Left = 0
                   Top = 0
                   Width = 165
-                  Height = 71
+                  Height = 102
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -2051,9 +1854,9 @@
                 end
                 object Label_NetIP: TLabel
                   Left = 0
-                  Top = 71
+                  Top = 102
                   Width = 165
-                  Height = 70
+                  Height = 102
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -2062,14 +1865,15 @@
                   Alignment = taCenter
                   Caption = #1051#1086#1082#1072#1083#1100#1085#1072' IP:'
                   Layout = tlCenter
+                  ExplicitTop = 71
                   ExplicitWidth = 121
                   ExplicitHeight = 30
                 end
                 object Label_NetMAC: TLabel
                   Left = 0
-                  Top = 141
+                  Top = 204
                   Width = 165
-                  Height = 71
+                  Height = 102
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -2078,14 +1882,15 @@
                   Alignment = taCenter
                   Caption = 'MAC-'#1072#1076#1088#1077#1089#1072':'
                   Layout = tlCenter
+                  ExplicitTop = 141
                   ExplicitWidth = 125
                   ExplicitHeight = 30
                 end
                 object Label_NetStatus: TLabel
                   Left = 0
-                  Top = 212
+                  Top = 306
                   Width = 165
-                  Height = 71
+                  Height = 102
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -2094,12 +1899,13 @@
                   Alignment = taCenter
                   Caption = #1057#1090#1072#1090#1091#1089':'
                   Layout = tlCenter
+                  ExplicitTop = 212
                   ExplicitWidth = 67
                   ExplicitHeight = 30
                 end
                 object ShowNetName: TComboBox
                   Left = 173
-                  Top = 18
+                  Top = 34
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2119,7 +1925,7 @@
                 end
                 object ShowNetIP: TEdit
                   Left = 173
-                  Top = 89
+                  Top = 136
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2139,7 +1945,7 @@
                 end
                 object ShowNetMAC: TEdit
                   Left = 173
-                  Top = 159
+                  Top = 238
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2159,7 +1965,7 @@
                 end
                 object ShowNetStatus: TEdit
                   Left = 173
-                  Top = 230
+                  Top = 340
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2191,7 +1997,7 @@
               Margins.Bottom = 6
               Align = alClient
               Caption = #1040#1042#1055#1047' '#1110#1085#1092#1086':'
-              TabOrder = 3
+              TabOrder = 1
               object GridPanel_EsetInfo: TGridPanel
                 Left = 2
                 Top = 32
@@ -3524,13 +3330,13 @@
               object Label_ForNumberARM: TLabel
                 Left = 20
                 Top = 379
-                Width = 328
+                Width = 285
                 Height = 30
                 Margins.Left = 6
                 Margins.Top = 6
                 Margins.Right = 6
                 Margins.Bottom = 6
-                Caption = #1042#1080#1082#1086#1088#1080#1089#1090#1086#1074#1091#1074#1072#1090#1080' '#1085#1086#1084#1077#1088' '#1040#1056#1052' '#1076#1083#1103':'
+                Caption = #1057#1090#1088#1091#1082#1090#1091#1088#1072' '#1079#1072' '#1079#1072#1084#1086#1074#1095#1091#1074#1072#1085#1085#1103#1084':'
               end
               object CheckBoxDebug: TCheckBox
                 Left = 398
@@ -3635,7 +3441,7 @@
                 TabOrder = 6
                 OnClick = CheckBoxLicenseClick
               end
-              object BtnEditPartition: TButton
+              object BtnEditStructures: TButton
                 Left = 398
                 Top = 252
                 Width = 253
@@ -3644,9 +3450,9 @@
                 Margins.Top = 6
                 Margins.Right = 6
                 Margins.Bottom = 6
-                Caption = #1056#1077#1076#1072#1075#1091#1074#1072#1090#1080' '#1087#1110#1076#1088#1086#1079#1076#1110#1083#1080
+                Caption = #1056#1077#1076#1072#1075#1091#1074#1072#1090#1080' '#1089#1090#1088#1091#1082#1090#1091#1088#1080
                 TabOrder = 7
-                OnClick = BtnEditPartitionClick
+                OnClick = BtnEditStructuresClick
               end
               object CheckBox_ShowEsetUpdate: TCheckBox
                 Left = 398
@@ -3687,7 +3493,7 @@
                 TabOrder = 10
                 OnClick = CheckBoxPrefixPartitionClick
               end
-              object ComboBox_forNumberARM: TComboBox
+              object ComboBox_DefStructur: TComboBox
                 Left = 357
                 Top = 377
                 Width = 293
@@ -3697,16 +3503,8 @@
                 Margins.Right = 6
                 Margins.Bottom = 6
                 Style = csDropDownList
-                ItemIndex = 0
                 TabOrder = 11
-                Text = #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
-                OnChange = ComboBox_forNumberARMChange
-                Items.Strings = (
-                  #1053#1077' '#1074#1082#1072#1079#1072#1085#1086
-                  #1059#1042'('#1089') "'#1055#1110#1074#1076#1077#1085#1100'"'
-                  #1059#1042'('#1089') "'#1055#1110#1074#1076#1077#1085#1100'" - '#1054#1043#1088#1051#1047' '
-                  #1054#1050' "'#1055#1110#1074#1076#1077#1085#1100'"'
-                  #1054#1050' "'#1055#1110#1074#1076#1077#1085#1100'" - '#1054#1043#1088#1051#1047' ')
+                OnChange = ComboBox_DefStructurChange
               end
               object CheckBox_TempDir: TCheckBox
                 Left = 398

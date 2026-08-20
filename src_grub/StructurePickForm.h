@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 
-#ifndef PartitionFormH
-#define PartitionFormH
+#ifndef StructurePickFormH
+#define StructurePickFormH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
@@ -9,20 +9,20 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.ExtCtrls.hpp>
 //---------------------------------------------------------------------------
-class TFormPartition : public TForm
+class TFormStructurePick : public TForm
 {
 __published:	// IDE-managed Components
 	TGridPanel *GridPanel1;
-	TMemo *EditPartition;
+	TLabel *LabelPrompt;
+	TComboBox *ComboBoxPick;
+	TButton *ButtonOK;
 	TButton *ButtonCancel;
-	TButton *ButtonSave;
-	void __fastcall ButtonCancelClick(TObject *Sender);
-	void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
-	__fastcall TFormPartition(TComponent* Owner);
+	__fastcall TFormStructurePick(TComponent* Owner);
+	UnicodeString __fastcall ShowPick(UnicodeString promptText);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormPartition *FormPartition;
+extern PACKAGE TFormStructurePick *FormStructurePick;
 //---------------------------------------------------------------------------
 #endif

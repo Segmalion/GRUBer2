@@ -9,6 +9,10 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
+// поточна версія формату GRUBer.ini - завжди пишеться при збереженні;
+// файли без ключа ini_version (тобто старіші за появу цього поля) читаються як версія 0
+const short CONFIG_INI_VERSION_CURRENT = 1;
+//---------------------------------------------------------------------------
 /* Класс Config */
 Config::Config() {
 	debug = false;
@@ -24,6 +28,9 @@ void Config::readFileIni() {
 		std::unique_ptr<TStringList> infoFilleOwner(new TStringList);
 		TStringList *infoFille = infoFilleOwner.get();
 		infoFille->LoadFromFile(configFile, TEncoding::UTF8);
+		// ini_version - відсутній ключ = застарілий формат (версія 0)
+		findStr = findParam(infoFille, "[settings]", "ini_version");
+		iniVersion = findStr.ToIntDef(0);
 		// debug
 		findStr = findParam(infoFille, "[settings]", "debug");
 		if(findStr == 0 || findStr == 1) debug = findStr.ToInt();
@@ -72,14 +79,9 @@ void Config::readFileIni() {
 		// enablePrefixPartition
 		findStr = findParam(infoFille, "[settings]", "enablePrefixPartition");
 		if(findStr == 0 || findStr == 1) enablePrefixPartition = findStr.ToInt();
-		// forNumberARMid
-		findStr = findParam(infoFille, "[settings]", "forNumberARMid");
-		if(findStr.ToIntDef(-1) >= 0 && findStr.ToIntDef(-1) <= 4) {
-			forNumberARMid = findStr.ToInt();
-		} else forNumberARMid = 0;
-		// partition <--
-		findStr = findParam(infoFille, "[list]", "partition");
-		if(!findStr.IsEmpty()) partition = vStrGenFromStr(findStr);
+		// defaultStructureId
+		findStr = findParam(infoFille, "[settings]", "defaultStructureId");
+		defaultStructureId = errCheck(findStr);
 		// lgpo <--
 		findStr = findParam(infoFille, "[list]", "lgpo");
 		if(!findStr.IsEmpty()) lgpo = vStrGenFromStr(findStr);
@@ -98,13 +100,29 @@ void Config::readFileIni() {
 		// soft-writeList <--
 		findStr = findParam(infoFille, "[list]", "softWriteList");
 		if(!findStr.IsEmpty()) softWriteList = vStrGenFromStr(findStr);
+		// structures <--
+		structures.clear();
+		for (auto &id : findSectionIds(infoFille, "[structur_")) {
+			UnicodeString sec = "[structur_" + id + "]";
+			StructureDef s;
+			s.id = id;
+			s.name = errCheck(findParam(infoFille, sec, "name"));
+			s.partition = vStrGenFromStr(errCheck(findParam(infoFille, sec, "partition")));
+			structures.push_back(s);
+		}
 	}
+	if (structures.empty()) {
+		structures = defaultStructures();
+		defaultStructureId = STRUCT_ID_UVS;
+	}
+	if (defaultStructureId.IsEmpty() && !structures.empty()) defaultStructureId = structures[0].id;
 }
 void Config::saveFileIni() {
 	std::unique_ptr<TStringList> infoFille(new TStringList);
 	/* формирование файла */
 	// раздел
 	infoFille->Add("[settings]");
+	infoFille->Add("ini_version=" + UnicodeString(CONFIG_INI_VERSION_CURRENT));
 	infoFille->Add("debug=" + UnicodeString(debug));
 	infoFille->Add("showLog=" + UnicodeString(showLog));
 	infoFille->Add("showEsetUpd=" + UnicodeString(showEsetUpd));
@@ -112,7 +130,7 @@ void Config::saveFileIni() {
 	infoFille->Add("grubUser=" + grubUser);
 	infoFille->Add("prefixPartition=" + prefixPartition);
 	infoFille->Add("enablePrefixPartition=" + UnicodeString(enablePrefixPartition));
-	infoFille->Add("forNumberARMid=" + UnicodeString(forNumberARMid)); // <===
+	infoFille->Add("defaultStructureId=" + defaultStructureId); // <===
 	// раздел
 	infoFille->Add("[genfile]");
 	infoFille->Add("oldGrub=" + UnicodeString(oldGrub));
@@ -127,16 +145,22 @@ void Config::saveFileIni() {
 	//for(auto str : curPC.mStrInfoArmGrub()) infoFille->Add(str);
 	// раздел
 	infoFille->Add("[list]");
-	infoFille->Add("partition=" + strGenFromVStr(partition));
 	infoFille->Add("lgpo=" + strGenFromVStr(lgpo)); //<--
 	infoFille->Add("usb=" + strGenFromVStr(usb));   //<--
 	infoFille->Add("user=" + strGenFromVStr(user)); //<--
 	infoFille->Add("spz=" + strGenFromVStr(spz));   //<--
 	infoFille->Add("softBlackList=" + strGenFromVStr(softBlackList)); //<--
 	infoFille->Add("softWriteList=" + strGenFromVStr(softWriteList)); //<--
+	// раздел структур
+	for (auto &s : structures) {
+		infoFille->Add("[structur_" + s.id + "]");
+		infoFille->Add("name=" + s.name);
+		infoFille->Add("partition=" + strGenFromVStr(s.partition));
+	}
 	/* конец формирования файла */
 	infoFille->SaveToFile(configFile, TEncoding::UTF8); // запись в файл
 	cacls(configFile); // [!]изменение прав на файл -- заменить на SetSecurityІnfo!
+	iniVersion = CONFIG_INI_VERSION_CURRENT;
 }
 short Config::checkOldGrubState() {
 	switch ((short)oldGrubComent + (short)oldGrubInfo + (short)oldGrubNet + (short)oldGrubUsb) {
@@ -164,13 +188,14 @@ bool Config::getOldGrubUsb()    { return oldGrubUsb; };
 bool Config::getNewGrub()  		{ return newGrub; }
 bool Config::getLicense()  		{ return license; }
 bool Config::getEnablePrefixPartition() { return enablePrefixPartition; }
-short Config::get_forNumberARMid() { return forNumberARMid; }
 short Config::getAudit()   { return audit; }
 short Config::getEsetLog() { return esetLog; }
 short Config::getOldGrub() { return oldGrub; }
+short Config::get_iniVersion() { return iniVersion; }
+std::vector<StructureDef> Config::get_structures() { return structures; }
+UnicodeString Config::get_defaultStructureId() { return defaultStructureId; }
 UnicodeString Config::getUser() { return grubUser; }
 UnicodeString Config::getPrefixPartition() { return prefixPartition; }
-std::vector<UnicodeString> Config::getPartition() { return partition; }
 std::vector<UnicodeString> Config::get_lgpo() { return lgpo; }; //<--
 std::vector<UnicodeString> Config::get_usb()  { return usb; };  //<--
 std::vector<UnicodeString> Config::get_user() { return user; }; //<--
@@ -189,13 +214,13 @@ void Config::setOldGrubUsb(bool i)    { oldGrubUsb = i; }
 void Config::setNewGrub(bool i) { newGrub = i; }
 void Config::setLicense(bool i) { license = i; }
 void Config::setEnablePrefixPartition(bool i) { enablePrefixPartition = i; }
-void Config::set_forNumberARMid(short i) { forNumberARMid = i; }
+void Config::set_structures(std::vector<StructureDef> v) { structures = v; }
+void Config::set_defaultStructureId(UnicodeString id) { defaultStructureId = id; }
 void Config::setOldGrub(short i) { oldGrub = i; }
 void Config::setAudit(short i)   { audit = i; }
 void Config::setEsetLog(short i) { esetLog = i; }
 void Config::setUser(UnicodeString str) { grubUser = str; }
 void Config::setPrefixPartition(UnicodeString str) { prefixPartition = str; }
-void Config::setPartition(std::vector<UnicodeString> vStr) { partition = vStr; }
 void Config::set_lgpo(std::vector<UnicodeString> vStr) { lgpo = vStr; } //<--
 void Config::set_usb(std::vector<UnicodeString> vStr) { usb = vStr; }   //<--
 void Config::set_user(std::vector<UnicodeString> vStr) { user = vStr; } //<--

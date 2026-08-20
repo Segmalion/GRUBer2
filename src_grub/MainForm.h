@@ -67,7 +67,7 @@ __published:	// IDE-managed Components
 	TCheckBox *CheckBoxOldGrub;
 	TCheckBox *CheckBoxNewGrub;
 	TCheckBox *CheckBoxLicense;
-	TButton *BtnEditPartition;
+	TButton *BtnEditStructures;
 	TGroupBox *GroupBox_SetingsESET;
 	TLabeledEdit *EditEsetMirrorDir;
 	TButton *BtnEditEsetMirrorDir;
@@ -158,20 +158,14 @@ __published:	// IDE-managed Components
 	TButton *Button_msconfig;
 	TButton *Button_CrashMonitor;
 	TButton *Button_ResMon;
-	TComboBox *ComboBox_forNumberARM;
+	TComboBox *ComboBox_DefStructur;
 	TLabel *Label_ForNumberARM;
 	TGridPanel *GridPanel2;
-	TLabel *Label_infoForNumberARM;
+	TComboBox *ComboBox_CurStructur;
 	TCheckBox *CheckBox_TempDir;
 	TMemo *Memo1;
 	TStringGrid *Grid_Users;
 	TGridPanel *GridPanel_Info;
-	TGridPanel *GridPanel3;
-	TGroupBox *GroupBox_Number;
-	TLabeledEdit *LabEdit_NumUVs;
-	TLabeledEdit *LabEdit_NumUVsO;
-	TLabeledEdit *LabEdit_NumOK;
-	TLabeledEdit *LabEdit_NumOKO;
 	TGroupBox *GroupBox_InfoARM;
 	TGridPanel *GridPanel_InfoArm;
 	TLabel *Label5;
@@ -243,7 +237,7 @@ __published:	// IDE-managed Components
 	void __fastcall BtnGruberStopClick(TObject *Sender);
 	void __fastcall CheckBoxAuditClick(TObject *Sender);
 	void __fastcall CheckBoxEsetLogClick(TObject *Sender);
-	void __fastcall BtnEditPartitionClick(TObject *Sender);
+	void __fastcall BtnEditStructuresClick(TObject *Sender);
 	void __fastcall BtnSaveSetteingsClick(TObject *Sender);
 	void __fastcall CheckBoxOldGrubClick(TObject *Sender);
 	void __fastcall CheckBoxNewGrubClick(TObject *Sender);
@@ -298,7 +292,8 @@ __published:	// IDE-managed Components
 	void __fastcall Edit_PhoneChange(TObject *Sender);
 	void __fastcall Edit_InResponChange(TObject *Sender);
 	void __fastcall Edit_InAdminBPChange(TObject *Sender);
-	void __fastcall ComboBox_forNumberARMChange(TObject *Sender);
+	void __fastcall ComboBox_DefStructurChange(TObject *Sender);
+	void __fastcall ComboBox_CurStructurChange(TObject *Sender);
 	void __fastcall ShowSerialGenarateDblClick(TObject *Sender);
 	void __fastcall ShowNetNameChange(TObject *Sender);
 	//void __fastcall CheckBox1Click(TObject *Sender);
@@ -309,6 +304,7 @@ __published:	// IDE-managed Components
 	void __fastcall ComboBox_MultiUSERSChange(TObject *Sender);
 	void __fastcall CheckListBox_SPZClickCheck(TObject *Sender);
 	void __fastcall CheckBox_installAvpzESETClick(TObject *Sender);
+	void __fastcall FormShow(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	std::set<int> DisabledItemsClass;
@@ -322,6 +318,10 @@ private:	// User declarations
 	void __fastcall Form1AfterMonitorDpiChanged(TObject *Sender, int OldDPI, int NewDPI);
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
+	// паралельні до Items вибраних комбобоксів структур - id по індексу
+	std::vector<UnicodeString> curStructureComboIds; // ComboBox_CurStructur
+	std::vector<UnicodeString> defStructureComboIds; // ComboBox_DefStructur
+	UnicodeString __fastcall getCurStructureId();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

@@ -129,6 +129,19 @@ UnicodeString findParam(TStringList* ini, UnicodeString cat, UnicodeString prm)
 	}
 	return "ERROR";
 }
+/* Перелік ід. усіх секцій, що починаються на заданий префікс, напр.
+** prefix="[structur_" для рядка "[structur_abc123]" поверне "abc123" */
+std::vector<UnicodeString> findSectionIds(TStringList* ini, UnicodeString prefix) {
+	std::vector<UnicodeString> ids;
+	UnicodeString findStr;
+	for (int i = 0; i < ini->Count; i++) {
+		findStr = ini->Strings[i];
+		if (isBeginUStr(findStr, prefix) && findStr[findStr.Length()] == ']') {
+			ids.push_back(findStr.SubString(prefix.Length()+1, findStr.Length()-prefix.Length()-1));
+		}
+	}
+	return ids;
+}
 std::vector<UnicodeString> findCategory(TStringList* ini, UnicodeString cat) {
 	std::vector<UnicodeString> findMulStr;
 	UnicodeString findStr;

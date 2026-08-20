@@ -22,6 +22,7 @@ bool compareInSring(UnicodeString strFull, UnicodeString strSearch);
 //---------------------------------------------------------------------------
 UnicodeString findParam(TStringList *ini, UnicodeString cat, UnicodeString prm);
 std::vector<UnicodeString> findCategory(TStringList *ini, UnicodeString cat);
+std::vector<UnicodeString> findSectionIds(TStringList *ini, UnicodeString prefix);
 //---------------------------------------------------------------------------
 void sortToVector(std::vector<UnicodeString> &vStr, UnicodeString &str);
 

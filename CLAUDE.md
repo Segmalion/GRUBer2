@@ -37,9 +37,13 @@ msbuild src_grub\GRUBer.cbproj /t:Build /p:Config=Debug /p:Platform=Win64x
 msbuild src_devLister\DeviceLister.cbproj /t:Build /p:Config=Debug /p:Platform=Win64x
 ```
 
-- Valid `Platform` values: `Win32`, `Win64`, `Win64x` (default/primary target is `Win64x`).
+- Both apps target **Win64x only** — Win32/Win64(classic) support was dropped (`TargetedPlatforms` in both
+  `.cbproj` files reflects this); always pass `/p:Platform=Win64x`. Leftover `Base_Win32`/`Cfg_1_Win32`/
+  `Cfg_2_Win32` (and classic `Win64`) `PropertyGroup`s may still exist in the `.cbproj` XML as inert IDE
+  cruft — that's normal RAD Studio behavior when a platform is unchecked in Project Options, not a sign that
+  Win32/Win64 is still a supported target.
 - Valid `Config` values: `Debug` (`Cfg_1`), `Release` (`Cfg_2`).
-- Output goes to `<Platform>\<Config>\` under each project folder (e.g. `src_grub\Win64x\Debug\`).
+- Output goes to `Win64x\<Config>\` under each project folder (e.g. `src_grub\Win64x\Debug\`).
 - There is no automated test suite in this repo — verification is manual (build + run the app).
 
 ## Architecture notes
@@ -75,14 +79,15 @@ same rule: they check `GetCurrentThreadId() == MainThreadID` and wrap in `Synchr
 main thread. When adding new code that runs inside `Th_Gruber::Execute()` or is called from it, follow this
 same split rather than touching `Form1->*` directly from the background thread.
 
-### File encodings are mixed — check before editing
-Source files in `src_grub/` are **not** uniformly UTF-8. Several headers/sources (e.g. `Config.h`,
-`Users.h`/`.cpp`, `Dir.h`, `GetSMB.h`, `RunApp.h`) are saved in a legacy Windows codepage (Cyrillic
-Windows-1251, misreported as "ISO-8859" by `file`), while others (e.g. `MainForm.cpp`) are UTF-8 with a BOM.
-Reading a Windows-1251 file as UTF-8 renders its Cyrillic/Ukrainian comments as mojibake — this is a file
-encoding issue, not file corruption. Before editing a file with garbled comments, check its actual encoding
-and preserve it; don't "fix" mojibake by rewriting comments in UTF-8 unless converting the whole file's
-encoding is the intended change.
+### File encoding — UTF-8 only
+All `.cpp`/`.h` source files in both `src_grub/` and `src_devLister/` are UTF-8 (verified 2026-08-20 — every
+non-ASCII file decodes as strict UTF-8; an earlier note here about mixed Windows-1251/UTF-8 files no longer
+reflects reality and was corrected). Most files carry no BOM, which the Clang-based `bcc64x` toolchain this
+project builds with handles fine — don't add one just for consistency. Keep it that way going forward: save
+new files as UTF-8, and if a file you're editing was ever saved in another codepage (e.g. pasted from a
+Windows-1251 source), re-save it as UTF-8 rather than leaving mixed encodings in the repo. `.dfm` files are
+exempt from this concern — Delphi/C++Builder escapes non-ASCII caption text as `#NNNN` decimal Unicode
+codepoints in the text format, so they carry no raw non-ASCII bytes regardless of file encoding.
 
 ### Language
 UI strings, log messages, and most comments are in Ukrainian (with some Russian in older comments). Keep

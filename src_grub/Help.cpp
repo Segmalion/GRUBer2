@@ -12,6 +12,8 @@
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 extern UnicodeString cmdEXE;
+extern Config curConfig;
+extern Arm curPC;
 //---------------------------------------------------------------------------
 /* Вывод логов */
 // ВАЖНО: printLog/printLogDebug могут вызываться как из главного потока (UI),
@@ -159,41 +161,83 @@ void setConfigToForm(Config &curConfig) {
 	Form1->CheckBoxAudit->State = (TCheckBoxState)curConfig.getAudit();
 	Form1->CheckBoxEsetLog->State = (TCheckBoxState)curConfig.getEsetLog();
 	Form1->CheckBoxPrefixPartition->State = (TCheckBoxState)curConfig.getEnablePrefixPartition();
-	Form1->ComboBox_forNumberARM->ItemIndex = curConfig.get_forNumberARMid();
 	Form1->EditPrefixPartition->Text = curConfig.getPrefixPartition();
-	for(auto i : curConfig.getPartition()) Form1->EditPartition->Items->Add(i);
 	for(auto i : curConfig.get_lgpo()) if(!i.IsEmpty()) Form1->ComboBox_PoliticInstall->Items->Add(i); //<--
 	for(auto i : curConfig.get_usb())  if(!i.IsEmpty()) Form1->ComboBox_ContrUSB->Items->Add(i); //<--
 	for(auto i : curConfig.get_user()) if(!i.IsEmpty()) Form1->ComboBox_MultiUSERS->Items->Add(i); //<--
 	for(auto i : curConfig.get_spz()) if(!i.IsEmpty()) Form1->CheckListBox_SPZ->Items->Add(i); //<--
+	populateStructureCombos(curConfig);
+}
+//---------------------------------------------------------------------------
+// перезаповнює обидва комбобокси структур зі списку Config, зберігаючи поточний
+// вибір ComboBox_CurStructur за id, якщо така структура ще існує, інакше -
+// на defaultStructureId
+void populateStructureCombos(Config &curConfig) {
+	UnicodeString keepId = Form1->getCurStructureId();
+	std::vector<StructureDef> structs = curConfig.get_structures();
+
+	Form1->ComboBox_CurStructur->Items->Clear();
+	Form1->curStructureComboIds.clear();
+	Form1->ComboBox_DefStructur->Items->Clear();
+	Form1->defStructureComboIds.clear();
+	for (auto &s : structs) {
+		Form1->ComboBox_CurStructur->Items->Add(s.name);
+		Form1->curStructureComboIds.push_back(s.id);
+		Form1->ComboBox_DefStructur->Items->Add(s.name);
+		Form1->defStructureComboIds.push_back(s.id);
+	}
+
+	int curIdx = 0;
+	for (size_t i = 0; i < Form1->curStructureComboIds.size(); i++)
+		if (Form1->curStructureComboIds[i] == keepId) { curIdx = (int)i; break; }
+	if (Form1->ComboBox_CurStructur->Items->Count > 0) Form1->ComboBox_CurStructur->ItemIndex = curIdx;
+
+	UnicodeString defId = curConfig.get_defaultStructureId();
+	int defIdx = 0;
+	for (size_t i = 0; i < Form1->defStructureComboIds.size(); i++)
+		if (Form1->defStructureComboIds[i] == defId) { defIdx = (int)i; break; }
+	if (Form1->ComboBox_DefStructur->Items->Count > 0) Form1->ComboBox_DefStructur->ItemIndex = defIdx;
+}
+//---------------------------------------------------------------------------
+// підвантажує обрану структуру (за id) в поля Edit_NumberARM/EditPartition/
+// Edit_Place/Edit_Phone - спільна логіка для setInfoArmToForm та зміни
+// ComboBox_CurStructur
+void applyCurStructureSelectionToForm(UnicodeString id) {
+	if (id.IsEmpty()) return;
+	StructurePcData data = curPC.getStructure(id);
+	Form1->Edit_NumberARM->Value = data.number;
+	Form1->Edit_NumberARM->Enabled = true;
+	Form1->EditPartition->Items->Clear();
+	// "Без відділу" - завжди перший пункт, для будь-якої структури (навіть
+	// порожньої), але це лише UI-заглушка: у списку відділів структури
+	// (StructuresForm/Config) її нема і не повинно бути
+	Form1->EditPartition->Items->Add("Без відділу");
+	for (auto &d : curConfig.get_structures())
+		if (d.id == id) for (auto &p : d.partition) Form1->EditPartition->Items->Add(p);
+	Form1->EditPartition->Text = data.partition.IsEmpty() ? UnicodeString("Без відділу") : data.partition;
+	// пряме присвоєння ->Text не викликає OnChange, тож підсвітку "нема у списку"
+	// доводиться запускати вручну
+	Form1->EditPartitionChange(Form1->EditPartition);
+	Form1->Edit_Place->Text = data.place;
+	Form1->Edit_PlaceChange(Form1->Edit_Place);
+	Form1->Edit_Phone->Text = data.phone;
+	Form1->Edit_PhoneChange(Form1->Edit_Phone);
+}
+//---------------------------------------------------------------------------
+// структури, знайдені в gruber_info.ini цього ПК, яких немає серед структур,
+// відомих програмі (GRUBer.ini) - кандидати на запит "додати цю структуру?"
+std::vector<StructurePcData> findUnknownStructures(Arm &curPC, Config &curConfig) {
+	std::vector<StructurePcData> unknown;
+	std::vector<StructureDef> known = curConfig.get_structures();
+	for (auto &s : curPC.get_structures()) {
+		bool found = false;
+		for (auto &k : known) if (k.id == s.id) { found = true; break; }
+		if (!found) unknown.push_back(s);
+	}
+	return unknown;
 }
 void setInfoArmToForm(Arm &curPC) {
-	if (curPC.get_useForNumberARMid() != 0)
-		Form1->ComboBox_forNumberARM->ItemIndex = curPC.get_useForNumberARMid();
-	if (Form1->ComboBox_forNumberARM->ItemIndex == 0) {
-		Form1->Edit_NumberARM->Value = 0;
-		Form1->Edit_NumberARM->Enabled = false;
-	}
-	if (Form1->ComboBox_forNumberARM->ItemIndex == 1) {
-		Form1->Edit_NumberARM->Value = curPC.getNumber_UVs();
-		Form1->Edit_NumberARM->Enabled = true;
-	}
-	if (Form1->ComboBox_forNumberARM->ItemIndex == 2) {
-		Form1->Edit_NumberARM->Value = curPC.getNumber_UVs_logist();
-		Form1->Edit_NumberARM->Enabled = true;
-	}
-	if (Form1->ComboBox_forNumberARM->ItemIndex == 3) {
-		Form1->Edit_NumberARM->Value = curPC.getNumber_OK();
-		Form1->Edit_NumberARM->Enabled = true;
-	}
-	if (Form1->ComboBox_forNumberARM->ItemIndex == 4) {
-		Form1->Edit_NumberARM->Value = curPC.getNumber_OK_logist();
-		Form1->Edit_NumberARM->Enabled = true;
-	}
-	Form1->EditPartition->Text = curPC.getPartition();
-	// пряме присвоєння ->Text не викликає OnChange, тож підсвітку "нема у списку"
-	// доводиться запускати вручну для значення, завантаженого при старті
-	Form1->EditPartitionChange(Form1->EditPartition);
+	applyCurStructureSelectionToForm(curConfig.get_defaultStructureId());
 	//---
 	if (!curPC.get_lgpo().IsEmpty())
 		Form1->ComboBox_PoliticInstall->Text = curPC.get_lgpo();  //<--
@@ -219,8 +263,6 @@ void setInfoArmToForm(Arm &curPC) {
 	Form1->EditLicOffice->Text = curPC.getLicOfficeName();
 	Form1->EditRespon->Text    = curPC.getRespon();
 	Form1->EditPurpose->Text   = curPC.getPurpose();
-	Form1->Edit_Place->Text   = curPC.getPlace();
-	Form1->Edit_Phone->Text   = curPC.getPhone();
 
 	Form1->Edit_InNumberARM->Text = curPC.getInNumberARM();
 	Form1->Edit_InNumberHDD->Text = curPC.getInNumberHDD();
@@ -240,11 +282,6 @@ void setInfoArmToForm(Arm &curPC) {
 		Form1->StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
 	else Form1->StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
 	Form1->EditEsetMirrorDir->Text = curPC.getEsetDir();
-
-	Form1->LabEdit_NumUVs->Text = curPC.getNumber_UVs();
-	Form1->LabEdit_NumUVsO->Text = curPC.getNumber_UVs_logist();
-	Form1->LabEdit_NumOK->Text = curPC.getNumber_OK();
-	Form1->LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
 
     Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
@@ -272,8 +309,8 @@ bool infoSetToFille(Arm &curPC)
 	for(auto str : curPC.mStrIniVersionNumber()) infoFille->Add(str);
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) infoFille->Add(str);
-	// раздел номеров ПК
-	for(auto str : curPC.mStrNumberARM()) infoFille->Add(str);
+	// раздел номеров ПК (структур)
+	for(auto str : curPC.mStrStructures()) infoFille->Add(str);
 	// раздел серийников
 	for(auto str : curPC.mStrSerial()) infoFille->Add(str);
 	// раздел об АРМ

@@ -7,6 +7,7 @@
 #include "InstallSoft.h"
 #include "Users.h"
 #include "Net.h"
+#include "Structures.h"
 //---------------------------------------------------------------------------
 class Arm {
 private:
@@ -19,11 +20,10 @@ private:
 	** 5 - запись изменений в клас при изменении формы
 	*/
 	// --- инфо об ПК (ручная)
-		int number_UVs = 0;
-		int number_OK = 0;
-		int number_UVs_logist = 0;
-		int number_OK_logist = 0;
-		short useForNumberARMid = 0;
+		std::vector<StructurePcData> structures;
+		bool pendingLegacyMigration = false;
+		UnicodeString pendingLegacyPartition, pendingLegacyPlace, pendingLegacyPhone;
+		int pendingLegacyNumber = 0;
 		UnicodeString partition  = "Без відділу";
 		UnicodeString className   = "Без класу";
 		UnicodeString categoryName   = "Особистий";
@@ -111,18 +111,20 @@ public:
 	std::vector<UnicodeString> mStrIniVersionNumber();
 	std::vector<UnicodeString> mStrInfoArm();
 	std::vector<UnicodeString> mStrSerial();
-	std::vector<UnicodeString> mStrNumberARM();
+	std::vector<UnicodeString> mStrStructures();
 	std::vector<UnicodeString> mStrInfoArmGrub();
 	std::vector<UnicodeString> mStrInfoArmEset();
 	std::vector<UnicodeString> mStrInfoArmNet();
 	std::vector<UnicodeString> mStrLastGrub();
 	UnicodeString lastGrub();
 	// === сеттери
-	void set_useForNumberARMid(short i);
-	void setNumber_UVs(int i);
-	void setNumber_OK(int i);
-	void setNumber_UVs_logist(int i);
-	void setNumber_OK_logist(int i);
+	void set_structures(std::vector<StructurePcData> v);
+	void setStructureNumber(UnicodeString id, UnicodeString name, int number);
+	void setStructurePartition(UnicodeString id, UnicodeString name, UnicodeString partition);
+	void setStructurePlace(UnicodeString id, UnicodeString name, UnicodeString place);
+	void setStructurePhone(UnicodeString id, UnicodeString name, UnicodeString phone);
+	void applyPendingLegacyMigration(UnicodeString targetStructureId, UnicodeString targetStructureName);
+	void clearPendingLegacyMigration();
 	void setPartition(UnicodeString str);
 	void setClass(UnicodeString str, int i);
 	void setCategory(UnicodeString str, int i);
@@ -149,11 +151,9 @@ public:
 	void set_multiUser (UnicodeString str);  //<--
 	void set_spzInstal(std::vector<UnicodeString> vStr); //<--
 	// === геттери
-	short get_useForNumberARMid();
-	int getNumber_UVs();
-	int getNumber_OK();
-	int getNumber_UVs_logist();
-	int getNumber_OK_logist();
+	std::vector<StructurePcData> get_structures();
+	StructurePcData getStructure(UnicodeString id);
+	bool needsLegacyMigrationPrompt();
 	UnicodeString getPartition();
 	UnicodeString getClassName();
 	UnicodeString getCategoryName();

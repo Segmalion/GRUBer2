@@ -121,7 +121,8 @@ void blockGrub(bool i) {
 	Form1->CheckBoxEsetLog->Enabled = !i;
 	Form1->CheckBoxPrefixPartition->Enabled = !i;
 	Form1->EditPrefixPartition->Enabled = !i;
-	Form1->ComboBox_forNumberARM->Enabled = !i;
+	Form1->ComboBox_DefStructur->Enabled = !i;
+	Form1->ComboBox_CurStructur->Enabled = !i;
 	Form1->CheckListBox_SPZ->Enabled = !i;
 	//-----
 	if (i) Form1->BtnGruberRun->Caption = "Зачекай...";

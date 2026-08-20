@@ -11,7 +11,8 @@
 
 #include "MainForm.h"
 #include "ComentForm.h"
-#include "PartitionForm.h"
+#include "StructuresForm.h"
+#include "StructurePickForm.h"
 #include "DialogDirExist.h"
 #include "About.h"
 #include "ClearTemp.h"
@@ -85,8 +86,8 @@ std::vector<UnicodeString> fileInfoGrub() {
 	for(auto str : curPC.mStrIniVersionNumber()) vStr.push_back(str);
 	// раздел даты и пользователя
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
-	// раздел номеров ПК
-	for(auto str : curPC.mStrNumberARM()) vStr.push_back(str);
+	// раздел номеров ПК (структур)
+	for(auto str : curPC.mStrStructures()) vStr.push_back(str);
 	// раздел серийников
 	for(auto str : curPC.mStrSerial()) vStr.push_back(str);
 	// раздел об АРМ-1
@@ -485,6 +486,7 @@ void checkDefection() {
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
+	Randomize(); // для generateStructureId()
 	PageControl_SetInfo->TabIndex = 0;
 	PageControl_InfoTabs->TabIndex = 0;
 	// === заголовки таблиці юзерів (Grid_Users)
@@ -500,7 +502,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	captureGridUsersDpiBaseline();
 	applyGridUsersDpiScale();
 	fs::path p_curDir = fs::current_path();
-	fs::path p_configIni = p_curDir / "GRUBer.ini";
 	// === запуск правильной разрядности
 	if (x64_sys() == true && x64_app() == false) {
 		fs::path p_app_x64 = p_curDir / "GRUBer.exe";
@@ -508,6 +509,37 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 			ShellExecuteW(NULL, L"open", p_app_x64.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 			exit(1);
 		}
+	}
+}
+//---------------------------------------------------------------------------
+// Виконується після того, як усі форми застосунку вже створені
+// (Application->CreateForm у GRUBer.cpp) - на відміну від конструктора,
+// тут безпечно звертатися до інших форм (FormStructurePick), бо в
+// конструкторі Form1 (перша форма, що створюється) вони ще не існують.
+void __fastcall TForm1::FormShow(TObject *Sender)
+{
+	if (gruberStart) return; // весь блок нижче - одноразова ініціалізація при старті
+	fs::path p_configIni = fs::current_path() / "GRUBer.ini";
+    // === нові структури, знайдені на ПК (запит "додати структуру?" - до
+	// заповнення комбобоксів, щоб нова структура одразу в них потрапила)
+	{
+		std::vector<StructurePcData> unknown = findUnknownStructures(curPC, curConfig);
+		bool configChanged = false;
+		for (auto &u : unknown) {
+			UnicodeString text = L"На цьому ПК знайдено невідому структуру \"" + u.name +
+				L"\". Додати її до списку структур програми?";
+			if (Application->MessageBox(text.c_str(), L"Невідома структура", MB_YESNO) == IDYES) {
+				StructureDef def;
+				def.id = u.id;
+				def.name = u.name;
+				def.partition = vStrGenFromStr(u.partition);
+				auto structs = curConfig.get_structures();
+				structs.push_back(def);
+				curConfig.set_structures(structs);
+				configChanged = true;
+			}
+		}
+		if (configChanged) curConfig.saveFileIni();
 	}
     // === выводим настройки & сохраненую инфу об АРМ
 	setConfigToForm(curConfig);
@@ -542,6 +574,32 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		}
 		admMode = "UserMode";
 	}
+    // === запит на перезбереження GRUBer.ini у новому форматі, якщо файл ще
+	// застарілої версії (ini_version=0/відсутній) - навмисно після запиту на
+	// перезапуск від адміна, а не до нього
+	if (curConfig.get_iniVersion() == 0) {
+		UnicodeString text = L"Файл налаштувань (GRUBer.ini) збережено застарілим форматом.\n"
+			L"Перезберегти його у новому форматі?";
+		if (Application->MessageBox(text.c_str(), L"Застарілий формат налаштувань", MB_YESNO) == IDYES) {
+			curConfig.saveFileIni();
+		}
+	}
+    // === міграція старих даних структур (запит - до якої структури віднести
+	// відділ/місце/телефон з попередньої версії) - навмисно після запиту на
+	// перезапуск від адміна, а не до нього
+	if (curPC.needsLegacyMigrationPrompt()) {
+		UnicodeString pickedId = FormStructurePick->ShowPick(
+			L"Знайдено застарілі дані (відділ/місце/телефон) з попередньої версії. "
+			L"До якої структури їх віднести?");
+		UnicodeString pickedName;
+		for (auto &s : curConfig.get_structures()) if (s.id == pickedId) { pickedName = s.name; break; }
+		if (!pickedId.IsEmpty()) curPC.applyPendingLegacyMigration(pickedId, pickedName);
+		else curPC.clearPendingLegacyMigration();
+		infoSetToFille(curPC);
+		// оновлюємо поля вкладки "Інфо" - міграція могла змінити дані
+		// структури, що зараз показана в ComboBox_CurStructur
+		applyCurStructureSelectionToForm(getCurStructureId());
+	}
 	/* === наполняем форму === */
 	printLog(">>", "Запушенно GRUBer v." + versionApp);
 	printLog(">>", "Останій граб: " + curPC.lastGrub());
@@ -559,15 +617,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	// --- статус бар
 	if (x64_app()) StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x64_" + admMode + ") ";
 	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
-	// --- разное
-	Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text; // тип номера ПК
-	/* --- вывод дебаг инфы
-	printLogDebug(curConfig.getDebug(), "{forNumberARM}=" + UnicodeString(curConfig.get_forNumberARMid()));
-	printLogDebug(curConfig.getDebug(), "{number_UVs}=" + UnicodeString(curPC.getNumber_UVs()));
-	printLogDebug(curConfig.getDebug(), "{number_UVs_logist}=" + UnicodeString(curPC.getNumber_UVs_logist()));
-	printLogDebug(curConfig.getDebug(), "{number_OK}=" + UnicodeString(curPC.getNumber_OK()));
-	printLogDebug(curConfig.getDebug(), "{number_OK_logist}=" + UnicodeString(curPC.getNumber_OK_logist()));
-	*/
 	gruberStart = 1;
 	captureGridPanelDpiBaselines();
 }
@@ -603,11 +652,11 @@ void __fastcall TForm1::Gruber_USBClick(TObject *Sender)
 		Thr->Resume();
 	}
 }
-// === открыть редактор подразделений
-void __fastcall TForm1::BtnEditPartitionClick(TObject *Sender)
+// === открыть редактор структур
+void __fastcall TForm1::BtnEditStructuresClick(TObject *Sender)
 {
-	FormPartition->EditPartition->Lines = Form1->EditPartition->Items;
-	FormPartition->ShowModal();
+	FormStructures->loadStructures();
+	FormStructures->ShowModal();
 }
 // === открыть папку Граба
 void __fastcall TForm1::BtnGruberDirOpenClick(TObject *Sender)
@@ -788,30 +837,28 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 /* Изменение полей */
+UnicodeString __fastcall TForm1::getCurStructureId()
+{
+	int i = ComboBox_CurStructur->ItemIndex;
+	if (i < 0 || i >= (int)curStructureComboIds.size()) return "";
+	return curStructureComboIds[i];
+}
 void __fastcall TForm1::Edit_NumberARMChange(TObject *Sender)
 {
-	//curPC.setNumber_OK(Edit_NumberARM->Value);
-	if (ComboBox_forNumberARM->ItemIndex == 1) {
-		curPC.setNumber_UVs(Edit_NumberARM->Value);
-	}
-	if (ComboBox_forNumberARM->ItemIndex == 2) {
-		curPC.setNumber_UVs_logist(Edit_NumberARM->Value);
-	}
-	if (ComboBox_forNumberARM->ItemIndex == 3) {
-		curPC.setNumber_OK(Edit_NumberARM->Value);
-	}
-	if (ComboBox_forNumberARM->ItemIndex == 4) {
-		curPC.setNumber_OK_logist(Edit_NumberARM->Value);
-	}
-	LabEdit_NumUVs->Text = curPC.getNumber_UVs();
-	LabEdit_NumUVsO->Text = curPC.getNumber_UVs_logist();
-	LabEdit_NumOK->Text = curPC.getNumber_OK();
-	LabEdit_NumOKO->Text = curPC.getNumber_OK_logist();
+	UnicodeString id = getCurStructureId();
+	if (!id.IsEmpty())
+		curPC.setStructureNumber(id, ComboBox_CurStructur->Text, Edit_NumberARM->Value);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 }
 void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
-	curPC.setPartition(EditPartition->Text);
+	// "Без відділу" - лише UI-заглушка за замовчуванням, у файли пишемо
+	// порожнє значення замість неї
+	UnicodeString saveVal = (EditPartition->Text == "Без відділу") ? UnicodeString("") : EditPartition->Text;
+	curPC.setPartition(saveVal); // плоске дзеркало - для dirGrubName() та підказки про права адміна
+	UnicodeString id = getCurStructureId();
+	if (!id.IsEmpty())
+		curPC.setStructurePartition(id, ComboBox_CurStructur->Text, saveVal);
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 	bool knownPartition = EditPartition->Items->IndexOf(EditPartition->Text) >= 0;
 	EditPartition->Color = knownPartition ? clWindow : (TColor)0x00D0D0FF; // блідо-червоний, якщо значення не обране зі списку
@@ -839,11 +886,17 @@ void __fastcall TForm1::EditPurposeChange(TObject *Sender)
 }
 void __fastcall TForm1::Edit_PlaceChange(TObject *Sender) // <===
 {
-	curPC.setPlace(Edit_Place->Text);
+	curPC.setPlace(Edit_Place->Text); // плоске дзеркало
+	UnicodeString id = getCurStructureId();
+	if (!id.IsEmpty())
+		curPC.setStructurePlace(id, ComboBox_CurStructur->Text, Edit_Place->Text);
 }
 void __fastcall TForm1::Edit_PhoneChange(TObject *Sender) // <===
 {
-	curPC.setPhone(Edit_Phone->Text);
+	curPC.setPhone(Edit_Phone->Text); // плоске дзеркало
+	UnicodeString id = getCurStructureId();
+	if (!id.IsEmpty())
+		curPC.setStructurePhone(id, ComboBox_CurStructur->Text, Edit_Phone->Text);
 }
 void __fastcall TForm1::EditLicWinChange(TObject *Sender)
 {
@@ -1026,37 +1079,17 @@ void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
 	curPC.setEsetAutoUpdate(i);
 	if(gruberStart) infoSetToFille(curPC);
 }
-void __fastcall TForm1::ComboBox_forNumberARMChange(TObject *Sender)
+void __fastcall TForm1::ComboBox_DefStructurChange(TObject *Sender)
 {
-	short id = ComboBox_forNumberARM->ItemIndex;
-	curConfig.set_forNumberARMid(ComboBox_forNumberARM->ItemIndex);
-	curPC.set_useForNumberARMid(id);
-	if (id == 0) {
-		Edit_NumberARM->Value = 0;
-		Edit_NumberARM->Enabled = false;
-//		Label_NumberARM->Caption = "Номер АРМ(...):";
-	}
-	if (id == 1) {
-		Edit_NumberARM->Value = curPC.getNumber_UVs();
-		Edit_NumberARM->Enabled = true;
-//		Label_NumberARM->Caption = "Номер АРМ(УВс\"П\"):";
-	}
-	if (id == 2) {
-		Edit_NumberARM->Value = curPC.getNumber_UVs_logist();
-		Edit_NumberARM->Enabled = true;
-//		Label_NumberARM->Caption = "Номер АРМ(УВс\"П\"-лог):";
-	}
-		if (id == 3) {
-		Edit_NumberARM->Value = curPC.getNumber_OK();
-		Edit_NumberARM->Enabled = true;
-//		Label_NumberARM->Caption = "Номер АРМ(ОК\"П\"):";
-	}
-	if (id == 4) {
-		Edit_NumberARM->Value = curPC.getNumber_OK_logist();
-		Edit_NumberARM->Enabled = true;
-//		Label_NumberARM->Caption = "Номер АРМ(ОК\"П\"-лог):";
-	}
-	Label_infoForNumberARM->Caption = ComboBox_forNumberARM->Text;
+	int i = ComboBox_DefStructur->ItemIndex;
+	if (i < 0 || i >= (int)defStructureComboIds.size()) return;
+	// не перемикає ComboBox_CurStructur/поля вкладки "Інфо" - нова структура за
+	// замовчуванням застосується лише при наступному запуску програми
+	curConfig.set_defaultStructureId(defStructureComboIds[i]);
+}
+void __fastcall TForm1::ComboBox_CurStructurChange(TObject *Sender)
+{
+	applyCurStructureSelectionToForm(getCurStructureId());
 }
 //---------------------------------------------------------------------------
 /* Запуск ПО */

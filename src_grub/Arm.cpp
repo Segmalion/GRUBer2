@@ -128,7 +128,7 @@ void Arm::read_net() {
 }
 //генерация строк в инфо файлы
 std::vector<UnicodeString> Arm::mStrIniVersionNumber() {
-	const int iniVersionNumber = 5;
+	const int iniVersionNumber = 6;
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[iniVersion]");
 	mStr.push_back("version=" + UnicodeString(iniVersionNumber));
@@ -153,14 +153,17 @@ std::vector<UnicodeString> Arm::mStrSerial() {
 	mStr.push_back("unSerial=" + unSerial);
 	return mStr;
 }
-std::vector<UnicodeString> Arm::mStrNumberARM() {
+std::vector<UnicodeString> Arm::mStrStructures() {
 	std::vector<UnicodeString> mStr;
-	mStr.push_back("[numberARM]");
-	mStr.push_back("useForNumberARMid=" + UnicodeString(useForNumberARMid));
-	mStr.push_back("UVs=" + UnicodeString(number_UVs));
-	mStr.push_back("UVs_logist=" + UnicodeString(number_UVs_logist));
-	mStr.push_back("OK=" + UnicodeString(number_OK));
-	mStr.push_back("OK_logist=" + UnicodeString(number_OK_logist));
+	for (auto &s : structures) {
+		if (s.number == 0 && s.partition.IsEmpty() && s.place.IsEmpty() && s.phone.IsEmpty()) continue;
+		mStr.push_back("[structur_" + s.id + "]");
+		mStr.push_back("name=" + s.name);
+		mStr.push_back("number=" + UnicodeString(s.number));
+		mStr.push_back("partition=" + s.partition);
+		mStr.push_back("place=" + s.place);
+		mStr.push_back("phone=" + s.phone);
+	}
 	return mStr;
 }
 std::vector<UnicodeString> Arm::mStrInfoArmGrub() {
@@ -296,7 +299,7 @@ bool Arm::readFromFile() {
 			multiUser = findParam(file, "[infoGrubARM]", "comMultiUSERS");
         }
 		if (vers == 1) {
-			number_UVs = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
+			pendingLegacyNumber = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
         }
 		if (vers >= 1) {
 			if (categoryID == 0) {categoryNameShort = "ОС";}
@@ -308,11 +311,18 @@ bool Arm::readFromFile() {
 			if (categoryID == 6) {categoryNameShort = "ЦТ";}
 		}
 		if (vers >= 2) {
-			useForNumberARMid = findParam(file, "[numberARM]", "useForNumberARMid").ToIntDef(0);
-			number_OK = findParam(file, "[numberARM]", "OK").ToIntDef(0);
-			number_OK_logist = findParam(file, "[numberARM]", "OK_logist").ToIntDef(0);
-            number_UVs = findParam(file, "[numberARM]", "UVs").ToIntDef(0);
-			number_UVs_logist = findParam(file, "[numberARM]", "UVs_logist").ToIntDef(0);
+			// useForNumberARMid зі старого формату свідомо не читаємо - в новій
+			// моделі структур немає єдиного "активного" типу, обраного per-ПК
+			if (vers < 6) {
+				int uvs   = findParam(file, "[numberARM]", "UVs").ToIntDef(0);
+				int uvsL  = findParam(file, "[numberARM]", "UVs_logist").ToIntDef(0);
+				int ok    = findParam(file, "[numberARM]", "OK").ToIntDef(0);
+				int okL   = findParam(file, "[numberARM]", "OK_logist").ToIntDef(0);
+				setStructureNumber(STRUCT_ID_UVS,        "УВ(с) \"Південь\"",             uvs);
+				setStructureNumber(STRUCT_ID_UVS_LOGIST, "УВ(с) \"Південь\" - Логістика", uvsL);
+				setStructureNumber(STRUCT_ID_OK,         "ОК \"Південь\"",                ok);
+				setStructureNumber(STRUCT_ID_OK_LOGIST,  "ОК \"Південь\" - Логістика",     okL);
+			}
 			place = findParam(file, "[infoGrubARM]", "place");
 			phone = findParam(file, "[infoGrubARM]", "phone");
 			inRespon = findParam(file, "[infoGrubARM]", "inRespon");
@@ -327,14 +337,43 @@ bool Arm::readFromFile() {
 			multiUser = findParam(file, "[infoGrubARM]", "multiUser");   //<--
 			spzInstal = vStrGenFromStr(findParam(file, "[infoGrubARM]", "spzInstal"));//<---
 		}
+		if (vers < 6) {
+			// partition/place/phone (та, для vers==1, окремий "number") у старих
+			// версіях завжди єдині - якій зі структур їх віднести, неоднозначно,
+			// тож просимо техніка обрати при старті форми (FormCreate)
+			if (!partition.IsEmpty() || !place.IsEmpty() || !phone.IsEmpty() || pendingLegacyNumber != 0) {
+				pendingLegacyMigration = true;
+				pendingLegacyPartition = partition;
+				pendingLegacyPlace = place;
+				pendingLegacyPhone = phone;
+			}
+		}
+		if (vers >= 6) {
+			structures.clear();
+			for (auto &id : findSectionIds(file, "[structur_")) {
+				UnicodeString sec = "[structur_" + id + "]";
+				StructurePcData s;
+				s.id = id;
+				s.name = errCheck(findParam(file, sec, "name"));
+				s.number = findParam(file, sec, "number").ToIntDef(0);
+				s.partition = errCheck(findParam(file, sec, "partition"));
+				s.place = errCheck(findParam(file, sec, "place"));
+				s.phone = errCheck(findParam(file, sec, "phone"));
+				structures.push_back(s);
+			}
+		}
 		return true;
 	}
 	//старые файлы
 	if (FileExists(dir + "info_001.dat")) {
 		std::unique_ptr<TStringList> infoDatIm(new TStringList);
 		infoDatIm->LoadFromFile(dir + "info_001.dat", TEncoding::UTF8);
-		number_UVs = (infoDatIm->Strings[1]).ToIntDef(0);
+		pendingLegacyNumber = (infoDatIm->Strings[1]).ToIntDef(0);
 		partition = infoDatIm->Strings[2];
+		if (!partition.IsEmpty() || pendingLegacyNumber != 0) {
+			pendingLegacyMigration = true;
+			pendingLegacyPartition = partition;
+		}
 		categoryID = (infoDatIm->Strings[3]).ToIntDef(0) + 1;
 		if (categoryID == 0) {categoryName = "Особистий"; categoryNameShort = "ОС";}
 		if (categoryID == 1) {categoryName = "НТ без підключеня"; categoryNameShort = "НТ-БП";}
@@ -361,11 +400,53 @@ bool Arm::readFromFile() {
 //---[сеттери]------------------------------------------------------------------------
 /* сеттери */
 // ручной ввод по компу
-void Arm::set_useForNumberARMid(short i) { useForNumberARMid = i; }
-void Arm::setNumber_UVs(int i) { number_UVs = i; }
-void Arm::setNumber_OK(int i) { number_OK = i; }
-void Arm::setNumber_UVs_logist(int i) { number_UVs_logist = i; }
-void Arm::setNumber_OK_logist(int i) { number_OK_logist = i; }
+void Arm::set_structures(std::vector<StructurePcData> v) { structures = v; }
+static std::vector<StructurePcData>::iterator findStructureIt(std::vector<StructurePcData> &v, UnicodeString id) {
+	for (auto it = v.begin(); it != v.end(); ++it) if (it->id == id) return it;
+	return v.end();
+}
+void Arm::setStructureNumber(UnicodeString id, UnicodeString name, int number) {
+	auto it = findStructureIt(structures, id);
+	if (it == structures.end()) {
+		StructurePcData s; s.id = id; s.name = name; s.number = number;
+		structures.push_back(s);
+	} else { it->name = name; it->number = number; }
+}
+void Arm::setStructurePartition(UnicodeString id, UnicodeString name, UnicodeString partitionVal) {
+	auto it = findStructureIt(structures, id);
+	if (it == structures.end()) {
+		StructurePcData s; s.id = id; s.name = name; s.partition = partitionVal;
+		structures.push_back(s);
+	} else { it->name = name; it->partition = partitionVal; }
+}
+void Arm::setStructurePlace(UnicodeString id, UnicodeString name, UnicodeString placeVal) {
+	auto it = findStructureIt(structures, id);
+	if (it == structures.end()) {
+		StructurePcData s; s.id = id; s.name = name; s.place = placeVal;
+		structures.push_back(s);
+	} else { it->name = name; it->place = placeVal; }
+}
+void Arm::setStructurePhone(UnicodeString id, UnicodeString name, UnicodeString phoneVal) {
+	auto it = findStructureIt(structures, id);
+	if (it == structures.end()) {
+		StructurePcData s; s.id = id; s.name = name; s.phone = phoneVal;
+		structures.push_back(s);
+	} else { it->name = name; it->phone = phoneVal; }
+}
+void Arm::applyPendingLegacyMigration(UnicodeString targetStructureId, UnicodeString targetStructureName) {
+	if (!targetStructureId.IsEmpty()) {
+		if (pendingLegacyNumber != 0) setStructureNumber(targetStructureId, targetStructureName, pendingLegacyNumber);
+		if (!pendingLegacyPartition.IsEmpty()) setStructurePartition(targetStructureId, targetStructureName, pendingLegacyPartition);
+		if (!pendingLegacyPlace.IsEmpty()) setStructurePlace(targetStructureId, targetStructureName, pendingLegacyPlace);
+		if (!pendingLegacyPhone.IsEmpty()) setStructurePhone(targetStructureId, targetStructureName, pendingLegacyPhone);
+	}
+	clearPendingLegacyMigration();
+}
+void Arm::clearPendingLegacyMigration() {
+	pendingLegacyMigration = false;
+	pendingLegacyPartition = ""; pendingLegacyPlace = ""; pendingLegacyPhone = "";
+	pendingLegacyNumber = 0;
+}
 void Arm::setPartition(UnicodeString str) { partition = str; }
 void Arm::setClass(UnicodeString str, int i) { className = str; classID = i; }
 void Arm::setCategory(UnicodeString str, int i) {
@@ -409,11 +490,14 @@ void Arm::set_spzInstal (std::vector<UnicodeString> vStr) { spzInstal=vStr; } //
 //---[геттери]---------------------------------------------------------------
 UnicodeString Arm::getDesktopName() { return desktopName; }
 // ручной ввод по компу
-short Arm::get_useForNumberARMid() { return useForNumberARMid; }
-int Arm::getNumber_UVs() { return number_UVs; }
-int Arm::getNumber_OK() { return number_OK; }
-int Arm::getNumber_UVs_logist() { return number_UVs_logist; }
-int Arm::getNumber_OK_logist() { return number_OK_logist; }
+std::vector<StructurePcData> Arm::get_structures() { return structures; }
+StructurePcData Arm::getStructure(UnicodeString id) {
+	for (auto &s : structures) if (s.id == id) return s;
+	StructurePcData empty;
+	empty.id = id;
+	return empty;
+}
+bool Arm::needsLegacyMigrationPrompt() { return pendingLegacyMigration; }
 UnicodeString Arm::getPartition() { return partition; }
 UnicodeString Arm::getClassName() { return className; }
 UnicodeString Arm::getCategoryName() { return categoryName; }

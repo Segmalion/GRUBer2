@@ -9,7 +9,7 @@
         <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win64x</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">DeviceLister</ProjectName>
-        <TargetedPlatforms>1048579</TargetedPlatforms>
+        <TargetedPlatforms>1048576</TargetedPlatforms>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>

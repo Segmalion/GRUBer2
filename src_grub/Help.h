@@ -33,6 +33,10 @@ void setConfigToForm(Config &curConfig);
 bool infoReadAndSet(Arm &curPC);
 bool infoSetToFille(Arm &curPC);
 //---------------------------------------------------------------------------
+void populateStructureCombos(Config &curConfig);
+void applyCurStructureSelectionToForm(UnicodeString id);
+std::vector<StructurePcData> findUnknownStructures(Arm &curPC, Config &curConfig);
+//---------------------------------------------------------------------------
 // UnicodeString dirCurGrubName (arm &curPC, UnicodeString date);
 //---------------------------------------------------------------------------
 bool compareVectorAndString(UnicodeString str, std::vector<UnicodeString> vct);
