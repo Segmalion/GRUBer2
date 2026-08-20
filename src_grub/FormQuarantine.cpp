@@ -3,6 +3,7 @@
 #pragma hdrstop
 
 #include <map>
+#include <System.DateUtils.hpp>
 
 #include "FormQuarantine.h"
 #include "MainForm.h"
@@ -124,6 +125,18 @@ void TFormQuarantine::autoFitColumns()
 void __fastcall TFormQuarantine::ButtonRefreshClick(TObject *Sender)
 {
 	refreshList();
+}
+//---------------------------------------------------------------------------
+// TListItem в цій VCL не має власного Color - фон рядка міняємо через
+// OnCustomDrawItem (Sender->Canvas->Brush->Color перед стандартним малюванням)
+void __fastcall TFormQuarantine::ListViewQuarantineCustomDrawItem(
+	TCustomListView *Sender, TListItem *Item, TCustomDrawState State, bool &DefaultDraw)
+{
+	if (Item->Index >= 0 && Item->Index < (int)groups.size() &&
+		System::Dateutils::DaysBetween(Now(), groups[Item->Index].date) > 90) {
+		Sender->Canvas->Brush->Color = (TColor)0x00EAFFEA; // старше 90 днів - блідо-зелений
+	}
+	DefaultDraw = true;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormQuarantine::ButtonSelectAllClick(TObject *Sender)

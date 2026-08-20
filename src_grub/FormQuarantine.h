@@ -25,6 +25,8 @@ __published:	// IDE-managed Components
 	void __fastcall ButtonRefreshClick(TObject *Sender);
 	void __fastcall ButtonCloseClick(TObject *Sender);
 	void __fastcall ButtonSelectAllClick(TObject *Sender);
+	void __fastcall ListViewQuarantineCustomDrawItem(TCustomListView *Sender,
+		TListItem *Item, TCustomDrawState State, bool &DefaultDraw);
 private:	// User declarations
 	// ESET зберігає ~3 супутні файли на один об'єкт карантину (з різними
 	// розширеннями, спільним базовим ім'ям) - видаляти їх окремо не має сенсу,

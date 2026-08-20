@@ -100,6 +100,7 @@ object FormQuarantine: TFormQuarantine
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
+      OnCustomDrawItem = ListViewQuarantineCustomDrawItem
       ExplicitWidth = 1040
       ExplicitHeight = 610
     end
