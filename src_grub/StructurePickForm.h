@@ -16,7 +16,6 @@ __published:	// IDE-managed Components
 	TLabel *LabelPrompt;
 	TComboBox *ComboBoxPick;
 	TButton *ButtonOK;
-	TButton *ButtonCancel;
 private:	// User declarations
 public:		// User declarations
 	__fastcall TFormStructurePick(TComponent* Owner);

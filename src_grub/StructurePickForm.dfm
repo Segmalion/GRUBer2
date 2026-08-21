@@ -8,7 +8,7 @@ object FormStructurePick: TFormStructurePick
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = #1042#1080#1073#1110#1088' '#1089#1090#1088#1091#1082#1090#1091#1088#1080
-  ClientHeight = 260
+  ClientHeight = 215
   ClientWidth = 590
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -21,13 +21,14 @@ object FormStructurePick: TFormStructurePick
   PixelsPerInch = 168
   TextHeight = 30
   object GridPanel1: TGridPanel
-    Left = 0
-    Top = 0
-    Width = 590
-    Height = 260
-    Margins.Left = 5
+    AlignWithMargins = True
+    Left = 20
+    Top = 5
+    Width = 550
+    Height = 205
+    Margins.Left = 20
     Margins.Top = 5
-    Margins.Right = 5
+    Margins.Right = 20
     Margins.Bottom = 5
     Align = alClient
     BevelOuter = bvNone
@@ -53,18 +54,14 @@ object FormStructurePick: TFormStructurePick
       end
       item
         Column = 0
-        Control = ButtonCancel
-        Row = 2
-      end
-      item
-        Column = 1
+        ColumnSpan = 2
         Control = ButtonOK
         Row = 2
       end>
     RowCollection = <
       item
         SizeStyle = ssAbsolute
-        Value = 137.000000000000000000
+        Value = 80.000000000000000000
       end
       item
         SizeStyle = ssAbsolute
@@ -75,26 +72,33 @@ object FormStructurePick: TFormStructurePick
         Value = 78.000000000000000000
       end>
     TabOrder = 0
+    ExplicitLeft = 0
+    ExplicitTop = 0
+    ExplicitWidth = 590
+    ExplicitHeight = 260
     object LabelPrompt: TLabel
       AlignWithMargins = True
       Left = 5
       Top = 5
-      Width = 580
-      Height = 127
+      Width = 540
+      Height = 70
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
       Align = alClient
+      Alignment = taCenter
       Caption = 'LabelPrompt'
       WordWrap = True
+      ExplicitWidth = 117
+      ExplicitHeight = 30
     end
     object ComboBoxPick: TComboBox
       AlignWithMargins = True
       Left = 5
-      Top = 142
-      Width = 580
-      Height = 35
+      Top = 85
+      Width = 540
+      Height = 38
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -102,27 +106,14 @@ object FormStructurePick: TFormStructurePick
       Align = alClient
       Style = csDropDownList
       TabOrder = 0
-    end
-    object ButtonCancel: TButton
-      AlignWithMargins = True
-      Left = 5
-      Top = 192
-      Width = 281
-      Height = 68
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
-      Align = alClient
-      Caption = #1042#1110#1076#1084#1110#1085#1072
-      ModalResult = 2
-      TabOrder = 1
+      ExplicitTop = 142
+      ExplicitWidth = 580
     end
     object ButtonOK: TButton
       AlignWithMargins = True
-      Left = 296
-      Top = 192
-      Width = 289
+      Left = 5
+      Top = 130
+      Width = 540
       Height = 68
       Margins.Left = 5
       Margins.Top = 5
@@ -131,7 +122,9 @@ object FormStructurePick: TFormStructurePick
       Align = alClient
       Caption = #1054#1073#1088#1072#1090#1080
       ModalResult = 1
-      TabOrder = 2
+      TabOrder = 1
+      ExplicitTop = 187
+      ExplicitWidth = 580
     end
   end
 end

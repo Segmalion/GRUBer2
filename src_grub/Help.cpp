@@ -187,9 +187,18 @@ void populateStructureCombos(Config &curConfig) {
 		Form1->defStructureComboIds.push_back(s.id);
 	}
 
-	int curIdx = 0;
+	// keepId порожній при першому заповненні (ще не було вибору) або структура
+	// з таким id зникла (видалена в StructuresForm) - в обох випадках обираємо
+	// структуру за замовчуванням, а не перший пункт списку
+	int curIdx = -1;
 	for (size_t i = 0; i < Form1->curStructureComboIds.size(); i++)
 		if (Form1->curStructureComboIds[i] == keepId) { curIdx = (int)i; break; }
+	if (curIdx < 0) {
+		UnicodeString defId = curConfig.get_defaultStructureId();
+		for (size_t i = 0; i < Form1->curStructureComboIds.size(); i++)
+			if (Form1->curStructureComboIds[i] == defId) { curIdx = (int)i; break; }
+	}
+	if (curIdx < 0) curIdx = 0;
 	if (Form1->ComboBox_CurStructur->Items->Count > 0) Form1->ComboBox_CurStructur->ItemIndex = curIdx;
 
 	UnicodeString defId = curConfig.get_defaultStructureId();
@@ -204,6 +213,13 @@ void populateStructureCombos(Config &curConfig) {
 // ComboBox_CurStructur
 void applyCurStructureSelectionToForm(UnicodeString id) {
 	if (id.IsEmpty()) return;
+	// синхронізуємо ComboBox_CurStructur з id, який завантажуємо - інакше
+	// EditPartitionChange/Edit_NumberARMChange/Edit_PlaceChange/Edit_PhoneChange
+	// (що спрацьовують нижче) збережуть щойно завантажені дані під ІНШИМ id,
+	// узятим із застарілого поточного вибору комбобокса (пряме присвоєння
+	// ItemIndex, на відміну від вибору користувачем, не викликає OnChange)
+	for (size_t i = 0; i < Form1->curStructureComboIds.size(); i++)
+		if (Form1->curStructureComboIds[i] == id) { Form1->ComboBox_CurStructur->ItemIndex = (int)i; break; }
 	StructurePcData data = curPC.getStructure(id);
 	Form1->Edit_NumberARM->Value = data.number;
 	Form1->Edit_NumberARM->Enabled = true;
