@@ -12,6 +12,7 @@ struct program {
 	UnicodeString name;
 	UnicodeString version;
 	UnicodeString publisher;
+	UnicodeString installDate; // дата встановлення, формат dd.MM.yyyy (з реєстру InstallDate=YYYYMMDD)
 };
 
 std::vector<program> installSoft();

@@ -382,6 +382,9 @@ bool job_infoFille(UnicodeString dir) {
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return true;
 }
+static UnicodeString programToLine(const program &soft) {
+	return soft.name + "; " + soft.version + "; " + soft.installDate;
+}
 bool job_softFille(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\soft_all.txt";
 	std::vector<UnicodeString> sortList_all;
@@ -389,7 +392,7 @@ bool job_softFille(UnicodeString dir) {
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	printLog("Генерування soft_all.txt...");
 	std::unique_ptr<TStringList> softAllFille(new TStringList);
-	for(auto soft : curPC.get_softInstall()) sortToVector(sortList_all, soft.name);
+	for(auto soft : curPC.get_softInstall()) { UnicodeString line = programToLine(soft); sortToVector(sortList_all, line); }
 	for(auto str: sortList_all) softAllFille->Add (str);
 	softAllFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 	printLog("Файл СТВОРЕННО!");
@@ -399,7 +402,7 @@ bool job_softFille(UnicodeString dir) {
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 		printLog("Генерування soft_block.txt...");
 		std::unique_ptr<TStringList> softBlockFille(new TStringList);
-		for(auto soft : curPC.get_softBlock()) sortToVector(sortList_block, soft.name);
+		for(auto soft : curPC.get_softBlock()) { UnicodeString line = programToLine(soft); sortToVector(sortList_block, line); }
 		for(auto str: sortList_block) softBlockFille->Add (str);
 		softBlockFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
 		printLog("Файл СТВОРЕННО!");

@@ -18,6 +18,39 @@ extern Config curConfig;
 std::vector<UnicodeString> blockProgrammsNames;
 std::vector<UnicodeString> UnBlockProgrammsNames;
 //---------------------------------------------------------------------------
+static UnicodeString formatInstallDate(const UnicodeString &raw) {
+	UnicodeString s = raw.Trim();
+
+	// Формат YYYYMMDD (стандартний для більшості MSI-інсталяторів)
+	if (s.Length() == 8) {
+		bool allDigits = true;
+		for (int i = 1; i <= 8; i++) if (s[i] < L'0' || s[i] > L'9') { allDigits = false; break; }
+		if (allDigits) {
+			int month = StrToIntDef(s.SubString(5,2), 0);
+			int day = StrToIntDef(s.SubString(7,2), 0);
+			if (month >= 1 && month <= 12 && day >= 1 && day <= 31)
+				return s.SubString(7,2) + "." + s.SubString(5,2) + "." + s.SubString(1,4);
+		}
+		return "";
+	}
+
+	// Формат M/D/YYYY чи MM/DD/YYYY (деякі інсталятори, напр. Adobe, пишуть US-дату з '/')
+	int p1 = s.Pos(L"/");
+	if (p1 > 0) {
+		UnicodeString rest = s.SubString(p1+1, s.Length());
+		int p2 = rest.Pos(L"/");
+		if (p2 > 0) {
+			int month = StrToIntDef(s.SubString(1, p1-1), 0);
+			int day = StrToIntDef(rest.SubString(1, p2-1), 0);
+			int year = StrToIntDef(rest.SubString(p2+1, rest.Length()), 0);
+			if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1990 && year <= 2100)
+				return Format(L"%.2d.%.2d.%d", ARRAYOFCONST((day, month, year)));
+		}
+	}
+
+	return ""; // невідомий/нерозпізнаний формат - залишаємо порожньо
+}
+//---------------------------------------------------------------------------
 std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
 	std::vector<program> tempListSoft;
 
@@ -114,6 +147,13 @@ std::vector<program> read_hKey(HKEY hKey, UnicodeString typeProg) {
 			if(retCode == ERROR_SUCCESS){
 					buffer[255] = L'\0';
 					soft.publisher = buffer;
+			}
+
+			cdata = sizeof(buffer);
+			retCode = RegQueryValueEx(hSubkey,L"InstallDate",NULL,&type,(LPBYTE)buffer,&cdata);
+			if(retCode == ERROR_SUCCESS){
+					buffer[255] = L'\0';
+					soft.installDate = formatInstallDate(UnicodeString(buffer));
 			}
 			if (!soft.name.IsEmpty()) { // Добавляем, только если есть название
 				tempListSoft.push_back(soft);
