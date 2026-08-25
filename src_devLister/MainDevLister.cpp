@@ -1693,11 +1693,11 @@ void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 	vectorToBD(devicesList);
 	// обновляем фильтр "по классам устройств"
 	UpdateClassFilterList();
-	// синхронизируем состояние активного основного фильтра, чтобы последующий клик
-	// по доп.фильтру (ListBox_Filter/чекбоксы) не унаследовал устаревший режим
-	SetActiveFilter(mfmAll, L"");
-	// выводим данные с БД в таблицу
-	refrechDBGrid(sql_all);
+	// переприменяем УЖЕ активный основной фильтр (а не сбрасываем на "Все") — это обновление
+	// вызывается и из авто-обновления по WM_DEVICECHANGE (Timer1Timer), которое может сработать
+	// в любой момент, пока пользователь смотрит выбранный фильтр; принудительный сброс на mfmAll
+	// раньше молча снимал выбор пользователя при каждом таком событии
+	ApplyDBGridFilter();
 
 	return;
 }
@@ -1778,6 +1778,18 @@ void __fastcall TForm1::SetActiveFilter(TMainFilterMode mode, const UnicodeStrin
 {
 	m_activeFilterMode = mode;
 	m_activeFilterCondition = condition;
+
+	// Все 5 кнопок фильтра — TSpeedButton с общим Parent (GridPanel_FilterButton) и общим
+	// GroupIndex, поэтому достаточно "вдавить" активную — VCL сам отожмёт остальные четыре
+	// (см. TSpeedButton.SetDown/UpdateExclusive).
+	switch (mode)
+	{
+		case mfmAll:        Button_ShowAll->Down = true; break;
+		case mfmUsb:        Button_ShowUSB->Down = true; break;
+		case mfmUnknownUsb: Button_ShowUnknowUSB->Down = true; break;
+		case mfmAlert:      Button_ShowAllert->Down = true; break;
+		case mfmContainer:  Button_FilterContainerID->Down = true; break;
+	}
 }
 /* Базовый SQL под активный основной режим: USB-режимы используют sql_usb (дедуп по
    containerId), остальные — sql_all. */
@@ -2081,10 +2093,16 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 {
 	CheckBox_FilterMotherboard->Enabled = false;
 	CheckBox_FilterMotherboard->Checked = false;
+	// SNnotNULL/ShowKnowUSB НЕ включаем: это доп.AND-условия поверх alert-фильтра, а
+	// нарушения по v_allertName (телефони, мережеві адаптери тощо) — це найчастіше дочірні
+	// USB-інтерфейси БЕЗ власного серійного номера і не зареєстровані як "відомі". Якщо
+	// примусово вимагати SN/known тут, такі рядки зникають з "Тільки порушення", хоча в
+	// звичайному перегляді підсвічуються — залишаємо чекбокси вимкненими, щоб alert-режим
+	// показував усе, що дійсно є нарушенням (ім'я/опис/категорія), без зайвого AND.
 	CheckBox_SNnotNULL->Enabled = false;
-	CheckBox_SNnotNULL->Checked = true;
+	CheckBox_SNnotNULL->Checked = false;
 	CheckBox_ShowKnowUSB->Enabled = false;
-	CheckBox_ShowKnowUSB->Checked = true;
+	CheckBox_ShowKnowUSB->Checked = false;
 	CheckBox_OnlyOneSN->Enabled = false;
 	CheckBox_OnlyOneSN->Checked = true;
 	ListBox_Filter->ClearSelection();
@@ -2102,6 +2120,7 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 {
 	// 1. Убеждаемся, что запрос активен и в гриде есть данные
     if (!FDQuery1->Active || FDQuery1->IsEmpty()) {
+        SetActiveFilter(m_activeFilterMode, m_activeFilterCondition); // откатить визуальное "нажатие" кнопки
         return;
     }
 
@@ -2119,6 +2138,7 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
     // 3. Проверяем, что у устройства вообще есть нормальный контейнер
     if (selectedContainerId.IsEmpty() || selectedContainerId == L"No Container" || selectedContainerId == L"GUID Error") {
         printLog(L"У выделенного устройства нет контейнера для фильтрации.");
+        SetActiveFilter(m_activeFilterMode, m_activeFilterCondition); // откатить визуальное "нажатие" кнопки
         return;
 	}
 

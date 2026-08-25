@@ -118,11 +118,7 @@ object Form1: TForm1
       ColumnCollection = <
         item
           SizeStyle = ssAbsolute
-          Value = 70.000000000000000000
-        end
-        item
-          SizeStyle = ssAbsolute
-          Value = 300.000000000000000000
+          Value = 370.000000000000000000
         end
         item
           SizeStyle = ssAbsolute
@@ -141,42 +137,36 @@ object Form1: TForm1
         end>
       ControlCollection = <
         item
-          Column = 2
+          Column = 1
           Control = ListBox_Filter
           Row = 1
         end
         item
-          Column = 2
+          Column = 1
           Control = Label1
           Row = 0
         end
         item
-          Column = 1
+          Column = 0
           Control = GridPanel_FilterButton
           Row = 0
           RowSpan = 2
         end
         item
-          Column = 3
+          Column = 2
           Control = GroupBox_FilterCheckBox
           Row = 0
           RowSpan = 2
         end
         item
-          Column = 4
+          Column = 3
           Control = GridPanel_Else
           Row = 0
           RowSpan = 2
         end
         item
-          Column = 5
+          Column = 4
           Control = Memo_LOG
-          Row = 0
-          RowSpan = 2
-        end
-        item
-          Column = 0
-          Control = Button_ShowAll
           Row = 0
           RowSpan = 2
         end>
@@ -234,9 +224,9 @@ object Form1: TForm1
         ExplicitHeight = 30
       end
       object GridPanel_FilterButton: TGridPanel
-        Left = 71
+        Left = 1
         Top = 1
-        Width = 300
+        Width = 370
         Height = 249
         Margins.Left = 6
         Margins.Top = 6
@@ -246,26 +236,36 @@ object Form1: TForm1
         BevelOuter = bvNone
         ColumnCollection = <
           item
+            SizeStyle = ssAbsolute
+            Value = 70.000000000000000000
+          end
+          item
             Value = 100.000000000000000000
           end>
         ControlCollection = <
           item
             Column = 0
+            Control = Button_ShowAll
+            Row = 0
+            RowSpan = 4
+          end
+          item
+            Column = 1
             Control = Button_FilterContainerID
             Row = 3
           end
           item
-            Column = 0
+            Column = 1
             Control = Button_ShowUnknowUSB
             Row = 1
           end
           item
-            Column = 0
+            Column = 1
             Control = Button_ShowAllert
             Row = 2
           end
           item
-            Column = 0
+            Column = 1
             Control = Button_ShowUSB
             Row = 0
           end>
@@ -283,7 +283,31 @@ object Form1: TForm1
             Value = 25.000000000000000000
           end>
         TabOrder = 1
-        object Button_FilterContainerID: TButton
+        object Button_ShowAll: TSpeedButton
+          AlignWithMargins = True
+          Left = 7
+          Top = 7
+          Width = 58
+          Height = 237
+          Margins.Left = 6
+          Margins.Top = 6
+          Margins.Right = 6
+          Margins.Bottom = 6
+          Align = alClient
+          BiDiMode = bdLeftToRight
+          GroupIndex = 1
+          AllowAllUp = False
+          Caption = #8635
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -62
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentBiDiMode = False
+          ParentFont = False
+          OnClick = Button_ShowAllClick
+        end
+        object Button_FilterContainerID: TSpeedButton
           AlignWithMargins = True
           Left = 6
           Top = 193
@@ -294,11 +318,12 @@ object Form1: TForm1
           Margins.Right = 6
           Margins.Bottom = 6
           Align = alClient
+          GroupIndex = 1
+          AllowAllUp = False
           Caption = #1042#1110#1076#1110#1073#1088#1072#1090#1080' '#1079#1072' '#1082#1086#1085#1090#1077#1081#1085#1077#1088#1086#1084
-          TabOrder = 0
           OnClick = Button_FilterContainerIDClick
         end
-        object Button_ShowUnknowUSB: TButton
+        object Button_ShowUnknowUSB: TSpeedButton
           AlignWithMargins = True
           Left = 6
           Top = 68
@@ -309,11 +334,12 @@ object Form1: TForm1
           Margins.Right = 6
           Margins.Bottom = 6
           Align = alClient
+          GroupIndex = 1
+          AllowAllUp = False
           Caption = #1058#1110#1083#1100#1082#1110' '#1085#1077#1074#1110#1076#1086#1084#1110' '#1092#1083#1077#1096#1082#1080
-          TabOrder = 1
           OnClick = Button_ShowUnknowUSBClick
         end
-        object Button_ShowAllert: TButton
+        object Button_ShowAllert: TSpeedButton
           AlignWithMargins = True
           Left = 6
           Top = 130
@@ -324,11 +350,12 @@ object Form1: TForm1
           Margins.Right = 6
           Margins.Bottom = 6
           Align = alClient
+          GroupIndex = 1
+          AllowAllUp = False
           Caption = #1058#1110#1083#1100#1082#1080' '#1087#1086#1088#1091#1096#1077#1085#1103
-          TabOrder = 2
           OnClick = Button_ShowAllertClick
         end
-        object Button_ShowUSB: TButton
+        object Button_ShowUSB: TSpeedButton
           AlignWithMargins = True
           Left = 6
           Top = 6
@@ -339,8 +366,9 @@ object Form1: TForm1
           Margins.Right = 6
           Margins.Bottom = 6
           Align = alClient
+          GroupIndex = 1
+          AllowAllUp = False
           Caption = #1058#1110#1083#1100#1082#1080' '#1092#1083#1077#1096#1082#1080
-          TabOrder = 3
           OnClick = Button_ShowUSBClick
         end
       end
@@ -656,29 +684,6 @@ object Form1: TForm1
         ScrollBars = ssBoth
         TabOrder = 4
         WordWrap = False
-      end
-      object Button_ShowAll: TButton
-        AlignWithMargins = True
-        Left = 7
-        Top = 7
-        Width = 58
-        Height = 237
-        Margins.Left = 6
-        Margins.Top = 6
-        Margins.Right = 6
-        Margins.Bottom = 6
-        Align = alClient
-        BiDiMode = bdLeftToRight
-        Caption = #8635
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -62
-        Font.Name = 'Segoe UI'
-        Font.Style = []
-        ParentBiDiMode = False
-        ParentFont = False
-        TabOrder = 5
-        OnClick = Button_ShowAllClick
       end
     end
     object StatusBar1: TStatusBar

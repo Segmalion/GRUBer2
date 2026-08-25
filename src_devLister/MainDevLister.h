@@ -6,6 +6,7 @@
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
+#include <Vcl.Buttons.hpp>
 #include <Vcl.Forms.hpp>
 #include <Vcl.Grids.hpp>
 #include <Data.DB.hpp>
@@ -102,7 +103,7 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel_Filter;
 	TLabel *Label1;
 	TGridPanel *GridPanel_FilterButton;
-	TButton *Button_FilterContainerID;
+	TSpeedButton *Button_FilterContainerID;
 	TGroupBox *GroupBox_FilterCheckBox;
 	TGridPanel *GridPanel_FilterCheckBox;
 	TCheckBox *CheckBox_FilterMotherboard;
@@ -120,14 +121,14 @@ __published:	// IDE-managed Components
 	TTimer *Timer1;
 	TGridPanel *GridPanel_RunButton;
 	TButton *Button_DelDevice;
-	TButton *Button_ShowUnknowUSB;
-	TButton *Button_ShowAllert;
-	TButton *Button_ShowUSB;
+	TSpeedButton *Button_ShowUnknowUSB;
+	TSpeedButton *Button_ShowAllert;
+	TSpeedButton *Button_ShowUSB;
 	TButton *Button_SaveToJSON;
 	TOpenDialog *OpenDialog_FromJSON;
 	TSaveDialog *SaveDialog_ToFile;
 	TButton *Button_LoadFromJSON;
-	TButton *Button_ShowAll;
+	TSpeedButton *Button_ShowAll;
 	TLabeledEdit *LabeledEdit_SearchSN;
 	void __fastcall Button_DeviceUpdateCurPCClick(TObject *Sender);
 	void __fastcall DBGrid1TitleClick(TColumn *Column);
