@@ -27,6 +27,7 @@
 
 #include "MainDevLister.h"
 #include "GetSMB.h"
+#include "GitVersion.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -104,7 +105,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	// Исходное состояние "основного" фильтра — как у Button_ShowAllClick
 	SetActiveFilter(mfmAll, L"");
 
-	UnicodeString appVersion = GetAppVersion();
+	UnicodeString appVersion = GetFullAppVersion();
 	printLog(L"Программа запущена. Версия: " + appVersion);
 	StatusBar1->Panels->Items[1]->Text = ("v. " + appVersion + "     ");
 
@@ -1607,6 +1608,14 @@ UnicodeString GetAppVersion()
     }
 
     return L"Неизвестно";
+}
+//---------------------------------------------------------------------------
+// Версія + git-хеш комміту, з якого зібраний .exe (GIT_COMMIT_HASH/GIT_DIRTY
+// підставляються tools\gen_gitversion.bat перед компіляцією, Pre-Build Event).
+UnicodeString GetFullAppVersion()
+{
+    UnicodeString dirty = GIT_DIRTY ? L"-dirty" : L"";
+    return GetAppVersion() + L" (" + UnicodeString(GIT_COMMIT_HASH) + dirty + L")";
 }
 //---------------------------------------------------------------------------
 

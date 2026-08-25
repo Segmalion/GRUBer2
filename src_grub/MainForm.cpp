@@ -79,7 +79,7 @@ static void setReadOnlyCheckBox(TCheckBox *cb, bool value) {
 	avpzCheckBoxProgrammaticSet = false;
 }
 //---------------------------------------------------------------------------
-extern const UnicodeString versionApp = GetAppVersion();
+extern const UnicodeString versionApp = GetFullAppVersion();
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> fileInfoGrub() {
 	std::vector<UnicodeString> vStr;

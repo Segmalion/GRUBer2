@@ -8,6 +8,7 @@
 #include "Fille.h"
 #include "MainForm.h"
 #include "Eset.h"
+#include "GitVersion.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -144,6 +145,14 @@ UnicodeString GetAppVersion()
     }
 
     return L"Неизвестно";
+}
+//---------------------------------------------------------------------------
+// Версія + git-хеш комміту, з якого зібраний .exe (GIT_COMMIT_HASH/GIT_DIRTY
+// підставляються tools\gen_gitversion.bat перед компіляцією, Pre-Build Event).
+UnicodeString GetFullAppVersion()
+{
+    UnicodeString dirty = GIT_DIRTY ? L"-dirty" : L"";
+    return GetAppVersion() + L" (" + UnicodeString(GIT_COMMIT_HASH) + dirty + L")";
 }
 //---------------------------------------------------------------------------
 void setConfigToForm(Config &curConfig) {

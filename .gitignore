@@ -1048,3 +1048,7 @@ dkms.conf
 *.dis
 
 *.patch
+
+# Generated at build time by tools/gen_gitversion.bat (Pre-Build Event) -
+# embeds the current git commit hash into the .exe, regenerated every build.
+GitVersion.h

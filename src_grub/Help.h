@@ -15,6 +15,7 @@ struct eC {
 };
 //---------------------------------------------------------------------------
 UnicodeString GetAppVersion();
+UnicodeString GetFullAppVersion();
 //---------------------------------------------------------------------------
 bool fileOpen(UnicodeString str);
 void cacls(UnicodeString str);

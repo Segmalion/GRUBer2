@@ -200,5 +200,6 @@ bool SaveDataToDB(const String& FilePath);
 
 bool LoadFontFromResource();
 UnicodeString GetAppVersion();
+UnicodeString GetFullAppVersion();
 //---------------------------------------------------------------------------
 #endif

@@ -46,6 +46,21 @@ msbuild src_devLister\DeviceLister.cbproj /t:Build /p:Config=Debug /p:Platform=W
 - Output goes to `Win64x\<Config>\` under each project folder (e.g. `src_grub\Win64x\Debug\`).
 - There is no automated test suite in this repo — verification is manual (build + run the app).
 
+### Versioning — commit-traceable version string
+The `Major.Minor.Release.Build` version baked into `VerInfo_*`/`VerInfo_Keys` in each `.cbproj` (e.g.
+`0.3.5.2`) is still bumped by hand per patch — it only conveys release intent, not an exact build.
+To make the version shown to the user traceable to the exact git commit it was built from, both
+`.cbproj` files run **`tools\gen_gitversion.bat`** as a `PreBuildEvent` (fires on every IDE/`msbuild`
+build). It shells out to `git rev-parse --short HEAD` / `git status --porcelain` and writes a
+`GitVersion.h` into the project directory (`src_grub\GitVersion.h`, `src_devLister\GitVersion.h`)
+defining `GIT_COMMIT_HASH`, `GIT_COMMIT_DATE`, `GIT_DIRTY`. `GetFullAppVersion()`
+(`src_grub/Help.cpp`, duplicated in `src_devLister/MainDevLister.cpp` alongside the existing
+`GetAppVersion()` duplication) combines the two into what's actually shown in About/status
+bar/log: `0.3.5.2 (3a1f9c2)`, or `0.3.5.2 (3a1f9c2-dirty)` if there were uncommitted changes at
+build time. `GitVersion.h` is **generated, gitignored, and never hand-edited or committed** — if
+git isn't found on the build machine the script falls back to placeholder values instead of
+failing the build.
+
 ## Architecture notes
 
 ### VCL forms + global singletons
