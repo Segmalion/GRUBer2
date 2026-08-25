@@ -129,6 +129,7 @@
         <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <BCC_PCHName_Clang>DeviceListerPCH1.h</BCC_PCHName_Clang>
+        <Icon_MainIcon>DeviceLister_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
