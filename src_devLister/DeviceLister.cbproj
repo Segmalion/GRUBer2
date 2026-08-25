@@ -195,8 +195,8 @@
         <DynamicRTL>false</DynamicRTL>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <LinkPackageStatics>rtl.lib;vcl.lib;dbrtl.lib;vcldb.lib;vclwinx.lib;vclimg.lib;bindengine.lib;FireDAC.lib;FireDACCommonDriver.lib;FireDACCommon.lib;xmlrtl.lib;vclFireDAC.lib;vclx.lib;FireDACSqliteDriver.lib</LinkPackageStatics>
-        <VerInfo_Build>0</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=;FileDescription=DeviceLister;FileVersion=0.0.2.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.DeviceLister;ProductName=DeviceLister;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>1</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=DeviceLister;FileVersion=0.0.2.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.DeviceLister;ProductName=DeviceLister;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <ItemGroup>

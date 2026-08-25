@@ -8,6 +8,7 @@
 #include <devpkey.h>      // Для DEVPKEY_Device_ContainerId
 #include <combaseapi.h>   // Для конвертации GUID в строку
 #include <algorithm>
+#include <cwctype>
 
 #include <devquery.h>
 
@@ -19,6 +20,7 @@
 #include <iostream>
 
 #include <System.SysUtils.hpp>
+#include <System.StrUtils.hpp>
 #include <System.Zlib.hpp>
 
 #include <System.JSON.hpp>
@@ -1224,17 +1226,66 @@ bool compareStrInSring(UnicodeString &strFull, UnicodeString &strSearch) {
 	// Приведение к LowerCase() гарантирует, что "MTP", "Mtp" и "mtp" найдутся без проблем.
 	return strFull.LowerCase().Pos(strSearch.LowerCase()) > 0;
 }
+/* Буква/цифра/подчёркивание — символ "внутри слова" для проверки границ совпадения. */
+static bool isWordChar(wchar_t ch) {
+	return iswalnum(ch) || ch == L'_';
+}
+/* Совпадение t_str внутри strFull с учётом границ слова там, где это уместно: если ключ
+   начинается буквой/цифрой — символ ПЕРЕД совпадением не должен быть буквой/цифрой; если
+   ключ заканчивается буквой/цифрой — символ ПОСЛЕ совпадения тоже не должен быть буквой/
+   цифрой. Ключи, оканчивающиеся небуквенным символом (например "SM-"), границу после себя
+   намеренно не проверяют — это сохраняет матчинг префиксов моделей ("SM-A125F" и т.п.).
+   Без этой проверки короткие ключи вроде "LTE" ложно совпадают внутри случайных слов
+   (например "filter" содержит "lte": fi-LTE-r). */
 bool compareStrInVector(UnicodeString &strFull, std::vector<UnicodeString> &v_str) {
 	// Чтобы не переводить strFull в нижний регистр на каждой итерации цикла,
     // делаем это ОДИН РАЗ перед циклом. Это экономит кучу тактов процессора!
     UnicodeString lowerFull = strFull.LowerCase();
 
     for (const auto &t_str : v_str) {
-        if (lowerFull.Pos(t_str.LowerCase()) > 0) {
-            return true; // Ранний выход: нашли первое же совпадение — сразу возвращаем true
+        UnicodeString keyword = t_str.LowerCase();
+        if (keyword.IsEmpty()) continue;
+
+        bool checkBefore = isWordChar(keyword[1]);
+        bool checkAfter  = isWordChar(keyword[keyword.Length()]);
+
+        int offset = 1;
+        int pos;
+        while ((pos = System::Strutils::PosEx(keyword, lowerFull, offset)) > 0) {
+            wchar_t before = (pos > 1) ? lowerFull[pos - 1] : L'\0';
+            int afterIdx = pos + keyword.Length();
+            wchar_t after = (afterIdx <= lowerFull.Length()) ? lowerFull[afterIdx] : L'\0';
+
+            bool okBefore = !checkBefore || !isWordChar(before);
+            bool okAfter  = !checkAfter  || !isWordChar(after);
+
+            if (okBefore && okAfter) {
+                return true; // Ранний выход: нашли первое же совпадение — сразу возвращаем true
+            }
+            offset = pos + 1;
         }
 	}
 	return false;
+}
+/* Общая логика "это нарушение?" для одного устройства — используется и подсветкой в гриде
+   (DBGrid1DrawColumnCell), и построением фильтра кнопки "Тільки порушення"
+   (BuildAlertFilterCondition), чтобы они не могли разойтись между собой. */
+struct DeviceViolationFlags {
+	bool isBuiltIn;
+	bool nameMatchesAlert;
+	bool descMatchesAlert;
+	bool catViolation;
+};
+DeviceViolationFlags ComputeViolationFlags(UnicodeString devName, UnicodeString devDescription,
+	const UnicodeString &devContainerId, short devCat, short catThreshold)
+{
+	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
+	DeviceViolationFlags f;
+	f.isBuiltIn = (devContainerId == SYSTEM_CONTAINER_ID);
+	f.nameMatchesAlert = !f.isBuiltIn && compareStrInVector(devName, v_allertName);
+	f.descMatchesAlert = !f.isBuiltIn && compareStrInVector(devDescription, v_allertName);
+	f.catViolation = !f.isBuiltIn && (devCat > catThreshold);
+	return f;
 }
 /* ИНФО для ПК */
 String getFastHash_CRC32(const String& Input)
@@ -1747,35 +1798,56 @@ UnicodeString __fastcall TForm1::BuildUnknownUsbFilterCondition()
 	return L"serialKnow = " + QuotedStr("0") +
 		L" AND serial_number IS NOT NULL AND serial_number <> ''";
 }
-/* Условие для режима "нарушения": совпадение по class_name/friendly_name из
-   v_allertName ИЛИ regCatNumber выше текущей категории ПК (indefPC.catPC). */
+/* Условие для режима "нарушения": построчно сканирует уже загруженный (полный,
+   неотфильтрованный — вызывающая сторона обязана обеспечить это, см. ApplyDBGridFilter)
+   датасет FDQuery1 и применяет ТУ ЖЕ проверку ComputeViolationFlags, что и подсветка строк
+   в DBGrid1DrawColumnCell (совпадение с v_allertName в friendly_name ИЛИ в dev_desc, либо
+   regCatNumber выше текущей категории ПК indefPC.catPC) — построчное сканирование вместо
+   SQL LIKE-условия гарантирует, что кнопка "Тільки порушення" никогда не разойдётся с тем,
+   что подсвечено в таблице (по образцу BuildOnlyOneSNFilterCondition ниже). */
 UnicodeString __fastcall TForm1::BuildAlertFilterCondition()
 {
-	UnicodeString nameConditions = L"";
-	for (size_t i = 0; i < v_allertName.size(); ++i)
+	if (!FDQuery1->Active) return L"0=1";
+
+	UnicodeString matchIds = L"";
+
+	TBookmark bm = FDQuery1->GetBookmark();
+	FDQuery1->DisableControls();
+	try
 	{
-		UnicodeString keyword = v_allertName[i].Trim();
-		if (keyword.IsEmpty()) continue;
+		FDQuery1->First();
+		while (!FDQuery1->Eof)
+		{
+			UnicodeString devName = FDQuery1->FieldByName(L"friendly_name")->AsString;
+			UnicodeString devDescription = FDQuery1->FieldByName(L"dev_desc")->AsString;
+			UnicodeString devContainerId = FDQuery1->FieldByName(L"containerId")->AsString;
+			short devCat = FDQuery1->FieldByName(L"regCatNumber")->AsInteger;
 
-		keyword = StringReplace(keyword, L"'", L"''", TReplaceFlags() << rfReplaceAll);
+			DeviceViolationFlags f = ComputeViolationFlags(devName, devDescription, devContainerId,
+				devCat, indefPC.catPC);
 
-		if (!nameConditions.IsEmpty()) {
-			nameConditions += L" OR ";
+			if (f.nameMatchesAlert || f.descMatchesAlert || f.catViolation)
+			{
+				if (!matchIds.IsEmpty()) {
+					matchIds += L",";
+				}
+				matchIds += FDQuery1->FieldByName(L"id")->AsString;
+			}
+
+			FDQuery1->Next();
 		}
-		nameConditions += L"(class_name LIKE '%" + keyword + L"%' OR friendly_name LIKE '%" + keyword + L"%')";
+	}
+	__finally
+	{
+		if (FDQuery1->BookmarkValid(bm)) {
+			FDQuery1->GotoBookmark(bm);
+		}
+		FDQuery1->FreeBookmark(bm);
+		FDQuery1->EnableControls();
 	}
 
-	// Ни совпадение по имени/классу, ни превышение категории не считаются нарушением для
-	// устройств, встроенных в материнскую плату (containerId = системный) — исключает
-	// ложные срабатывания на штатные Bluetooth/Wi-Fi модули и прочее онбордовое "железо".
-	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-	UnicodeString notBuiltIn = L"containerId <> " + QuotedStr(SYSTEM_CONTAINER_ID);
-	UnicodeString catCondition = L"regCatNumber > " + IntToStr(indefPC.catPC) + L" AND " + notBuiltIn;
-
-	if (!nameConditions.IsEmpty()) {
-		return L"((" + nameConditions + L") AND " + notBuiltIn + L") OR (" + catCondition + L")";
-	}
-	return catCondition;
+	if (matchIds.IsEmpty()) return L"0=1"; // ни одного нарушения — фильтр не должен пропускать ничего
+	return L"id IN (" + matchIds + L")";
 }
 /* Условие для чекбокса "тільки один SN": идём по текущему (ещё не отфильтрованному)
    набору данных и для каждого повторного вхождения непустого serial_number запоминаем
@@ -1837,6 +1909,16 @@ void __fastcall TForm1::ApplyDBGridFilter()
 	if (!FDQuery1->Active) return;
 
 	FDQuery1->Filtered = false;
+
+	// Для режима "нарушения" условие пересчитывается прямо тут, построчным сканированием
+	// FDQuery1 — датасет в этот момент уже гарантированно полный и неотфильтрованный
+	// (см. BuildAlertFilterCondition). Это учитывает и friendly_name, и dev_desc, и текущий
+	// порог категории (indefPC.catPC) при каждом вызове, независимо от того, что было активно раньше.
+	UnicodeString mainCondition = m_activeFilterCondition;
+	if (m_activeFilterMode == mfmAlert)
+	{
+		mainCondition = BuildAlertFilterCondition();
+	}
 
 	// 1. Условия из ListBox (фильтр по классам)
 	UnicodeString listboxFilter = L"";
@@ -1901,7 +1983,7 @@ void __fastcall TForm1::ApplyDBGridFilter()
 	// 6. Объединяем условие активного основного фильтра (Show*/FilterContainerID) с
 	// доп.фильтрами через AND — основной фильтр теперь всегда учитывается
 	std::vector<UnicodeString> parts;
-	if (!m_activeFilterCondition.IsEmpty()) parts.push_back(m_activeFilterCondition);
+	if (!mainCondition.IsEmpty()) parts.push_back(mainCondition);
 	if (!listboxFilter.IsEmpty()) parts.push_back(listboxFilter);
 	if (!mbFilter.IsEmpty()) parts.push_back(mbFilter);
 	if (!emptySerialFilter.IsEmpty()) parts.push_back(emptySerialFilter);
@@ -2007,10 +2089,13 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 	CheckBox_OnlyOneSN->Checked = true;
 	ListBox_Filter->ClearSelection();
 
-	SetActiveFilter(mfmAlert, BuildAlertFilterCondition());
+	// Условие для этого режима больше не передаётся заранее — ApplyDBGridFilter пересчитывает
+	// его самостоятельно построчным сканированием (BuildAlertFilterCondition), когда датасет
+	// уже гарантированно полный и неотфильтрованный.
+	SetActiveFilter(mfmAlert, L"");
 	ApplyDBGridFilter();
 
-	printLog(L"Применен alert-фильтр (клас/ім'я зі списку порушень або категорія вища за поточну)");
+	printLog(L"Применен alert-фильтр (ім'я/опис зі списку порушень або категорія вища за поточну)");
 }
 /* ФИЛЬТР по контейнеру */
 void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
@@ -2114,11 +2199,13 @@ void __fastcall TForm1::DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect
 	// Ни совпадение с v_allertName, ни превышение категории не считаются нарушением для
 	// устройств, встроенных в материнскую плату (containerId = системный) — исключает
 	// ложные срабатывания на штатные Bluetooth/Wi-Fi модули и прочее онбордовое "железо".
-	const UnicodeString SYSTEM_CONTAINER_ID = L"{00000000-0000-0000-FFFF-FFFFFFFFFFFF}";
-	bool isBuiltIn = (devContainerId == SYSTEM_CONTAINER_ID);
-	bool nameMatchesAlert = !isBuiltIn && compareStrInVector(devName, v_allertName);
-	bool descMatchesAlert = !isBuiltIn && compareStrInVector(devDescription, v_allertName);
-	bool catViolation = !isBuiltIn && (devCat > indefPC.catPC);
+	// Логика вынесена в ComputeViolationFlags — её же использует BuildAlertFilterCondition
+	// для кнопки "Тільки порушення", чтобы подсветка и фильтр никогда не расходились.
+	DeviceViolationFlags vf = ComputeViolationFlags(devName, devDescription, devContainerId, devCat, indefPC.catPC);
+	bool isBuiltIn = vf.isBuiltIn;
+	bool nameMatchesAlert = vf.nameMatchesAlert;
+	bool descMatchesAlert = vf.descMatchesAlert;
+	bool catViolation = vf.catViolation;
 
     // 3. Проверяем, выделена ли эта строка пользователем (кликнули ли по ней мышкой).
     // Если строка выделена, мы НЕ должны менять её фон на серый или белый,
@@ -2215,11 +2302,11 @@ void __fastcall TForm1::ComboBox_CategPCChange(TObject *Sender)
 	try { indefPC.catPC = m_catNumber.at(ComboBox_CategPC->Text); }
 	catch (const std::out_of_range& error) { indefPC.catPC = 0; }
 
-	// Alert-условие зависит от indefPC.catPC (regCatNumber > indefPC.catPC) —
-	// если сейчас активен режим "нарушения", пересчитываем его и переприменяем фильтр
+	// Alert-условие зависит от indefPC.catPC (regCatNumber > indefPC.catPC) — если сейчас
+	// активен режим "нарушения", просто переприменяем фильтр: ApplyDBGridFilter пересчитает
+	// условие заново (BuildAlertFilterCondition) с учётом нового порога категории.
 	if (m_activeFilterMode == mfmAlert)
 	{
-		SetActiveFilter(mfmAlert, BuildAlertFilterCondition());
 		ApplyDBGridFilter();
 	}
 	else
