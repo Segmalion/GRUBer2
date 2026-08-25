@@ -9,6 +9,7 @@
 class Th_ClearFile : public TThread
 {
 private:
+	void __fastcall ExecuteImpl();
 protected:
 	void __fastcall Execute();
 public:

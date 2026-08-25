@@ -8,6 +8,9 @@
 class Th_Gruber : public TThread
 {
 private:
+	// весь оригінальний код Execute() - винесений, щоб Execute() міг обгорнути
+	// його у try/catch без переформатування всього тіла
+	void __fastcall ExecuteImpl();
 protected:
 	void __fastcall Execute();
 public:

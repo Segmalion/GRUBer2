@@ -9,6 +9,7 @@
 #include "Help.h"
 #include "Text.h"
 #include "Fille.h"
+#include "CrashHandler.h"
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 std::vector<UnicodeString> dirListFull {
@@ -34,7 +35,45 @@ __fastcall Th_ClearFile::Th_ClearFile(bool CreateSuspended)
 {
 }
 //---------------------------------------------------------------------------
+// Ловить будь-який виняток з ExecuteImpl(), щоб потік не помирав тихо і
+// th_ClearFile_run завжди скидався - інакше форма "Очищення" лишалась би
+// думати, що очищення й досі триває.
 void __fastcall Th_ClearFile::Execute()
+{
+	try
+	{
+		ExecuteImpl();
+	}
+	catch (Exception &e)
+	{
+		LogCrash("Th_ClearFile", e.ClassName() + ": " + e.Message);
+		Synchronize([&e]() {
+			FormClearTempDir->Memo_LOG->Lines->Add("ПОМИЛКА: " + e.Message);
+			FormClearTempDir->Button_Clean->Enabled = true;
+		});
+		th_ClearFile_run = false;
+	}
+	catch (std::exception &e)
+	{
+		UnicodeString what = e.what();
+		LogCrash("Th_ClearFile", what);
+		Synchronize([what]() {
+			FormClearTempDir->Memo_LOG->Lines->Add("ПОМИЛКА: " + what);
+			FormClearTempDir->Button_Clean->Enabled = true;
+		});
+		th_ClearFile_run = false;
+	}
+	catch (...)
+	{
+		LogCrash("Th_ClearFile", "невідомий виняток");
+		Synchronize([]() {
+			FormClearTempDir->Memo_LOG->Lines->Add("ПОМИЛКА: невідомий виняток");
+			FormClearTempDir->Button_Clean->Enabled = true;
+		});
+		th_ClearFile_run = false;
+	}
+}
+void __fastcall Th_ClearFile::ExecuteImpl()
 {
     FreeOnTerminate = true;
 	th_ClearFile_run = true;

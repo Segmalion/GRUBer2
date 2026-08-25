@@ -21,6 +21,7 @@ private:
 	*/
 	// --- инфо об ПК (ручная)
 		std::vector<StructurePcData> structures;
+		UnicodeString curStructureId, curStructureName;
 		bool pendingLegacyMigration = false;
 		UnicodeString pendingLegacyPartition, pendingLegacyPlace, pendingLegacyPhone;
 		int pendingLegacyNumber = 0;
@@ -112,6 +113,7 @@ public:
 	std::vector<UnicodeString> mStrInfoArm();
 	std::vector<UnicodeString> mStrSerial();
 	std::vector<UnicodeString> mStrStructures();
+	std::vector<UnicodeString> mStrCurStructure();
 	std::vector<UnicodeString> mStrInfoArmGrub();
 	std::vector<UnicodeString> mStrInfoArmEset();
 	std::vector<UnicodeString> mStrInfoArmNet();
@@ -123,6 +125,7 @@ public:
 	void setStructurePartition(UnicodeString id, UnicodeString name, UnicodeString partition);
 	void setStructurePlace(UnicodeString id, UnicodeString name, UnicodeString place);
 	void setStructurePhone(UnicodeString id, UnicodeString name, UnicodeString phone);
+	void setCurStructureSelection(UnicodeString id, UnicodeString name);
 	void applyPendingLegacyMigration(UnicodeString targetStructureId, UnicodeString targetStructureName);
 	void clearPendingLegacyMigration();
 	void setPartition(UnicodeString str);
@@ -153,6 +156,8 @@ public:
 	// === геттери
 	std::vector<StructurePcData> get_structures();
 	StructurePcData getStructure(UnicodeString id);
+	UnicodeString getCurStructureId();
+	UnicodeString getCurStructureName();
 	bool needsLegacyMigrationPrompt();
 	UnicodeString getPartition();
 	UnicodeString getClassName();

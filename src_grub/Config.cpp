@@ -6,6 +6,7 @@
 
 #include "Config.h"
 #include "Text.h"
+#include "CrashHandler.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -14,12 +15,31 @@
 const short CONFIG_INI_VERSION_CURRENT = 1;
 //---------------------------------------------------------------------------
 /* Класс Config */
+// curConfig - глобальний об'єкт, конструктор виконується ще до WinMain (та
+// ж причина, що й для Arm::Arm() в Arm.cpp - дивись коментар там), тому
+// винятки тут ловимо прямо на місці, а не покладаємось на try/catch у
+// WinMain чи SetUnhandledExceptionFilter, які на цьому етапі ще не діють.
 Config::Config() {
+try
+{
 	debug = false;
 	showLog = false;
 	showEsetUpd = true;
 	configFile = GetCurrentDir() + "\\GRUBer.ini";
 	readFileIni();
+}
+catch (Exception &e)
+{
+	LogCrash("Config::Config", e.ClassName() + ": " + e.Message);
+}
+catch (std::exception &e)
+{
+	LogCrash("Config::Config", UnicodeString(e.what()));
+}
+catch (...)
+{
+	LogCrash("Config::Config", "невідомий виняток");
+}
 }
 void Config::readFileIni() {
 	if (FileExists(configFile))

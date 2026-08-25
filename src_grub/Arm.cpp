@@ -10,11 +10,27 @@
 #include "Arm.h"
 #include "Text.h"
 #include "GetSMB.h"
+#include "CrashHandler.h"
 
 //===========================================================================
 #pragma package(smart_init)
 /* конструктор */
+// curPC - глобальний об'єкт, тому цей конструктор виконується під час
+// статичної ініціалізації, ЩЕ ДО виклику WinMain - жоден try/catch у самому
+// WinMain чи SetUnhandledExceptionFilter (CrashHandler.h) фізично не встигає
+// встановитися настільки рано. Якщо тут вилетить необроблений виняток (як
+// сталося з некоректним значенням дати в gruber_info.ini) - процес падає
+// миттєво, без жодного вікна й без шансу це впіймати ззовні. Тому весь вміст
+// конструктора обгорнуто тут: у гіршому разі об'єкт лишиться частково
+// заповненим (значення, присвоєні до моменту винятку - на місці, решта -
+// дефолтні), але застосунок хоча б стартує і подробиці підуть у crash.log.
+// (звичайний try/catch у тілі, а не function-try-block на самому Arm::Arm() -
+// у function-try-block конструктора catch не може "проковтнути" виняток,
+// той автоматично перекидається далі; а нам якраз треба, щоб об'єкт
+// добудувався і застосунок стартував)
 Arm::Arm()
+{
+try
 {
 	readFromFile();
 	// получаем DesktopName
@@ -64,6 +80,19 @@ Arm::Arm()
     read_user();
 	// поточне мережеве з'єднання
 	read_net();
+}
+catch (Exception &e)
+{
+	LogCrash("Arm::Arm", e.ClassName() + ": " + e.Message);
+}
+catch (std::exception &e)
+{
+	LogCrash("Arm::Arm", UnicodeString(e.what()));
+}
+catch (...)
+{
+	LogCrash("Arm::Arm", "невідомий виняток");
+}
 }
 //---------------------------------------------------------------------------
 /* функции */
@@ -166,6 +195,13 @@ std::vector<UnicodeString> Arm::mStrStructures() {
 	}
 	return mStr;
 }
+std::vector<UnicodeString> Arm::mStrCurStructure() {
+	std::vector<UnicodeString> mStr;
+	mStr.push_back("[curStructure]");
+	mStr.push_back("id=" + curStructureId);
+	mStr.push_back("name=" + curStructureName);
+	return mStr;
+}
 std::vector<UnicodeString> Arm::mStrInfoArmGrub() {
 	std::vector<UnicodeString> mStr;
 	mStr.push_back("[infoGrubARM]");
@@ -246,7 +282,11 @@ bool Arm::readFromFile() {
 		// определение версии файла
 		int vers = findParam(file, "[iniVersion]", "version").ToIntDef(1);
         // общии для всех версий
-		histGr.date = findParam(file, "[lastGrub]", "lastGrubDate");
+		// findParam повертає "ERROR" якщо ключа нема - без errCheck() і перевірки
+		// на порожній рядок TDateTime впаде на спробі розпарсити "ERROR" як дату
+		// (EConvertError під час конструктора Arm(), тобто ще до появи вікна)
+		UnicodeString lastGrubDateStr = errCheck(findParam(file, "[lastGrub]", "lastGrubDate"));
+		if (!lastGrubDateStr.IsEmpty()) histGr.date = lastGrubDateStr;
 		histGr.user = findParam(file, "[lastGrub]", "lastGrubUser");
 		partition = findParam(file, "[infoGrubARM]", "partition");
 		classID = findParam(file, "[infoGrubARM]", "classID").ToIntDef(0);
@@ -392,7 +432,7 @@ bool Arm::readFromFile() {
 				if(!infoDatIm->Strings[6].IsEmpty()) eset.dirMirror = infoDatIm->Strings[6];
 			}
 		}
-		histGr.date = infoDatIm->Strings[0];
+		if (!infoDatIm->Strings[0].IsEmpty()) histGr.date = infoDatIm->Strings[0];
 		return true;
 	}
 	return false;
@@ -433,6 +473,7 @@ void Arm::setStructurePhone(UnicodeString id, UnicodeString name, UnicodeString 
 		structures.push_back(s);
 	} else { it->name = name; it->phone = phoneVal; }
 }
+void Arm::setCurStructureSelection(UnicodeString id, UnicodeString name) { curStructureId = id; curStructureName = name; }
 void Arm::applyPendingLegacyMigration(UnicodeString targetStructureId, UnicodeString targetStructureName) {
 	if (!targetStructureId.IsEmpty()) {
 		if (pendingLegacyNumber != 0) setStructureNumber(targetStructureId, targetStructureName, pendingLegacyNumber);
@@ -497,6 +538,8 @@ StructurePcData Arm::getStructure(UnicodeString id) {
 	empty.id = id;
 	return empty;
 }
+UnicodeString Arm::getCurStructureId() { return curStructureId; }
+UnicodeString Arm::getCurStructureName() { return curStructureName; }
 bool Arm::needsLegacyMigrationPrompt() { return pendingLegacyMigration; }
 UnicodeString Arm::getPartition() { return partition; }
 UnicodeString Arm::getClassName() { return className; }

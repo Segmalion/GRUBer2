@@ -317,6 +317,10 @@ private:	// User declarations
 	// самостійно перераховує Font/DefaultRowHeight при зміні DPI монітора.
 	void __fastcall Form1AfterMonitorDpiChanged(TObject *Sender, int OldDPI, int NewDPI);
 public:		// User declarations
+	// призначається у GRUBer.cpp через Application->OnException - пише виняток
+	// у C:\ProgramData\GRUBer\error\crash.log перед показом стандартного діалогу.
+	// public, бо призначається ззовні класу (GRUBer.cpp), а не через .dfm.
+	void __fastcall AppExceptionHandler(TObject *Sender, Exception *E);
 	__fastcall TForm1(TComponent* Owner);
 	// паралельні до Items вибраних комбобоксів структур - id по індексу
 	std::vector<UnicodeString> curStructureComboIds; // ComboBox_CurStructur

@@ -19,6 +19,7 @@
 #include "Help.h"
 #include "Text.h"
 #include "Fille.h"
+#include "CrashHandler.h"
 
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -156,7 +157,52 @@ static bool ensureAccessOrStop(UnicodeString path, UnicodeString what)
 }
 //---------------------------------------------------------------------------
 /* ОСНОВНОЙ КОД ГРАБА */
+// Ловить будь-який виняток, що вислизнув з ExecuteImpl() (наприклад, з job_*
+// або якогось глибокого виклику всередині). Без цього потік просто тихо
+// вмирав би: UI лишався заблокованим (blockGrub(true) з ExecuteImpl ніхто б
+// не відкотив), а користувач не бачив би жодного повідомлення про причину.
 void __fastcall Th_Gruber::Execute()
+{
+	try
+	{
+		ExecuteImpl();
+	}
+	catch (Exception &e)
+	{
+		LogCrash("Th_Gruber", e.ClassName() + ": " + e.Message);
+		Synchronize([&e]() {
+			blockGrub(false);
+			printLog("ER", "GRUBer: критична помилка - " + e.Message);
+			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
+		});
+		grubActive = false;
+		th_Gruber_run = false;
+	}
+	catch (std::exception &e)
+	{
+		UnicodeString what = e.what();
+		LogCrash("Th_Gruber", what);
+		Synchronize([what]() {
+			blockGrub(false);
+			printLog("ER", "GRUBer: критична помилка - " + what);
+			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
+		});
+		grubActive = false;
+		th_Gruber_run = false;
+	}
+	catch (...)
+	{
+		LogCrash("Th_Gruber", "невідомий виняток");
+		Synchronize([]() {
+			blockGrub(false);
+			printLog("ER", "GRUBer: критична помилка (невідомий тип винятку)");
+			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
+		});
+		grubActive = false;
+		th_Gruber_run = false;
+	}
+}
+void __fastcall Th_Gruber::ExecuteImpl()
 {
     FreeOnTerminate = true;
 	// -> переменные

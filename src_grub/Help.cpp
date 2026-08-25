@@ -220,6 +220,7 @@ void applyCurStructureSelectionToForm(UnicodeString id) {
 	// ItemIndex, на відміну від вибору користувачем, не викликає OnChange)
 	for (size_t i = 0; i < Form1->curStructureComboIds.size(); i++)
 		if (Form1->curStructureComboIds[i] == id) { Form1->ComboBox_CurStructur->ItemIndex = (int)i; break; }
+	curPC.setCurStructureSelection(id, Form1->ComboBox_CurStructur->Text);
 	StructurePcData data = curPC.getStructure(id);
 	Form1->Edit_NumberARM->Value = data.number;
 	Form1->Edit_NumberARM->Enabled = true;
@@ -327,6 +328,8 @@ bool infoSetToFille(Arm &curPC)
 	for(auto str : curPC.mStrLastGrub()) infoFille->Add(str);
 	// раздел номеров ПК (структур)
 	for(auto str : curPC.mStrStructures()) infoFille->Add(str);
+	// раздел поточної обраної структури
+	for(auto str : curPC.mStrCurStructure()) infoFille->Add(str);
 	// раздел серийников
 	for(auto str : curPC.mStrSerial()) infoFille->Add(str);
 	// раздел об АРМ

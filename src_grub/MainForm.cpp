@@ -32,6 +32,7 @@
 #include "Eset.h"
 
 #include "Th_Gruber.h"
+#include "CrashHandler.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -88,6 +89,8 @@ std::vector<UnicodeString> fileInfoGrub() {
 	for(auto str : curPC.mStrLastGrub()) vStr.push_back(str);
 	// раздел номеров ПК (структур)
 	for(auto str : curPC.mStrStructures()) vStr.push_back(str);
+	// раздел поточної обраної структури
+	for(auto str : curPC.mStrCurStructure()) vStr.push_back(str);
 	// раздел серийников
 	for(auto str : curPC.mStrSerial()) vStr.push_back(str);
 	// раздел об АРМ-1
@@ -214,6 +217,15 @@ void __fastcall TForm1::Form1AfterMonitorDpiChanged(TObject *Sender, int OldDPI,
 {
 	rescaleGridPanelsForDpi();
 	applyGridUsersDpiScale();
+}
+// Ловить винятки, що виникають під час обробки повідомлень у Application->Run()
+// (наприклад, у обробнику кліку кнопки). Пише в crash.log, тоді показує
+// стандартний діалог VCL - для користувача поведінка не змінюється, але тепер
+// причина падіння лишається в файлі, а не тільки на екрані, що зникає одразу.
+void __fastcall TForm1::AppExceptionHandler(TObject *Sender, Exception *E)
+{
+	LogCrash("Application", E->ClassName() + ": " + E->Message);
+	Application->ShowException(E);
 }
 void RestartApplicationRunas()
 {
