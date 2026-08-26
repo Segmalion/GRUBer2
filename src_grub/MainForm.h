@@ -219,6 +219,9 @@ __published:	// IDE-managed Components
 	TCheckBox *CheckBox_installAvpzRDsensor;
 	TCheckBox *CheckBox_installAvpzTRELIX;
 	TButton *Button_OpenQuarantine;
+	TButton *BtnEsetDownload;
+	TProgressBar *ProgressBar_ESET;
+	TButton *BtnJobs;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall CheckBox_TempDirClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
