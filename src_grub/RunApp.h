@@ -2,6 +2,8 @@
 
 #ifndef RunAppH
 #define RunAppH
+
+#include <atomic>
 //---------------------------------------------------------------------------
 class RunApp {
 private:
@@ -12,6 +14,9 @@ private:
 	UnicodeString dir;
 	bool runas;
 	bool hide;
+	// додатковий прапорець скасування, окрім глобальних stopBool/passBool
+	// (напр. кнопка "Зупинити завантаження" ESET не повинна зупиняти Граб і навпаки)
+	std::atomic<bool> *externalStop = nullptr;
 	struct eC {
 		bool run;  // результат запуска
 		short exit; // результат выполнения
@@ -28,7 +33,8 @@ public:
 	UnicodeString resultString();
 	bool checkErr();
 	//сеттер
-
+	void set_dir(UnicodeString d);
+	void set_externalStop(std::atomic<bool> *flag);
 };
 
 #endif

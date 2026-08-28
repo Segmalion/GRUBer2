@@ -81,7 +81,7 @@ void RunApp::run(bool h, bool r) {
 	MSG msg;
 	while(1) {
 		DWORD dwRet = ::MsgWaitForMultipleObjects(1, hHandles, FALSE, 50, QS_ALLINPUT);
-		if (stopBool || passBool) {
+		if (stopBool || passBool || (externalStop && *externalStop)) {
 			TerminateProcess(ShExecInfoA.hProcess, 1);
 			if (passBool) { passBool = false; passBoolTmp = true;}
             error.exit = -1;
@@ -141,4 +141,6 @@ bool RunApp::checkErr() {
 	if(error.run == 1 || error.exit == 1) return true;
 	else return false;
 }
+void RunApp::set_dir(UnicodeString d) { dir = d; }
+void RunApp::set_externalStop(std::atomic<bool> *flag) { externalStop = flag; }
 //---------------------------------------------------------------------------

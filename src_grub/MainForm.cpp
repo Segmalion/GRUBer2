@@ -32,6 +32,7 @@
 #include "Eset.h"
 
 #include "Th_Gruber.h"
+#include "Th_EsetDownload.h"
 #include "CrashHandler.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -51,6 +52,7 @@ UnicodeString cmdEXE, curentDate;
 // прибирає data race на цих прапорцях (пор. з compute/apply-розділенням
 // для доступу до VCL, описаним у CLAUDE.md).
 std::atomic<bool> th_Gruber_run{false}, th_ClearFile_run{false};
+std::atomic<bool> th_EsetDownload_run{false}, stopEsetDownload{false};
 bool th_EsetUpdate_run=0; // наразі ніде більше не використовується
 std::atomic<bool> th_Gruber_runMini{false}, th_Gruber_runUSB{false};
 std::atomic<bool> stopBool{false}, passBool{false};
@@ -586,6 +588,17 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 		}
 		admMode = "UserMode";
 	}
+	// === запит на додавання типових налаштувань завантаження баз ESET,
+	// якщо у GRUBer.ini відсутня секція [eset_download] - навмисно після
+	// запиту на перезапуск від адміна, а не до нього
+	if (!curConfig.getEsetDlSectionExists()) {
+		UnicodeString text = L"У файлі налаштувань (GRUBer.ini) відсутня секція [eset_download] "
+			L"(завантаження баз ESET).\nДодати її з типовими значеннями?";
+		if (Application->MessageBox(text.c_str(), L"Немає налаштувань завантаження ESET", MB_YESNO) == IDYES) {
+			curConfig.applyEsetDlDefaults();
+			curConfig.saveFileIni();
+		}
+	}
     // === запит на перезбереження GRUBer.ini у новому форматі, якщо файл ще
 	// застарілої версії (ini_version=0/відсутній) - навмисно після запиту на
 	// перезапуск від адміна, а не до нього
@@ -846,6 +859,25 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 			NULL, "start update"};
 		esetBaseUpdate.run();
 	}
+}
+// === завантаження баз ESET (тягне update_full.zip, сортує й пакує в
+// update_x32/x64.* - те, що потім розпаковує BtnEsetUpdateClick вище).
+// Друге натискання під час завантаження - скасування (stopEsetDownload).
+void __fastcall TForm1::BtnEsetDownloadClick(TObject *Sender)
+{
+	if (th_EsetDownload_run) {
+		stopEsetDownload = true;
+		return;
+	}
+	if (curConfig.getEsetDlUrl().IsEmpty()) {
+		printLog("!!", "ESET-Download: URL не вказано в налаштуваннях GRUBer.ini ([eset_download])!");
+		return;
+	}
+	stopEsetDownload = false;
+	BtnEsetUpdate->Enabled = false;
+	BtnEsetDownload->Caption = "Зупинити завантаження";
+	Th_EsetDownload *Thr = new Th_EsetDownload(true);
+	Thr->Resume();
 }
 //---------------------------------------------------------------------------
 /* Изменение полей */

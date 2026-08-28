@@ -25,6 +25,9 @@ try
 	debug = false;
 	showLog = false;
 	showEsetUpd = true;
+	esetDlArhive = "zstd";
+	esetDlConvert = true;
+	esetDlUpdateMs = 150;
 	configFile = GetCurrentDir() + "\\GRUBer.ini";
 	readFileIni();
 }
@@ -120,6 +123,23 @@ void Config::readFileIni() {
 		// soft-writeList <--
 		findStr = findParam(infoFille, "[list]", "softWriteList");
 		if(!findStr.IsEmpty()) softWriteList = vStrGenFromStr(findStr);
+		// eset_download
+		{
+			std::vector<UnicodeString> sec = findCategory(infoFille, "[eset_download]");
+			esetDlSectionExists = !(sec.size() == 1 && sec[0] == "ERROR");
+		}
+		findStr = findParam(infoFille, "[eset_download]", "URL");
+		if(findStr != "ERROR") esetDlUrl = findStr;
+		findStr = findParam(infoFille, "[eset_download]", "user");
+		if(findStr != "ERROR") esetDlUser = findStr;
+		findStr = findParam(infoFille, "[eset_download]", "pass");
+		if(findStr != "ERROR") esetDlPass = findStr;
+		findStr = findParam(infoFille, "[eset_download]", "arhive");
+		if(findStr == "zip" || findStr == "zstd") esetDlArhive = findStr;
+		findStr = findParam(infoFille, "[eset_download]", "convert");
+		if(findStr == 0 || findStr == 1) esetDlConvert = findStr.ToInt();
+		findStr = findParam(infoFille, "[eset_download]", "update_ms");
+		if(findStr != "ERROR") esetDlUpdateMs = findStr.ToIntDef(150);
 		// structures <--
 		structures.clear();
 		for (auto &id : findSectionIds(infoFille, "[structur_")) {
@@ -171,6 +191,14 @@ void Config::saveFileIni() {
 	infoFille->Add("spz=" + strGenFromVStr(spz));   //<--
 	infoFille->Add("softBlackList=" + strGenFromVStr(softBlackList)); //<--
 	infoFille->Add("softWriteList=" + strGenFromVStr(softWriteList)); //<--
+	// раздел
+	infoFille->Add("[eset_download]");
+	infoFille->Add("URL=" + esetDlUrl);
+	infoFille->Add("user=" + esetDlUser);
+	infoFille->Add("pass=" + esetDlPass);
+	infoFille->Add("arhive=" + esetDlArhive);
+	infoFille->Add("convert=" + UnicodeString(esetDlConvert));
+	infoFille->Add("update_ms=" + UnicodeString(esetDlUpdateMs));
 	// раздел структур
 	for (auto &s : structures) {
 		infoFille->Add("[structur_" + s.id + "]");
@@ -216,6 +244,13 @@ std::vector<StructureDef> Config::get_structures() { return structures; }
 UnicodeString Config::get_defaultStructureId() { return defaultStructureId; }
 UnicodeString Config::getUser() { return grubUser; }
 UnicodeString Config::getPrefixPartition() { return prefixPartition; }
+UnicodeString Config::getEsetDlUrl() { return esetDlUrl; }
+UnicodeString Config::getEsetDlUser() { return esetDlUser; }
+UnicodeString Config::getEsetDlPass() { return esetDlPass; }
+UnicodeString Config::getEsetDlArhive() { return esetDlArhive; }
+bool Config::getEsetDlConvert() { return esetDlConvert; }
+short Config::getEsetDlUpdateMs() { return esetDlUpdateMs; }
+bool Config::getEsetDlSectionExists() { return esetDlSectionExists; }
 std::vector<UnicodeString> Config::get_lgpo() { return lgpo; }; //<--
 std::vector<UnicodeString> Config::get_usb()  { return usb; };  //<--
 std::vector<UnicodeString> Config::get_user() { return user; }; //<--
@@ -241,6 +276,22 @@ void Config::setAudit(short i)   { audit = i; }
 void Config::setEsetLog(short i) { esetLog = i; }
 void Config::setUser(UnicodeString str) { grubUser = str; }
 void Config::setPrefixPartition(UnicodeString str) { prefixPartition = str; }
+void Config::setEsetDlUrl(UnicodeString str) { esetDlUrl = str; }
+void Config::setEsetDlUser(UnicodeString str) { esetDlUser = str; }
+void Config::setEsetDlPass(UnicodeString str) { esetDlPass = str; }
+void Config::setEsetDlArhive(UnicodeString str) { esetDlArhive = str; }
+void Config::setEsetDlConvert(bool i) { esetDlConvert = i; }
+void Config::setEsetDlUpdateMs(short i) { esetDlUpdateMs = i; }
+void Config::applyEsetDlDefaults() {
+	// значення за замовчуванням з EsetBaseDownloader.ini
+	esetDlUrl = "http://45.156.37.106:2222/updates.zip";
+	esetDlUser = "eset_upd";
+	esetDlPass = "QaZEwQ123^%$";
+	esetDlArhive = "zstd";
+	esetDlConvert = true;
+	esetDlUpdateMs = 150;
+	esetDlSectionExists = true;
+}
 void Config::set_lgpo(std::vector<UnicodeString> vStr) { lgpo = vStr; } //<--
 void Config::set_usb(std::vector<UnicodeString> vStr) { usb = vStr; }   //<--
 void Config::set_user(std::vector<UnicodeString> vStr) { user = vStr; } //<--

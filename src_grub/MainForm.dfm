@@ -127,7 +127,6 @@
         ParentShowHint = False
         ShowHint = False
         TabOrder = 0
-        ExplicitHeight = 636
         object TabGRUBer: TTabSheet
           Margins.Left = 6
           Margins.Top = 6
@@ -280,7 +279,6 @@
                 Value = 100.000000000000000000
               end>
             TabOrder = 0
-            ExplicitHeight = 591
             object Label2: TLabel
               AlignWithMargins = True
               Left = 8
@@ -447,7 +445,6 @@
               WordWrap = False
               OnChange = EditComentChange
               OnDblClick = EditComentDblClick
-              ExplicitHeight = 135
             end
             object Label_Purpose: TLabel
               AlignWithMargins = True
@@ -776,7 +773,6 @@
                 Value = 12.500000000000000000
               end>
             TabOrder = 0
-            ExplicitHeight = 591
             DesignSize = (
               668
               579)
@@ -807,7 +803,6 @@
               TabOrder = 0
               Text = 'Edit_InNumberARM'
               OnChange = Edit_InNumberARMChange
-              ExplicitTop = 18
             end
             object Label13: TLabel
               AlignWithMargins = True
@@ -836,7 +831,6 @@
               TabOrder = 1
               Text = 'Edit_InNumberHDD'
               OnChange = Edit_InNumberHDDChange
-              ExplicitTop = 92
             end
             object Label14: TLabel
               AlignWithMargins = True
@@ -865,7 +859,6 @@
               TabOrder = 2
               Text = 'Edit_InNumberDeclr'
               OnChange = Edit_InNumberDeclrChange
-              ExplicitTop = 166
             end
             object Label15: TLabel
               AlignWithMargins = True
@@ -894,7 +887,6 @@
               TabOrder = 3
               Text = 'Edit_InNumberFormulyar'
               OnChange = Edit_InNumberFormulyarChange
-              ExplicitTop = 240
             end
             object Label16: TLabel
               AlignWithMargins = True
@@ -923,7 +915,6 @@
               TabOrder = 4
               Text = 'Edit_InNumberWork'
               OnChange = Edit_InNumberWorkChange
-              ExplicitTop = 313
             end
             object Label17: TLabel
               AlignWithMargins = True
@@ -953,7 +944,6 @@
               TabOrder = 5
               Text = 'Edit_InNumberPerson'
               OnChange = Edit_InNumberPersonChange
-              ExplicitTop = 387
             end
             object Label_Respon: TLabel
               AlignWithMargins = True
@@ -983,7 +973,6 @@
               TabOrder = 6
               Text = 'Edit_InRespon'
               OnChange = Edit_InResponChange
-              ExplicitTop = 461
             end
             object Edit_InAdminBP: TEdit
               AlignWithMargins = True
@@ -999,7 +988,6 @@
               TabOrder = 7
               Text = 'Edit_InAdminBP'
               OnChange = Edit_InAdminBPChange
-              ExplicitTop = 535
             end
             object Label_AdminBP: TLabel
               AlignWithMargins = True
@@ -1072,7 +1060,6 @@
                 Value = 100.000000000000000000
               end>
             TabOrder = 0
-            ExplicitHeight = 591
             object GroupBox6: TGroupBox
               AlignWithMargins = True
               Left = 6
@@ -1386,7 +1373,6 @@
               Align = alClient
               Caption = #1053#1072#1083#1072#1096#1090#1086#1074#1072#1085#1077' '#1057#1055#1047
               TabOrder = 2
-              ExplicitHeight = 579
               object CheckListBox_SPZ: TCheckListBox
                 AlignWithMargins = True
                 Left = 8
@@ -1401,7 +1387,6 @@
                 ItemHeight = 30
                 TabOrder = 0
                 OnClickCheck = CheckListBox_SPZClickCheck
-                ExplicitHeight = 533
               end
             end
           end
@@ -3878,7 +3863,6 @@
             Value = 40.000000000000000000
           end>
         TabOrder = 2
-        ExplicitLeft = 18
         object EditDirGrubName: TEdit
           AlignWithMargins = True
           Left = 6
@@ -3916,8 +3900,6 @@
           Enabled = False
           TabOrder = 1
           OnClick = BtnGruberDirOpenClick
-          ExplicitTop = 131
-          ExplicitHeight = 69
         end
         object BtnDevListerOpen: TButton
           AlignWithMargins = True
@@ -3934,8 +3916,6 @@
           Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1080' DevLister'
           TabOrder = 2
           OnClick = BtnDevListerOpenClick
-          ExplicitTop = 131
-          ExplicitHeight = 69
         end
         object BtnGruberRun: TButton
           AlignWithMargins = True
@@ -3954,8 +3934,6 @@
           Style = bsSplitButton
           TabOrder = 3
           OnClick = BtnGruberRunClick
-          ExplicitTop = 212
-          ExplicitHeight = 70
         end
         object BtnGruberStop: TButton
           AlignWithMargins = True
@@ -3975,8 +3953,6 @@
           Style = bsSplitButton
           TabOrder = 4
           OnClick = BtnGruberStopClick
-          ExplicitTop = 212
-          ExplicitHeight = 70
         end
         object BtnEsetUpdate: TButton
           AlignWithMargins = True
@@ -3993,7 +3969,6 @@
           Enabled = False
           TabOrder = 5
           OnClick = BtnEsetUpdateClick
-          ExplicitHeight = 70
         end
         object BtnClearPC: TButton
           AlignWithMargins = True
@@ -4010,8 +3985,6 @@
           Enabled = False
           TabOrder = 6
           OnClick = BtnClearPCClick
-          ExplicitTop = 49
-          ExplicitHeight = 70
         end
         object ProgressBar_Grub: TProgressBar
           AlignWithMargins = True
@@ -4029,9 +4002,6 @@
           MarqueeInterval = 1
           Step = 1
           TabOrder = 7
-          ExplicitLeft = 18
-          ExplicitTop = 978
-          ExplicitHeight = 64
         end
         object BtnEsetDownload: TButton
           AlignWithMargins = True
@@ -4047,6 +4017,7 @@
           Caption = #1047#1072#1074#1072#1085#1090#1072#1078#1080#1090#1080' '#1073#1072#1079#1091' ESET'
           Style = bsSplitButton
           TabOrder = 8
+          OnClick = BtnEsetDownloadClick
         end
         object ProgressBar_ESET: TProgressBar
           AlignWithMargins = True
@@ -4060,7 +4031,6 @@
           Margins.Bottom = 5
           Align = alClient
           TabOrder = 9
-          ExplicitLeft = 17
         end
         object BtnJobs: TButton
           AlignWithMargins = True
@@ -4075,10 +4045,6 @@
           Align = alClient
           Caption = '[WIP] BtnJobs'
           TabOrder = 10
-          ExplicitLeft = 235
-          ExplicitTop = 299
-          ExplicitWidth = 131
-          ExplicitHeight = 44
         end
       end
     end
@@ -4101,11 +4067,11 @@
       Panels = <
         item
           Text = ' GRUBer '#1085#1077' '#1079#1072#1087#1091#1089#1082#1072#1074#1089#1103
-          Width = 350
+          Width = 400
         end
         item
           Text = ' '#1041#1072#1079#1080' '#1085#1077' '#1086#1085#1086#1074#1083#1102#1074#1072#1083#1080#1089#1103
-          Width = 350
+          Width = 550
         end
         item
           Alignment = taRightJustify

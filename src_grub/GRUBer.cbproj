@@ -95,11 +95,11 @@
         <IncludePath>..\..\..\cppbuilder\GRUBer2\;include\;..\scr\;$(IncludePath)</IncludePath>
         <VerInfo_Locale>1058</VerInfo_Locale>
         <ILINK_LibraryPath>..\..\..\cppbuilder\GRUBer2\;include\;..\scr\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
-        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.5.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.5.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>3</VerInfo_MinorVer>
-        <VerInfo_Build>2</VerInfo_Build>
+        <VerInfo_Build>3</VerInfo_Build>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
         <VerInfo_Release>5</VerInfo_Release>
         <PreBuildEvent>call "$(MSBuildProjectDirectory)\..\tools\gen_gitversion.bat" "$(MSBuildProjectDirectory)"</PreBuildEvent>
@@ -189,10 +189,10 @@
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(BDSLIB)\$(PLATFORM)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
         <BCC_StackFrames>true</BCC_StackFrames>
-        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.5.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.5.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=</VerInfo_Keys>
         <Icon_MainIcon>GRUBer_Icon.ico</Icon_MainIcon>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Build>2</VerInfo_Build>
+        <VerInfo_Build>3</VerInfo_Build>
         <VerInfo_Release>5</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
@@ -206,9 +206,9 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <LinkPackageStatics>rtl.lib;vcl.lib;vclwinx.lib;vclimg.lib;bindengine.lib;vclx.lib</LinkPackageStatics>
         <Icon_MainIcon>GRUBer_Icon.ico</Icon_MainIcon>
-        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.5.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Llamas SOFT;FileDescription=$(MSBuildProjectName);FileVersion=0.3.5.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Release>5</VerInfo_Release>
-        <VerInfo_Build>2</VerInfo_Build>
+        <VerInfo_Build>3</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="About.cpp">
@@ -263,6 +263,11 @@
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
             <DependentOn>Eset.h</DependentOn>
             <BuildOrder>24</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="EsetDownload.cpp">
+            <VirtualFolder>{8701FF02-8B08-42DE-A343-88ECA155892A}</VirtualFolder>
+            <DependentOn>EsetDownload.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="Fille.cpp">
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
@@ -364,6 +369,11 @@
             <VirtualFolder>{9F4040FB-9770-473E-8CD4-B95AE379325C}</VirtualFolder>
             <DependentOn>Th_Gruber.h</DependentOn>
             <BuildOrder>21</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Th_EsetDownload.cpp">
+            <VirtualFolder>{9F4040FB-9770-473E-8CD4-B95AE379325C}</VirtualFolder>
+            <DependentOn>Th_EsetDownload.h</DependentOn>
+            <BuildOrder>30</BuildOrder>
         </CppCompile>
         <CppCompile Include="Users.cpp">
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>

@@ -248,6 +248,7 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBoxEsetAutoUpdateClick(TObject *Sender);
 	void __fastcall EditEsetMirrorDirChange(TObject *Sender);
 	void __fastcall BtnEsetUpdateClick(TObject *Sender);
+	void __fastcall BtnEsetDownloadClick(TObject *Sender);
 	void __fastcall BtnEditEsetMirrorDirClick(TObject *Sender);
 	void __fastcall DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose);
 	void __fastcall BtnDevListerOpenClick(TObject *Sender);

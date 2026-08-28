@@ -20,6 +20,15 @@ private:
 	UnicodeString grubUser;
 	UnicodeString configFile;
 	UnicodeString prefixPartition;
+	// eset_download - налаштування завантаження баз ESET (кнопка BtnEsetDownload)
+	UnicodeString esetDlUrl, esetDlUser, esetDlPass;
+	UnicodeString esetDlArhive; // "zip" або "zstd"
+	bool esetDlConvert;
+	short esetDlUpdateMs;
+	// true, якщо секція [eset_download] була знайдена у GRUBer.ini при
+	// останньому readFileIni() - використовується, щоб при старті програми
+	// один раз запропонувати додати її з типовими значеннями
+	bool esetDlSectionExists = false;
 	std::vector<UnicodeString> lgpo;        //<==
 	std::vector<UnicodeString> usb;         //<==
 	std::vector<UnicodeString> user;        //<==
@@ -52,6 +61,13 @@ public:
 	UnicodeString get_defaultStructureId();
 	UnicodeString getUser();
 	UnicodeString getPrefixPartition();
+	UnicodeString getEsetDlUrl();
+	UnicodeString getEsetDlUser();
+	UnicodeString getEsetDlPass();
+	UnicodeString getEsetDlArhive();
+	bool getEsetDlConvert();
+	short getEsetDlUpdateMs();
+	bool getEsetDlSectionExists();
 	std::vector<UnicodeString> get_lgpo(); //<--
 	std::vector<UnicodeString> get_usb();  //<--
 	std::vector<UnicodeString> get_user(); //<--
@@ -77,6 +93,15 @@ public:
 	void setOldGrub(short i);
 	void setUser(UnicodeString str);
 	void setPrefixPartition(UnicodeString str);
+	void setEsetDlUrl(UnicodeString str);
+	void setEsetDlUser(UnicodeString str);
+	void setEsetDlPass(UnicodeString str);
+	void setEsetDlArhive(UnicodeString str);
+	void setEsetDlConvert(bool i);
+	void setEsetDlUpdateMs(short i);
+	// заповнює [eset_download] типовими значеннями (з EsetBaseDownloader.ini)
+	// і позначає секцію як наявну, щоб стартовий запит більше не з'являвся
+	void applyEsetDlDefaults();
 	void set_lgpo(std::vector<UnicodeString> vStr); //<--
 	void set_usb(std::vector<UnicodeString> vStr); //<--
 	void set_user(std::vector<UnicodeString> vStr); //<--
