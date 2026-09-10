@@ -24,11 +24,11 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 bool EsetDownload_ExtractArchive(const fs::path &archivePath, const fs::path &destDir,
 	std::atomic<bool> &cancelFlag, UnicodeString &errMsg);
 
-// знаходить у розпакованому update_full.zip теку dll/update.ver, сортує
-// перелічені в update.ver файли по x86/x64 і пакує їх у update_x32.*/
-// update_x64.* (формат "zip" або "zstd", згідно arhiveType) поруч з exe
+// знаходить у розпакованому update_full.zip теку dll/update.ver, вибирає з
+// update.ver файли для x64 і пакує їх у update_x64.* (формат "zip" або
+// "zstd", згідно arhiveType) поруч з exe
 bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiveType,
-	const fs::path &outX32, const fs::path &outX64,
+	const fs::path &outX64,
 	std::atomic<bool> &cancelFlag, EsetDlProgressCb progressCb, UnicodeString &errMsg);
 
 // копіює один файл (готовий архів) із temp у теку ПО через CopyFileExW -

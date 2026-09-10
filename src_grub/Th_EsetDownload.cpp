@@ -9,7 +9,6 @@
 #include "MainForm.h"
 
 #include "Config.h"
-#include "Dir.h"
 #include "EsetDownload.h"
 
 #include "Help.h"
@@ -20,7 +19,6 @@
 namespace fs = std::filesystem;
 
 extern Config curConfig;
-extern Dir curDir;
 extern std::atomic<bool> th_EsetDownload_run, stopEsetDownload;
 
 //---------------------------------------------------------------------------
@@ -98,19 +96,31 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 		esetDlStatus(phase);
 	};
 
-	fs::path tempRoot = fs::path(curDir.get_grubPathTemp().c_str()) / L"eset_download";
+	// постійна тека (НЕ під TempGRUB - не чиститься автоматично щоразу),
+	// щоб update_full.zip лишався між запусками і давав змогу нижче
+	// пропустити повторне скачування, якщо на сервері той самий файл
+	fs::path tempRoot = fs::path(L"C:\\ProgramData\\GRUBer\\eset_download");
 	std::error_code ec;
-	fs::remove_all(tempRoot, ec);
 	fs::create_directories(tempRoot, ec);
 
 	fs::path fullZip = tempRoot / L"update_full.zip";
 	fs::path unpackDir = tempRoot / L"unpack";
+	// чистимо лише проміжну розпаковку з можливого попереднього невдалого
+	// запуску - update_full.zip навмисно не чіпаємо
+	fs::remove_all(unpackDir, ec);
+
 	bool zstd = (curConfig.getEsetDlArhive() == "zstd");
-	// готові архіви спершу збираються у temp - тека ПО (fs::current_path())
-	// не займається до самого кінця, щоб робочі update_x32/x64.* там не
-	// зникали передчасно, якщо завантаження/пакування впаде або буде скасоване
-	fs::path tempOutX32 = tempRoot / (zstd ? L"update_x32.tar.zstd" : L"update_x32.zip");
+	// готовий архів спершу збирається у temp - тека ПО (fs::current_path())
+	// не займається до самого кінця, щоб робочий update_x64.* там не зникав
+	// передчасно, якщо завантаження/пакування впаде або буде скасоване
 	fs::path tempOutX64 = tempRoot / (zstd ? L"update_x64.tar.zstd" : L"update_x64.zip");
+
+	// проміжні артефакти (unpack, ще не опублікований update_x64.*) -
+	// update_full.zip НІКОЛИ не видаляється цим helper-ом
+	auto cleanupTemp = [&]() {
+		fs::remove_all(unpackDir, ec);
+		fs::remove(tempOutX64, ec);
+	};
 
 	printLog(">>", "ESET-Download: завантаження бази ESET...");
 	progressBarEsetGo(0);
@@ -125,7 +135,7 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 		bool cancelled = stopEsetDownload;
 		printLog(cancelled ? "!!" : "ER", "ESET-Download: " + errMsg);
 		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка завантаження");
-		fs::remove_all(tempRoot, ec);
+		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 		return;
@@ -139,67 +149,56 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 		bool cancelled = stopEsetDownload;
 		printLog(cancelled ? "!!" : "ER", "ESET-Download: " + errMsg);
 		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка розпакування");
-		fs::remove_all(tempRoot, ec);
+		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 		return;
 	}
 
-	printLog(">>", "ESET-Download: сортування та пакування баз...");
+	printLog(">>", "ESET-Download: сортування та пакування бази...");
 	progressBarEsetGo(0);
-	esetDlStatus("Пакування баз...");
-	ok = EsetDownload_SortAndRepack(unpackDir, curConfig.getEsetDlArhive(), tempOutX32, tempOutX64,
+	esetDlStatus("Пакування бази...");
+	ok = EsetDownload_SortAndRepack(unpackDir, curConfig.getEsetDlArhive(), tempOutX64,
 		stopEsetDownload, progressCb, errMsg);
 	if (!ok) {
 		bool cancelled = stopEsetDownload;
 		printLog(cancelled ? "!!" : "ER", "ESET-Download: " + errMsg);
 		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка пакування");
-		fs::remove_all(tempRoot, ec);
+		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 		return;
 	}
 
-	// публікація у теку ПО - лише зараз, коли нові архіви вже готові у temp;
+	// публікація у теку ПО - лише зараз, коли новий архів вже готовий у temp;
 	// спершу копіюємо нове (з живим прогресом через CopyFileExW), і тільки
 	// після успіху приберемо застарілий формат
 	progressBarEsetGo(0);
-	esetDlStatus("Публікація архівів...");
-	fs::path poX32Zip = fs::current_path() / L"update_x32.zip";
+	esetDlStatus("Публікація архіву...");
 	fs::path poX64Zip = fs::current_path() / L"update_x64.zip";
-	fs::path poX32Zstd = fs::current_path() / L"update_x32.tar.zstd";
 	fs::path poX64Zstd = fs::current_path() / L"update_x64.tar.zstd";
-	fs::path poX32 = zstd ? poX32Zstd : poX32Zip;
 	fs::path poX64 = zstd ? poX64Zstd : poX64Zip;
 
-	bool published32 = false, published64 = false;
+	bool published64 = false;
 	UnicodeString pubErr;
-	if (fs::exists(tempOutX32, ec)) {
-		published32 = EsetDownload_PublishFile(tempOutX32, poX32, curConfig.getEsetDlUpdateMs(),
-			stopEsetDownload, progressCb, pubErr);
-		if (!published32) printLog("!!", "ESET-Download: " + pubErr);
-	}
-	if (!stopEsetDownload && fs::exists(tempOutX64, ec)) {
+	if (fs::exists(tempOutX64, ec)) {
 		published64 = EsetDownload_PublishFile(tempOutX64, poX64, curConfig.getEsetDlUpdateMs(),
 			stopEsetDownload, progressCb, pubErr);
 		if (!published64) printLog("!!", "ESET-Download: " + pubErr);
 	}
-	if (!published32 && !published64) {
+	if (!published64) {
 		bool cancelled = stopEsetDownload;
-		printLog(cancelled ? "!!" : "ER", "ESET-Download: не вдалось опублікувати готові архіви у теку ПО.");
-		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка публікації архівів");
-		fs::remove_all(tempRoot, ec);
+		printLog(cancelled ? "!!" : "ER", "ESET-Download: не вдалось опублікувати готовий архів у теку ПО.");
+		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка публікації архіву");
+		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 		return;
 	}
-	// прибираємо застарілий формат лише для тих архітектур, які реально
-	// щойно оновили - робочий архів іншої архітектури (якщо не входив у цю
-	// поставку) лишається недоторканим
-	if (published32) fs::remove(zstd ? poX32Zip : poX32Zstd, ec);
-	if (published64) fs::remove(zstd ? poX64Zip : poX64Zstd, ec);
+	// прибираємо застарілий формат (zip<->zstd) у теці ПО
+	fs::remove(zstd ? poX64Zip : poX64Zstd, ec);
 
-	fs::remove_all(tempRoot, ec);
+	cleanupTemp();
 	progressBarEsetGo(100);
 	esetDlStatus("Базу ESET завантажено!");
 	printLog("OK", "ESET-Download: базу ESET завантажено та підготовлено!");

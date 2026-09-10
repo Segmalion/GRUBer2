@@ -277,7 +277,7 @@ static bool findDllDirWithUpdateVer(const fs::path &searchRoot, fs::path &outDll
 }
 //---------------------------------------------------------------------------
 bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiveType,
-	const fs::path &outX32, const fs::path &outX64,
+	const fs::path &outX64,
 	std::atomic<bool> &cancelFlag, EsetDlProgressCb progressCb, UnicodeString &errMsg)
 {
 	fs::path dllDir;
@@ -294,42 +294,27 @@ bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiv
 
 	fs::path stagingRoot = unpackedDir.parent_path() / L"staging";
 	fs::path stagingX64Root = stagingRoot / L"x64";
-	fs::path stagingX32Root = stagingRoot / L"x32";
 	fs::path stagingX64Dll = stagingX64Root / L"dll";
-	fs::path stagingX32Dll = stagingX32Root / L"dll";
 	std::error_code ec;
 	fs::create_directories(stagingX64Dll, ec);
-	fs::create_directories(stagingX32Dll, ec);
 
-	bool anyX64 = false, anyX32 = false;
+	bool anyX64 = false;
 	for (auto &e : entries) {
 		if (cancelFlag) { errMsg = "Ручна зупинка."; fs::remove_all(stagingRoot, ec); return false; }
+		if (e.arch != "x64") continue; // x86/update_x32 - застарілий функціонал, не генеруємо
 		fs::path src = dllDir / fs::path(e.file.c_str());
 		if (!fs::exists(src, ec)) continue;
-		if (e.arch == "x64") {
-			fs::copy_file(src, stagingX64Dll / src.filename(), fs::copy_options::overwrite_existing, ec);
-			anyX64 = true;
-		} else if (e.arch == "x86") {
-			fs::copy_file(src, stagingX32Dll / src.filename(), fs::copy_options::overwrite_existing, ec);
-			anyX32 = true;
-		}
+		fs::copy_file(src, stagingX64Dll / src.filename(), fs::copy_options::overwrite_existing, ec);
+		anyX64 = true;
 	}
 	fs::copy_file(updVerPath, stagingX64Dll / L"update.ver", fs::copy_options::overwrite_existing, ec);
-	fs::copy_file(updVerPath, stagingX32Dll / L"update.ver", fs::copy_options::overwrite_existing, ec);
 
 	bool zstd = (arhiveType == "zstd");
 
 	if (anyX64) {
-		if (progressCb) progressCb(25, "Пакування x64... (25%)");
+		if (progressCb) progressCb(50, "Пакування x64... (50%)");
 		bool ok = zstd ? packTarZstd(outX64, stagingX64Root, cancelFlag, errMsg)
 					   : packZip(outX64, stagingX64Root, cancelFlag, errMsg);
-		if (!ok) { fs::remove_all(stagingRoot, ec); return false; }
-	}
-	if (cancelFlag) { errMsg = "Ручна зупинка."; fs::remove_all(stagingRoot, ec); return false; }
-	if (anyX32) {
-		if (progressCb) progressCb(65, "Пакування x32... (65%)");
-		bool ok = zstd ? packTarZstd(outX32, stagingX32Root, cancelFlag, errMsg)
-					   : packZip(outX32, stagingX32Root, cancelFlag, errMsg);
 		if (!ok) { fs::remove_all(stagingRoot, ec); return false; }
 	}
 

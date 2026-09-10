@@ -874,7 +874,7 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	}
 }
 // === завантаження баз ESET (тягне update_full.zip, сортує й пакує в
-// update_x32/x64.* - те, що потім розпаковує BtnEsetUpdateClick вище).
+// update_x64.* - те, що потім розпаковує BtnEsetUpdateClick вище).
 // Друге натискання під час завантаження - скасування (stopEsetDownload).
 void __fastcall TForm1::BtnEsetDownloadClick(TObject *Sender)
 {
