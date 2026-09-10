@@ -173,6 +173,9 @@
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
         <TASM_Debugging>None</TASM_Debugging>
+        <ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+        <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+        <BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_Release>1</VerInfo_Release>
