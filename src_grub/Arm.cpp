@@ -286,7 +286,7 @@ bool Arm::readFromFile() {
 		// на порожній рядок TDateTime впаде на спробі розпарсити "ERROR" як дату
 		// (EConvertError під час конструктора Arm(), тобто ще до появи вікна)
 		UnicodeString lastGrubDateStr = errCheck(findParam(file, "[lastGrub]", "lastGrubDate"));
-		if (!lastGrubDateStr.IsEmpty()) histGr.date = lastGrubDateStr;
+		if (!lastGrubDateStr.IsEmpty()) histGr.date = StrToDateTimeSafe(lastGrubDateStr, TDateTime(0.0));
 		histGr.user = findParam(file, "[lastGrub]", "lastGrubUser");
 		partition = findParam(file, "[infoGrubARM]", "partition");
 		classID = findParam(file, "[infoGrubARM]", "classID").ToIntDef(0);
@@ -322,7 +322,7 @@ bool Arm::readFromFile() {
 			// це до порожнього рядка, щоб TDateTime не впав на спробі
 			// розпарсити "ERROR" як дату.
 			UnicodeString netLastActiveStr = errCheck(findParam(file, netSection, "lastActive"));
-			if (!netLastActiveStr.IsEmpty()) netEntry.lastActive = netLastActiveStr;
+			if (!netLastActiveStr.IsEmpty()) netEntry.lastActive = StrToDateTimeSafe(netLastActiveStr, TDateTime(0.0));
 			netAdapters.push_back(netEntry);
 		}
 		coment = findCategory(file, "[comment]");
@@ -432,7 +432,7 @@ bool Arm::readFromFile() {
 				if(!infoDatIm->Strings[6].IsEmpty()) eset.dirMirror = infoDatIm->Strings[6];
 			}
 		}
-		if (!infoDatIm->Strings[0].IsEmpty()) histGr.date = infoDatIm->Strings[0];
+		if (!infoDatIm->Strings[0].IsEmpty()) histGr.date = StrToDateTimeSafe(infoDatIm->Strings[0], TDateTime(0.0));
 		return true;
 	}
 	return false;
@@ -513,7 +513,7 @@ void Arm::setComent(std::vector<UnicodeString> vStr) { coment = vStr; }
 void Arm::setEsetDir(UnicodeString str) { eset.dirMirror = str; }
 void Arm::setEsetAutoUpdate(bool i) { eset.autoUpdate = i; }
 // последний граб
-void Arm::setLastGrub(UnicodeString user, UnicodeString date) { histGr.date = date; histGr.user = user; }
+void Arm::setLastGrub(UnicodeString user, UnicodeString date) { histGr.date = StrToDateTimeSafe(date, TDateTime(0.0)); histGr.user = user; }
 // по докам
 void Arm::setInNumberARM (UnicodeString str) { inNumberARM=str; }
 void Arm::setInNumberHDD (UnicodeString str) { inNumberHDD=str; }

@@ -1454,10 +1454,19 @@ bool LoadDataFromJSON(const UnicodeString& filePath)
             return false;
         }
 
-        // Лямбда-помощник для безопасного чтения дат из строк JSON обратно в TDateTime
-        auto parseJsonDate = [](UnicodeString dateStr) -> TDateTime {
+        // Лямбда-помощник для безопасного чтения дат из строк JSON обратно в TDateTime.
+        // Формат обязан совпадать с тем, что задан явно в FormatDateTime() при записи
+        // ("dd.mm.yyyy hh:nn:ss") - обычный StrToDateTimeDef() без TFormatSettings
+        // парсит по системной локали и падает с EConvertError на ПК с иным
+        // региональным форматом даты (тот же баг, что был в GRUBer/Th_Gruber).
+        TFormatSettings jsonDateFmt = TFormatSettings::Create();
+        jsonDateFmt.DateSeparator = '.';
+        jsonDateFmt.ShortDateFormat = "dd.mm.yyyy";
+        jsonDateFmt.TimeSeparator = ':';
+        jsonDateFmt.ShortTimeFormat = "hh:nn:ss";
+        auto parseJsonDate = [&jsonDateFmt](UnicodeString dateStr) -> TDateTime {
             if (dateStr.StartsWith(L"30.12.1899")) return 0.0; // Пустая системная дата Delphi
-            return StrToDateTimeDef(dateStr, 0.0);
+            return StrToDateTimeDef(dateStr, 0.0, jsonDateFmt);
         };
 
         // 6. Перебираем все элементы массива устройств

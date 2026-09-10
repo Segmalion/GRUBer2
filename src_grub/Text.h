@@ -13,6 +13,7 @@ UnicodeString strGenFromVStr (std::vector<UnicodeString> vStr);
 UnicodeString curDate();
 UnicodeString curTime();
 UnicodeString curDateTime();
+TDateTime StrToDateTimeSafe(UnicodeString str, TDateTime def);
 UnicodeString fixDirName(UnicodeString str);
 UnicodeString byteToStr(long long i);
 UnicodeString GetHashCRC32(UnicodeString str);

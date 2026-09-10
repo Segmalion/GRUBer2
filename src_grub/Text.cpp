@@ -96,6 +96,22 @@ UnicodeString curDateTime()
 	return TDateTime(Now()).FormatString("dd.MM.yy hh:mm:ss");
 }
 //---------------------------------------------------------------------------
+// Розбір рядка дати/часу у форматі "dd.MM.yy[ HH:mm[:ss]]" (той самий, що й
+// curDate()/curDateTime()/FormatString у цьому проєкті), незалежно від
+// регіональних налаштувань ОС. Пряме присвоєння UnicodeString у TDateTime
+// (histGr.date = str;) використовує системний FormatSettings і падає з
+// EConvertError на ПК з англійським/іншим форматом дати - звідси ця функція.
+TDateTime StrToDateTimeSafe(UnicodeString str, TDateTime def)
+{
+	if (str.IsEmpty()) return def;
+	TFormatSettings fs = TFormatSettings::Create();
+	fs.DateSeparator = '.';
+	fs.ShortDateFormat = "dd.MM.yy";
+	fs.TimeSeparator = ':';
+	fs.ShortTimeFormat = "hh:mm";
+	return StrToDateTimeDef(str, def, fs);
+}
+//---------------------------------------------------------------------------
 // Чистка строки имени папки от запрещеных символов
 UnicodeString fixDirName(UnicodeString str)
 {
