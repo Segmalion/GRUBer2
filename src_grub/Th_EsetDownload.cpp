@@ -161,7 +161,9 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 	}
 
 	// публікація у теку ПО - лише зараз, коли нові архіви вже готові у temp;
-	// спершу копіюємо нове, і тільки після успіху приберемо застарілий формат
+	// спершу копіюємо нове (з живим прогресом через CopyFileExW), і тільки
+	// після успіху приберемо застарілий формат
+	progressBarEsetGo(0);
 	esetDlStatus("Публікація архівів...");
 	fs::path poX32Zip = fs::current_path() / L"update_x32.zip";
 	fs::path poX64Zip = fs::current_path() / L"update_x64.zip";
@@ -171,17 +173,21 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 	fs::path poX64 = zstd ? poX64Zstd : poX64Zip;
 
 	bool published32 = false, published64 = false;
+	UnicodeString pubErr;
 	if (fs::exists(tempOutX32, ec)) {
-		fs::copy_file(tempOutX32, poX32, fs::copy_options::overwrite_existing, ec);
-		published32 = !ec;
+		published32 = EsetDownload_PublishFile(tempOutX32, poX32, curConfig.getEsetDlUpdateMs(),
+			stopEsetDownload, progressCb, pubErr);
+		if (!published32) printLog("!!", "ESET-Download: " + pubErr);
 	}
-	if (fs::exists(tempOutX64, ec)) {
-		fs::copy_file(tempOutX64, poX64, fs::copy_options::overwrite_existing, ec);
-		published64 = !ec;
+	if (!stopEsetDownload && fs::exists(tempOutX64, ec)) {
+		published64 = EsetDownload_PublishFile(tempOutX64, poX64, curConfig.getEsetDlUpdateMs(),
+			stopEsetDownload, progressCb, pubErr);
+		if (!published64) printLog("!!", "ESET-Download: " + pubErr);
 	}
 	if (!published32 && !published64) {
-		printLog("ER", "ESET-Download: не вдалось скопіювати готові архіви у теку ПО.");
-		esetDlStatus("Помилка публікації архівів");
+		bool cancelled = stopEsetDownload;
+		printLog(cancelled ? "!!" : "ER", "ESET-Download: не вдалось опублікувати готові архіви у теку ПО.");
+		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка публікації архівів");
 		fs::remove_all(tempRoot, ec);
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();

@@ -31,4 +31,10 @@ bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiv
 	const fs::path &outX32, const fs::path &outX64,
 	std::atomic<bool> &cancelFlag, EsetDlProgressCb progressCb, UnicodeString &errMsg);
 
+// копіює один файл (готовий архів) із temp у теку ПО через CopyFileExW -
+// живий прогрес (0..100 для цього файлу) через progressCb, скасування -
+// повертає false з errMsg, якщо cancelFlag виставили під час копіювання
+bool EsetDownload_PublishFile(const fs::path &src, const fs::path &dst, short updateMs,
+	std::atomic<bool> &cancelFlag, EsetDlProgressCb progressCb, UnicodeString &errMsg);
+
 #endif

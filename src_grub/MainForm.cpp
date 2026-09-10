@@ -823,8 +823,21 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 		StatusBar1->Panels->Items[1]->Text = " Немає доступу до теки ESET mirror!";
 		return;
 	}
-	if (fs::exists(esetUpdDir / L"dll\\update.ver"))
-		if(fs::remove_all(esetUpdDir)) ensureDirWithAccess(esetUpdDirStr);
+	if (fs::exists(esetUpdDir / L"dll\\update.ver")) {
+		// не кидаюча версія - стару теку могли створити під іншим рівнем прав,
+		// і видалення файлів усередині може впасти навіть якщо сам каталог
+		// пройшов перевірку доступу вище (окремий файл лишився заблокований/
+		// захищений ACL з попереднього адмінського запуску)
+		std::error_code ec;
+		fs::remove_all(esetUpdDir, ec);
+		if (ec) {
+			BtnEsetUpdate->Enabled = true;
+			StatusBar1->Panels->Items[1]->Text = " Не вдалось очистити стару теку ESET mirror (немає прав)!";
+			printLog("!!", "ESET-Update: не вдалось видалити стару теку " + esetUpdDirStr + " - " + UnicodeString(ec.message().c_str()));
+			return;
+		}
+		ensureDirWithAccess(esetUpdDirStr);
+	}
 	//запуск обновления
 	UnicodeString app32 = curDir.get_toolPath() + "\\7zip\\32\\7za.exe";
 	UnicodeString app64 = curDir.get_toolPath() + "\\7zip\\64\\7za.exe";

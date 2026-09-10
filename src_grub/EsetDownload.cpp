@@ -338,3 +338,57 @@ bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiv
 	return true;
 }
 //---------------------------------------------------------------------------
+namespace {
+	struct CopyProgressCtx {
+		EsetDlProgressCb *progressCb;
+		std::atomic<bool> *cancelFlag;
+		UnicodeString label;
+		short updateMs;
+		std::chrono::steady_clock::time_point lastUpdate;
+	};
+}
+// CopyFileExW сама періодично викликає цей колбек з поточним прогресом -
+// повернення PROGRESS_CANCEL коректно перериває копіювання (CopyFileExW
+// поверне FALSE, GetLastError() == ERROR_REQUEST_ABORTED)
+static DWORD CALLBACK esetCopyProgressRoutine(
+	LARGE_INTEGER totalFileSize, LARGE_INTEGER totalBytesTransferred,
+	LARGE_INTEGER, LARGE_INTEGER, DWORD, DWORD,
+	HANDLE, HANDLE, LPVOID lpData)
+{
+	CopyProgressCtx *ctx = reinterpret_cast<CopyProgressCtx*>(lpData);
+	if (ctx->cancelFlag && *ctx->cancelFlag) return PROGRESS_CANCEL;
+
+	auto now = std::chrono::steady_clock::now();
+	auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - ctx->lastUpdate).count();
+	bool done = (totalFileSize.QuadPart > 0 && totalBytesTransferred.QuadPart >= totalFileSize.QuadPart);
+	if ((elapsedMs >= ctx->updateMs || done) && ctx->progressCb && *ctx->progressCb) {
+		int percent = (totalFileSize.QuadPart > 0)
+			? (int)((totalBytesTransferred.QuadPart * 100) / totalFileSize.QuadPart) : 0;
+		UnicodeString phase = "Публікація " + ctx->label + ": "
+			+ formatBytes((uintmax_t)totalBytesTransferred.QuadPart) + " / "
+			+ formatBytes((uintmax_t)totalFileSize.QuadPart) + " (" + UnicodeString(percent) + "%)";
+		(*ctx->progressCb)(percent, phase);
+		ctx->lastUpdate = now;
+	}
+	return PROGRESS_CONTINUE;
+}
+bool EsetDownload_PublishFile(const fs::path &src, const fs::path &dst, short updateMs,
+	std::atomic<bool> &cancelFlag, EsetDlProgressCb progressCb, UnicodeString &errMsg)
+{
+	CopyProgressCtx ctx;
+	ctx.progressCb = &progressCb;
+	ctx.cancelFlag = &cancelFlag;
+	ctx.label = UnicodeString(dst.filename().c_str());
+	ctx.updateMs = updateMs;
+	ctx.lastUpdate = std::chrono::steady_clock::now() - std::chrono::hours(1); // форсуємо перший виклик
+
+	BOOL ok = CopyFileExW(src.c_str(), dst.c_str(), esetCopyProgressRoutine, &ctx, NULL, 0);
+	if (!ok) {
+		DWORD err = GetLastError();
+		if (err == ERROR_REQUEST_ABORTED) errMsg = "Ручна зупинка публікації архіву.";
+		else errMsg = "Не вдалось скопіювати " + ctx.label + " у теку ПО (код " + UnicodeString((int)err) + ").";
+		return false;
+	}
+	return true;
+}
+//---------------------------------------------------------------------------
