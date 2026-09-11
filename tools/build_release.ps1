@@ -22,7 +22,8 @@ $dlVer     = (Get-Item $dlExe).VersionInfo.FileVersion.Trim()
 $commit    = (git rev-parse --short HEAD).Trim()
 
 $folderName = "[GRUBer_$gruberVer][DL_$dlVer][$commit]"
-$destDir = "D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\$folderName"
+$releaseRoot = "D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE"
+$destDir = Join-Path $releaseRoot $folderName
 New-Item -ItemType Directory -Force -Path $destDir | Out-Null
 
 Copy-Item $gruberExe -Destination $destDir -Force
@@ -37,4 +38,15 @@ foreach ($exe in $signedExes) {
     if ($LASTEXITCODE -ne 0) { throw "signtool failed for $exe" }
 }
 
+$sevenZip = "C:\Program Files\7-Zip-Zstandard\7z.exe"
+if (-not (Test-Path $sevenZip)) { throw "7z.exe not found: $sevenZip" }
+
+$archivePath = Join-Path $releaseRoot "$folderName.7z"
+if (Test-Path $archivePath) { Remove-Item $archivePath -Force }
+
+Write-Host "Archiving to $archivePath ..."
+& $sevenZip a -mx=9 $archivePath (Join-Path $destDir "*")
+if ($LASTEXITCODE -ne 0) { throw "7z failed with exit code $LASTEXITCODE" }
+
 Write-Host "DONE: $destDir"
+Write-Host "Archive: $archivePath"

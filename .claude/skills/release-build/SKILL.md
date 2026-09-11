@@ -6,8 +6,10 @@ description: Собрать финальный релиз GRUBer.exe и DeviceLi
 # release-build
 
 Собирает Release-версии `GRUBer.exe` и `DeviceLister.exe`, раскладывает их в
-`D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\[GRUBer_<версия>][DL_<версия>][<коммит>]\`
-и подписывает оба файла сертификатом (thumbprint `B4D511E8418E0957521FE045EAAB39BA72B70F18`).
+`D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\[GRUBer_<версия>][DL_<версия>][<коммит>]\`,
+подписывает оба файла сертификатом (thumbprint `B4D511E8418E0957521FE045EAAB39BA72B70F18`) и
+упаковывает подписанные файлы в архив `[GRUBer_<версия>][DL_<версия>][<коммит>].7z` рядом с
+этой папкой, в `D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\`.
 
 Перед сборкой обязательно проверяет состояние git (коммит/пуш) и спрашивает пользователя,
 что делать, если рабочее дерево не в чистом/запушенном состоянии — иначе версия/коммит в
@@ -56,21 +58,24 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_release.ps1 -Con
 
 Это выполнит: `msbuild GRUBer2.groupproj /t:Build /p:Config=Release /p:Platform=Win64x`,
 считает фактическую версию из собранных `GRUBer.exe`/`DeviceLister.exe`
-(`VersionInfo.FileVersion`), создаст папку релиза, скопирует оба exe и подпишет их
-`signtool.exe`.
+(`VersionInfo.FileVersion`), создаст папку релиза, скопирует оба exe, подпишет их
+`signtool.exe` и упакует подписанные файлы в `.7z`-архив рядом с папкой релиза (7-Zip берётся
+из `C:\Program Files\7-Zip-Zstandard\7z.exe`).
 
-Стримить вывод пользователю по ходу выполнения. Если скрипт упал (billed build, отсутствующий
-сертификат, ошибка signtool) — показать ошибку как есть, **не** докладывать об успешном
+Стримить вывод пользователю по ходу выполнения. Если скрипт упал (билд, отсутствующий
+сертификат, ошибка signtool или 7z) — показать ошибку как есть, **не** докладывать об успешном
 релизе и не переходить к шагу 4.
 
 ### 4. Итог
 
-Сообщить пользователю финальный путь к папке релиза и список подписанных файлов, например:
+Сообщить пользователю финальный путь к папке релиза, архиву и список подписанных файлов,
+например:
 
 ```
 Готово: D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\[GRUBer_0.3.5.4][DL_0.0.2.2][a1b2c3d]\
   - GRUBer.exe (подписан)
   - DeviceLister.exe (подписан)
+Архив: D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\[GRUBer_0.3.5.4][DL_0.0.2.2][a1b2c3d].7z
 ```
 
 ## Как пользоваться
@@ -86,6 +91,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_release.ps1 -Con
    `D:\UsersFiles\JOB-PROJECTS\TEST\GRUBer-RELEASE\`, названную по версиям обеих программ и
    короткому хешу коммита, например `[GRUBer_0.3.5.4][DL_0.0.2.2][a1b2c3d]`.
 5. Подпишет оба exe цифровой подписью.
+6. Упакует подписанные exe в архив `[GRUBer_0.3.5.4][DL_0.0.2.2][a1b2c3d].7z` в той же папке
+   `GRUBer-RELEASE\` (рядом с папкой релиза, не внутри неё).
 
 На каждом из шагов 1–2 скилл может задать вопрос в чате — отвечайте выбором варианта.
 Если сборка или подпись завершились с ошибкой, скилл остановится и покажет текст ошибки,
@@ -98,6 +105,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_release.ps1 -Con
   `B4D511E8418E0957521FE045EAAB39BA72B70F18`, и доступен
   `C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe`.
 - Есть сетевой доступ к `http://timestamp.digicert.com` (сервер штампа времени для подписи).
+- Установлен 7-Zip (сборка Zstandard) по пути
+  `C:\Program Files\7-Zip-Zstandard\7z.exe`.
 
 Если что-то из этого изменится (новая версия RAD Studio, другой сертификат, другой путь к
 TEST-папке) — поправьте константы в начале `tools\build_release.ps1`.
