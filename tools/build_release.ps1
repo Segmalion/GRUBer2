@@ -42,7 +42,7 @@ $sevenZip = "C:\Program Files\7-Zip-Zstandard\7z.exe"
 if (-not (Test-Path $sevenZip)) { throw "7z.exe not found: $sevenZip" }
 
 $archivePath = Join-Path $releaseRoot "$folderName.7z"
-if (Test-Path $archivePath) { Remove-Item $archivePath -Force }
+if (Test-Path -LiteralPath $archivePath) { Remove-Item -LiteralPath $archivePath -Force }
 
 Write-Host "Archiving to $archivePath ..."
 & $sevenZip a -mx=9 $archivePath (Join-Path $destDir "*")
@@ -56,14 +56,14 @@ Get-ChildItem -Path $releaseRoot -Directory | Where-Object {
     $_.FullName -ne $destDir -and $_.Name.StartsWith("[GRUBer_")
 } | ForEach-Object {
     Write-Host "Removing previous release folder: $($_.FullName)"
-    Remove-Item $_.FullName -Recurse -Force
+    Remove-Item -LiteralPath $_.FullName -Recurse -Force
 }
 
 Get-ChildItem -Path $releaseRoot -File | Where-Object {
     $_.Extension -eq ".7z" -and $_.FullName -ne $archivePath -and $_.Name.StartsWith("[GRUBer_")
 } | ForEach-Object {
     Write-Host "Moving previous archive to OLD_VERSION: $($_.Name)"
-    Move-Item $_.FullName -Destination $oldVersionDir -Force
+    Move-Item -LiteralPath $_.FullName -Destination $oldVersionDir -Force
 }
 
 Write-Host "DONE: $destDir"
