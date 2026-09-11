@@ -26,7 +26,7 @@ UnicodeString __fastcall TFormStructurePick::ShowPick(UnicodeString promptText)
 	// заміна колишньої ButtonCancel - останній пункт списку, індекс якого
 	// свідомо виходить за межі structs.size(), тож перевірка нижче вже
 	// трактує його як "не переносити дані" без додаткового спецвипадку
-	ComboBoxPick->Items->Add("Не переносити дані");
+	ComboBoxPick->Items->Add(L"Не переносити дані");
 	if (ComboBoxPick->Items->Count > 0) ComboBoxPick->ItemIndex = 0;
 	if (ShowModal() == mrOk && ComboBoxPick->ItemIndex >= 0 &&
 		ComboBoxPick->ItemIndex < (int)structs.size())

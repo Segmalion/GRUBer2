@@ -50,7 +50,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 	}
 	catch (...)
 	{
-		LogCrash("WinMain", "невідомий виняток (не System::Sysutils::Exception)");
+		LogCrash("WinMain", L"невідомий виняток (не System::Sysutils::Exception)");
 		try
 		{
 			throw Exception("");

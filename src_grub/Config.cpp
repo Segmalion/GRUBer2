@@ -41,7 +41,7 @@ catch (std::exception &e)
 }
 catch (...)
 {
-	LogCrash("Config::Config", "невідомий виняток");
+	LogCrash("Config::Config", L"невідомий виняток");
 }
 }
 void Config::readFileIni() {

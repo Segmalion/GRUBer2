@@ -198,7 +198,7 @@ UnicodeString byteToStr(long long i) {
 		str = FloatToStrF((double)i/(pow(1024,3)), ffFixed, 4, 1) + "Gb";
 		return str;
 	}
-	str = FloatToStrF((double)i/(pow(1024,4)), ffFixed, 4, 1) + "Тb";
+	str = FloatToStrF((double)i/(pow(1024,4)), ffFixed, 4, 1) + L"Тb";
 	return str;
 }
 //---------------------------------------------------------------------------

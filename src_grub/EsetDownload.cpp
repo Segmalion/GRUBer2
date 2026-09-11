@@ -42,7 +42,7 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 	urlComp.dwUrlPathLength = _countof(urlPath);
 
 	if (!WinHttpCrackUrl(url.c_str(), url.Length(), 0, &urlComp)) {
-		errMsg = "Некоректний URL завантаження бази ESET.";
+		errMsg = L"Некоректний URL завантаження бази ESET.";
 		return false;
 	}
 
@@ -52,11 +52,11 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 	bool success = false;
 	HINTERNET hSession = WinHttpOpen(L"GRUBer ESET Downloader/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
 		WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-	if (!hSession) { errMsg = "Не вдалось ініціалізувати WinHTTP."; return false; }
+	if (!hSession) { errMsg = L"Не вдалось ініціалізувати WinHTTP."; return false; }
 
 	HINTERNET hConnect = WinHttpConnect(hSession, hostName, urlComp.nPort, 0);
 	if (!hConnect) {
-		errMsg = "Не вдалось підключитись до сервера.";
+		errMsg = L"Не вдалось підключитись до сервера.";
 		WinHttpCloseHandle(hSession);
 		return false;
 	}
@@ -65,7 +65,7 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 	HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"GET", urlPath, NULL, WINHTTP_NO_REFERER,
 		WINHTTP_DEFAULT_ACCEPT_TYPES, requestFlags);
 	if (!hRequest) {
-		errMsg = "Не вдалось створити HTTP-запит.";
+		errMsg = L"Не вдалось створити HTTP-запит.";
 		WinHttpCloseHandle(hConnect);
 		WinHttpCloseHandle(hSession);
 		return false;
@@ -90,7 +90,7 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 
 			// файл вже повністю завантажено раніше - докачка не потрібна
 			if (contentLength > 0 && fs::exists(destPath, ec) && fs::file_size(destPath, ec) == contentLength) {
-				if (progressCb) progressCb(100, "Завантаження: " + formatBytes(contentLength) + " / "
+				if (progressCb) progressCb(100, L"Завантаження: " + formatBytes(contentLength) + " / "
 					+ formatBytes(contentLength) + " (100%)");
 				success = true;
 			} else {
@@ -127,7 +127,7 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 								medianSpeed = sorted[sorted.size() / 2];
 							}
 							int percent = (contentLength > 0) ? (int)((totalBytesRead * 100) / contentLength) : 0;
-							UnicodeString phase = "Завантаження: " + formatBytes(totalBytesRead) + " / "
+							UnicodeString phase = L"Завантаження: " + formatBytes(totalBytesRead) + " / "
 								+ (contentLength > 0 ? formatBytes(contentLength) : UnicodeString("? MB"))
 								+ " (" + formatBytes((uintmax_t)medianSpeed) + "/s, " + UnicodeString(percent) + "%)";
 							if (progressCb) progressCb(percent, phase);
@@ -138,22 +138,22 @@ bool EsetDownload_DownloadFile(UnicodeString url, const fs::path &destPath,
 					outFile.close();
 
 					if (cancelled) {
-						errMsg = "Ручна зупинка завантаження.";
+						errMsg = L"Ручна зупинка завантаження.";
 						fs::remove(destPath, ec);
 					} else {
 						if (contentLength == 0 && progressCb)
-							progressCb(100, "Завантаження: " + formatBytes(totalBytesRead) + " (100%)");
+							progressCb(100, L"Завантаження: " + formatBytes(totalBytesRead) + " (100%)");
 						success = true;
 					}
 				} else {
-					errMsg = "Не вдалось створити файл " + UnicodeString(destPath.c_str());
+					errMsg = L"Не вдалось створити файл " + UnicodeString(destPath.c_str());
 				}
 			}
 		} else {
-			errMsg = "Помилка сервера: " + UnicodeString((int)statusCode);
+			errMsg = L"Помилка сервера: " + UnicodeString((int)statusCode);
 		}
 	} else {
-		errMsg = "Помилка мережі: " + UnicodeString((int)GetLastError());
+		errMsg = L"Помилка мережі: " + UnicodeString((int)GetLastError());
 	}
 
 	WinHttpCloseHandle(hRequest);
@@ -282,13 +282,13 @@ bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiv
 {
 	fs::path dllDir;
 	if (!findDllDirWithUpdateVer(unpackedDir, dllDir)) {
-		errMsg = "Архів update_full.zip не містить update.ver/dll - структура не розпізнана.";
+		errMsg = L"Архів update_full.zip не містить update.ver/dll - структура не розпізнана.";
 		return false;
 	}
 	fs::path updVerPath = dllDir / L"update.ver";
 	std::vector<FileArchEntry> entries = parseUpdateVer(updVerPath);
 	if (entries.empty()) {
-		errMsg = "Файл update.ver порожній або не вдалось розпізнати.";
+		errMsg = L"Файл update.ver порожній або не вдалось розпізнати.";
 		return false;
 	}
 
@@ -300,7 +300,7 @@ bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiv
 
 	bool anyX64 = false;
 	for (auto &e : entries) {
-		if (cancelFlag) { errMsg = "Ручна зупинка."; fs::remove_all(stagingRoot, ec); return false; }
+		if (cancelFlag) { errMsg = L"Ручна зупинка."; fs::remove_all(stagingRoot, ec); return false; }
 		if (e.arch != "x64") continue; // x86/update_x32 - застарілий функціонал, не генеруємо
 		fs::path src = dllDir / fs::path(e.file.c_str());
 		if (!fs::exists(src, ec)) continue;
@@ -312,14 +312,14 @@ bool EsetDownload_SortAndRepack(const fs::path &unpackedDir, UnicodeString arhiv
 	bool zstd = (arhiveType == "zstd");
 
 	if (anyX64) {
-		if (progressCb) progressCb(50, "Пакування x64... (50%)");
+		if (progressCb) progressCb(50, L"Пакування x64... (50%)");
 		bool ok = zstd ? packTarZstd(outX64, stagingX64Root, cancelFlag, errMsg)
 					   : packZip(outX64, stagingX64Root, cancelFlag, errMsg);
 		if (!ok) { fs::remove_all(stagingRoot, ec); return false; }
 	}
 
 	fs::remove_all(stagingRoot, ec);
-	if (progressCb) progressCb(100, "Пакування завершено (100%)");
+	if (progressCb) progressCb(100, L"Пакування завершено (100%)");
 	return true;
 }
 //---------------------------------------------------------------------------
@@ -349,7 +349,7 @@ static DWORD CALLBACK esetCopyProgressRoutine(
 	if ((elapsedMs >= ctx->updateMs || done) && ctx->progressCb && *ctx->progressCb) {
 		int percent = (totalFileSize.QuadPart > 0)
 			? (int)((totalBytesTransferred.QuadPart * 100) / totalFileSize.QuadPart) : 0;
-		UnicodeString phase = "Публікація " + ctx->label + ": "
+		UnicodeString phase = L"Публікація " + ctx->label + ": "
 			+ formatBytes((uintmax_t)totalBytesTransferred.QuadPart) + " / "
 			+ formatBytes((uintmax_t)totalFileSize.QuadPart) + " (" + UnicodeString(percent) + "%)";
 		(*ctx->progressCb)(percent, phase);
@@ -370,8 +370,8 @@ bool EsetDownload_PublishFile(const fs::path &src, const fs::path &dst, short up
 	BOOL ok = CopyFileExW(src.c_str(), dst.c_str(), esetCopyProgressRoutine, &ctx, NULL, 0);
 	if (!ok) {
 		DWORD err = GetLastError();
-		if (err == ERROR_REQUEST_ABORTED) errMsg = "Ручна зупинка публікації архіву.";
-		else errMsg = "Не вдалось скопіювати " + ctx.label + " у теку ПО (код " + UnicodeString((int)err) + ").";
+		if (err == ERROR_REQUEST_ABORTED) errMsg = L"Ручна зупинка публікації архіву.";
+		else errMsg = L"Не вдалось скопіювати " + ctx.label + L" у теку ПО (код " + UnicodeString((int)err) + ").";
 		return false;
 	}
 	return true;

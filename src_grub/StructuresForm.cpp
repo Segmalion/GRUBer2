@@ -90,7 +90,7 @@ void __fastcall TFormStructures::ButtonAddStructClick(TObject *Sender)
 {
 	StructureDef s;
 	s.id = generateStructureId();
-	s.name = "Нова структура";
+	s.name = L"Нова структура";
 	workingStructures.push_back(s);
 	refreshList((int)workingStructures.size() - 1);
 	EditStructName->SetFocus();

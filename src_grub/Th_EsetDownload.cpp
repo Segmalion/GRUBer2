@@ -38,7 +38,7 @@ static void restoreEsetDownloadUI() {
 	// функцію, який неоднозначно конвертується одразу в обидва перевантаження
 	// TThread::Synchronize (через bool і через делегат)
 	auto restore = [&]() {
-		Form1->BtnEsetDownload->Caption = "Завантажити базу ESET";
+		Form1->BtnEsetDownload->Caption = L"Завантажити базу ESET";
 		Form1->BtnEsetUpdate->Enabled = !Form1->CheckBoxEsetAutoUpdate->Checked;
 	};
 	if (GetCurrentThreadId() == MainThreadID) restore();
@@ -59,8 +59,8 @@ void __fastcall Th_EsetDownload::Execute()
 	catch (Exception &e)
 	{
 		LogCrash("Th_EsetDownload", e.ClassName() + ": " + e.Message);
-		printLog("ER", "ESET-Download: критична помилка - " + e.Message);
-		esetDlStatus("Помилка завантаження бази ESET");
+		printLog("ER", L"ESET-Download: критична помилка - " + e.Message);
+		esetDlStatus(L"Помилка завантаження бази ESET");
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 	}
@@ -68,16 +68,16 @@ void __fastcall Th_EsetDownload::Execute()
 	{
 		UnicodeString what = e.what();
 		LogCrash("Th_EsetDownload", what);
-		printLog("ER", "ESET-Download: критична помилка - " + what);
-		esetDlStatus("Помилка завантаження бази ESET");
+		printLog("ER", L"ESET-Download: критична помилка - " + what);
+		esetDlStatus(L"Помилка завантаження бази ESET");
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 	}
 	catch (...)
 	{
-		LogCrash("Th_EsetDownload", "невідомий виняток");
-		printLog("ER", "ESET-Download: критична помилка (невідомий тип винятку)");
-		esetDlStatus("Помилка завантаження бази ESET");
+		LogCrash("Th_EsetDownload", L"невідомий виняток");
+		printLog("ER", L"ESET-Download: критична помилка (невідомий тип винятку)");
+		esetDlStatus(L"Помилка завантаження бази ESET");
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 	}
@@ -122,9 +122,9 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 		fs::remove(tempOutX64, ec);
 	};
 
-	printLog(">>", "ESET-Download: завантаження бази ESET...");
+	printLog(">>", L"ESET-Download: завантаження бази ESET...");
 	progressBarEsetGo(0);
-	esetDlStatus("Завантаження бази ESET...");
+	esetDlStatus(L"Завантаження бази ESET...");
 
 	UnicodeString errMsg;
 	bool ok = EsetDownload_DownloadFile(curConfig.getEsetDlUrl(), fullZip,
@@ -134,36 +134,36 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 	if (!ok) {
 		bool cancelled = stopEsetDownload;
 		printLog(cancelled ? "!!" : "ER", "ESET-Download: " + errMsg);
-		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка завантаження");
+		esetDlStatus(cancelled ? L"Завантаження зупинено" : L"Помилка завантаження");
 		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 		return;
 	}
 
-	printLog(">>", "ESET-Download: розпакування архіву...");
+	printLog(">>", L"ESET-Download: розпакування архіву...");
 	progressBarEsetGo(0);
-	esetDlStatus("Розпакування архіву...");
+	esetDlStatus(L"Розпакування архіву...");
 	ok = EsetDownload_ExtractArchive(fullZip, unpackDir, stopEsetDownload, errMsg);
 	if (!ok) {
 		bool cancelled = stopEsetDownload;
 		printLog(cancelled ? "!!" : "ER", "ESET-Download: " + errMsg);
-		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка розпакування");
+		esetDlStatus(cancelled ? L"Завантаження зупинено" : L"Помилка розпакування");
 		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
 		return;
 	}
 
-	printLog(">>", "ESET-Download: сортування та пакування бази...");
+	printLog(">>", L"ESET-Download: сортування та пакування бази...");
 	progressBarEsetGo(0);
-	esetDlStatus("Пакування бази...");
+	esetDlStatus(L"Пакування бази...");
 	ok = EsetDownload_SortAndRepack(unpackDir, curConfig.getEsetDlArhive(), tempOutX64,
 		stopEsetDownload, progressCb, errMsg);
 	if (!ok) {
 		bool cancelled = stopEsetDownload;
 		printLog(cancelled ? "!!" : "ER", "ESET-Download: " + errMsg);
-		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка пакування");
+		esetDlStatus(cancelled ? L"Завантаження зупинено" : L"Помилка пакування");
 		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
@@ -174,7 +174,7 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 	// спершу копіюємо нове (з живим прогресом через CopyFileExW), і тільки
 	// після успіху приберемо застарілий формат
 	progressBarEsetGo(0);
-	esetDlStatus("Публікація архіву...");
+	esetDlStatus(L"Публікація архіву...");
 	fs::path poX64Zip = fs::current_path() / L"update_x64.zip";
 	fs::path poX64Zstd = fs::current_path() / L"update_x64.tar.zstd";
 	fs::path poX64 = zstd ? poX64Zstd : poX64Zip;
@@ -188,8 +188,8 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 	}
 	if (!published64) {
 		bool cancelled = stopEsetDownload;
-		printLog(cancelled ? "!!" : "ER", "ESET-Download: не вдалось опублікувати готовий архів у теку ПО.");
-		esetDlStatus(cancelled ? "Завантаження зупинено" : "Помилка публікації архіву");
+		printLog(cancelled ? "!!" : "ER", L"ESET-Download: не вдалось опублікувати готовий архів у теку ПО.");
+		esetDlStatus(cancelled ? L"Завантаження зупинено" : L"Помилка публікації архіву");
 		cleanupTemp();
 		th_EsetDownload_run = false;
 		restoreEsetDownloadUI();
@@ -200,8 +200,8 @@ void __fastcall Th_EsetDownload::ExecuteImpl()
 
 	cleanupTemp();
 	progressBarEsetGo(100);
-	esetDlStatus("Базу ESET завантажено!");
-	printLog("OK", "ESET-Download: базу ESET завантажено та підготовлено!");
+	esetDlStatus(L"Базу ESET завантажено!");
+	printLog("OK", L"ESET-Download: базу ESET завантажено та підготовлено!");
 	th_EsetDownload_run = false;
 	restoreEsetDownloadUI();
 }

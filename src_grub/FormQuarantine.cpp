@@ -41,7 +41,7 @@ void TFormQuarantine::refreshList()
 		UnicodeString label = dir;
 		int usersPos = dir.Pos("\\Users\\");
 		if (dir.Pos("systemprofile") > 0) {
-			label = "Системний (SYSTEM)";
+			label = L"Системний (SYSTEM)";
 		} else if (usersPos > 0) {
 			UnicodeString rest = dir.SubString(usersPos + 7, dir.Length());
 			int slashPos = rest.Pos("\\");
@@ -83,12 +83,12 @@ void TFormQuarantine::refreshList()
 		item->Caption = g.label;
 		item->SubItems->Add(g.baseName);
 		item->SubItems->Add(g.date.FormatString("dd.MM.yyyy HH:mm"));
-		item->SubItems->Add(UnicodeString((int)g.files.size()) + " файл(ів), " +
-			UnicodeString((int)((g.size + 1023) / 1024)) + " КБ");
+		item->SubItems->Add(UnicodeString((int)g.files.size()) + L" файл(ів), " +
+			UnicodeString((int)((g.size + 1023) / 1024)) + L" КБ");
 	}
 	ListViewQuarantine->Items->EndUpdate();
-	LabelInfo->Caption = "Знайдено об'єктів: " + UnicodeString((int)groups.size()) +
-		" (файлів: " + UnicodeString(totalFiles) + ")";
+	LabelInfo->Caption = L"Знайдено об'єктів: " + UnicodeString((int)groups.size()) +
+		L" (файлів: " + UnicodeString(totalFiles) + ")";
 }
 //---------------------------------------------------------------------------
 // підганяє ширину стовпців під найдовший текст (заголовок або вміст), і
@@ -155,10 +155,10 @@ void __fastcall TFormQuarantine::ButtonDeleteClick(TObject *Sender)
 			totalFiles += (int)groups[i].files.size();
 		}
 	if (checkedIdx.empty()) return;
-	UnicodeString text = "Видалити " + UnicodeString((int)checkedIdx.size()) +
-		" позначених об'єктів карантину (" + UnicodeString(totalFiles) + " файл(ів))?"
-		"\nЦю дію не можна скасувати.";
-	UnicodeString caption = "Підтвердження видалення";
+	UnicodeString text = L"Видалити " + UnicodeString((int)checkedIdx.size()) +
+		L" позначених об'єктів карантину (" + UnicodeString(totalFiles) + L" файл(ів))?"
+		L"\nЦю дію не можна скасувати.";
+	UnicodeString caption = L"Підтвердження видалення";
 	if (Application->MessageBox(text.c_str(), caption.c_str(), MB_YESNO) != IDYES) return;
 	for (int idx : checkedIdx) {
 		for (auto &path : groups[idx].files) {

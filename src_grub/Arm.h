@@ -25,12 +25,12 @@ private:
 		bool pendingLegacyMigration = false;
 		UnicodeString pendingLegacyPartition, pendingLegacyPlace, pendingLegacyPhone;
 		int pendingLegacyNumber = 0;
-		UnicodeString partition  = "Без відділу";
-		UnicodeString className   = "Без класу";
-		UnicodeString categoryName   = "Особистий";
-		UnicodeString categoryNameShort = "ОС";
-		UnicodeString licWindowsName = "Не вказано";
-		UnicodeString licOfficeName  = "Не вказано";
+		UnicodeString partition  = L"Без відділу";
+		UnicodeString className   = L"Без класу";
+		UnicodeString categoryName   = L"Особистий";
+		UnicodeString categoryNameShort = L"ОС";
+		UnicodeString licWindowsName = L"Не вказано";
+		UnicodeString licOfficeName  = L"Не вказано";
 		int classID   = 0;
 		int categoryID   = 0;
 		int licWindowsID = 0;

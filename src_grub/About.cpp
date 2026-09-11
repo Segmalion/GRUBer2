@@ -14,9 +14,9 @@ extern const UnicodeString versionApp;
 __fastcall TFormAbout::TFormAbout(TComponent* Owner)
 	: TForm(Owner)
 {
-	FormAbout->LinkLabel_ThreemaID->Caption = "Версія " + versionApp +
-		"\n©GreenCapsul\nЗворотній зв'язок через " +
-		"<a href=\"https://threema.id/XPPU95RT\">Threema</a> або " +
+	FormAbout->LinkLabel_ThreemaID->Caption = L"Версія " + versionApp +
+		L"\n©GreenCapsul\nЗворотній зв'язок через " +
+		L"<a href=\"https://threema.id/XPPU95RT\">Threema</a> або " +
 		"<a href=\"https://signal.me/#eu/ksKOKIRBGVlFLV99G8Mha2Q6uTdAkNnev3kjL72nCniZt3jsOqVDZqlJ4yzD-CXr\">Signal</a>";
 }
 //---------------------------------------------------------------------------

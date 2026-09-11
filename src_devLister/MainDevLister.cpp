@@ -67,10 +67,10 @@ std::vector<registeredUsb> regUsbList;
 //bool sqlFull;
 //---------------------------------------------------------------------------
 std::map<UnicodeString, short> m_catNumber {
-		{"НТ", 1}, {"НТ-БП", 1}, {"НТ-ІСД", 1}, {"НТ-ЕКМ", 1}, {"Не Таємно", 1},
-		{"ДСК", 2},
-		{"Т", 3}, {"Таємно", 3},
-		{"ЦТ", 4}, {"Цілком Таємно", 4}
+		{L"НТ", 1}, {L"НТ-БП", 1}, {L"НТ-ІСД", 1}, {L"НТ-ЕКМ", 1}, {L"Не Таємно", 1},
+		{L"ДСК", 2},
+		{L"Т", 3}, {L"Таємно", 3},
+		{L"ЦТ", 4}, {L"Цілком Таємно", 4}
 };
 std::vector<UnicodeString> v_allertName {
 	// Подключення смартфонів (MTP/PTP/ADB/Fastboot-режими, драйвери виробників)
@@ -402,10 +402,10 @@ void __fastcall TForm1::DelContainerDevice() {
     }
 
     // 4. Запрашиваем подтверждение у пользователя
-	UnicodeString prompt = "Вы действительно хотите навсегда УДАЛИТЬ контейнер из Windows и программы?\n\n"
-						   "Контейнер: \"" + containerName + "\"\n"
+	UnicodeString prompt = L"Вы действительно хотите навсегда УДАЛИТЬ контейнер из Windows и программы?\n\n"
+						   L"Контейнер: \"" + containerName + "\"\n"
 						   "GUID: " + containerId + "\n"
-						   "Будет удалено связанных устройств: " + IntToStr(totalDevicesInContainer);
+						   L"Будет удалено связанных устройств: " + IntToStr(totalDevicesInContainer);
 
     if (MessageDlg(prompt, mtWarning, TMsgDlgButtons() << mbYes << mbNo, 0) != mrYes) {
         return; // Отмена
@@ -842,7 +842,7 @@ void __fastcall TForm1::createDB() {
 		FDConnection1->Commit();
 	}
 	catch (const Exception &e) {
-		printLog("Ошибка БД: " + e.Message);
+		printLog(L"Ошибка БД: " + e.Message);
 	}
 }
 /* Перенос данных в БД */
@@ -945,7 +945,7 @@ void __fastcall TForm1::vectorToBD(std::vector<deviceInfo> &devicesList) {
     }
     catch (const Exception &e) {
 		FDConnection1->Rollback();
-        printLog("Ошибка записи в БД: " + e.Message);
+        printLog(L"Ошибка записи в БД: " + e.Message);
 	}
 }
 /* Вывод на TDBGrid */
@@ -957,7 +957,7 @@ void __fastcall TForm1::refrechDBGrid(String &sql) {
 		FDQuery1->Open();  // Открываем — TDBGrid автоматически отобразит данные
 	}
 	catch (const Exception &e) {
-		printLog("Ошибка отображения данных: " + e.Message);
+		printLog(L"Ошибка отображения данных: " + e.Message);
 	}
 	// украшает таблицу
 	optimizeGridColumns(Form1->DBGrid1);
@@ -1026,7 +1026,7 @@ void __fastcall TForm1::optimizeGridColumns(TDBGrid* grid) {
 		}
 	}
 	catch (const Exception &e) {
-		printLog("Ошибка отображения данных: " + e.Message);
+		printLog(L"Ошибка отображения данных: " + e.Message);
 	}
 	// Лямбда-функция для поиска и изменения видимости колонки по её имени в БД
 	auto setColumnVisible = [&](UnicodeString fieldName, bool visible) {
@@ -1061,8 +1061,8 @@ void __fastcall TForm1::UpdateClassFilterList()
 	tempQuery->Open();
 
 	ListBox_Filter->Items->Clear();
-	ListBox_Filter->Items->Add("(Усі класи)");
-	ListBox_Filter->Items->Add("(USB пристрої)");
+	ListBox_Filter->Items->Add(L"(Усі класи)");
+	ListBox_Filter->Items->Add(L"(USB пристрої)");
 
     while (!tempQuery->Eof) {
 		ListBox_Filter->Items->Add(tempQuery->FieldByName("class_name")->AsString);
@@ -1077,7 +1077,7 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 	if(exists(p_file)) {
 		regUsbFile->LoadFromFile(p_file.c_str(), TEncoding::UTF8);
 	} else {
-		printLog("Немає registered.txt :(");
+		printLog(L"Немає registered.txt :(");
 		return tempRegUsbList;
 	}
 	// -- обрабатываем файл с извесными флешками, заполняем вектор "tempRegUsbList"
@@ -1124,7 +1124,7 @@ std::vector<registeredUsb> readRegUsbFile(fs::path &p_file) {
 		}
 		tempRegUsbList.push_back(tempRegUsb);
 	}
-	printLog("Завантаженно " + UnicodeString(tempRegUsbList.size()) + " відомих пристроїв з файлу registered.txt");
+	printLog(L"Завантаженно " + UnicodeString(tempRegUsbList.size()) + L" відомих пристроїв з файлу registered.txt");
 	return tempRegUsbList;
 }
 /* Сравнение текста с возможной ошибкой */
@@ -1327,10 +1327,10 @@ void getInfoPC() {
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
 	if (dataSMB == NULL) {
-		indefPC.sn_Main = "Помилка SMBIOS_DATA!";
-		indefPC.sn_UUID = "Помилка SMBIOS_DATA!";
-		indefPC.sn_serialMrb = "Помилка SMBIOS_DATA!";
-		indefPC.sn_CPUID = "Помилка SMBIOS_DATA!";
+		indefPC.sn_Main = L"Помилка SMBIOS_DATA!";
+		indefPC.sn_UUID = L"Помилка SMBIOS_DATA!";
+		indefPC.sn_serialMrb = L"Помилка SMBIOS_DATA!";
+		indefPC.sn_CPUID = L"Помилка SMBIOS_DATA!";
 	}
 	indefPC.sn_Main = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
 	indefPC.sn_UUID = g.GetBiosValue(dataSMB, SMB_TABLE_SYSTEM, 8, 16);
@@ -1693,7 +1693,7 @@ void __fastcall TForm1::Button_DeviceUpdateCurPCClick(TObject *Sender)
 	// сканируем устройства
 	devicesList = scanDevices();
 	if (devicesList.empty()) {
-		printLog("Устройства не найдены.");
+		printLog(L"Устройства не найдены.");
 		return;
 	}
 	// распознаем извесные флешки
@@ -1949,12 +1949,12 @@ void __fastcall TForm1::ApplyDBGridFilter()
 		{
 			UnicodeString value = ListBox_Filter->Items->Strings[i];
 
-			if (value == "(Усі класи)")
+			if (value == L"(Усі класи)")
 			{
 				listboxFilter = L"";
 				break;
 			}
-			if (value == "(USB пристрої)")
+			if (value == L"(USB пристрої)")
 			{
 				listboxFilter = L"class_name IN ('SCSIAdapter', 'USB', 'WPD', 'DiskDrive', 'Volume')";
 				break;
@@ -2377,10 +2377,10 @@ void __fastcall TForm1::Button_DelDeviceClick(TObject *Sender)
 void __fastcall TForm1::Button_SaveToJSONClick(TObject *Sender)
 {
 	String t_str =
-		"Слепок всех устройств в JSON файл (*.json)|*.json|"
-		"Слепок всех устройств в SQLite DataBase (*.db)|*.db|"
-		"Выгрузка для КП ESET (*.txt)|*.txt|"
-		"Все файлы (*.*)|*.*";
+		L"Слепок всех устройств в JSON файл (*.json)|*.json|"
+		L"Слепок всех устройств в SQLite DataBase (*.db)|*.db|"
+		L"Выгрузка для КП ESET (*.txt)|*.txt|"
+		L"Все файлы (*.*)|*.*";
 	SaveDialog_ToFile->Filter = t_str.c_str();
 	SaveDialog_ToFile->DefaultExt = L"json";
 	SaveDialog_ToFile->FileName = L"devList";

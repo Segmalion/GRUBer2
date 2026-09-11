@@ -145,7 +145,7 @@ void cacls(UnicodeString str)
 	// Шлях до файлу/теки обов'язково в лапках - інакше пробіли в шляху ламають
 	// розбір аргументів icacls.exe. stripTrailingSlash() - див. коментар вище.
 	UnicodeString path = stripTrailingSlash(str);
-	UnicodeString setArg = "\"" + path + "\" /grant Users:(OI)(CI)M /grant \"Пользователи\":(OI)(CI)M /T /C";
+	UnicodeString setArg = "\"" + path + L"\" /grant Users:(OI)(CI)M /grant \"Пользователи\":(OI)(CI)M /T /C";
 	RunApp fix(setApp, NULL, setArg);
 	fix.run(true, false);
 }

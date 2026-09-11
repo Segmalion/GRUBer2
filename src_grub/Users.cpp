@@ -140,10 +140,10 @@ static std::map<UnicodeString, UnicodeString> loadMicrosoftAccountFullNames() {
 }
 static UnicodeString getAccountType(const UnicodeString &fullName, const std::map<UnicodeString, UnicodeString> &msaFullNames) {
 	UnicodeString key = fullName.Trim().UpperCase();
-	if (key.IsEmpty()) return "Локальна";
+	if (key.IsEmpty()) return L"Локальна";
 	auto it = msaFullNames.find(key);
 	if (it != msaFullNames.end() && it->second.UpperCase() == "MICROSOFTACCOUNT") return "Microsoft";
-	return "Локальна";
+	return L"Локальна";
 }
 //---------------------------------------------------------------------------
 std::vector<User> currentUsers() {

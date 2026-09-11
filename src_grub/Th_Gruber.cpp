@@ -55,8 +55,8 @@ void progressBarStep() {
 }
 void jobDone(short &c, short &n) {
 	UnicodeString str;
-	if (c > n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + "]GRUBer запущено...";
-	else if (c == n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + "]GRUBer зібрано!!!";
+	if (c > n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + L"]GRUBer запущено...";
+	else if (c == n) str = " [" + UnicodeString(n) + "/" + UnicodeString(c) + L"]GRUBer зібрано!!!";
 	// jobDone дергается из каждого job_* шага граба, т.е. из фонового потока -
 	// правим StatusBar только через главный поток.
 	auto setStatus = [str]() { Form1->StatusBar1->Panels->Items[0]->Text = str; };
@@ -126,8 +126,8 @@ void blockGrub(bool i) {
 	Form1->ComboBox_CurStructur->Enabled = !i;
 	Form1->CheckListBox_SPZ->Enabled = !i;
 	//-----
-	if (i) Form1->BtnGruberRun->Caption = "Зачекай...";
-	else Form1->BtnGruberRun->Caption = "Запуск GRUBer";
+	if (i) Form1->BtnGruberRun->Caption = L"Зачекай...";
+	else Form1->BtnGruberRun->Caption = L"Запуск GRUBer";
 }
 //----------
 __fastcall Th_Gruber::Th_Gruber(bool CreateSuspended)
@@ -148,7 +148,7 @@ static bool ensureAccessOrStop(UnicodeString path, UnicodeString what)
 	if (!proceed) {
 		TThread::Synchronize(NULL, [what]() {
 			blockGrub(false);
-			printLog("ER", "Немає прав на запис у " + what + "!");
+			printLog("ER", L"Немає прав на запис у " + what + "!");
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
 			progressBarGo(100, true);
 		});
@@ -172,7 +172,7 @@ void __fastcall Th_Gruber::Execute()
 		LogCrash("Th_Gruber", e.ClassName() + ": " + e.Message);
 		Synchronize([&e]() {
 			blockGrub(false);
-			printLog("ER", "GRUBer: критична помилка - " + e.Message);
+			printLog("ER", L"GRUBer: критична помилка - " + e.Message);
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
 		});
 		grubActive = false;
@@ -184,7 +184,7 @@ void __fastcall Th_Gruber::Execute()
 		LogCrash("Th_Gruber", what);
 		Synchronize([what]() {
 			blockGrub(false);
-			printLog("ER", "GRUBer: критична помилка - " + what);
+			printLog("ER", L"GRUBer: критична помилка - " + what);
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
 		});
 		grubActive = false;
@@ -192,10 +192,10 @@ void __fastcall Th_Gruber::Execute()
 	}
 	catch (...)
 	{
-		LogCrash("Th_Gruber", "невідомий виняток");
+		LogCrash("Th_Gruber", L"невідомий виняток");
 		Synchronize([]() {
 			blockGrub(false);
-			printLog("ER", "GRUBer: критична помилка (невідомий тип винятку)");
+			printLog("ER", L"GRUBer: критична помилка (невідомий тип винятку)");
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
 		});
 		grubActive = false;
@@ -247,7 +247,7 @@ void __fastcall Th_Gruber::ExecuteImpl()
 	curPC.setLastGrub(curConfig.getUser(), curDateTime());
 	Synchronize([=]() {
 		blockGrub(true);
-		printLog(">>", "GRUBer запущено...");
+		printLog(">>", L"GRUBer запущено...");
 		jobDone(countJob, curJob);
 	});
 	// -> сохранение введеной инфы о ПК
@@ -257,7 +257,7 @@ void __fastcall Th_Gruber::ExecuteImpl()
 		if (dirGrubStr.IsDelimiter("<>:\"/\\|?* ", i)) {
 			Synchronize([this]() {
 				blockGrub(false);
-				printLog("ER", "Назва папки містить недопустимі символи!!! :'(");
+				printLog("ER", L"Назва папки містить недопустимі символи!!! :'(");
 				Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR:'(";
 				progressBarGo(100, true);
 			});
@@ -272,7 +272,7 @@ void __fastcall Th_Gruber::ExecuteImpl()
 		GrubDir = curDir.get_grubPathTemp();
 		if (!DirectoryExists(GrubDir)) ensureDirWithAccess(GrubDir);
 		else deleteDir(GrubDir, false);
-		if (!ensureAccessOrStop(GrubDir, "теку Граба (temp)")) {
+		if (!ensureAccessOrStop(GrubDir, L"теку Граба (temp)")) {
 			th_Gruber_run = false;
 			return;
 		}
@@ -282,27 +282,27 @@ void __fastcall Th_Gruber::ExecuteImpl()
 		Synchronize([=]() {
 			FormDirExist->ShowDir->Text=(dirGrubStr);
 			FormDirExist->ShowModal();
-			printLog("!!","Знайденно попередню теку!");
+			printLog("!!",L"Знайденно попередню теку!");
 		});
 		if (!dirGrubRewrite) { //отказ от перезаписи
 			Synchronize([this]() {
 				blockGrub(false);
-				printLog("SP", "GRUBer зупинено :'(");
-				Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer зупинено:'(";
+				printLog("SP", L"GRUBer зупинено :'(");
+				Form1->StatusBar1->Panels->Items[0]->Text = L" GRUBer зупинено:'(";
 			});
 			th_Gruber_run = false;
 			return;
 		}
-		Synchronize([this]() { printLog("!!","Наявні файли буде перезаписанно!"); });
+		Synchronize([this]() { printLog("!!",L"Наявні файли буде перезаписанно!"); });
 	}
 	// -- запуск секундомера
 	auto start_time = std::chrono::steady_clock::now();
 	// -> создание папок и проверка папки
 	curDir.check();
 	if (!exists(curDir.get_p_grubPath())) {
-		printLog("!!", "Відсутня папка для Грабу!!!");
+		printLog("!!", L"Відсутня папка для Грабу!!!");
 		bigErr = false;
-	} else if (!ensureAccessOrStop(curDir.get_grubPath(), "теку Граба")) {
+	} else if (!ensureAccessOrStop(curDir.get_grubPath(), L"теку Граба")) {
 		th_Gruber_run = false;
 		return;
 	} else {
@@ -323,7 +323,7 @@ void __fastcall Th_Gruber::ExecuteImpl()
 		if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
 		// --
 		if (tempDir) {
-			Synchronize([this]() { printLog("Перенесеня файлів в папку граба..."); });
+			Synchronize([this]() { printLog(L"Перенесеня файлів в папку граба..."); });
 			TSearchRec sr;
 			if (GrubDir.Length()) {
 				if (!FindFirst(GrubDir + "\\*.*", faAnyFile, sr)) {
@@ -338,21 +338,21 @@ void __fastcall Th_Gruber::ExecuteImpl()
 				}
 				FindClose(sr);
 			}
-            printLog("OK", "Файли перенесенно!");
+            printLog("OK", L"Файли перенесенно!");
 		}
 	}
 	// -> обработка ошибок
 	if (!bigErr) {
 		Synchronize([this]() {
-			if (stopBool) printLog("ER", "GRUBer зупиннено з помилками!");
-			else printLog("ER", "GRUBer виконано з помилками!");
+			if (stopBool) printLog("ER", L"GRUBer зупиннено з помилками!");
+			else printLog("ER", L"GRUBer виконано з помилками!");
 			Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer ERROR!";
 			progressBarGo(100, true);
 		});
 	} else {
 		Synchronize([this]() {
-			if (stopBool) printLog("OK", "GRUBer зупиненно!");
-			else printLog("OK", "GRUBer виконано успішно!");
+			if (stopBool) printLog("OK", L"GRUBer зупиненно!");
+			else printLog("OK", L"GRUBer виконано успішно!");
 			//Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer виконано!";
 		});
 	}
@@ -363,7 +363,7 @@ void __fastcall Th_Gruber::ExecuteImpl()
 	// -> конец граба
 	grubActive = false;
 	Synchronize([=]() {
-		printLogDebug("Час виконання: " + FloatToStrF(speedTimer, ffFixed, 4, 2) + "с.");
+		printLogDebug(L"Час виконання: " + FloatToStrF(speedTimer, ffFixed, 4, 2) + L"с.");
 		blockGrub(false);
 	});
     th_Gruber_run = false;
@@ -372,11 +372,11 @@ void __fastcall Th_Gruber::ExecuteImpl()
 bool job_infoFille(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\gruber_info.ini";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування gruber_info.ini...");
+	printLog(L"Генерування gruber_info.ini...");
 	std::unique_ptr<TStringList> infoFille(new TStringList);
 	for(auto str : fileInfoGrub()) infoFille->Add (str);
 	infoFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
-	printLog("Файл СТВОРЕННО!");
+	printLog(L"Файл СТВОРЕННО!");
 	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
@@ -390,22 +390,22 @@ bool job_softFille(UnicodeString dir) {
 	std::vector<UnicodeString> sortList_all;
 	std::vector<UnicodeString> sortList_block;
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування soft_all.txt...");
+	printLog(L"Генерування soft_all.txt...");
 	std::unique_ptr<TStringList> softAllFille(new TStringList);
 	for(auto soft : curPC.get_softInstall()) { UnicodeString line = programToLine(soft); sortToVector(sortList_all, line); }
 	for(auto str: sortList_all) softAllFille->Add (str);
 	softAllFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
-	printLog("Файл СТВОРЕННО!");
+	printLog(L"Файл СТВОРЕННО!");
     progressBarGo(pos += step);
 	if (curPC.get_softBlock().size() > 0) {
 		outFilePath = dir + "\\soft_block.txt";
 		if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-		printLog("Генерування soft_block.txt...");
+		printLog(L"Генерування soft_block.txt...");
 		std::unique_ptr<TStringList> softBlockFille(new TStringList);
 		for(auto soft : curPC.get_softBlock()) { UnicodeString line = programToLine(soft); sortToVector(sortList_block, line); }
 		for(auto str: sortList_block) softBlockFille->Add (str);
 		softBlockFille->SaveToFile(outFilePath, TEncoding::UTF8); // запись в файл
-		printLog("Файл СТВОРЕННО!");
+		printLog(L"Файл СТВОРЕННО!");
 	}
     curJob += 2;
 	jobDone(countJob, curJob);
@@ -416,14 +416,14 @@ bool job_softFille(UnicodeString dir) {
 bool job_comTxt(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\coment.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування coment.txt...");
+	printLog(L"Генерування coment.txt...");
 	std::unique_ptr<TStringList> comTxt(new TStringList);
 	comTxt->Add(curPC.getComentStr());
 	comTxt->Add(curPC.getRespon());
 	comTxt->Add(curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition()));
 	comTxt->Add("");
 	comTxt->SaveToFile(outFilePath, TEncoding::UTF8);
-	printLog("Файл СТВОРЕННО!");
+	printLog(L"Файл СТВОРЕННО!");
 	jobDone(countJob, ++curJob);
 	progressBarGo(pos += step);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
@@ -432,7 +432,7 @@ bool job_comTxt(UnicodeString dir) {
 bool job_info(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\info_ps1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування info_ps1.txt...");
+	printLog(L"Генерування info_ps1.txt...");
 	UnicodeString app32 = curDir.get_toolPath() + "\\scripts\\info_ps1\\Run_toFile.bat";
 	UnicodeString arg = "\""+ outFilePath + "\"";
 	RunApp info {app32, NULL, arg};
@@ -454,7 +454,7 @@ bool job_usb(UnicodeString dir) {
 
 	UnicodeString outFilePath = dir + "\\devList.json";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування devList.json...");
+	printLog(L"Генерування devList.json...");
 	UnicodeString app32 = GetCurrentDir() + "\\DeviceLister.exe";
 	UnicodeString app64 = GetCurrentDir() + "\\DeviceLister.exe";
 	UnicodeString arg = "-silent \"" + outFilePath + "\" -cat " + String(t_cat);
@@ -470,7 +470,7 @@ bool job_usb(UnicodeString dir) {
 bool job_net1(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\net1.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування net1.txt...");
+	printLog(L"Генерування net1.txt...");
 	UnicodeString app32 = curDir.get_toolPath() + "\\Network\\NetworkInterfacesView_x32.exe";
 	UnicodeString app64 = curDir.get_toolPath() + "\\Network\\NetworkInterfacesView_x64.exe";
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -486,7 +486,7 @@ bool job_net1(UnicodeString dir) {
 bool job_net2(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\net2.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування net2.txt...");
+	printLog(L"Генерування net2.txt...");
 	UnicodeString app32 = curDir.get_toolPath() + "\\Network\\WifiHistoryView.exe";
 	UnicodeString app64 = NULL;
 	UnicodeString arg = "/stext " + outFilePath + "\"";
@@ -502,7 +502,7 @@ bool job_net2(UnicodeString dir) {
 bool job_license(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\license.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування license.txt...");
+	printLog(L"Генерування license.txt...");
 	UnicodeString app32 = curDir.get_toolPath() + "\\CheckActivationStatus\\CheckActivationStatus.exe";
 	UnicodeString app64 = NULL;
 	UnicodeString arg = "-pass -log \""+ outFilePath + "\"";
@@ -520,12 +520,12 @@ bool job_audit(UnicodeString dir) {
 	if(jb7 == 1) {
 		outFilePath = dir + "\\auditMax.html";
 		arg = "/r=gsoPxuTUeERNtnzDaIbMpmidcSArHG /f=" + outFilePath + " /L=en\"";
-		printLog("Генерування auditMax.html...");
+		printLog(L"Генерування auditMax.html...");
 	}
 	if(jb7 == 2) {
 		outFilePath = dir + "\\auditMin.html";
 		arg = "/r=go /f=" + outFilePath + " /L=en\"";
-		printLog("Генерування auditMin.html...");
+		printLog(L"Генерування auditMin.html...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	UnicodeString app32 = curDir.get_toolPath() + "\\WinAudit\\WinAudit.exe";
@@ -542,7 +542,7 @@ bool job_audit(UnicodeString dir) {
 bool job_diskInfo(UnicodeString dir) {
 	UnicodeString outFilePath = dir + "\\diskInfo.txt";
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
-	printLog("Генерування diskInfo.txt...");
+	printLog(L"Генерування diskInfo.txt...");
 	UnicodeString app32 = NULL;
 	UnicodeString app64 = curDir.get_toolPath() + "\\DiskInfo64\\DiskInfo64.exe";
 	UnicodeString arg = "/CopyExit :";
@@ -562,12 +562,12 @@ bool job_esetLog(UnicodeString dir) {
 	if(jb8 == 1) {
 		outFilePath = dir + "\\eset-log-full.zip";
 		arg = "/accepteula /Lang:UKR /Age:0 \"" + outFilePath + "\"";
-		printLog("Генерування eset-log-full.zip...");
+		printLog(L"Генерування eset-log-full.zip...");
 	}
 	if(jb8 == 2) {
 		outFilePath = dir + "\\eset-log-mini.zip";
 		arg = "/accepteula /Lang:UKR /Age:30 /Targets:warn,threat,ondem,dev \"" + outFilePath + "\"";
-		printLog("Генерування eset-log-mini.zip...");
+		printLog(L"Генерування eset-log-mini.zip...");
 	}
 	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
 	UnicodeString app32 = curDir.get_toolPath() + "\\EsetLogCollector\\ESETLogCollector.exe";

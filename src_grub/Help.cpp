@@ -96,14 +96,14 @@ bool warnIfNoAccess(UnicodeString path)
 	if (IsAdminMode()) {
 		// вже під адміном, а прав нема - icacls у ensureDirWithAccess() чомусь
 		// не спрацював (напр. тека на диску лише для читання)
-		UnicodeString text = "Немає доступу на запис до теки:\n" + path;
-		UnicodeString formCaption = "Помилка доступу";
+		UnicodeString text = L"Немає доступу на запис до теки:\n" + path;
+		UnicodeString formCaption = L"Помилка доступу";
 		Application->MessageBox(text.c_str(), formCaption.c_str(), MB_OK);
 		return false;
 	}
-	UnicodeString text = "Немає прав на запис у теку:\n" + path +
-		"\nПерезапустити GRUBer з правами Адміністратора, щоб виправити права?";
-	UnicodeString formCaption = "Немає доступу до теки";
+	UnicodeString text = L"Немає прав на запис у теку:\n" + path +
+		L"\nПерезапустити GRUBer з правами Адміністратора, щоб виправити права?";
+	UnicodeString formCaption = L"Немає доступу до теки";
 	if (Application->MessageBox(text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
 		RestartApplicationRunas(); // exit(1), не повертається
 	}
@@ -237,10 +237,10 @@ void applyCurStructureSelectionToForm(UnicodeString id) {
 	// "Без відділу" - завжди перший пункт, для будь-якої структури (навіть
 	// порожньої), але це лише UI-заглушка: у списку відділів структури
 	// (StructuresForm/Config) її нема і не повинно бути
-	Form1->EditPartition->Items->Add("Без відділу");
+	Form1->EditPartition->Items->Add(L"Без відділу");
 	for (auto &d : curConfig.get_structures())
 		if (d.id == id) for (auto &p : d.partition) Form1->EditPartition->Items->Add(p);
-	Form1->EditPartition->Text = data.partition.IsEmpty() ? UnicodeString("Без відділу") : data.partition;
+	Form1->EditPartition->Text = data.partition.IsEmpty() ? UnicodeString(L"Без відділу") : data.partition;
 	// пряме присвоєння ->Text не викликає OnChange, тож підсвітку "нема у списку"
 	// доводиться запускати вручну
 	Form1->EditPartitionChange(Form1->EditPartition);
@@ -305,8 +305,8 @@ void setInfoArmToForm(Arm &curPC) {
 	}
 	Form1->CheckBoxEsetAutoUpdate->Checked = curPC.getEsetAutoUpdate();
 	if (curPC.getEsetAutoUpdate())
-		Form1->StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
-	else Form1->StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
+		Form1->StatusBar1->Panels->Items[1]->Text = L" ESET оновлюеться самостійно";
+	else Form1->StatusBar1->Panels->Items[1]->Text = L" Бази не оновлювалися";
 	Form1->EditEsetMirrorDir->Text = curPC.getEsetDir();
 
     Form1->ShowName->Text = curPC.getDesktopName();

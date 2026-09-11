@@ -129,13 +129,13 @@ UnicodeString RunApp::errorString() {
 }
 UnicodeString RunApp::resultString() {
 	if (error.run) {
-		return "[!!]Щось пішло НЕ так, під час запуску...)";
+		return L"[!!]Щось пішло НЕ так, під час запуску...)";
 	} else {
-		if (error.exit == 1) return "[!!]Щось пішло НЕ так, під час створення файлу...";
-		if (error.exit == 0) return "Файл СТВОРЕННО!";
-		if (error.exit == -1) return "[!!]Ручна зупинка Граба...";
+		if (error.exit == 1) return L"[!!]Щось пішло НЕ так, під час створення файлу...";
+		if (error.exit == 0) return L"Файл СТВОРЕННО!";
+		if (error.exit == -1) return L"[!!]Ручна зупинка Граба...";
 	}
-	return "[:(]Якась хуйня.."; // заглушка
+	return L"[:(]Якась хуйня.."; // заглушка
 }
 bool RunApp::checkErr() {
 	if(error.run == 1 || error.exit == 1) return true;

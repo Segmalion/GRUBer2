@@ -50,12 +50,12 @@ try
 	GetSMB g;
 	PRAW_SMBIOS_DATA dataSMB = g.GetSmbiosData();
 	if (dataSMB == NULL) {
-		serialMain = "Помилка SMBIOS_DATA!";
-		UUID = "Помилка SMBIOS_DATA!";
-		serial_mrb = "Помилка SMBIOS_DATA!";
-		CPUID = "Помилка SMBIOS_DATA!";
-		manufacturer = "Помилка SMBIOS_DATA!";
-		productName = "Помилка SMBIOS_DATA!";
+		serialMain = L"Помилка SMBIOS_DATA!";
+		UUID = L"Помилка SMBIOS_DATA!";
+		serial_mrb = L"Помилка SMBIOS_DATA!";
+		CPUID = L"Помилка SMBIOS_DATA!";
+		manufacturer = L"Помилка SMBIOS_DATA!";
+		productName = L"Помилка SMBIOS_DATA!";
 	}
 	serialMain = g.GetBiosString(dataSMB, SMB_TABLE_SYSTEM, 7);
 	serial = serialMain;
@@ -91,7 +91,7 @@ catch (std::exception &e)
 }
 catch (...)
 {
-	LogCrash("Arm::Arm", "невідомий виняток");
+	LogCrash("Arm::Arm", L"невідомий виняток");
 }
 }
 //---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ UnicodeString Arm::dirGrubName(UnicodeString prfPart, bool enPrfPart)
 	} else str = str + prfPart + "_" + partition;
 	// serial
 	if (serial == "ErrorSN") {
-		str = str + "#(" + unSerial + ")" + "БезСН";
+		str = str + "#(" + unSerial + ")" + L"БезСН";
 	}
 	else str = str + "#(" + unSerial + ")" + serial;
 	// category
@@ -329,9 +329,9 @@ bool Arm::readFromFile() {
 		// class FIX
 		classID = findParam(file, "[infoGrubARM]", "classID").ToIntDef(0);
 		className = findParam(file, "[infoGrubARM]", "className");
-		if (className == "АС-1") className = "АС-1 (Без підключення)";
-		if (className == "АС-2") className = "АС-2 (Локальна мережа)";
-		if (className == "АС-3") className = "АС-3 (Глобальна мережа)";
+		if (className == L"АС-1") className = L"АС-1 (Без підключення)";
+		if (className == L"АС-2") className = L"АС-2 (Локальна мережа)";
+		if (className == L"АС-3") className = L"АС-3 (Глобальна мережа)";
 		// версия --2--
 		if (vers <= 3) {
 			lgpo = findParam(file, "[infoGrubARM]", "comPoliticInstall");
@@ -342,13 +342,13 @@ bool Arm::readFromFile() {
 			pendingLegacyNumber = findParam(file, "[infoGrubARM]", "number").ToIntDef(0);
         }
 		if (vers >= 1) {
-			if (categoryID == 0) {categoryNameShort = "ОС";}
-			if (categoryID == 1) {categoryNameShort = "НТ-БП";}
-			if (categoryID == 2) {categoryNameShort = "НТ-ІСД";}
-			if (categoryID == 3) {categoryNameShort = "НТ-ЕКМ";}
-			if (categoryID == 4) {categoryNameShort = "ДСК";}
-			if (categoryID == 5) {categoryNameShort = "Т";}
-			if (categoryID == 6) {categoryNameShort = "ЦТ";}
+			if (categoryID == 0) {categoryNameShort = L"ОС";}
+			if (categoryID == 1) {categoryNameShort = L"НТ-БП";}
+			if (categoryID == 2) {categoryNameShort = L"НТ-ІСД";}
+			if (categoryID == 3) {categoryNameShort = L"НТ-ЕКМ";}
+			if (categoryID == 4) {categoryNameShort = L"ДСК";}
+			if (categoryID == 5) {categoryNameShort = L"Т";}
+			if (categoryID == 6) {categoryNameShort = L"ЦТ";}
 		}
 		if (vers >= 2) {
 			// useForNumberARMid зі старого формату свідомо не читаємо - в новій
@@ -358,10 +358,10 @@ bool Arm::readFromFile() {
 				int uvsL  = findParam(file, "[numberARM]", "UVs_logist").ToIntDef(0);
 				int ok    = findParam(file, "[numberARM]", "OK").ToIntDef(0);
 				int okL   = findParam(file, "[numberARM]", "OK_logist").ToIntDef(0);
-				setStructureNumber(STRUCT_ID_UVS,        "УВ(с) \"Південь\"",             uvs);
-				setStructureNumber(STRUCT_ID_UVS_LOGIST, "УВ(с) \"Південь\" - Логістика", uvsL);
-				setStructureNumber(STRUCT_ID_OK,         "ОК \"Південь\"",                ok);
-				setStructureNumber(STRUCT_ID_OK_LOGIST,  "ОК \"Південь\" - Логістика",     okL);
+				setStructureNumber(STRUCT_ID_UVS,        L"УВ(с) \"Південь\"",             uvs);
+				setStructureNumber(STRUCT_ID_UVS_LOGIST, L"УВ(с) \"Південь\" - Логістика", uvsL);
+				setStructureNumber(STRUCT_ID_OK,         L"ОК \"Південь\"",                ok);
+				setStructureNumber(STRUCT_ID_OK_LOGIST,  L"ОК \"Південь\" - Логістика",     okL);
 			}
 			place = findParam(file, "[infoGrubARM]", "place");
 			phone = findParam(file, "[infoGrubARM]", "phone");
@@ -415,13 +415,13 @@ bool Arm::readFromFile() {
 			pendingLegacyPartition = partition;
 		}
 		categoryID = (infoDatIm->Strings[3]).ToIntDef(0) + 1;
-		if (categoryID == 0) {categoryName = "Особистий"; categoryNameShort = "ОС";}
-		if (categoryID == 1) {categoryName = "НТ без підключеня"; categoryNameShort = "НТ-БП";}
-		if (categoryID == 2) {categoryName = "НТ з \"Інтернет\""; categoryNameShort = "НТ-ІСД";}
-		if (categoryID == 3) {categoryName = "НТ з \"Дніпро\""; categoryNameShort = "НТ-ЕКМ";}
-		if (categoryID == 4) {categoryName = "ДСК"; categoryNameShort = "ДСК";}
-		if (categoryID == 5) {categoryName = "Таємно"; categoryNameShort = "Т";}
-		if (categoryID == 6) {categoryName = "Цілком Таємно"; categoryNameShort = "ЦТ";}
+		if (categoryID == 0) {categoryName = L"Особистий"; categoryNameShort = L"ОС";}
+		if (categoryID == 1) {categoryName = L"НТ без підключеня"; categoryNameShort = L"НТ-БП";}
+		if (categoryID == 2) {categoryName = L"НТ з \"Інтернет\""; categoryNameShort = L"НТ-ІСД";}
+		if (categoryID == 3) {categoryName = L"НТ з \"Дніпро\""; categoryNameShort = L"НТ-ЕКМ";}
+		if (categoryID == 4) {categoryName = L"ДСК"; categoryNameShort = L"ДСК";}
+		if (categoryID == 5) {categoryName = L"Таємно"; categoryNameShort = L"Т";}
+		if (categoryID == 6) {categoryName = L"Цілком Таємно"; categoryNameShort = L"ЦТ";}
 		coment.push_back(infoDatIm->Strings[4]);
 		respon = infoDatIm->Strings[5];
 		if(infoDatIm->Count == 7) {
@@ -493,13 +493,13 @@ void Arm::setClass(UnicodeString str, int i) { className = str; classID = i; }
 void Arm::setCategory(UnicodeString str, int i) {
 	categoryName = str;
 	categoryID = i;
-	if (categoryID == 0) categoryNameShort = "ОС";
-	if (categoryID == 1) categoryNameShort = "НТ-БП";
-	if (categoryID == 2) categoryNameShort = "НТ-ІСД";
-	if (categoryID == 3) categoryNameShort = "НТ-ЕКМ";
-	if (categoryID == 4) categoryNameShort = "ДСК";
-	if (categoryID == 5) categoryNameShort = "Т";
-	if (categoryID == 6) categoryNameShort = "ЦТ";
+	if (categoryID == 0) categoryNameShort = L"ОС";
+	if (categoryID == 1) categoryNameShort = L"НТ-БП";
+	if (categoryID == 2) categoryNameShort = L"НТ-ІСД";
+	if (categoryID == 3) categoryNameShort = L"НТ-ЕКМ";
+	if (categoryID == 4) categoryNameShort = L"ДСК";
+	if (categoryID == 5) categoryNameShort = L"Т";
+	if (categoryID == 6) categoryNameShort = L"ЦТ";
 }
 void Arm::setLicWindows(UnicodeString str, int i) { licWindowsName = str; licWindowsID = i; }
 void Arm::setLicOffice(UnicodeString str, int i) { licOfficeName = str; licOfficeID = i; }

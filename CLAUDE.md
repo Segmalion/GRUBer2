@@ -104,6 +104,21 @@ Windows-1251 source), re-save it as UTF-8 rather than leaving mixed encodings in
 exempt from this concern — Delphi/C++Builder escapes non-ASCII caption text as `#NNNN` decimal Unicode
 codepoints in the text format, so they carry no raw non-ASCII bytes regardless of file encoding.
 
+### Cyrillic string literals must be wide (`L"..."`)
+Any Cyrillic/Ukrainian string literal in `.cpp`/`.h` code (both `src_grub/` and `src_devLister/`) **must**
+use a wide prefix — `L"текст"` (or `u"текст"`, matching the handful of pre-existing spots that use it, e.g.
+some `Caption` assignments in `MainForm.cpp`) — **never** a plain narrow `"текст"` literal. A narrow literal
+assigned to `UnicodeString` gets implicitly converted through an 8-bit `AnsiString` using the OS's "language
+for non-Unicode programs" codepage (`CP_ACP`), resolved at **runtime**, not by the source file's UTF-8
+encoding. On a Ukrainian/Russian-locale Windows machine `CP_ACP` happens to decode the bytes correctly; on
+an English-locale machine it doesn't, and the text renders as mojibake (e.g. "Без відділу" → "Áåç
+â³ää³ëó"). `.dfm`-sourced captions are immune (pre-compiled UTF-16 resources), which is why only
+code-constructed strings (dialog text, log messages, `Items->Add(...)`, default field values, `Format(...)`
+arguments) are at risk. This bit ~300 narrow literals across `src_grub` and ~33 across `src_devLister`
+(fixed in bulk — see git history around 2026-09-11); neither project has any legitimate reason to hold
+Cyrillic text in `AnsiString`/`UTF8String`/raw `char*`, so a new narrow Cyrillic literal found in review is
+almost certainly this bug, not an intentional byte-oriented use.
+
 ### Language
 UI strings, log messages, and most comments are in Ukrainian (with some Russian in older comments). Keep
 new user-facing strings and comments consistent with the existing language per file/area rather than

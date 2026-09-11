@@ -15,7 +15,7 @@ UnicodeString getEsetLogsDir()
 
 UnicodeString getEsetProductInstanceID()
 {
-	UnicodeString notFound = "Не знайдено";
+	UnicodeString notFound = L"Не знайдено";
 	UnicodeString filePath = getEsetLogsDir() + "trace.log";
 	UnicodeString marker = "ProductInstanceID:";
 

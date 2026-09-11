@@ -115,11 +115,11 @@ void changeEditDirColor() {
 	if(DirectoryExists(curDir.get_grubPath())) {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x006E00;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAFFEA;
-		if (!grubActive) Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer вже зібрано!";
+		if (!grubActive) Form1->StatusBar1->Panels->Items[0]->Text = L" GRUBer вже зібрано!";
 	} else {
 		Form1->EditDirGrubName->Font->Color = (TColor) 0x00006E;
 		Form1->EditDirGrubName->Color = (TColor) 0xEAEAFF;
-		Form1->StatusBar1->Panels->Items[0]->Text = " GRUBer не зібрано:(";
+		Form1->StatusBar1->Panels->Items[0]->Text = L" GRUBer не зібрано:(";
 	}
 	Form1->BtnGruberDirOpen->Enabled = DirectoryExists(curDir.get_grubPath());
 }
@@ -138,11 +138,11 @@ void updateNetAdapterFields() {
 	Form1->ShowNetIP->Text = a.ip;
 	Form1->ShowNetMAC->Text = a.mac;
 	if (a.active) {
-		Form1->ShowNetStatus->Text = "Активне";
+		Form1->ShowNetStatus->Text = L"Активне";
 	} else if (a.lastActive == TDateTime(0.0)) {
-		Form1->ShowNetStatus->Text = "Неактивне";
+		Form1->ShowNetStatus->Text = L"Неактивне";
 	} else {
-		Form1->ShowNetStatus->Text = "Неактивне (з " + a.lastActive.FormatString("dd.MM.yy HH:mm") + ")";
+		Form1->ShowNetStatus->Text = L"Неактивне (з " + a.lastActive.FormatString("dd.MM.yy HH:mm") + ")";
 	}
 }
 void __fastcall TForm1::ShowNetNameChange(TObject *Sender)
@@ -237,7 +237,7 @@ void RestartApplicationRunas()
 	if(exists(p_app)) {
 		ShellExecuteW(NULL, L"runas", p_app.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 		exit(1);
-	} else printLogDebug("Не вдалося перезапустити ГРАБер з правами адміна :(");
+	} else printLogDebug(L"Не вдалося перезапустити ГРАБер з правами адміна :(");
 }
 // ---------------------------------------------------------------------------
 // "Тяжёлые" части - без обращения к Form1/VCL. Можно безопасно вызывать из
@@ -274,14 +274,14 @@ UsersDefectionResult computeUsersDefection() {
 			if (user.priv == "GUEST") guest_t++;
 		}
 		res.users = usersList;
-		if (curPC.getCategoryName() == "Особистий") {
+		if (curPC.getCategoryName() == L"Особистий") {
 			res.bad = false;
 		} else {
-			if (admin_t == 1 && curPC.getClassName() != "ЛООК") {
+			if (admin_t == 1 && curPC.getClassName() != L"ЛООК") {
 				if ((user_t ) > 0 ) {
 					res.bad = false;
 				} else res.bad = true;
-			} else if (admin_t == 2 && curPC.getClassName() == "ЛООК") {
+			} else if (admin_t == 2 && curPC.getClassName() == L"ЛООК") {
 				if ((user_t) > 0 ) {
 					res.bad = false;
 				} else res.bad = true;
@@ -367,7 +367,7 @@ DefectionResult computeDefection() {
 // ---------------------------------------------------------------------------
 void applySoftDefection(const SoftDefectionResult &r) {
 	Form1->Memo1->Clear();
-	if (r.lines.empty()) Form1->Memo1->Lines->Add("Не знайдено!");
+	if (r.lines.empty()) Form1->Memo1->Lines->Add(L"Не знайдено!");
 	else for(auto str: r.lines) Form1->Memo1->Lines->Add(str);
 	curDefection.soft = r.bad;
 	setReadOnlyCheckBox(Form1->CheckBox_installAvpzESET, r.esetInstalled);
@@ -380,20 +380,20 @@ void applyUsersDefection(const UsersDefectionResult &r) {
 	if (r.users.empty()) {
 		grid->RowCount = 2;
 		grid->Rows[1]->Clear();
-		grid->Cells[1][1] = "Нема юзерів... О_о";
+		grid->Cells[1][1] = L"Нема юзерів... О_о";
 	} else {
 		grid->RowCount = (int)r.users.size() + 1;
 		int row = 1;
 		for (auto &user: r.users) {
-			UnicodeString priv = "Юзер";
-			if (user.priv == "ADMIN") priv = "Адмін";
-			else if (user.priv == "GUEST") priv = "Гість";
+			UnicodeString priv = L"Юзер";
+			if (user.priv == "ADMIN") priv = L"Адмін";
+			else if (user.priv == "GUEST") priv = L"Гість";
 			grid->Cells[0][row] = priv;
 			grid->Cells[1][row] = user.name;
 			grid->Cells[2][row] = user.fullName;
 			grid->Cells[3][row] = UnicodeString(user.password_age);
 			if (user.last_logon == 0) {
-				grid->Cells[4][row] = "ніколи";
+				grid->Cells[4][row] = L"ніколи";
 			} else {
 				TDateTime lastLogonDate = System::Dateutils::UnixToDateTime(user.last_logon, false);
 				grid->Cells[4][row] = lastLogonDate.FormatString("dd.MM.yy HH:mm");
@@ -438,12 +438,12 @@ void __fastcall TForm1::Grid_UsersDrawCell(TObject *Sender, int ACol, int ARow, 
 void applyEsetDefection(const EsetDefectionResult &r) {
 	if (r.countTotal > 0) {
 		Form1->Show_ESETQuarantine->Text = UnicodeString(r.countTotal);
-		UnicodeString str = "В системі " + UnicodeString(r.countSys)
-			+ ", у користувачів " + UnicodeString(r.countUser) + "...";
+		UnicodeString str = L"В системі " + UnicodeString(r.countSys)
+			+ L", у користувачів " + UnicodeString(r.countUser) + "...";
 		Form1->Show_ESETQuarantine->Hint = str;
 	} else {
 		Form1->Show_ESETQuarantine->Text = "0";
-		Form1->Show_ESETQuarantine->Hint = "Карантин порожній!";
+		Form1->Show_ESETQuarantine->Hint = L"Карантин порожній!";
 	}
 	curDefection.eset = r.bad;
 	curDefection.quarantineDirs = r.quarantineDirs;
@@ -504,12 +504,12 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	PageControl_SetInfo->TabIndex = 0;
 	PageControl_InfoTabs->TabIndex = 0;
 	// === заголовки таблиці юзерів (Grid_Users)
-	Grid_Users->Cells[0][0] = "Права";
-	Grid_Users->Cells[1][0] = "Логін";
-	Grid_Users->Cells[2][0] = "ПІБ";
-	Grid_Users->Cells[3][0] = "Вік пароля";
-	Grid_Users->Cells[4][0] = "Дата входу";
-	Grid_Users->Cells[5][0] = "Тип";
+	Grid_Users->Cells[0][0] = L"Права";
+	Grid_Users->Cells[1][0] = L"Логін";
+	Grid_Users->Cells[2][0] = L"ПІБ";
+	Grid_Users->Cells[3][0] = L"Вік пароля";
+	Grid_Users->Cells[4][0] = L"Дата входу";
+	Grid_Users->Cells[5][0] = L"Тип";
 	// підв'язано кодом, а не через .dfm, - див. коментар біля оголошення в MainForm.h
 	Grid_Users->OnDrawCell = Grid_UsersDrawCell;
 	OnAfterMonitorDpiChanged = Form1AfterMonitorDpiChanged;
@@ -563,8 +563,8 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 	// === проверка на необходимые файлы и папки
 	if(exists(p_configIni)) printLogDebug("Config fille OK");
 	else {
-		UnicodeString text = "Немає файла налаштувань...";
-		UnicodeString formCaption = "Де файл?!";
+		UnicodeString text = L"Немає файла налаштувань...";
+		UnicodeString formCaption = L"Де файл?!";
 		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_OK) == IDOK) {
 			exit(0);
 		}
@@ -572,17 +572,17 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 	/* === проверка прав админа === */
 	UnicodeString admMode;
 	if(IsAdminMode()) {
-		printLogDebug("Запущено з правами Адміністратора!");
+		printLogDebug(L"Запущено з правами Адміністратора!");
 		Button_RestartAssAdmin->Enabled = false;
 		BtnClearPC->Enabled = true;
 		admMode = "AdminMode";
 	} else {
-		printLogDebug("Запущено без прав Адміністратора!");
+		printLogDebug(L"Запущено без прав Адміністратора!");
 		int number = Form1->Edit_NumberARM->Value;
-		UnicodeString text = "Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
+		UnicodeString text = L"Перезапустити GRUBer з правами Адміністратора?\n( ПК: "
 			+ UnicodeString(number)
-			+ ", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
-		UnicodeString formCaption = "Нема прав Адміна.. :'(";
+			+ L", Відділ.: " + UnicodeString(curPC.getPartition()) + " )";
+		UnicodeString formCaption = L"Нема прав Адміна.. :'(";
 		if(Application->MessageBox( text.c_str(), formCaption.c_str(), MB_YESNO) == IDYES) {
 				RestartApplicationRunas();
 		}
@@ -626,8 +626,8 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 		applyCurStructureSelectionToForm(getCurStructureId());
 	}
 	/* === наполняем форму === */
-	printLog(">>", "Запушенно GRUBer v." + versionApp);
-	printLog(">>", "Останій граб: " + curPC.lastGrub());
+	printLog(">>", L"Запушенно GRUBer v." + versionApp);
+	printLog(">>", L"Останій граб: " + curPC.lastGrub());
 	// --- проверка нарушений
 	checkDefection();
 	// --- заполняем строку с именем папки граба
@@ -802,16 +802,16 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	} else if (fs::exists(updArhOld)) {
 		updArhive = updArhOld;
 	} else {
-		printLog("!!", "ESET-Update: Немає архіву з базами! " + UnicodeString(curDirectory.c_str()));
+		printLog("!!", L"ESET-Update: Немає архіву з базами! " + UnicodeString(curDirectory.c_str()));
 		return;
     }
     if (!fs::exists(updArhive)) {
-		printLog("!!", "ESET-Update: Немає архіву з базами! " + UnicodeString(curDirectory.c_str()));
+		printLog("!!", L"ESET-Update: Немає архіву з базами! " + UnicodeString(curDirectory.c_str()));
 		return;
 	}
-	printLog(">>", "ESET-Update: Оновленя бази Eset...");
+	printLog(">>", L"ESET-Update: Оновленя бази Eset...");
 	BtnEsetUpdate->Enabled = false;
-	StatusBar1->Panels->Items[1]->Text = " Оновленя бази Eset...";
+	StatusBar1->Panels->Items[1]->Text = L" Оновленя бази Eset...";
 	// теку дзеркала могли раніше створити під іншим рівнем прав (адмін/юзер) -
 	// перевіряємо доступ ДО розпакування, інакше 7-Zip впирається в
 	// ACCESS_DENIED і зависає на власному діалозі помилки (RunApp чекає завершення
@@ -820,7 +820,7 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	ensureDirWithAccess(esetUpdDirStr);
 	if (!warnIfNoAccess(esetUpdDirStr)) {
 		BtnEsetUpdate->Enabled = true;
-		StatusBar1->Panels->Items[1]->Text = " Немає доступу до теки ESET mirror!";
+		StatusBar1->Panels->Items[1]->Text = L" Немає доступу до теки ESET mirror!";
 		return;
 	}
 	if (fs::exists(esetUpdDir / L"dll\\update.ver")) {
@@ -832,8 +832,8 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 		fs::remove_all(esetUpdDir, ec);
 		if (ec) {
 			BtnEsetUpdate->Enabled = true;
-			StatusBar1->Panels->Items[1]->Text = " Не вдалось очистити стару теку ESET mirror (немає прав)!";
-			printLog("!!", "ESET-Update: не вдалось видалити стару теку " + esetUpdDirStr + " - " + UnicodeString(ec.message().c_str()));
+			StatusBar1->Panels->Items[1]->Text = L" Не вдалось очистити стару теку ESET mirror (немає прав)!";
+			printLog("!!", L"ESET-Update: не вдалось видалити стару теку " + esetUpdDirStr + " - " + UnicodeString(ec.message().c_str()));
 			return;
 		}
 		ensureDirWithAccess(esetUpdDirStr);
@@ -860,13 +860,13 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	//------
 	if (esetBaseUnpack.checkErr()){
 		//ошибочка вышла...
-		printLog("!!", "ESET-Update: Щось пішло НЕ так...");
+		printLog("!!", L"ESET-Update: Щось пішло НЕ так...");
 		BtnEsetUpdate->Enabled = true;
 		return;
 	}
-	printLog("OK", "ESET-Update: Бази оновленно!");
+	printLog("OK", L"ESET-Update: Бази оновленно!");
     BtnEsetUpdate->Enabled = true;
-	StatusBar1->Panels->Items[1]->Text = " Бази оновленно!";
+	StatusBar1->Panels->Items[1]->Text = L" Бази оновленно!";
 	if (FileExists("c:\\Program Files\\ESET\\ESET Security\\ermm.exe")) {
 		RunApp esetBaseUpdate {"c:\\Program Files\\ESET\\ESET Security\\ermm.exe",
 			NULL, "start update"};
@@ -883,12 +883,12 @@ void __fastcall TForm1::BtnEsetDownloadClick(TObject *Sender)
 		return;
 	}
 	if (curConfig.getEsetDlUrl().IsEmpty()) {
-		printLog("!!", "ESET-Download: URL не вказано в налаштуваннях GRUBer.ini ([eset_download])!");
+		printLog("!!", L"ESET-Download: URL не вказано в налаштуваннях GRUBer.ini ([eset_download])!");
 		return;
 	}
 	stopEsetDownload = false;
 	BtnEsetUpdate->Enabled = false;
-	BtnEsetDownload->Caption = "Зупинити завантаження";
+	BtnEsetDownload->Caption = L"Зупинити завантаження";
 	Th_EsetDownload *Thr = new Th_EsetDownload(true);
 	Thr->Resume();
 }
@@ -911,7 +911,7 @@ void __fastcall TForm1::EditPartitionChange(TObject *Sender)
 {
 	// "Без відділу" - лише UI-заглушка за замовчуванням, у файли пишемо
 	// порожнє значення замість неї
-	UnicodeString saveVal = (EditPartition->Text == "Без відділу") ? UnicodeString("") : EditPartition->Text;
+	UnicodeString saveVal = (EditPartition->Text == L"Без відділу") ? UnicodeString("") : EditPartition->Text;
 	curPC.setPartition(saveVal); // плоске дзеркало - для dirGrubName() та підказки про права адміна
 	UnicodeString id = getCurStructureId();
 	if (!id.IsEmpty())
@@ -1128,8 +1128,8 @@ void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
 {
 	bool i = Form1->CheckBoxEsetAutoUpdate->Checked;
 	if(Form1->CheckBoxEsetAutoUpdate->Checked)
-		StatusBar1->Panels->Items[1]->Text = " ESET оновлюеться самостійно";
-	else StatusBar1->Panels->Items[1]->Text = " Бази не оновлювалися";
+		StatusBar1->Panels->Items[1]->Text = L" ESET оновлюеться самостійно";
+	else StatusBar1->Panels->Items[1]->Text = L" Бази не оновлювалися";
 	Form1->EditEsetMirrorDir->Enabled = !i;
 	Form1->BtnEditEsetMirrorDir->Enabled = !i;
 	Form1->BtnEsetUpdate->Enabled = !i;
