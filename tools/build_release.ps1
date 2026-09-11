@@ -48,5 +48,23 @@ Write-Host "Archiving to $archivePath ..."
 & $sevenZip a -mx=9 $archivePath (Join-Path $destDir "*")
 if ($LASTEXITCODE -ne 0) { throw "7z failed with exit code $LASTEXITCODE" }
 
+# Build+sign+archive all succeeded at this point - safe to retire the previous release.
+$oldVersionDir = Join-Path $releaseRoot "OLD_VERSION"
+New-Item -ItemType Directory -Force -Path $oldVersionDir | Out-Null
+
+Get-ChildItem -Path $releaseRoot -Directory | Where-Object {
+    $_.FullName -ne $destDir -and $_.Name.StartsWith("[GRUBer_")
+} | ForEach-Object {
+    Write-Host "Removing previous release folder: $($_.FullName)"
+    Remove-Item $_.FullName -Recurse -Force
+}
+
+Get-ChildItem -Path $releaseRoot -File | Where-Object {
+    $_.Extension -eq ".7z" -and $_.FullName -ne $archivePath -and $_.Name.StartsWith("[GRUBer_")
+} | ForEach-Object {
+    Write-Host "Moving previous archive to OLD_VERSION: $($_.Name)"
+    Move-Item $_.FullName -Destination $oldVersionDir -Force
+}
+
 Write-Host "DONE: $destDir"
 Write-Host "Archive: $archivePath"
