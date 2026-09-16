@@ -61,10 +61,12 @@ if ($Publish) {
     $ghRepo = "Segmalion/GRUBer2"
     $commitFull = (git rev-parse HEAD).Trim()
     $releaseTitle = "GRUBer $gruberVer / DeviceLister $dlVer ($commit)"
+    # лише два exe - без .7z. Автооновлення (Update_FindAsset у src_grub/UpdateCheck.cpp)
+    # шукає ассети саме за іменами "GRUBer.exe"/"DeviceLister.exe"; архів там не потрібен,
+    # а зайвий великий ассет лише сповільнював би перевірку/публікацію.
     $assets = @(
         (Join-Path $destDir "GRUBer.exe"),
-        (Join-Path $destDir "DeviceLister.exe"),
-        $archivePath
+        (Join-Path $destDir "DeviceLister.exe")
     )
 
     Write-Host "Publishing GitHub Release $commit ..."
