@@ -272,6 +272,21 @@
             <DependentOn>EsetDownload.h</DependentOn>
             <BuildOrder>29</BuildOrder>
         </CppCompile>
+        <CppCompile Include="UpdateCheck.cpp">
+            <VirtualFolder>{8701FF02-8B08-42DE-A343-88ECA155892A}</VirtualFolder>
+            <DependentOn>UpdateCheck.h</DependentOn>
+            <BuildOrder>31</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="UpdateVerify.cpp">
+            <VirtualFolder>{8701FF02-8B08-42DE-A343-88ECA155892A}</VirtualFolder>
+            <DependentOn>UpdateVerify.h</DependentOn>
+            <BuildOrder>32</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="UpdateInstall.cpp">
+            <VirtualFolder>{8701FF02-8B08-42DE-A343-88ECA155892A}</VirtualFolder>
+            <DependentOn>UpdateInstall.h</DependentOn>
+            <BuildOrder>33</BuildOrder>
+        </CppCompile>
         <CppCompile Include="Fille.cpp">
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
             <DependentOn>Fille.h</DependentOn>
@@ -377,6 +392,11 @@
             <VirtualFolder>{9F4040FB-9770-473E-8CD4-B95AE379325C}</VirtualFolder>
             <DependentOn>Th_EsetDownload.h</DependentOn>
             <BuildOrder>30</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Th_UpdateCheck.cpp">
+            <VirtualFolder>{9F4040FB-9770-473E-8CD4-B95AE379325C}</VirtualFolder>
+            <DependentOn>Th_UpdateCheck.h</DependentOn>
+            <BuildOrder>34</BuildOrder>
         </CppCompile>
         <CppCompile Include="Users.cpp">
             <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>

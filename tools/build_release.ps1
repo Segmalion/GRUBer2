@@ -1,5 +1,6 @@
 param(
-    [ValidateSet("Debug","Release")][string]$Config = "Release"
+    [ValidateSet("Debug","Release")][string]$Config = "Release",
+    [switch]$Publish
 )
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -48,6 +49,66 @@ Write-Host "Archiving to $archivePath ..."
 & $sevenZip a -mx=9 $archivePath (Join-Path $destDir "*")
 if ($LASTEXITCODE -ne 0) { throw "7z failed with exit code $LASTEXITCODE" }
 
+# Публікація в GitHub Releases (Segmalion/GRUBer2, приватний репозиторій) -
+# лише за явним -Publish, щоб локальна збірка без публікації лишалась
+# можливою. tag_name = короткий commit hash - той самий рядок, що GRUBer.exe
+# зчитує як GIT_COMMIT_HASH (tools\gen_gitversion.bat) - так перевірка
+# оновлень у програмі порівнює свою версію з тегом релізу без окремого
+# маніфесту. Токен тут - ОКРЕМИЙ, write-scoped, живе лише на цій машині
+# розробника (env:GRUBER_RELEASE_TOKEN) - це НЕ той read-only токен, що
+# зашивається у GRUBer.exe для читання релізів (UpdateSecrets.h).
+if ($Publish) {
+    $ghRepo = "Segmalion/GRUBer2"
+    $commitFull = (git rev-parse HEAD).Trim()
+    $releaseTitle = "GRUBer $gruberVer / DeviceLister $dlVer ($commit)"
+    $assets = @(
+        (Join-Path $destDir "GRUBer.exe"),
+        (Join-Path $destDir "DeviceLister.exe"),
+        $archivePath
+    )
+
+    Write-Host "Publishing GitHub Release $commit ..."
+    $ghCli = Get-Command gh -ErrorAction SilentlyContinue
+    if ($ghCli) {
+        if (-not $env:GRUBER_RELEASE_TOKEN) { throw "GRUBER_RELEASE_TOKEN not set - cannot publish (-Publish)" }
+        # gh сам підхопить GH_TOKEN з середовища
+        $env:GH_TOKEN = $env:GRUBER_RELEASE_TOKEN
+        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes "" @assets
+        if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE" }
+        $releaseUrl = "https://github.com/$ghRepo/releases/tag/$commit"
+    } else {
+        $token = $env:GRUBER_RELEASE_TOKEN
+        if (-not $token) { throw "GRUBER_RELEASE_TOKEN not set - cannot publish (-Publish)" }
+        $headers = @{
+            Authorization          = "Bearer $token"
+            Accept                 = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+            "User-Agent"           = "GRUBer-release-script"
+        }
+        $body = @{
+            tag_name         = $commit
+            target_commitish = $commitFull
+            name             = $releaseTitle
+            draft            = $false
+            prerelease       = $false
+        } | ConvertTo-Json
+        $release = Invoke-RestMethod -Method Post `
+            -Uri "https://api.github.com/repos/$ghRepo/releases" `
+            -Headers $headers -Body $body -ContentType "application/json"
+
+        foreach ($asset in $assets) {
+            $name = [System.IO.Path]::GetFileName($asset)
+            Write-Host "Uploading asset $name ..."
+            # УВАГА: хост завантаження ассетів - uploads.github.com, НЕ api.github.com
+            Invoke-RestMethod -Method Post `
+                -Uri "https://uploads.github.com/repos/$ghRepo/releases/$($release.id)/assets?name=$name" `
+                -Headers $headers -ContentType "application/octet-stream" -InFile $asset | Out-Null
+        }
+        $releaseUrl = $release.html_url
+    }
+    Write-Host "Published: $releaseUrl"
+}
+
 # Build+sign+archive all succeeded at this point - safe to retire the previous release.
 $oldVersionDir = Join-Path $releaseRoot "OLD_VERSION"
 New-Item -ItemType Directory -Force -Path $oldVersionDir | Out-Null
@@ -68,3 +129,4 @@ Get-ChildItem -Path $releaseRoot -File | Where-Object {
 
 Write-Host "DONE: $destDir"
 Write-Host "Archive: $archivePath"
+if ($Publish) { Write-Host "Release: $releaseUrl" }

@@ -1052,3 +1052,7 @@ dkms.conf
 # Generated at build time by tools/gen_gitversion.bat (Pre-Build Event) -
 # embeds the current git commit hash into the .exe, regenerated every build.
 GitVersion.h
+
+# GitHub PAT for the update-check feature (see UpdateSecrets.h.template) -
+# never committed; each dev/build machine keeps its own local copy.
+src_grub/UpdateSecrets.h

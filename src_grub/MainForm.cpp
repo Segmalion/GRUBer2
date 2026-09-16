@@ -33,7 +33,9 @@
 
 #include "Th_Gruber.h"
 #include "Th_EsetDownload.h"
+#include "Th_UpdateCheck.h"
 #include "CrashHandler.h"
+#include "GitVersion.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -53,6 +55,7 @@ UnicodeString cmdEXE, curentDate;
 // для доступу до VCL, описаним у CLAUDE.md).
 std::atomic<bool> th_Gruber_run{false}, th_ClearFile_run{false};
 std::atomic<bool> th_EsetDownload_run{false}, stopEsetDownload{false};
+std::atomic<bool> th_UpdateCheck_run{false}, stopUpdate{false};
 bool th_EsetUpdate_run=0; // наразі ніде більше не використовується
 std::atomic<bool> th_Gruber_runMini{false}, th_Gruber_runUSB{false};
 std::atomic<bool> stopBool{false}, passBool{false};
@@ -530,6 +533,24 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 // (Application->CreateForm у GRUBer.cpp) - на відміну від конструктора,
 // тут безпечно звертатися до інших форм (FormStructurePick), бо в
 // конструкторі Form1 (перша форма, що створюється) вони ще не існують.
+// true, якщо варто запустити тиху фонову перевірку оновлень при старті:
+// автоперевірка увімкнена, ще не йде інша перевірка, збірка не "nogit"/
+// "-dirty" (розробнику не пропонують оновитись на комміт, який він щойно
+// редагує), і з часу lastCheckUtc пройшло не менше intervalHours.
+static bool shouldRunStartupUpdateCheck()
+{
+	if (!curConfig.getUpdAutoCheck()) return false;
+	if (th_UpdateCheck_run) return false;
+	if (UnicodeString(GIT_COMMIT_HASH) == "nogit") return false;
+	if (GIT_DIRTY) return false;
+
+	UnicodeString lastStr = curConfig.getUpdLastCheckUtc();
+	if (lastStr.IsEmpty()) return true;
+	TDateTime last = StrToDateTimeSafe(lastStr, TDateTime(0));
+	if ((double)last == 0.0) return true;
+	return HoursBetween(Now(), last) >= curConfig.getUpdIntervalHours();
+}
+//---------------------------------------------------------------------------
 void __fastcall TForm1::FormShow(TObject *Sender)
 {
 	if (gruberStart) return; // весь блок нижче - одноразова ініціалізація при старті
@@ -599,6 +620,17 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 			curConfig.saveFileIni();
 		}
 	}
+	// === запит на додавання типових налаштувань автоперевірки оновлень,
+	// якщо у GRUBer.ini відсутня секція [update] - той самий паттерн, що й
+	// для [eset_download] вище
+	if (!curConfig.getUpdSectionExists()) {
+		UnicodeString text = L"У файлі налаштувань (GRUBer.ini) відсутня секція [update] "
+			L"(автоматична перевірка оновлень).\nДодати її з типовими значеннями?";
+		if (Application->MessageBox(text.c_str(), L"Немає налаштувань оновлення", MB_YESNO) == IDYES) {
+			curConfig.applyUpdateDefaults();
+			curConfig.saveFileIni();
+		}
+	}
     // === запит на перезбереження GRUBer.ini у новому форматі, якщо файл ще
 	// застарілої версії (ini_version=0/відсутній) - навмисно після запиту на
 	// перезапуск від адміна, а не до нього
@@ -644,6 +676,14 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 	else StatusBar1->Panels->Items[2]->Text = "v." + versionApp + " (x32_" + admMode + ") ";
 	gruberStart = 1;
 	captureGridPanelDpiBaselines();
+	// === фонова перевірка оновлень (GitHub Releases) - остання дія старту,
+	// щоб жодна попередня блокуюча стартова перевірка не переплелась з нею.
+	// Мережева помилка сюди ніколи не "просочується" - Th_UpdateCheck сама
+	// пише лише в лог, не затримуючи роботу програми.
+	if (shouldRunStartupUpdateCheck()) {
+		Th_UpdateCheck *thUpd = new Th_UpdateCheck(true, /*silent*/ true);
+		thUpd->Resume();
+	}
 }
 //---------------------------------------------------------------------------
 /* КНОПКИ */

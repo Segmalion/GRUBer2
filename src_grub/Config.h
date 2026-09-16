@@ -29,6 +29,13 @@ private:
 	// останньому readFileIni() - використовується, щоб при старті програми
 	// один раз запропонувати додати її з типовими значеннями
 	bool esetDlSectionExists = false;
+	// update - автоперевірка оновлень через приватні GitHub Releases
+	bool updAutoCheck = true;
+	short updIntervalHours = 24;
+	UnicodeString updLastCheckUtc; // порожньо, якщо перевірок ще не було
+	UnicodeString updSkipTag;      // тег релізу, який користувач відхилив назавжди ("Скасувати")
+	// той самий сенс, що й esetDlSectionExists, але для секції [update]
+	bool updSectionExists = false;
 	std::vector<UnicodeString> lgpo;        //<==
 	std::vector<UnicodeString> usb;         //<==
 	std::vector<UnicodeString> user;        //<==
@@ -68,6 +75,11 @@ public:
 	bool getEsetDlConvert();
 	short getEsetDlUpdateMs();
 	bool getEsetDlSectionExists();
+	bool getUpdAutoCheck();
+	short getUpdIntervalHours();
+	UnicodeString getUpdLastCheckUtc();
+	UnicodeString getUpdSkipTag();
+	bool getUpdSectionExists();
 	std::vector<UnicodeString> get_lgpo(); //<--
 	std::vector<UnicodeString> get_usb();  //<--
 	std::vector<UnicodeString> get_user(); //<--
@@ -102,6 +114,13 @@ public:
 	// заповнює [eset_download] типовими значеннями (з EsetBaseDownloader.ini)
 	// і позначає секцію як наявну, щоб стартовий запит більше не з'являвся
 	void applyEsetDlDefaults();
+	void setUpdAutoCheck(bool i);
+	void setUpdIntervalHours(short i);
+	void setUpdLastCheckUtc(UnicodeString str);
+	void setUpdSkipTag(UnicodeString str);
+	// заповнює [update] типовими значеннями і позначає секцію як наявну,
+	// щоб стартовий запит більше не з'являвся (аналог applyEsetDlDefaults)
+	void applyUpdateDefaults();
 	void set_lgpo(std::vector<UnicodeString> vStr); //<--
 	void set_usb(std::vector<UnicodeString> vStr); //<--
 	void set_user(std::vector<UnicodeString> vStr); //<--

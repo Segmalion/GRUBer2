@@ -140,6 +140,19 @@ void Config::readFileIni() {
 		if(findStr == 0 || findStr == 1) esetDlConvert = findStr.ToInt();
 		findStr = findParam(infoFille, "[eset_download]", "update_ms");
 		if(findStr != "ERROR") esetDlUpdateMs = findStr.ToIntDef(150);
+		// update
+		{
+			std::vector<UnicodeString> sec = findCategory(infoFille, "[update]");
+			updSectionExists = !(sec.size() == 1 && sec[0] == "ERROR");
+		}
+		findStr = findParam(infoFille, "[update]", "autoCheck");
+		if(findStr == 0 || findStr == 1) updAutoCheck = findStr.ToInt();
+		findStr = findParam(infoFille, "[update]", "intervalHours");
+		if(findStr != "ERROR") updIntervalHours = findStr.ToIntDef(24);
+		findStr = findParam(infoFille, "[update]", "lastCheckUtc");
+		if(findStr != "ERROR") updLastCheckUtc = findStr;
+		findStr = findParam(infoFille, "[update]", "skipTag");
+		if(findStr != "ERROR") updSkipTag = findStr;
 		// structures <--
 		structures.clear();
 		for (auto &id : findSectionIds(infoFille, "[structur_")) {
@@ -199,6 +212,12 @@ void Config::saveFileIni() {
 	infoFille->Add("arhive=" + esetDlArhive);
 	infoFille->Add("convert=" + UnicodeString(esetDlConvert));
 	infoFille->Add("update_ms=" + UnicodeString(esetDlUpdateMs));
+	// раздел
+	infoFille->Add("[update]");
+	infoFille->Add("autoCheck=" + UnicodeString(updAutoCheck));
+	infoFille->Add("intervalHours=" + UnicodeString(updIntervalHours));
+	infoFille->Add("lastCheckUtc=" + updLastCheckUtc);
+	infoFille->Add("skipTag=" + updSkipTag);
 	// раздел структур
 	for (auto &s : structures) {
 		infoFille->Add("[structur_" + s.id + "]");
@@ -251,6 +270,11 @@ UnicodeString Config::getEsetDlArhive() { return esetDlArhive; }
 bool Config::getEsetDlConvert() { return esetDlConvert; }
 short Config::getEsetDlUpdateMs() { return esetDlUpdateMs; }
 bool Config::getEsetDlSectionExists() { return esetDlSectionExists; }
+bool Config::getUpdAutoCheck() { return updAutoCheck; }
+short Config::getUpdIntervalHours() { return updIntervalHours; }
+UnicodeString Config::getUpdLastCheckUtc() { return updLastCheckUtc; }
+UnicodeString Config::getUpdSkipTag() { return updSkipTag; }
+bool Config::getUpdSectionExists() { return updSectionExists; }
 std::vector<UnicodeString> Config::get_lgpo() { return lgpo; }; //<--
 std::vector<UnicodeString> Config::get_usb()  { return usb; };  //<--
 std::vector<UnicodeString> Config::get_user() { return user; }; //<--
@@ -291,6 +315,16 @@ void Config::applyEsetDlDefaults() {
 	esetDlConvert = true;
 	esetDlUpdateMs = 150;
 	esetDlSectionExists = true;
+}
+void Config::setUpdAutoCheck(bool i) { updAutoCheck = i; }
+void Config::setUpdIntervalHours(short i) { updIntervalHours = i; }
+void Config::setUpdLastCheckUtc(UnicodeString str) { updLastCheckUtc = str; }
+void Config::setUpdSkipTag(UnicodeString str) { updSkipTag = str; }
+void Config::applyUpdateDefaults() {
+	updAutoCheck = true;
+	updIntervalHours = 24;
+	updSkipTag = "";
+	updSectionExists = true;
 }
 void Config::set_lgpo(std::vector<UnicodeString> vStr) { lgpo = vStr; } //<--
 void Config::set_usb(std::vector<UnicodeString> vStr) { usb = vStr; }   //<--
