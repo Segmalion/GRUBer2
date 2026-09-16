@@ -75,8 +75,23 @@ if ($Publish) {
         if (-not $env:GRUBER_RELEASE_TOKEN) { throw "GRUBER_RELEASE_TOKEN not set - cannot publish (-Publish)" }
         # gh сам підхопить GH_TOKEN з середовища
         $env:GH_TOKEN = $env:GRUBER_RELEASE_TOKEN
-        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes "" @assets
-        if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE" }
+        # gh release create сам виконує glob-розбір шляхів ассетів (Go filepath.Glob) -
+        # квадратні дужки у назві $destDir ("[GRUBer_...][...]") трактуються як
+        # символьний клас glob-патерну і не знаходять жодного співпадіння
+        # ("no matches found for ..."). Тому копіюємо обидва підписаних exe у
+        # тимчасову теку БЕЗ дужок у шляху і публікуємо звідти.
+        $ghStageDir = Join-Path $env:TEMP "GRUBerReleaseAssets"
+        Remove-Item -LiteralPath $ghStageDir -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Force -Path $ghStageDir | Out-Null
+        $ghAssets = $assets | ForEach-Object {
+            $dst = Join-Path $ghStageDir (Split-Path -Leaf $_)
+            Copy-Item -LiteralPath $_ -Destination $dst -Force
+            $dst
+        }
+        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes "" @ghAssets
+        $ghExit = $LASTEXITCODE
+        Remove-Item -LiteralPath $ghStageDir -Recurse -Force -ErrorAction SilentlyContinue
+        if ($ghExit -ne 0) { throw "gh release create failed with exit code $ghExit" }
         $releaseUrl = "https://github.com/$ghRepo/releases/tag/$commit"
     } else {
         $token = $env:GRUBER_RELEASE_TOKEN
