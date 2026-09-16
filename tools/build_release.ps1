@@ -88,7 +88,11 @@ if ($Publish) {
             Copy-Item -LiteralPath $_ -Destination $dst -Force
             $dst
         }
-        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes "" @ghAssets
+        # УВАГА: --notes "" (порожній рядок) НЕ можна - Windows PowerShell 5.1
+        # губить порожньоряткові аргументи при виклику зовнішніх .exe, через що
+        # gh зсуває решту аргументів і "з'їдає" шлях до GRUBer.exe як текст
+        # notes, лишаючи в релізі лише DeviceLister.exe. Тому нотатка - непорожня.
+        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes $releaseTitle @ghAssets
         $ghExit = $LASTEXITCODE
         Remove-Item -LiteralPath $ghStageDir -Recurse -Force -ErrorAction SilentlyContinue
         if ($ghExit -ne 0) { throw "gh release create failed with exit code $ghExit" }
