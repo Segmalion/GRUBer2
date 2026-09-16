@@ -8,7 +8,7 @@ object FormAbout: TFormAbout
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = #1055#1088#1086' GRUBer'
-  ClientHeight = 285
+  ClientHeight = 324
   ClientWidth = 469
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -23,7 +23,7 @@ object FormAbout: TFormAbout
     Left = 0
     Top = 0
     Width = 469
-    Height = 285
+    Height = 324
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -52,18 +52,19 @@ object FormAbout: TFormAbout
       end>
     RowCollection = <
       item
-        Value = 100.000000000000000000
+        SizeStyle = ssAbsolute
+        Value = 180.000000000000000000
       end
       item
-        SizeStyle = ssAbsolute
         Value = 100.000000000000000000
       end>
     TabOrder = 0
+    ExplicitHeight = 285
     object Image1: TImage
       Left = 0
       Top = 0
-      Width = 472
-      Height = 188
+      Width = 469
+      Height = 180
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -1919,12 +1920,14 @@ object FormAbout: TFormAbout
         826D420E7177866F301C9993AA553F258EB90DB80E10714CD2C7CAF8F2786B51
         7F099EC9858E758C8E10E0C362583EF802C7A4E8BEF32E2DC48159E9F1BDF8D8
         0DE024E5FF03993516EDD575BAB90000000049454E44AE426082}
+      ExplicitWidth = 472
+      ExplicitHeight = 188
     end
     object Panel1: TPanel
       Left = 0
-      Top = 185
+      Top = 180
       Width = 469
-      Height = 100
+      Height = 144
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -1932,12 +1935,14 @@ object FormAbout: TFormAbout
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitTop = 185
+      ExplicitHeight = 100
       object LinkLabel_ThreemaID: TLinkLabel
         AlignWithMargins = True
         Left = 5
         Top = 5
         Width = 459
-        Height = 90
+        Height = 134
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -1955,6 +1960,7 @@ object FormAbout: TFormAbout
         ParentFont = False
         TabOrder = 0
         OnLinkClick = LinkLabel_ThreemaIDLinkClick
+        ExplicitLeft = 460
         ExplicitWidth = 4
         ExplicitHeight = 4
       end
