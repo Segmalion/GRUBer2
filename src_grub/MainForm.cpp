@@ -1421,7 +1421,15 @@ void TForm1::LoadSelectedFileLog()
 	}
 	UnicodeString path = LogFile_GetLogDir() + ComboBox_FileLOGS->Items->Strings[ComboBox_FileLOGS->ItemIndex];
 	try {
-		RichEdit_FileLOGS->Lines->LoadFromFile(path, TEncoding::UTF8);
+		// TRichEdit->Lines->LoadFromFile(path, Encoding) йде через
+		// EM_STREAMIN самого rich edit контролу (не звичайний TStrings-стрім)
+		// і падає з "Failed to Load Stream" на UTF-8 без BOM, хоча той самий
+		// файл читається без проблем через TStringList (як в решті коду, що
+		// працює з цими логами). Тому читаємо TStringList'ом і просто
+		// підставляємо готовий текст.
+		std::unique_ptr<TStringList> content(new TStringList);
+		content->LoadFromFile(path, TEncoding::UTF8);
+		RichEdit_FileLOGS->Lines->Text = content->Text;
 	} catch (Exception &e) {
 		RichEdit_FileLOGS->Lines->Text = L"Не вдалось відкрити файл: " + e.Message;
 	}
