@@ -155,8 +155,16 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 
 	int mbResult = IDNO;
 	TThread::Synchronize(NULL, [&mbResult, rel]() {
-		UnicodeString text = L"Знайдено нову версію GRUBer/DeviceLister:\n" + rel.name +
-			L"\n\nОновити зараз? Програма закриється і перезапуститься.\n\n" +
+		UnicodeString text = L"Знайдено нову версію GRUBer/DeviceLister:\n" + rel.name;
+
+		// release notes (--notes тексту з /release-build), якщо є - обрізаємо
+		// задовге тіло, щоб MessageBox лишався читабельним
+		UnicodeString notes = rel.body.Trim();
+		const int maxNotesLen = 1000;
+		if (notes.Length() > maxNotesLen) notes = notes.SubString(1, maxNotesLen) + L"...";
+		if (!notes.IsEmpty()) text += L"\n\nЩо нового:\n" + notes;
+
+		text += L"\n\nОновити зараз? Програма закриється і перезапуститься.\n\n"
 			L"\"Скасувати\" - не пропонувати цю версію знову.";
 		mbResult = Application->MessageBox(text.c_str(), L"Доступне оновлення GRUBer", MB_YESNOCANCEL | MB_ICONQUESTION);
 	});

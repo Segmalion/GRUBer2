@@ -1,6 +1,7 @@
 param(
     [ValidateSet("Debug","Release")][string]$Config = "Release",
-    [switch]$Publish
+    [switch]$Publish,
+    [string]$Notes = ""
 )
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -61,6 +62,12 @@ if ($Publish) {
     $ghRepo = "Segmalion/GRUBer2"
     $commitFull = (git rev-parse HEAD).Trim()
     $releaseTitle = "GRUBer $gruberVer / DeviceLister $dlVer ($commit)"
+    # текст, що GRUBer.exe покаже в діалозі "Доступне оновлення" (rel.body,
+    # див. Th_UpdateCheck.cpp) - якщо викликач не передав -Notes, підставляємо
+    # releaseTitle замість нього (той самий текст, що й раніше), а не порожній
+    # рядок - через PowerShell 5.1 баг з елізією порожньоряткових аргументів
+    # при виклику зовнішніх .exe (див. коментар нижче про --notes "").
+    $releaseNotes = if ($Notes -and $Notes.Trim()) { $Notes } else { $releaseTitle }
     # лише два exe - без .7z. Автооновлення (Update_FindAsset у src_grub/UpdateCheck.cpp)
     # шукає ассети саме за іменами "GRUBer.exe"/"DeviceLister.exe"; архів там не потрібен,
     # а зайвий великий ассет лише сповільнював би перевірку/публікацію.
@@ -91,8 +98,9 @@ if ($Publish) {
         # УВАГА: --notes "" (порожній рядок) НЕ можна - Windows PowerShell 5.1
         # губить порожньоряткові аргументи при виклику зовнішніх .exe, через що
         # gh зсуває решту аргументів і "з'їдає" шлях до GRUBer.exe як текст
-        # notes, лишаючи в релізі лише DeviceLister.exe. Тому нотатка - непорожня.
-        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes $releaseTitle @ghAssets
+        # notes, лишаючи в релізі лише DeviceLister.exe. Тому $releaseNotes
+        # вище завжди непорожній.
+        & gh release create $commit --repo $ghRepo --title $releaseTitle --notes $releaseNotes @ghAssets
         $ghExit = $LASTEXITCODE
         Remove-Item -LiteralPath $ghStageDir -Recurse -Force -ErrorAction SilentlyContinue
         if ($ghExit -ne 0) { throw "gh release create failed with exit code $ghExit" }
@@ -110,6 +118,7 @@ if ($Publish) {
             tag_name         = $commit
             target_commitish = $commitFull
             name             = $releaseTitle
+            body             = $releaseNotes
             draft            = $false
             prerelease       = $false
         } | ConvertTo-Json
