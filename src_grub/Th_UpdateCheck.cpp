@@ -242,8 +242,8 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 		int mbCert = IDNO;
 		TThread::Synchronize(NULL, [&mbCert]() {
 			UnicodeString text = L"Оновлення підписано коректно, але кореневий сертифікат видавця "
-				L"не довірений на цьому ПК.\n\nВстановити кореневий сертифікат у сховище поточного "
-				L"користувача зараз?";
+				L"не довірений на цьому ПК.\n\nВстановити кореневий сертифікат у сховище цього "
+				L"комп'ютера зараз?";
 			mbCert = Application->MessageBox(text.c_str(), L"Кореневий сертифікат не довірений",
 				MB_YESNO | MB_ICONWARNING);
 		});
