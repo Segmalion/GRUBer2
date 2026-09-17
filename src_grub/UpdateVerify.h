@@ -28,9 +28,9 @@ bool Update_VerifySigner(const fs::path &exePath, UnicodeString expectedSha1Hex,
 bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg, bool *outUntrustedRoot = NULL);
 
 // встановлює кореневий сертифікат, вшитий у сам GRUBer.exe як ресурс RCDATA
-// "GREENCAPSUL_ROOTCA" (див. UpdateResources.rc), у сховище поточного
-// користувача (CurrentUser\Root) - без прав адміністратора, цього досить,
-// щоб WinVerifyTrust цього ж процесу почав довіряти ланцюгу. НЕ впливає на
+// "GREENCAPSUL_ROOTCA" (див. UpdateResources.rc), у сховище комп'ютера
+// (LocalMachine\Root) - потребує прав адміністратора (див. IsAdminMode()),
+// зате довіра ланцюгу діє для будь-якого користувача цього ПК. НЕ впливає на
 // пінінг відбитка підписанта (UPDATE_SIGNER_SHA1, Update_VerifySigner) -
 // той лишається окремим, більш суворим бар'єром і після встановлення кореня.
 bool Update_InstallEmbeddedRootCert(UnicodeString &errMsg);

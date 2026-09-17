@@ -146,13 +146,15 @@ bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg, boo
 }
 //---------------------------------------------------------------------------
 // Спільна для обох джерел (ресурс/файл) частина - додає вже розпізнаний
-// PCCERT_CONTEXT у сховище поточного користувача (CurrentUser\Root). Без
-// прав адміністратора - достатньо, щоб подальший WinVerifyTrust цього ж
-// процесу (той самий користувач) почав довіряти ланцюгу.
-static bool addCertContextToCurrentUserRoot(PCCERT_CONTEXT cert, UnicodeString &errMsg)
+// PCCERT_CONTEXT у сховище довірених кореневих сертифікатів комп'ютера
+// (LocalMachine\Root), а не поточного користувача - щоб WinVerifyTrust
+// довіряв ланцюгу для будь-якого користувача цього ПК, не лише того, хто
+// запустив оновлення. Потребує прав адміністратора (перевіряється через
+// IsAdminMode() ще до виклику цієї функції - див. Th_UpdateCheck.cpp).
+static bool addCertContextToLocalMachineRoot(PCCERT_CONTEXT cert, UnicodeString &errMsg)
 {
 	HCERTSTORE hStore = CertOpenStore(CERT_STORE_PROV_SYSTEM_W, 0, NULL,
-		CERT_SYSTEM_STORE_CURRENT_USER | CERT_STORE_OPEN_EXISTING_FLAG, L"Root");
+		CERT_SYSTEM_STORE_LOCAL_MACHINE | CERT_STORE_OPEN_EXISTING_FLAG, L"Root");
 	if (!hStore) {
 		errMsg = L"Не вдалось відкрити сховище довірених кореневих сертифікатів (код " +
 			UnicodeString((int)GetLastError()) + L").";
@@ -197,6 +199,6 @@ bool Update_InstallEmbeddedRootCert(UnicodeString &errMsg)
 		0, NULL, &contentType, NULL, NULL, NULL, (const void**)&cert);
 	if (!ok || !cert) { errMsg = L"Не вдалось розпізнати вбудований кореневий сертифікат."; return false; }
 
-	return addCertContextToCurrentUserRoot(cert, errMsg);
+	return addCertContextToLocalMachineRoot(cert, errMsg);
 }
 //---------------------------------------------------------------------------

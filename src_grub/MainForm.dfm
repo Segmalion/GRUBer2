@@ -2528,7 +2528,7 @@
             Margins.Top = 5
             Margins.Right = 5
             Margins.Bottom = 5
-            ActivePage = TabSheet_FileLOGS
+            ActivePage = TabSheet_CurLOGS
             Align = alClient
             MultiLine = True
             TabOrder = 0

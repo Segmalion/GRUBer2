@@ -539,13 +539,16 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 // true, якщо варто запустити тиху фонову перевірку оновлень при старті:
 // автоперевірка увімкнена, ще не йде інша перевірка, збірка не "nogit"/
 // "-dirty" (розробнику не пропонують оновитись на комміт, який він щойно
-// редагує), і з часу lastCheckUtc пройшло не менше intervalHours.
+// редагує), програма запущена від імені адміністратора (встановлення
+// оновлення/кореневого сертифіката вимагає прав адміна - без них перевірку
+// сенсу починати немає), і з часу lastCheckUtc пройшло не менше intervalHours.
 static bool shouldRunStartupUpdateCheck()
 {
 	if (!curConfig.getUpdAutoCheck()) return false;
 	if (th_UpdateCheck_run) return false;
 	if (UnicodeString(GIT_COMMIT_HASH) == "nogit") return false;
 	if (GIT_DIRTY) return false;
+	if (!IsAdminMode()) return false;
 
 	UnicodeString lastStr = curConfig.getUpdLastCheckUtc();
 	if (lastStr.IsEmpty()) return true;

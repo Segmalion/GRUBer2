@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include "Th_UpdateCheck.h"
+#include "Help.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -30,6 +31,12 @@ void __fastcall TFormAbout::LinkLabel_ThreemaIDLinkClick(TObject *Sender, const 
 {
 	if (Link == "gruber:check-update") {
 		if (th_UpdateCheck_run) return;
+		if (!IsAdminMode()) {
+			Application->MessageBox(
+				L"Перевірка оновлень доступна лише при запуску GRUBer від імені адміністратора.",
+				L"Перевірка оновлень", MB_OK | MB_ICONWARNING);
+			return;
+		}
 		// закриваємо About одразу - якщо перевірка знайде оновлення і
 		// користувач погодиться, застосування завершиться Application->Terminate()
 		// поки ця форма ще була б модальною
