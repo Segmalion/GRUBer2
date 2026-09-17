@@ -14,6 +14,7 @@
 #include "UpdateInstall.h"
 #include "Th_EsetDownload.h" // progressBarEsetGo/esetDlStatus - переюзано для UI прогресу
 #include "GitVersion.h"
+#include "Help.h" // printLog - той самий видимий лог, що й у "Лог Граба"
 
 #include "CrashHandler.h"
 
@@ -63,6 +64,8 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	th_UpdateCheck_run = true;
 	stopUpdate = false;
 
+	printLog(">>", L"Перевірка оновлень GRUBer/DeviceLister...");
+
 	Update_CleanStaleStaging(UnicodeString(GIT_COMMIT_HASH));
 
 	UpdateRelease rel;
@@ -86,6 +89,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	}
 
 	if (hardError) {
+		printLog("ER", L"Перевірка оновлень: мережева помилка - " + errMsg);
 		Update_Log(L"Перевірка оновлень: мережева помилка - " + errMsg);
 		if (!silent) {
 			TThread::Synchronize(NULL, [errMsg]() {
@@ -98,6 +102,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	}
 
 	if (!fetchOk || !rel.valid) {
+		printLog("!!", L"Перевірка оновлень: релізів не знайдено, або перевірку не налаштовано.");
 		if (!silent) {
 			TThread::Synchronize(NULL, [&]() {
 				Application->MessageBox(L"Оновлень не знайдено (немає релізів, або перевірку не налаштовано).",
@@ -112,6 +117,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	TThread::Synchronize(NULL, [&skipTag]() { skipTag = curConfig.getUpdSkipTag(); });
 
 	if (!Update_IsNewer(rel, skipTag)) {
+		printLog("OK", L"Перевірка оновлень: у вас найновіша версія (" + UnicodeString(GIT_COMMIT_HASH) + L").");
 		if (!silent) {
 			TThread::Synchronize(NULL, [&]() {
 				Application->MessageBox(L"У вас найновіша версія GRUBer/DeviceLister.",
@@ -125,10 +131,13 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	// не заважаємо активному грабу чи завантаженню бази ESET - спробуємо
 	// знову наступного разу (наступний запуск/ручна перевірка)
 	if (grubActive || th_Gruber_run || th_EsetDownload_run) {
+		printLog("!!", L"Перевірка оновлень: знайдено " + rel.tagName + L", але GRUBer зараз зайнятий - відкладено.");
 		Update_Log(L"Перевірка оновлень: знайдено " + rel.tagName + L", але GRUBer зараз зайнятий - відкладено.");
 		th_UpdateCheck_run = false;
 		return;
 	}
+
+	printLog(">>", L"Перевірка оновлень: знайдено нову версію " + rel.tagName + L" (" + rel.name + L").");
 
 	int mbResult = IDNO;
 	TThread::Synchronize(NULL, [&mbResult, rel]() {
@@ -139,6 +148,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	});
 
 	if (mbResult == IDCANCEL) {
+		printLog("!!", L"Перевірка оновлень: версію " + rel.tagName + L" відхилено, більше не пропонувати.");
 		TThread::Synchronize(NULL, [rel]() {
 			curConfig.setUpdSkipTag(rel.tagName);
 			curConfig.saveFileIni();
@@ -146,10 +156,15 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 		th_UpdateCheck_run = false;
 		return;
 	}
-	if (mbResult != IDYES) { th_UpdateCheck_run = false; return; }
+	if (mbResult != IDYES) {
+		printLog("!!", L"Перевірка оновлень: оновлення відкладено користувачем.");
+		th_UpdateCheck_run = false;
+		return;
+	}
 
 	UpdateAsset gruberAsset, dlAsset;
 	if (!Update_FindAsset(rel, L"GRUBer.exe", gruberAsset) || !Update_FindAsset(rel, L"DeviceLister.exe", dlAsset)) {
+		printLog("ER", L"Перевірка оновлень: у релізі " + rel.tagName + L" немає обох потрібних файлів.");
 		Update_Log(L"Перевірка оновлень: у релізі " + rel.tagName + L" немає обох потрібних файлів.");
 		TThread::Synchronize(NULL, [&]() {
 			Application->MessageBox(L"Реліз не містить обох потрібних файлів (GRUBer.exe/DeviceLister.exe).",
@@ -177,6 +192,8 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	}
 	if (!ok) {
 		bool cancelled = stopUpdate;
+		printLog(cancelled ? "!!" : "ER", cancelled ? L"Перевірка оновлень: завантаження скасовано користувачем."
+			: L"Перевірка оновлень: завантаження не вдалося - " + dlErr);
 		Update_Log(cancelled ? L"Перевірка оновлень: завантаження скасовано користувачем."
 			: L"Перевірка оновлень: завантаження не вдалося - " + dlErr);
 		if (!cancelled) {
@@ -195,6 +212,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	bool verified = Update_VerifyTrustedExe(gruberStaged, verifyErr) &&
 					 Update_VerifyTrustedExe(dlStaged, verifyErr);
 	if (!verified) {
+		printLog("ER", L"Перевірка оновлень: ВІДХИЛЕНО - недійсний підпис (" + verifyErr + L").");
 		Update_Log(L"Перевірка оновлень: ВІДХИЛЕНО - недійсний підпис (" + verifyErr + L").");
 		std::error_code ec; fs::remove_all(stageDir, ec);
 		TThread::Synchronize(NULL, [verifyErr]() {
@@ -209,6 +227,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	fs::path cmdPath;
 	UnicodeString helperErr;
 	if (!Update_WriteHelperCmd(stageDir, cmdPath, helperErr)) {
+		printLog("ER", L"Перевірка оновлень: не вдалось згенерувати встановлювач - " + helperErr);
 		Update_Log(L"Перевірка оновлень: не вдалось згенерувати встановлювач - " + helperErr);
 		TThread::Synchronize(NULL, [helperErr]() {
 			Application->MessageBox(helperErr.c_str(), L"Помилка оновлення", MB_OK | MB_ICONERROR);
@@ -220,6 +239,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	bool needElevation = !Update_InstallDirWritable(installDir);
 	UnicodeString launchErr;
 	if (!Update_LaunchHelper(cmdPath, installDir, GetCurrentProcessId(), needElevation, launchErr)) {
+		printLog("ER", L"Перевірка оновлень: не вдалось запустити встановлювач - " + launchErr);
 		Update_Log(L"Перевірка оновлень: не вдалось запустити встановлювач - " + launchErr);
 		TThread::Synchronize(NULL, [launchErr]() {
 			Application->MessageBox(launchErr.c_str(), L"Помилка оновлення", MB_OK | MB_ICONERROR);
@@ -228,6 +248,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 		return;
 	}
 
+	printLog("OK", L"Перевірка оновлень: оновлення " + rel.tagName + L" застосовується, закриваю GRUBer.");
 	Update_Log(L"Перевірка оновлень: оновлення " + rel.tagName + L" застосовується, закриваю GRUBer.");
 	th_UpdateCheck_run = false;
 	TThread::Synchronize(NULL, [&]() { Application->Terminate(); });
