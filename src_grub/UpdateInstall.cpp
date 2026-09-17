@@ -68,12 +68,23 @@ bool Update_WriteHelperCmd(const fs::path &stageDir, fs::path &outCmd, UnicodeSt
 {
 	std::unique_ptr<TStringList> s(new TStringList);
 	s->Add(L"@echo off");
-	s->Add(L"setlocal");
+	// enabledelayedexpansion - потрібен, бо TS (дата/час логу, див. нижче)
+	// переобчислюється й читається в межах одного й того ж дужкового
+	// if(...)-блоку (waitmain/waitdl timeout), де звичайний %TS% підставився
+	// б ще ДО виконання for /f (значення з моменту розбору блоку, а не з
+	// моменту виконання) - тому скрізь нижче використовується !TS!, а не %TS%
+	s->Add(L"setlocal enabledelayedexpansion");
 	s->Add(L"set \"INSTALL=%~1\"");
 	s->Add(L"set \"PID=%~2\"");
 	s->Add(L"set \"LOG=%ProgramData%\\GRUBer\\logs\\update.log\"");
 	s->Add(L"");
-	s->Add(L"echo [%date% %time%] apply_update: start pid=%PID% install=%INSTALL% >> \"%LOG%\" 2>nul");
+	// %date%/%time% форматуються за локаллю ОС (у логу з'являлось "17.09.2026
+	// 17:46:23,16" замість "2026-09-17 17:46:23", як в решти файлових логів
+	// програми) - тому дата/час тут беруться через PowerShell Get-Date у
+	// фіксованому форматі "yyyy-MM-dd HH:mm:ss", той самий, що й скрізь
+	// інде (див. LogFile.cpp/CrashHandler.cpp)
+	s->Add(L"for /f %%a in ('powershell -NoProfile -Command \"(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\"') do set \"TS=%%a\"");
+	s->Add(L"echo [!TS!] apply_update: start pid=%PID% install=%INSTALL% >> \"%LOG%\" 2>nul");
 	s->Add(L"");
 	s->Add(L"set WAITED=0");
 	s->Add(L":waitmain");
@@ -81,7 +92,8 @@ bool Update_WriteHelperCmd(const fs::path &stageDir, fs::path &outCmd, UnicodeSt
 	s->Add(L"if errorlevel 1 goto waitmain_done");
 	s->Add(L"set /a WAITED=%WAITED%+1");
 	s->Add(L"if %WAITED% GEQ 60 (");
-	s->Add(L"  echo [%date% %time%] apply_update: GRUBer.exe pid %PID% still running after 60s - abort >> \"%LOG%\" 2>nul");
+	s->Add(L"  for /f %%a in ('powershell -NoProfile -Command \"(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\"') do set \"TS=%%a\"");
+	s->Add(L"  echo [!TS!] apply_update: GRUBer.exe pid %PID% still running after 60s - abort >> \"%LOG%\" 2>nul");
 	s->Add(L"  goto :eof");
 	s->Add(L")");
 	s->Add(L"ping -n 2 127.0.0.1 >nul");
@@ -94,7 +106,8 @@ bool Update_WriteHelperCmd(const fs::path &stageDir, fs::path &outCmd, UnicodeSt
 	s->Add(L"if errorlevel 1 goto waitdl_done");
 	s->Add(L"set /a WAITED=%WAITED%+1");
 	s->Add(L"if %WAITED% GEQ 60 (");
-	s->Add(L"  echo [%date% %time%] apply_update: DeviceLister.exe still running after 60s - abort >> \"%LOG%\" 2>nul");
+	s->Add(L"  for /f %%a in ('powershell -NoProfile -Command \"(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\"') do set \"TS=%%a\"");
+	s->Add(L"  echo [!TS!] apply_update: DeviceLister.exe still running after 60s - abort >> \"%LOG%\" 2>nul");
 	s->Add(L"  goto :eof");
 	s->Add(L")");
 	s->Add(L"ping -n 2 127.0.0.1 >nul");
@@ -111,12 +124,14 @@ bool Update_WriteHelperCmd(const fs::path &stageDir, fs::path &outCmd, UnicodeSt
 	s->Add(L"");
 	s->Add(L"del \"%INSTALL%\\GRUBer.exe.bak\" >nul 2>&1");
 	s->Add(L"del \"%INSTALL%\\DeviceLister.exe.bak\" >nul 2>&1");
-	s->Add(L"echo [%date% %time%] apply_update: success >> \"%LOG%\" 2>nul");
+	s->Add(L"for /f %%a in ('powershell -NoProfile -Command \"(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\"') do set \"TS=%%a\"");
+	s->Add(L"echo [!TS!] apply_update: success >> \"%LOG%\" 2>nul");
 	s->Add(L"start \"\" \"%INSTALL%\\GRUBer.exe\"");
 	s->Add(L"goto cleanup");
 	s->Add(L"");
 	s->Add(L":rollback");
-	s->Add(L"echo [%date% %time%] apply_update: copy FAILED - rolling back >> \"%LOG%\" 2>nul");
+	s->Add(L"for /f %%a in ('powershell -NoProfile -Command \"(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\"') do set \"TS=%%a\"");
+	s->Add(L"echo [!TS!] apply_update: copy FAILED - rolling back >> \"%LOG%\" 2>nul");
 	s->Add(L"copy /Y \"%INSTALL%\\GRUBer.exe.bak\" \"%INSTALL%\\GRUBer.exe\" >nul 2>&1");
 	s->Add(L"copy /Y \"%INSTALL%\\DeviceLister.exe.bak\" \"%INSTALL%\\DeviceLister.exe\" >nul 2>&1");
 	s->Add(L"del \"%INSTALL%\\GRUBer.exe.bak\" >nul 2>&1");
