@@ -12,7 +12,6 @@
 #include "UpdateCheck.h"
 #include "UpdateVerify.h"
 #include "UpdateInstall.h"
-#include "Th_EsetDownload.h" // progressBarEsetGo/esetDlStatus - переюзано для UI прогресу
 #include "GitVersion.h"
 #include "Help.h" // printLog - той самий видимий лог, що й у "Лог Граба"
 
@@ -25,6 +24,21 @@ namespace fs = std::filesystem;
 extern Config curConfig;
 extern std::atomic<bool> th_UpdateCheck_run, stopUpdate;
 extern std::atomic<bool> grubActive, th_Gruber_run, th_EsetDownload_run;
+//---------------------------------------------------------------------------
+// прогрес завантаження оновлення - на ProgressBar_Grub (головна вкладка), а
+// не на ProgressBar_ESET, щоб не виглядало так, ніби йде завантаження бази
+// ESET. Безпечно ділити бар з Th_Gruber - вище вже перевірено, що граб
+// зараз не активний (grubActive/th_Gruber_run), перш ніж починати завантаження.
+static void updateProgressGo(int percent) {
+	auto setProgress = [percent]() { Form1->ProgressBar_Grub->Position = percent; };
+	if (GetCurrentThreadId() == MainThreadID) setProgress();
+	else TThread::Synchronize(NULL, setProgress);
+}
+static void updateStatusText(UnicodeString text) {
+	auto setStatus = [text]() { Form1->StatusBar1->Panels->Items[1]->Text = " " + text; };
+	if (GetCurrentThreadId() == MainThreadID) setStatus();
+	else TThread::Synchronize(NULL, setStatus);
+}
 //---------------------------------------------------------------------------
 __fastcall Th_UpdateCheck::Th_UpdateCheck(bool CreateSuspended, bool silentMode)
 	: TThread(CreateSuspended), silent(silentMode)
@@ -179,15 +193,15 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 	fs::path dlStaged = stageDir / L"DeviceLister.exe";
 
 	EsetDlProgressCb progressCb = [](int percent, UnicodeString phase) {
-		progressBarEsetGo(percent);
-		esetDlStatus(phase);
+		updateProgressGo(percent);
+		updateStatusText(phase);
 	};
 
 	UnicodeString dlErr;
-	esetDlStatus(L"Завантаження GRUBer.exe...");
+	updateStatusText(L"Завантаження GRUBer.exe...");
 	bool ok = Update_DownloadAsset(gruberAsset, gruberStaged, 150, stopUpdate, progressCb, dlErr);
 	if (ok) {
-		esetDlStatus(L"Завантаження DeviceLister.exe...");
+		updateStatusText(L"Завантаження DeviceLister.exe...");
 		ok = Update_DownloadAsset(dlAsset, dlStaged, 150, stopUpdate, progressCb, dlErr);
 	}
 	if (!ok) {
@@ -207,7 +221,7 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 		return;
 	}
 
-	esetDlStatus(L"Перевірка підпису оновлення...");
+	updateStatusText(L"Перевірка підпису оновлення...");
 	UnicodeString verifyErr;
 	bool verified = Update_VerifyTrustedExe(gruberStaged, verifyErr) &&
 					 Update_VerifyTrustedExe(dlStaged, verifyErr);
