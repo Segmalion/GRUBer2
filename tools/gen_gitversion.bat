@@ -20,7 +20,11 @@ if errorlevel 1 goto :write
 
 for /f "delims=" %%H in ('git rev-parse --short HEAD 2^>nul') do set "GITHASH=%%H"
 for /f "delims=" %%D in ('git log -1 --format^=%%cI 2^>nul') do set "GITDATE=%%D"
-for /f "delims=" %%S in ('git status --porcelain 2^>nul') do set "GITDIRTY=1"
+rem *.cbproj.local (RAD Studio per-machine IDE state - rename-history log,
+rem active build config) is tracked/pushed like any other file, but it
+rem churns on every IDE session regardless of actual source changes, so
+rem changes limited to it alone must not mark the build as "-dirty".
+for /f "delims=" %%S in ('git status --porcelain 2^>nul ^| findstr /V /I "\.cbproj\.local"') do set "GITDIRTY=1"
 
 popd
 
