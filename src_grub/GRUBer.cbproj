@@ -214,6 +214,10 @@
         <VerInfo_Build>0</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
+        <ResourceCompile Include="UpdateResources.rc">
+            <Form>UpdateResources.res</Form>
+            <BuildOrder>1</BuildOrder>
+        </ResourceCompile>
         <CppCompile Include="About.cpp">
             <VirtualFolder>{BBC2C35B-5B92-40A6-8C64-6BBC4B044AF3}</VirtualFolder>
             <Form>FormAbout</Form>

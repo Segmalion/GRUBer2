@@ -145,22 +145,12 @@ bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg, boo
 	return true;
 }
 //---------------------------------------------------------------------------
-// Читає .cer (DER або Base64/PEM - CryptQueryObject сам визначає формат) і
-// встановлює його у сховище поточного користувача (CurrentUser\Root). Без
+// Спільна для обох джерел (ресурс/файл) частина - додає вже розпізнаний
+// PCCERT_CONTEXT у сховище поточного користувача (CurrentUser\Root). Без
 // прав адміністратора - достатньо, щоб подальший WinVerifyTrust цього ж
 // процесу (той самий користувач) почав довіряти ланцюгу.
-bool Update_InstallRootCert(const fs::path &certPath, UnicodeString &errMsg)
+static bool addCertContextToCurrentUserRoot(PCCERT_CONTEXT cert, UnicodeString &errMsg)
 {
-	PCCERT_CONTEXT cert = NULL;
-	DWORD contentType = 0;
-	BOOL ok = CryptQueryObject(CERT_QUERY_OBJECT_FILE, certPath.c_str(),
-		CERT_QUERY_CONTENT_FLAG_CERT, CERT_QUERY_FORMAT_FLAG_ALL,
-		0, NULL, &contentType, NULL, NULL, NULL, (const void**)&cert);
-	if (!ok || !cert) {
-		errMsg = L"Не вдалось прочитати файл сертифіката " + UnicodeString(certPath.c_str()) + L".";
-		return false;
-	}
-
 	HCERTSTORE hStore = CertOpenStore(CERT_STORE_PROV_SYSTEM_W, 0, NULL,
 		CERT_SYSTEM_STORE_CURRENT_USER | CERT_STORE_OPEN_EXISTING_FLAG, L"Root");
 	if (!hStore) {
@@ -180,5 +170,33 @@ bool Update_InstallRootCert(const fs::path &certPath, UnicodeString &errMsg)
 		return false;
 	}
 	return true;
+}
+//---------------------------------------------------------------------------
+// Кореневий сертифікат вшитий у сам GRUBer.exe як ресурс RCDATA
+// "GREENCAPSUL_ROOTCA" (див. UpdateResources.rc, GreenCapsul_RootCA.cer) -
+// нічого поруч з exe лежати не мусить. CryptQueryObject з CERT_QUERY_OBJECT_BLOB
+// сам визначає формат (DER/Base64).
+bool Update_InstallEmbeddedRootCert(UnicodeString &errMsg)
+{
+	HMODULE hModule = GetModuleHandle(NULL);
+	HRSRC hRes = FindResourceW(hModule, L"GREENCAPSUL_ROOTCA", RT_RCDATA);
+	if (!hRes) { errMsg = L"Вбудований кореневий сертифікат не знайдено в ресурсах програми."; return false; }
+	HGLOBAL hData = LoadResource(hModule, hRes);
+	DWORD size = SizeofResource(hModule, hRes);
+	const void *ptr = hData ? LockResource(hData) : NULL;
+	if (!ptr || size == 0) { errMsg = L"Не вдалось завантажити ресурс кореневого сертифіката."; return false; }
+
+	CERT_BLOB blob;
+	blob.cbData = size;
+	blob.pbData = (BYTE*)ptr;
+
+	PCCERT_CONTEXT cert = NULL;
+	DWORD contentType = 0;
+	BOOL ok = CryptQueryObject(CERT_QUERY_OBJECT_BLOB, &blob,
+		CERT_QUERY_CONTENT_FLAG_CERT, CERT_QUERY_FORMAT_FLAG_ALL,
+		0, NULL, &contentType, NULL, NULL, NULL, (const void**)&cert);
+	if (!ok || !cert) { errMsg = L"Не вдалось розпізнати вбудований кореневий сертифікат."; return false; }
+
+	return addCertContextToCurrentUserRoot(cert, errMsg);
 }
 //---------------------------------------------------------------------------
