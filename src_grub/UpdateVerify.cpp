@@ -35,7 +35,7 @@ static UnicodeString stripSpaces(UnicodeString s)
 	return out;
 }
 //---------------------------------------------------------------------------
-bool Update_VerifyTrust(const fs::path &exePath, UnicodeString &errMsg)
+bool Update_VerifyTrust(const fs::path &exePath, UnicodeString &errMsg, LONG *outStatus)
 {
 	WINTRUST_FILE_INFO fileInfo = {0};
 	fileInfo.cbStruct = sizeof(fileInfo);
@@ -58,6 +58,7 @@ bool Update_VerifyTrust(const fs::path &exePath, UnicodeString &errMsg)
 	winTrustData.dwStateAction = WTD_STATEACTION_CLOSE;
 	WinVerifyTrust(NULL, &action, &winTrustData);
 
+	if (outStatus) *outStatus = status;
 	if (status != ERROR_SUCCESS) {
 		errMsg = L"Підпис файлу недійсний або відсутній (код " + UnicodeString((int)status) + L").";
 		return false;
@@ -132,10 +133,52 @@ bool Update_VerifySigner(const fs::path &exePath, UnicodeString expectedSha1Hex,
 	return true;
 }
 //---------------------------------------------------------------------------
-bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg)
+bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg, bool *outUntrustedRoot)
 {
-	if (!Update_VerifyTrust(exePath, errMsg)) return false;
+	if (outUntrustedRoot) *outUntrustedRoot = false;
+	LONG trustStatus = 0;
+	if (!Update_VerifyTrust(exePath, errMsg, &trustStatus)) {
+		if (outUntrustedRoot) *outUntrustedRoot = (trustStatus == CERT_E_UNTRUSTEDROOT);
+		return false;
+	}
 	if (!Update_VerifySigner(exePath, UPDATE_SIGNER_SHA1, errMsg)) return false;
+	return true;
+}
+//---------------------------------------------------------------------------
+// Читає .cer (DER або Base64/PEM - CryptQueryObject сам визначає формат) і
+// встановлює його у сховище поточного користувача (CurrentUser\Root). Без
+// прав адміністратора - достатньо, щоб подальший WinVerifyTrust цього ж
+// процесу (той самий користувач) почав довіряти ланцюгу.
+bool Update_InstallRootCert(const fs::path &certPath, UnicodeString &errMsg)
+{
+	PCCERT_CONTEXT cert = NULL;
+	DWORD contentType = 0;
+	BOOL ok = CryptQueryObject(CERT_QUERY_OBJECT_FILE, certPath.c_str(),
+		CERT_QUERY_CONTENT_FLAG_CERT, CERT_QUERY_FORMAT_FLAG_ALL,
+		0, NULL, &contentType, NULL, NULL, NULL, (const void**)&cert);
+	if (!ok || !cert) {
+		errMsg = L"Не вдалось прочитати файл сертифіката " + UnicodeString(certPath.c_str()) + L".";
+		return false;
+	}
+
+	HCERTSTORE hStore = CertOpenStore(CERT_STORE_PROV_SYSTEM_W, 0, NULL,
+		CERT_SYSTEM_STORE_CURRENT_USER | CERT_STORE_OPEN_EXISTING_FLAG, L"Root");
+	if (!hStore) {
+		errMsg = L"Не вдалось відкрити сховище довірених кореневих сертифікатів (код " +
+			UnicodeString((int)GetLastError()) + L").";
+		CertFreeCertificateContext(cert);
+		return false;
+	}
+
+	BOOL added = CertAddCertificateContextToStore(hStore, cert, CERT_STORE_ADD_REPLACE_EXISTING, NULL);
+	DWORD addErr = added ? 0 : GetLastError();
+	CertCloseStore(hStore, 0);
+	CertFreeCertificateContext(cert);
+
+	if (!added) {
+		errMsg = L"Не вдалось встановити сертифікат (код " + UnicodeString((int)addErr) + L").";
+		return false;
+	}
 	return true;
 }
 //---------------------------------------------------------------------------

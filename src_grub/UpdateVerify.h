@@ -13,12 +13,26 @@ extern const UnicodeString UPDATE_SIGNER_SHA1;
 
 // WinVerifyTrust: підпис файлу цілий і ланцюг довіри дійсний
 // (WTD_REVOKE_NONE - без перевірки відкликання, техніки часто офлайн).
-bool Update_VerifyTrust(const fs::path &exePath, UnicodeString &errMsg);
+// outStatus (якщо не NULL) - сирий код WinVerifyTrust, щоб викликач міг
+// розрізнити CERT_E_UNTRUSTEDROOT (кореневий сертифікат просто не довірений
+// на цьому ПК - можна запропонувати встановити GreenCapsul_RootCA.cer) від
+// будь-якої іншої, "справжньої" відмови підпису (підробка, підміна файлу).
+bool Update_VerifyTrust(const fs::path &exePath, UnicodeString &errMsg, LONG *outStatus = NULL);
 
 // відбиток сертифіката підписанта файлу збігається з UPDATE_SIGNER_SHA1
 bool Update_VerifySigner(const fs::path &exePath, UnicodeString expectedSha1Hex, UnicodeString &errMsg);
 
-// обидві перевірки разом - єдина точка виклику перед застосуванням оновлення
-bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg);
+// обидві перевірки разом - єдина точка виклику перед застосуванням оновлення.
+// outUntrustedRoot (якщо не NULL) - true лише якщо причина відмови саме
+// CERT_E_UNTRUSTEDROOT (див. Update_VerifyTrust вище).
+bool Update_VerifyTrustedExe(const fs::path &exePath, UnicodeString &errMsg, bool *outUntrustedRoot = NULL);
+
+// встановлює кореневий сертифікат (.cer, DER або Base64/PEM - формат
+// визначається автоматично) у сховище поточного користувача (CurrentUser\Root) -
+// без прав адміністратора, цього досить, щоб WinVerifyTrust цього ж процесу
+// почав довіряти ланцюгу. НЕ впливає на пінінг відбитка підписанта
+// (UPDATE_SIGNER_SHA1, Update_VerifySigner) - той лишається окремим, більш
+// суворим бар'єром і після встановлення кореневого сертифіката.
+bool Update_InstallRootCert(const fs::path &certPath, UnicodeString &errMsg);
 
 #endif

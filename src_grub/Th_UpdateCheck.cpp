@@ -223,8 +223,51 @@ void __fastcall Th_UpdateCheck::ExecuteImpl()
 
 	updateStatusText(L"Перевірка підпису оновлення...");
 	UnicodeString verifyErr;
-	bool verified = Update_VerifyTrustedExe(gruberStaged, verifyErr) &&
-					 Update_VerifyTrustedExe(dlStaged, verifyErr);
+	bool untrustedRoot = false;
+	bool verified = Update_VerifyTrustedExe(gruberStaged, verifyErr, &untrustedRoot);
+	if (verified) {
+		bool untrustedRoot2 = false;
+		verified = Update_VerifyTrustedExe(dlStaged, verifyErr, &untrustedRoot2);
+		if (!verified) untrustedRoot = untrustedRoot2;
+	}
+
+	// CERT_E_UNTRUSTEDROOT (а не будь-яка інша відмова підпису!) означає, що
+	// сам підпис коректний, просто кореневий сертифікат видавця не довірений
+	// на цьому конкретному ПК - типова ситуація для внутрішнього CA. Пінінг
+	// відбитка підписанта (Update_VerifySigner/UPDATE_SIGNER_SHA1) лишається
+	// в силі й після встановлення кореня - зловмисник з чужим коренем усе
+	// одно не підбере той самий SHA1, тож ризик тут не зростає.
+	if (!verified && untrustedRoot) {
+		fs::path certPath = fs::current_path() / L"GreenCapsul_RootCA.cer";
+		std::error_code certEc;
+		if (fs::exists(certPath, certEc)) {
+			printLog("!!", L"Перевірка оновлень: кореневий сертифікат не довірений, пропоную встановити " +
+				UnicodeString(certPath.filename().c_str()) + L".");
+			int mbCert = IDNO;
+			TThread::Synchronize(NULL, [&mbCert]() {
+				UnicodeString text = L"Оновлення підписано коректно, але кореневий сертифікат видавця "
+					L"не довірений на цьому ПК.\n\nВстановити кореневий сертифікат "
+					L"(GreenCapsul_RootCA.cer) у сховище поточного користувача зараз?";
+				mbCert = Application->MessageBox(text.c_str(), L"Кореневий сертифікат не довірений",
+					MB_YESNO | MB_ICONWARNING);
+			});
+			if (mbCert == IDYES) {
+				UnicodeString certErr;
+				if (Update_InstallRootCert(certPath, certErr)) {
+					printLog("OK", L"Перевірка оновлень: кореневий сертифікат встановлено, повторна перевірка підпису...");
+					Update_Log(L"Перевірка оновлень: кореневий сертифікат встановлено.");
+					UnicodeString retryErr;
+					verified = Update_VerifyTrustedExe(gruberStaged, retryErr) &&
+							   Update_VerifyTrustedExe(dlStaged, retryErr);
+					if (!verified) verifyErr = retryErr;
+				} else {
+					printLog("ER", L"Перевірка оновлень: не вдалось встановити кореневий сертифікат - " + certErr);
+					Update_Log(L"Перевірка оновлень: не вдалось встановити кореневий сертифікат - " + certErr);
+				}
+			}
+		}
+	}
+
 	if (!verified) {
 		printLog("ER", L"Перевірка оновлень: ВІДХИЛЕНО - недійсний підпис (" + verifyErr + L").");
 		Update_Log(L"Перевірка оновлень: ВІДХИЛЕНО - недійсний підпис (" + verifyErr + L").");
