@@ -12,7 +12,7 @@
 // випадків потрібен try/catch прямо в конструкторі відповідного класу.
 void InstallCrashHandler();
 
-// Дописує рядок у C:\ProgramData\GRUBer\error\crash.log. Чиста файлова
+// Дописує рядок у C:\ProgramData\GRUBer\logs\crash.log. Чиста файлова
 // операція без залежності від VCL/Application/Form1 - безпечно викликати
 // з будь-якого потоку і на будь-якому етапі запуску, навіть до створення
 // форм (на відміну від printLog/printLogDebug з Help.cpp, які звертаються

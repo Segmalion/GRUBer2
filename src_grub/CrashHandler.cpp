@@ -14,7 +14,7 @@
 // конструюються рівно в момент виконання цього рядка, тому завжди готові.
 void LogCrash(const UnicodeString &source, const UnicodeString &message)
 {
-	const UnicodeString crashLogDir  = "C:\\ProgramData\\GRUBer\\error\\";
+	const UnicodeString crashLogDir  = "C:\\ProgramData\\GRUBer\\logs\\";
 	const UnicodeString crashLogFile = crashLogDir + "crash.log";
 
 	// Без ensureDirWithAccess()/cacls() (Fille.h) - щоб не тягнути залежність
@@ -30,7 +30,7 @@ void LogCrash(const UnicodeString &source, const UnicodeString &message)
 	if (hFile == INVALID_HANDLE_VALUE) return;
 	SetFilePointer(hFile, 0, NULL, FILE_END);
 
-	UnicodeString ts = TDateTime(Now()).FormatString("yyyy-MM-dd hh:nn:ss");
+	UnicodeString ts = TDateTime(Now()).FormatString("yyyy-mm-dd hh:mm:ss");
 	UTF8String line = UnicodeString("[" + ts + "] [" + source + "] " + message + "\r\n");
 	DWORD written;
 	WriteFile(hFile, line.c_str(), line.Length(), &written, NULL);
@@ -47,7 +47,7 @@ static LONG WINAPI TopLevelExceptionFilter(EXCEPTION_POINTERS *ep)
 
 	MessageBoxW(NULL,
 		L"GRUBer зазнав критичної помилки і буде закрито.\n\n"
-		L"Деталі записано у файл:\nC:\\ProgramData\\GRUBer\\error\\crash.log\n\n"
+		L"Деталі записано у файл:\nC:\\ProgramData\\GRUBer\\logs\\crash.log\n\n"
 		L"Передайте цей файл розробнику для діагностики.",
 		L"GRUBer - критична помилка", MB_OK | MB_ICONERROR | MB_TOPMOST);
 

@@ -11,7 +11,7 @@ private:
 	bool debug, showLog, showEsetUpd;
 	bool tempDir;
 	bool newGrub, license;
-	bool oldGrubComent, oldGrubInfo, oldGrubNet, oldGrubUsb;
+	bool oldGrubComent, oldGrubInfo, oldGrubNet, oldGrubUsb, oldGrubLogs;
 	bool enablePrefixPartition;
 	short oldGrub, audit, esetLog;
 	short iniVersion = 0; // версія GRUBer.ini: 0, якщо ключ ini_version відсутній (старий формат)
@@ -57,6 +57,7 @@ public:
 	bool getOldGrubInfo();
 	bool getOldGrubNet();
 	bool getOldGrubUsb();
+	bool getOldGrubLogs();
 	bool getNewGrub();
 	bool getLicense();
 	bool getEnablePrefixPartition();
@@ -95,6 +96,7 @@ public:
 	void setOldGrubInfo(bool i);
 	void setOldGrubNet(bool i);
 	void setOldGrubUsb(bool i);
+	void setOldGrubLogs(bool i);
 	void setNewGrub(bool i);
 	void setLicense(bool i);
     void setEnablePrefixPartition(bool i);

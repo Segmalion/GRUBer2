@@ -9,6 +9,7 @@
 #include "MainForm.h"
 #include "Eset.h"
 #include "GitVersion.h"
+#include "LogFile.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -27,8 +28,12 @@ extern Arm curPC;
 // компонент обновляется напрямую.
 void printLog(UnicodeString str)
 {
-	UnicodeString logTime = TDateTime(Now()).FormatString("hh:mm:ss");
+	TDateTime now = Now();
+	UnicodeString logTime = now.FormatString("hh:mm:ss");
 	UnicodeString line = "[" + logTime + "]" + str;
+	// у файл - з повною датою (потрібна для розбору логів заднім числом), в
+	// UI - лише час, дата там не потрібна
+	LogFile_Write("[" + now.FormatString("yyyy-mm-dd hh:mm:ss") + "]" + str);
 	auto addLine = [line]() {
 		Form1->RichEdit_LOG->Lines->Add(line);
 		// Form1->RichEdit_LOG->SelAttributes->Color = clDefault;
@@ -165,6 +170,7 @@ void setConfigToForm(Config &curConfig) {
 	Form1->InfoTxt->Checked = curConfig.getOldGrubInfo();
 	Form1->NetTxt->Checked = curConfig.getOldGrubNet();
 	Form1->UsbTxt->Checked = curConfig.getOldGrubUsb();
+	Form1->LogsTxt->Checked = curConfig.getOldGrubLogs();
 	Form1->CheckBoxNewGrub->Checked = curConfig.getNewGrub();
 	Form1->CheckBoxLicense->Checked = curConfig.getLicense();
 	Form1->CheckBoxAudit->State = (TCheckBoxState)curConfig.getAudit();

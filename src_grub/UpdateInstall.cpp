@@ -12,7 +12,7 @@
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 static const fs::path UPDATE_ROOT = L"C:\\ProgramData\\GRUBer\\update";
-static const UnicodeString UPDATE_LOG_DIR  = L"C:\\ProgramData\\GRUBer\\error\\";
+static const UnicodeString UPDATE_LOG_DIR  = L"C:\\ProgramData\\GRUBer\\logs\\";
 static const UnicodeString UPDATE_LOG_FILE = UPDATE_LOG_DIR + L"update.log";
 //---------------------------------------------------------------------------
 void Update_Log(const UnicodeString &message)
@@ -27,7 +27,7 @@ void Update_Log(const UnicodeString &message)
 	if (hFile == INVALID_HANDLE_VALUE) return;
 	SetFilePointer(hFile, 0, NULL, FILE_END);
 
-	UnicodeString ts = TDateTime(Now()).FormatString("yyyy-MM-dd hh:nn:ss");
+	UnicodeString ts = TDateTime(Now()).FormatString("yyyy-mm-dd hh:mm:ss");
 	UTF8String line = UnicodeString(L"[" + ts + L"] " + message + L"\r\n");
 	DWORD written;
 	WriteFile(hFile, line.c_str(), line.Length(), &written, NULL);
@@ -71,7 +71,7 @@ bool Update_WriteHelperCmd(const fs::path &stageDir, fs::path &outCmd, UnicodeSt
 	s->Add(L"setlocal");
 	s->Add(L"set \"INSTALL=%~1\"");
 	s->Add(L"set \"PID=%~2\"");
-	s->Add(L"set \"LOG=%ProgramData%\\GRUBer\\error\\update.log\"");
+	s->Add(L"set \"LOG=%ProgramData%\\GRUBer\\logs\\update.log\"");
 	s->Add(L"");
 	s->Add(L"echo [%date% %time%] apply_update: start pid=%PID% install=%INSTALL% >> \"%LOG%\" 2>nul");
 	s->Add(L"");

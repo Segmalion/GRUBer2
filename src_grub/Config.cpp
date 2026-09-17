@@ -84,6 +84,9 @@ void Config::readFileIni() {
 		// oldGrubUsb
 		findStr = findParam(infoFille, "[genfile]", "oldGrubUsb");
 		if(findStr == 0 || findStr == 1) oldGrubUsb = findStr.ToInt();
+		// oldGrubLogs
+		findStr = findParam(infoFille, "[genfile]", "oldGrubLogs");
+		if(findStr == 0 || findStr == 1) oldGrubLogs = findStr.ToInt();
 		// newGrub
 		findStr = findParam(infoFille, "[genfile]", "newGrub");
 		if(findStr == 0 || findStr == 1) newGrub = findStr.ToInt();
@@ -191,6 +194,7 @@ void Config::saveFileIni() {
 	infoFille->Add("oldGrubInfo=" + UnicodeString(oldGrubInfo));
 	infoFille->Add("oldGrubNet=" + UnicodeString(oldGrubNet));
 	infoFille->Add("oldGrubUsb=" + UnicodeString(oldGrubUsb));
+	infoFille->Add("oldGrubLogs=" + UnicodeString(oldGrubLogs));
 	infoFille->Add("newGrub=" + UnicodeString(newGrub));
 	infoFille->Add("license=" + UnicodeString(license));
 	infoFille->Add("audit=" + UnicodeString(audit));
@@ -230,17 +234,13 @@ void Config::saveFileIni() {
 	iniVersion = CONFIG_INI_VERSION_CURRENT;
 }
 short Config::checkOldGrubState() {
-	switch ((short)oldGrubComent + (short)oldGrubInfo + (short)oldGrubNet + (short)oldGrubUsb) {
+	switch ((short)oldGrubComent + (short)oldGrubInfo + (short)oldGrubNet + (short)oldGrubUsb + (short)oldGrubLogs) {
 	case 0:
 		return 0;
-	case 1:
-	case 2:
-	case 3:
-		return 2;
-	case 4:
+	case 5:
 		return 1;
-    default:
-		return 0;
+	default:
+		return 2;
 	}
 }
 // геттеры
@@ -252,6 +252,7 @@ bool Config::getOldGrubComent() { return oldGrubComent; };
 bool Config::getOldGrubInfo()   { return oldGrubInfo; };
 bool Config::getOldGrubNet()    { return oldGrubNet; };
 bool Config::getOldGrubUsb()    { return oldGrubUsb; };
+bool Config::getOldGrubLogs()   { return oldGrubLogs; };
 bool Config::getNewGrub()  		{ return newGrub; }
 bool Config::getLicense()  		{ return license; }
 bool Config::getEnablePrefixPartition() { return enablePrefixPartition; }
@@ -290,6 +291,7 @@ void Config::setOldGrubComent(bool i) { oldGrubComent = i; }
 void Config::setOldGrubInfo(bool i)   { oldGrubInfo = i; }
 void Config::setOldGrubNet(bool i)    { oldGrubNet = i; }
 void Config::setOldGrubUsb(bool i)    { oldGrubUsb = i; }
+void Config::setOldGrubLogs(bool i)   { oldGrubLogs = i; }
 void Config::setNewGrub(bool i) { newGrub = i; }
 void Config::setLicense(bool i) { license = i; }
 void Config::setEnablePrefixPartition(bool i) { enablePrefixPartition = i; }

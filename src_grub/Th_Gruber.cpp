@@ -33,7 +33,7 @@ extern bool dirGrubRewrite, gruberStart;
 extern std::atomic<bool> grubActive;
 double pos, step;
 extern std::atomic<bool> checkDirExist;
-bool jb1, jb2, jb3, jb4, jb5, jb6;
+bool jb1, jb2, jb3, jb4, jb5, jb6, jb9;
 short jb7, jb8;
 short countJob, curJob;
 
@@ -50,6 +50,7 @@ void progressBarStep() {
 	if (jb7 != 0) countJob++;      //auditMin.html || auditMax.html
 	if (jb7 != 0 && x64_sys() && IsAdminMode()) countJob++; //diskInfo.txt
 	if (jb8 != 0) countJob++;      //eset-log-mini.zip || eset-log-max.zip
+	if (jb9 != 0) countJob++;      //grub_logs.7z
 	printLogDebug("{countJob}=" + UnicodeString(countJob));
 	step = 100/(double)countJob;
 }
@@ -225,10 +226,11 @@ void __fastcall Th_Gruber::ExecuteImpl()
 	jb6 = curConfig.getLicense();
 	jb7 = curConfig.getAudit();
 	jb8 = curConfig.getEsetLog();
+	jb9 = curConfig.getOldGrubLogs();
 	if (th_Gruber_runMini == true) {
-		jb1 = 1; jb2 = 0; jb3 = 0; jb4 = 0; jb5 = 0; jb6 = 0; jb7 = 0; jb8 = 0; }
+		jb1 = 1; jb2 = 0; jb3 = 0; jb4 = 0; jb5 = 0; jb6 = 0; jb7 = 0; jb8 = 0; jb9 = 0; }
 	if (th_Gruber_runUSB == true) {
-		jb1 = 0; jb2 = 0; jb3 = 0; jb4 = 1; jb5 = 0; jb6 = 0; jb7 = 0; jb8 = 0; }
+		jb1 = 0; jb2 = 0; jb3 = 0; jb4 = 1; jb5 = 0; jb6 = 0; jb7 = 0; jb8 = 0; jb9 = 0; }
 	// -> преварительные процедуры
 	// --- настройка прогресбара
 	pos = 0;
@@ -321,6 +323,7 @@ void __fastcall Th_Gruber::ExecuteImpl()
 		if (jb7 != 0 && !stopBool) bigErr *= job_audit(GrubDir); 		//audit.html
 		if (jb7 != 0 && !stopBool && x64_sys() && IsAdminMode()) bigErr *= job_diskInfo(GrubDir); //CDI.txt
 		if (jb8 != 0 && !stopBool) bigErr *= job_esetLog(GrubDir);   //eset-log.zip
+		if (jb9 != 0 && !stopBool) bigErr *= job_gruber_logs(GrubDir); //grub_logs.7z
 		// --
 		if (tempDir) {
 			Synchronize([this]() { printLog(L"Перенесеня файлів в папку граба..."); });
@@ -582,5 +585,20 @@ bool job_esetLog(UnicodeString dir) {
 //	printLogDebug("{arg}=" + arg);
 //	printLogDebug("{pos}=" + UnicodeString(pos));
 	return !esetLog.checkErr();
+}
+bool job_gruber_logs(UnicodeString dir) {
+	UnicodeString outFilePath = dir + "\\grub_logs.7z";
+	if (FileExists(outFilePath)) FileSetAttr(outFilePath, 0) && DeleteFile(outFilePath);
+	printLog(L"Генерування grub_logs.7z...");
+	UnicodeString app32 = curDir.get_toolPath() + "\\7zip\\32\\7za.exe";
+	UnicodeString app64 = curDir.get_toolPath() + "\\7zip\\64\\7za.exe";
+	UnicodeString arg = "a -t7z -y \"" + outFilePath + "\" \"C:\\ProgramData\\GRUBer\\logs\\*\"";
+	RunApp logsArch {app32, app64, arg};
+	logsArch.run();
+//	printLogDebug(logsArch.errorString());
+	printLog(logsArch.resultString());
+	jobDone(countJob, ++curJob);
+	progressBarGo(pos += step, logsArch.checkErr());
+	return !logsArch.checkErr();
 }
 //---------------------------------------------------------------------------

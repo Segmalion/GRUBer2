@@ -97,6 +97,7 @@ __published:	// IDE-managed Components
 	TMenuItem *InfoTxt;
 	TMenuItem *NetTxt;
 	TMenuItem *UsbTxt;
+	TMenuItem *LogsTxt;
 	TEdit *EditPrefixPartition;
 	TCheckBox *CheckBoxPrefixPartition;
 	TButton *BtnAboutGruber;
@@ -222,6 +223,12 @@ __published:	// IDE-managed Components
 	TButton *BtnEsetDownload;
 	TProgressBar *ProgressBar_ESET;
 	TButton *BtnJobs;
+	TPageControl *PageControl_LOGS;
+	TTabSheet *TabSheet_CurLOGS;
+	TTabSheet *TabSheet_FileLOGS;
+	TGridPanel *GridPanel_FileLOGS;
+	TComboBox *ComboBox_FileLOGS;
+	TRichEdit *RichEdit_FileLOGS;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall CheckBox_TempDirClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
@@ -270,6 +277,7 @@ __published:	// IDE-managed Components
 	void __fastcall InfoTxtClick(TObject *Sender);
 	void __fastcall NetTxtClick(TObject *Sender);
 	void __fastcall UsbTxtClick(TObject *Sender);
+	void __fastcall LogsTxtClick(TObject *Sender);
 	void __fastcall EditPrefixPartitionChange(TObject *Sender);
 	void __fastcall CheckBoxPrefixPartitionClick(TObject *Sender);
 	void __fastcall BtnAboutGruberClick(TObject *Sender);
@@ -309,9 +317,17 @@ __published:	// IDE-managed Components
 	void __fastcall CheckListBox_SPZClickCheck(TObject *Sender);
 	void __fastcall CheckBox_installAvpzESETClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
+	void __fastcall ComboBox_FileLOGSChange(TObject *Sender);
+	void __fastcall PageControl_LOGSChange(TObject *Sender);
 private:	// User declarations
 	std::vector<UnicodeString> fileInfoGrub();
 	std::set<int> DisabledItemsClass;
+	// оновлює список файлів у ComboBox_FileLOGS (тека логів) і підвантажує
+	// вміст обраного файлу; викликається зі старту форми і з
+	// PageControl_LOGSChange при переході на TabSheet_FileLOGS
+	void RefreshFileLogsList();
+	// підвантажує в RichEdit_FileLOGS вміст файлу, обраного у ComboBox_FileLOGS
+	void LoadSelectedFileLog();
 	// не __published і не прив'язаний через .dfm (OnDrawCell = ...) навмисно:
 	// призначається кодом у конструкторі, щоб дизайнер форми не звіряв сигнатуру
 	// цього методу з .dfm і не показував хибну помилку "incompatible parameter list"

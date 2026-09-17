@@ -2518,26 +2518,129 @@
           Margins.Bottom = 6
           Caption = #1051#1086#1075' '#1043#1088#1072#1073#1072
           ImageIndex = 1
-          object RichEdit_LOG: TRichEdit
+          object PageControl_LOGS: TPageControl
             AlignWithMargins = True
-            Left = 6
-            Top = 6
-            Width = 664
-            Height = 967
-            Margins.Left = 6
-            Margins.Top = 6
-            Margins.Right = 6
-            Margins.Bottom = 6
+            Left = 5
+            Top = 5
+            Width = 666
+            Height = 969
+            Margins.Left = 5
+            Margins.Top = 5
+            Margins.Right = 5
+            Margins.Bottom = 5
+            ActivePage = TabSheet_FileLOGS
             Align = alClient
-            Font.Charset = RUSSIAN_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -21
-            Font.Name = 'Consolas'
-            Font.Style = []
-            ParentFont = False
-            ReadOnly = True
-            ScrollBars = ssBoth
+            MultiLine = True
             TabOrder = 0
+            OnChange = PageControl_LOGSChange
+            object TabSheet_CurLOGS: TTabSheet
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Caption = #1055#1086#1090#1086#1095#1085#1080#1081' '#1051#1054#1043
+              object RichEdit_LOG: TRichEdit
+                AlignWithMargins = True
+                Left = 6
+                Top = 6
+                Width = 646
+                Height = 912
+                Margins.Left = 6
+                Margins.Top = 6
+                Margins.Right = 6
+                Margins.Bottom = 6
+                Align = alClient
+                Font.Charset = RUSSIAN_CHARSET
+                Font.Color = clWindowText
+                Font.Height = -21
+                Font.Name = 'Consolas'
+                Font.Style = []
+                ParentFont = False
+                ReadOnly = True
+                ScrollBars = ssBoth
+                TabOrder = 0
+              end
+            end
+            object TabSheet_FileLOGS: TTabSheet
+              Margins.Left = 5
+              Margins.Top = 5
+              Margins.Right = 5
+              Margins.Bottom = 5
+              Caption = #1060#1072#1081#1083#1086#1074#1110' '#1051#1054#1043#1080
+              ImageIndex = 1
+              object GridPanel_FileLOGS: TGridPanel
+                Left = 0
+                Top = 0
+                Width = 658
+                Height = 924
+                Margins.Left = 5
+                Margins.Top = 5
+                Margins.Right = 5
+                Margins.Bottom = 5
+                Align = alClient
+                ColumnCollection = <
+                  item
+                    Value = 100.000000000000000000
+                  end>
+                ControlCollection = <
+                  item
+                    Column = 0
+                    Control = ComboBox_FileLOGS
+                    Row = 0
+                  end
+                  item
+                    Column = 0
+                    Control = RichEdit_FileLOGS
+                    Row = 1
+                  end>
+                RowCollection = <
+                  item
+                    SizeStyle = ssAbsolute
+                    Value = 50.000000000000000000
+                  end
+                  item
+                    Value = 100.000000000000000000
+                  end>
+                TabOrder = 0
+                object ComboBox_FileLOGS: TComboBox
+                  AlignWithMargins = True
+                  Left = 6
+                  Top = 6
+                  Width = 646
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Style = csDropDownList
+                  TabOrder = 0
+                  OnChange = ComboBox_FileLOGSChange
+                end
+                object RichEdit_FileLOGS: TRichEdit
+                  AlignWithMargins = True
+                  Left = 6
+                  Top = 56
+                  Width = 646
+                  Height = 862
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Font.Charset = RUSSIAN_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -21
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  ScrollBars = ssBoth
+                  TabOrder = 1
+                  WordWrap = False
+                end
+              end
+            end
           end
         end
         object TabSheet_Soft: TTabSheet
@@ -4128,6 +4231,11 @@
       Caption = 'usb.txt'
       Checked = True
       OnClick = UsbTxtClick
+    end
+    object LogsTxt: TMenuItem
+      Caption = 'grub_logs.7z'
+      Checked = True
+      OnClick = LogsTxtClick
     end
   end
   object PopupMenu_GrubButton: TPopupMenu

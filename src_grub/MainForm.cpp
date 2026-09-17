@@ -6,6 +6,7 @@
 #include <chrono> // Required for std::chrono::seconds
 #include <filesystem>
 #include <atomic>
+#include <memory>
 #include <System.DateUtils.hpp>
 #pragma hdrstop
 
@@ -36,6 +37,7 @@
 #include "Th_UpdateCheck.h"
 #include "CrashHandler.h"
 #include "GitVersion.h"
+#include "LogFile.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -519,6 +521,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	captureGridUsersDpiBaseline();
 	applyGridUsersDpiScale();
 	fs::path p_curDir = fs::current_path();
+	RefreshFileLogsList(); // початкове наповнення ComboBox_FileLOGS
 	// === запуск правильной разрядности
 	if (x64_sys() == true && x64_app() == false) {
 		fs::path p_app_x64 = p_curDir / "GRUBer.exe";
@@ -1123,12 +1126,14 @@ void __fastcall TForm1::CheckBoxOldGrubClick(TObject *Sender)
 			if (InfoTxt->Checked) {InfoTxt->Checked = 0; curConfig.setOldGrubInfo(InfoTxt->Checked);}
 			if (NetTxt->Checked) {NetTxt->Checked = 0; curConfig.setOldGrubNet(NetTxt->Checked);}
 			if (UsbTxt->Checked) {UsbTxt->Checked = 0; curConfig.setOldGrubUsb(UsbTxt->Checked);}
+			if (LogsTxt->Checked) {LogsTxt->Checked = 0; curConfig.setOldGrubLogs(LogsTxt->Checked);}
 		}
 		if (curConfig.getOldGrub()==1) {
 			if (!ComentTxt->Checked) {ComentTxt->Checked = 1; curConfig.setOldGrubComent(ComentTxt->Checked);}
 			if (!InfoTxt->Checked) {InfoTxt->Checked = 1; curConfig.setOldGrubInfo(InfoTxt->Checked);}
 			if (!NetTxt->Checked) {NetTxt->Checked = 1; curConfig.setOldGrubNet(NetTxt->Checked);}
 			if (!UsbTxt->Checked) {UsbTxt->Checked = 1; curConfig.setOldGrubUsb(UsbTxt->Checked);}
+			if (!LogsTxt->Checked) {LogsTxt->Checked = 1; curConfig.setOldGrubLogs(LogsTxt->Checked);}
 		}
 	}
 }
@@ -1154,6 +1159,12 @@ void __fastcall TForm1::UsbTxtClick(TObject *Sender)
 {
 	UsbTxt->Checked = !UsbTxt->Checked;
 	curConfig.setOldGrubUsb(UsbTxt->Checked);
+	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
+}
+void __fastcall TForm1::LogsTxtClick(TObject *Sender)
+{
+	LogsTxt->Checked = !LogsTxt->Checked;
+	curConfig.setOldGrubLogs(LogsTxt->Checked);
 	CheckBoxOldGrub->State = (TCheckBoxState)curConfig.checkOldGrubState();
 }
 void __fastcall TForm1::CheckBoxNewGrubClick(TObject *Sender)
@@ -1370,6 +1381,57 @@ void __fastcall TForm1::CheckBox_installAvpzESETClick(TObject *Sender)
 	avpzCheckBoxProgrammaticSet = true;
 	((TCheckBox*)Sender)->Checked = !((TCheckBox*)Sender)->Checked;
 	avpzCheckBoxProgrammaticSet = false;
+}
+//---------------------------------------------------------------------------
+void TForm1::RefreshFileLogsList()
+{
+	UnicodeString prevSelected;
+	if (ComboBox_FileLOGS->ItemIndex >= 0)
+		prevSelected = ComboBox_FileLOGS->Items->Strings[ComboBox_FileLOGS->ItemIndex];
+
+	UnicodeString logDir = LogFile_GetLogDir();
+	std::unique_ptr<TStringList> files(new TStringList);
+	files->Sorted = true;
+	TSearchRec sr;
+	if (DirectoryExists(logDir) && !FindFirst(logDir + "*.*", faAnyFile, sr)) {
+		do {
+			if ((sr.Attr & faDirectory) == 0) files->Add(sr.Name);
+		} while (!FindNext(sr));
+		FindClose(sr);
+	}
+
+	ComboBox_FileLOGS->Items->Clear();
+	// ім'я файлу починається з дати (yyyymmddhhmm), тому звичайне сортування
+	// рядків = хронологічний порядок; виводимо у зворотному - новіші зверху
+	for (int i = files->Count - 1; i >= 0; i--) ComboBox_FileLOGS->Items->Add(files->Strings[i]);
+
+	int idx = prevSelected.IsEmpty() ? -1 : ComboBox_FileLOGS->Items->IndexOf(prevSelected);
+	ComboBox_FileLOGS->ItemIndex = (idx >= 0) ? idx : (ComboBox_FileLOGS->Items->Count ? 0 : -1);
+	LoadSelectedFileLog();
+}
+//---------------------------------------------------------------------------
+void TForm1::LoadSelectedFileLog()
+{
+	if (ComboBox_FileLOGS->ItemIndex < 0) {
+		RichEdit_FileLOGS->Lines->Clear();
+		return;
+	}
+	UnicodeString path = LogFile_GetLogDir() + ComboBox_FileLOGS->Items->Strings[ComboBox_FileLOGS->ItemIndex];
+	try {
+		RichEdit_FileLOGS->Lines->LoadFromFile(path, TEncoding::UTF8);
+	} catch (Exception &e) {
+		RichEdit_FileLOGS->Lines->Text = L"Не вдалось відкрити файл: " + e.Message;
+	}
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::ComboBox_FileLOGSChange(TObject *Sender)
+{
+	LoadSelectedFileLog();
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::PageControl_LOGSChange(TObject *Sender)
+{
+	if (PageControl_LOGS->ActivePage == TabSheet_FileLOGS) RefreshFileLogsList();
 }
 //---------------------------------------------------------------------------
 

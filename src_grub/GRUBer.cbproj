@@ -407,6 +407,11 @@
             <DependentOn>Users.h</DependentOn>
             <BuildOrder>20</BuildOrder>
         </CppCompile>
+        <CppCompile Include="LogFile.cpp">
+            <VirtualFolder>{9A310DFE-C063-4294-88FF-C6C1FB9225A6}</VirtualFolder>
+            <DependentOn>LogFile.h</DependentOn>
+            <BuildOrder>35</BuildOrder>
+        </CppCompile>
         <FormResources Include="MainForm.dfm"/>
         <FormResources Include="StructuresForm.dfm"/>
         <FormResources Include="StructurePickForm.dfm"/>

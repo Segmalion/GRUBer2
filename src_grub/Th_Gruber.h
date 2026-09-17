@@ -33,5 +33,6 @@ bool job_license(UnicodeString dir);
 bool job_audit(UnicodeString dir);
 bool job_diskInfo(UnicodeString dir);
 bool job_esetLog(UnicodeString dir);
+bool job_gruber_logs(UnicodeString dir);
 //---------------------------------------------------------------------------
 #endif
