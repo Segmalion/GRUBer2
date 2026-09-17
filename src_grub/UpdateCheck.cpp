@@ -4,190 +4,63 @@
 
 #include "UpdateCheck.h"
 
-#include <winhttp.h>
-#include <fstream>
-#include <vector>
-#include <utility>
-#include <string>
 #include <memory>
 #include <System.JSON.hpp>
+#include <System.Net.HttpClient.hpp>
+#include <System.Net.HttpClientComponent.hpp>
+#include <System.Net.URLClient.hpp>
+#include <System.Classes.hpp>
 
 #include "GitVersion.h"
 #include "UpdateSecrets.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-#pragma comment(lib, "winhttp.lib")
 
-// GitHub API - той самий приватний репозиторій, з якого зібрана ця програма
+using namespace System::Net::Httpclient;
+using namespace System::Net::Urlclient;
+
+// GitHub API - той самий приватний репозиторій, з якого зібрана ця програма.
+//
+// ПРИМІТКА (2026-09-16): спочатку тут була ручна реалізація на "сирому"
+// WinHTTP - технічно робоча (перевірено окремим тестом на цій же машині),
+// але у польових умовах на кількох різних Windows-машинах (з різними
+// антивірусами/HTTPS-фільтрами) WinHttpSendRequest стабільно проходив, а
+// WinHttpReceiveResponse падав з ERROR_WINHTTP_INVALID_SERVER_RESPONSE
+// (12152) - тобто TCP+TLS з'єднання з реальним IP GitHub встановлювалось
+// (підтверджено діагностикою WINHTTP_OPTION_CONNECTION_INFO), але суворий
+// парсер відповідей WinHTTP відмовлявся розбирати те, що повертав
+// локальний HTTPS-перехоплювач. System.Net.HttpClient (THTTPClient) -
+// той самий стек, яким користується сучасний RAD Studio код за замовчуванням -
+// значно толерантніший до таких відповідей (аналогічно до того, чому
+// PowerShell Invoke-WebRequest на тих самих машинах працював без проблем).
 static const UnicodeString GH_OWNER_REPO = L"Segmalion/GRUBer2";
 static const UnicodeString GH_API_HOST   = L"api.github.com";
 static const int MAX_REDIRECT_HOPS = 5;
-static const DWORD MAX_RESPONSE_BYTES = 4 * 1024 * 1024; // метаданих релізу вистачить з запасом
-
-typedef std::vector<std::pair<UnicodeString, UnicodeString>> HttpHeaders;
 //---------------------------------------------------------------------------
-static UnicodeString formatBytes(uintmax_t bytes) {
-	if (bytes < 1024) return UnicodeString((int)bytes) + " B";
-	if (bytes < 1024 * 1024) return FloatToStrF(bytes / 1024.0, ffFixed, 4, 1) + " KB";
-	if (bytes < 1024ull * 1024 * 1024) return FloatToStrF(bytes / 1048576.0, ffFixed, 4, 1) + " MB";
-	return FloatToStrF(bytes / 1073741824.0, ffFixed, 4, 1) + " GB";
-}
-//---------------------------------------------------------------------------
-// Один HTTP GET без автоматичного слідування за редиректом (WinHTTP
-// налаштований на WINHTTP_OPTION_REDIRECT_POLICY_NEVER) - виклик сам вирішує,
-// повторювати запит на outLocation, чи ні, і з якими заголовками (для
-// приватних ассетів GitHub заголовок Authorization НЕ можна передавати на
-// адресу редиректу - див. Update_DownloadAsset).
-// streamToFile=false -> тіло відповіді збирається у outBody (обмежено
-// MAX_RESPONSE_BYTES); streamToFile=true -> тіло пишеться одразу у destPath
-// з прогресом через progressCb (для великих файлів-ассетів).
-// peekOnly=true - лише статус+Location, тіло відповіді НЕ читається (навіть
-// при статусі 200) - для проміжного "чи це редирект?" запиту на приватний
-// ассет GitHub, щоб не тягнути вміст файлу в пам'ять лише заради перевірки.
-static bool httpRequestOnce(const UnicodeString &url, const HttpHeaders &headers,
-	int sendRecvTimeoutMs, DWORD &outStatus, UnicodeString &outLocation,
-	bool streamToFile, const fs::path &destPath, short updateMs,
-	std::atomic<bool> &cancelFlag, EsetDlProgressCb progressCb,
-	std::string &outBody, UnicodeString &errMsg, bool peekOnly = false)
+static TNetHeaders makeHeaders(std::vector<std::pair<UnicodeString, UnicodeString>> pairs)
 {
-	outStatus = 0;
-	outLocation = L"";
-
-	::URL_COMPONENTS urlComp = {0};
-	urlComp.dwStructSize = sizeof(urlComp);
-	wchar_t hostName[256] = {0};
-	wchar_t urlPath[2048] = {0};
-	urlComp.lpszHostName = hostName;
-	urlComp.dwHostNameLength = _countof(hostName);
-	urlComp.lpszUrlPath = urlPath;
-	urlComp.dwUrlPathLength = _countof(urlPath);
-
-	if (!WinHttpCrackUrl(url.c_str(), url.Length(), 0, &urlComp)) {
-		errMsg = L"Некоректний URL оновлення.";
-		return false;
-	}
-
-	HINTERNET hSession = WinHttpOpen(L"GRUBer-Updater/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-	if (!hSession) { errMsg = L"Не вдалось ініціалізувати WinHTTP."; return false; }
-	WinHttpSetTimeouts(hSession, 5000, 5000, sendRecvTimeoutMs, sendRecvTimeoutMs);
-
-	HINTERNET hConnect = WinHttpConnect(hSession, hostName, urlComp.nPort, 0);
-	if (!hConnect) {
-		errMsg = L"Не вдалось підключитись до сервера оновлень.";
-		WinHttpCloseHandle(hSession);
-		return false;
-	}
-
-	DWORD requestFlags = (urlComp.nScheme == INTERNET_SCHEME_HTTPS) ? WINHTTP_FLAG_SECURE : 0;
-	HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"GET", urlPath, NULL, WINHTTP_NO_REFERER,
-		WINHTTP_DEFAULT_ACCEPT_TYPES, requestFlags);
-	if (!hRequest) {
-		errMsg = L"Не вдалось створити HTTP-запит оновлення.";
-		WinHttpCloseHandle(hConnect);
-		WinHttpCloseHandle(hSession);
-		return false;
-	}
-
-	DWORD redirectPolicy = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
-	WinHttpSetOption(hRequest, WINHTTP_OPTION_REDIRECT_POLICY, &redirectPolicy, sizeof(redirectPolicy));
-
-	for (auto &h : headers) {
-		UnicodeString line = h.first + L": " + h.second;
-		WinHttpAddRequestHeaders(hRequest, line.c_str(), (DWORD)-1L, WINHTTP_ADDREQ_FLAG_ADD);
-	}
-
-	bool ok = false;
-	if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
-		WinHttpReceiveResponse(hRequest, NULL))
-	{
-		DWORD dwSize = sizeof(outStatus);
-		WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-			WINHTTP_HEADER_NAME_BY_INDEX, &outStatus, &dwSize, WINHTTP_NO_HEADER_INDEX);
-
-		if (outStatus == 301 || outStatus == 302 || outStatus == 303 ||
-			outStatus == 307 || outStatus == 308)
-		{
-			wchar_t locBuf[2048] = {0};
-			DWORD locSize = sizeof(locBuf);
-			if (WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_LOCATION, WINHTTP_HEADER_NAME_BY_INDEX,
-				locBuf, &locSize, WINHTTP_NO_HEADER_INDEX)) {
-				outLocation = locBuf;
-			}
-			ok = true; // редирект - це не помилка транспорту, вирішує викликач
-		}
-		else if (peekOnly) {
-			ok = true; // статус/заголовки вже отримано, тіло свідомо не читаємо
-		}
-		else if (!streamToFile) {
-			std::vector<char> buffer(8192);
-			DWORD bytesRead = 0;
-			while (outBody.size() < MAX_RESPONSE_BYTES &&
-				WinHttpReadData(hRequest, buffer.data(), (DWORD)buffer.size(), &bytesRead) && bytesRead > 0) {
-				outBody.append(buffer.data(), bytesRead);
-			}
-			ok = true;
-		}
-		else {
-			DWORD contentLength = 0;
-			dwSize = sizeof(contentLength);
-			WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER,
-				WINHTTP_HEADER_NAME_BY_INDEX, &contentLength, &dwSize, WINHTTP_NO_HEADER_INDEX);
-
-			if (outStatus == 200) {
-				std::error_code ec;
-				fs::create_directories(destPath.parent_path(), ec);
-				std::ofstream outFile(destPath, std::ios::binary);
-				if (outFile.is_open()) {
-					std::vector<char> buffer(8192);
-					DWORD bytesRead = 0;
-					uintmax_t totalBytesRead = 0;
-					bool cancelled = false;
-					while (WinHttpReadData(hRequest, buffer.data(), (DWORD)buffer.size(), &bytesRead) && bytesRead > 0) {
-						if (cancelFlag) { cancelled = true; break; }
-						outFile.write(buffer.data(), bytesRead);
-						totalBytesRead += bytesRead;
-						if (progressCb) {
-							int percent = (contentLength > 0) ? (int)((totalBytesRead * 100) / contentLength) : 0;
-							UnicodeString phase = L"Завантаження оновлення: " + formatBytes(totalBytesRead) + " / "
-								+ (contentLength > 0 ? formatBytes(contentLength) : UnicodeString(L"? MB"))
-								+ L" (" + UnicodeString(percent) + L"%)";
-							progressCb(percent, phase);
-						}
-					}
-					outFile.close();
-					if (cancelled) {
-						errMsg = L"Ручна зупинка завантаження оновлення.";
-						fs::remove(destPath, ec);
-						ok = false;
-					} else {
-						if (progressCb) progressCb(100, L"Завантаження оновлення: " + formatBytes(totalBytesRead) + L" (100%)");
-						ok = true;
-					}
-				} else {
-					errMsg = L"Не вдалось створити файл " + UnicodeString(destPath.c_str());
-				}
-			} else {
-				ok = true; // не 200 - тіло не тягнемо, статус розбере викликач
-			}
-		}
-	} else {
-		errMsg = L"Помилка мережі: " + UnicodeString((int)GetLastError());
-	}
-
-	WinHttpCloseHandle(hRequest);
-	WinHttpCloseHandle(hConnect);
-	WinHttpCloseHandle(hSession);
-	return ok;
-}
-//---------------------------------------------------------------------------
-static HttpHeaders githubApiHeaders(UnicodeString accept)
-{
-	HttpHeaders h;
-	h.push_back({L"Authorization", L"Bearer " + UnicodeString(GITHUB_UPDATE_TOKEN)});
-	h.push_back({L"Accept", accept});
-	h.push_back({L"X-GitHub-Api-Version", L"2022-11-28"});
+	TNetHeaders h;
+	h.Length = (int)pairs.size();
+	for (size_t i = 0; i < pairs.size(); i++)
+		h[(int)i] = TNameValuePair(pairs[i].first, pairs[i].second);
 	return h;
+}
+static TNetHeaders githubApiHeaders(UnicodeString accept)
+{
+	std::vector<std::pair<UnicodeString, UnicodeString>> pairs = {
+		{L"Authorization", L"Bearer " + UnicodeString(GITHUB_UPDATE_TOKEN)},
+		{L"Accept", accept},
+		{L"X-GitHub-Api-Version", L"2022-11-28"}
+	};
+	return makeHeaders(pairs);
+}
+static UnicodeString findResponseHeader(const _di_IHTTPResponse &resp, UnicodeString name)
+{
+	TNetHeaders hdrs = resp->Headers;
+	for (int i = 0; i < hdrs.Length; i++) {
+		if (hdrs[i].Name.LowerCase() == name.LowerCase()) return hdrs[i].Value;
+	}
+	return UnicodeString();
 }
 //---------------------------------------------------------------------------
 bool Update_FetchLatestRelease(UpdateRelease &out, UnicodeString &errMsg)
@@ -202,61 +75,55 @@ bool Update_FetchLatestRelease(UpdateRelease &out, UnicodeString &errMsg)
 	}
 
 	UnicodeString url = L"https://" + GH_API_HOST + L"/repos/" + GH_OWNER_REPO + L"/releases/latest";
-	HttpHeaders headers = githubApiHeaders(L"application/vnd.github+json");
 
-	DWORD status = 0; UnicodeString location; std::string body;
-	std::atomic<bool> noCancel{false};
-	int hop = 0;
-	for (; hop < MAX_REDIRECT_HOPS; hop++) {
-		body.clear();
-		if (!httpRequestOnce(url, headers, 15000, status, location, false, fs::path(), 0,
-			noCancel, nullptr, body, errMsg)) {
-			return false; // errMsg вже заповнено - справжня мережева помилка
+	try {
+		std::unique_ptr<TNetHTTPClient> client(new TNetHTTPClient(NULL));
+		client->ConnectionTimeout = 15000;
+		client->ResponseTimeout = 15000;
+		client->HandleRedirects = true; // цей ендпоінт на сторонній хост не редиректить
+
+		_di_IHTTPResponse resp = client->Get(url, NULL, githubApiHeaders(L"application/vnd.github+json"));
+		int status = resp->StatusCode;
+
+		if (status == 404) return false; // релізів ще немає - не помилка
+		if (status == 401 || status == 403) {
+			errMsg = L""; // токен протух/недійсний - тихий лог, без діалогу (див. Th_UpdateCheck)
+			return false;
 		}
-		if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {
-			if (location.IsEmpty()) { errMsg = L"Редирект без Location."; return false; }
-			url = location;
-			continue;
+		if (status != 200) { errMsg = L"Помилка сервера GitHub: " + UnicodeString(status); return false; }
+
+		UnicodeString jsonText = resp->ContentAsString(TEncoding::UTF8);
+		std::unique_ptr<TJSONObject> root(dynamic_cast<TJSONObject*>(TJSONObject::ParseJSONValue(jsonText)));
+		if (!root) { errMsg = L"Некоректна відповідь GitHub (JSON)."; return false; }
+
+		auto getStr = [&root](UnicodeString key) -> UnicodeString {
+			return root->Values[key] ? root->Values[key]->Value() : UnicodeString();
+		};
+		out.tagName = getStr(L"tag_name");
+		out.name = getStr(L"name");
+		out.body = getStr(L"body");
+		out.publishedAt = getStr(L"published_at");
+
+		TJSONArray *assetsArr = dynamic_cast<TJSONArray*>(root->Values[L"assets"]);
+		if (assetsArr) {
+			for (int i = 0; i < assetsArr->Count; i++) {
+				TJSONObject *a = dynamic_cast<TJSONObject*>(assetsArr->Items[i]);
+				if (!a) continue;
+				UpdateAsset asset;
+				asset.name = a->Values[L"name"] ? a->Values[L"name"]->Value() : UnicodeString();
+				asset.id = a->Values[L"id"] ? StrToInt64Def(a->Values[L"id"]->Value(), 0) : 0;
+				asset.size = a->Values[L"size"] ? StrToInt64Def(a->Values[L"size"]->Value(), 0) : 0;
+				if (!asset.name.IsEmpty() && asset.id != 0) out.assets.push_back(asset);
+			}
 		}
-		break;
+
+		out.valid = !out.tagName.IsEmpty();
+		return out.valid;
 	}
-	if (hop >= MAX_REDIRECT_HOPS) { errMsg = L"Забагато редиректів."; return false; }
-
-	if (status == 404) return false; // релізів ще немає - не помилка
-	if (status == 401 || status == 403) {
-		errMsg = L""; // токен протух/недійсний - тихий лог, без діалогу (див. Th_UpdateCheck)
+	catch (Exception &e) {
+		errMsg = L"Помилка мережі: " + e.Message;
 		return false;
 	}
-	if (status != 200) { errMsg = L"Помилка сервера GitHub: " + UnicodeString((int)status); return false; }
-
-	UTF8String rawUtf8(body.c_str(), (int)body.size());
-	UnicodeString jsonText = rawUtf8;
-	std::unique_ptr<TJSONObject> root(dynamic_cast<TJSONObject*>(TJSONObject::ParseJSONValue(jsonText)));
-	if (!root) { errMsg = L"Некоректна відповідь GitHub (JSON)."; return false; }
-
-	auto getStr = [&root](UnicodeString key) -> UnicodeString {
-		return root->Values[key] ? root->Values[key]->Value() : UnicodeString();
-	};
-	out.tagName = getStr(L"tag_name");
-	out.name = getStr(L"name");
-	out.body = getStr(L"body");
-	out.publishedAt = getStr(L"published_at");
-
-	TJSONArray *assetsArr = dynamic_cast<TJSONArray*>(root->Values[L"assets"]);
-	if (assetsArr) {
-		for (int i = 0; i < assetsArr->Count; i++) {
-			TJSONObject *a = dynamic_cast<TJSONObject*>(assetsArr->Items[i]);
-			if (!a) continue;
-			UpdateAsset asset;
-			asset.name = a->Values[L"name"] ? a->Values[L"name"]->Value() : UnicodeString();
-			asset.id = a->Values[L"id"] ? StrToInt64Def(a->Values[L"id"]->Value(), 0) : 0;
-			asset.size = a->Values[L"size"] ? StrToInt64Def(a->Values[L"size"]->Value(), 0) : 0;
-			if (!asset.name.IsEmpty() && asset.id != 0) out.assets.push_back(asset);
-		}
-	}
-
-	out.valid = !out.tagName.IsEmpty();
-	return out.valid;
 }
 //---------------------------------------------------------------------------
 bool Update_IsNewer(const UpdateRelease &rel, UnicodeString skipTag)
@@ -282,36 +149,52 @@ bool Update_DownloadAsset(const UpdateAsset &asset, const fs::path &destPath, sh
 
 	UnicodeString url = L"https://" + GH_API_HOST + L"/repos/" + GH_OWNER_REPO +
 		L"/releases/assets/" + IntToStr(asset.id);
-	HttpHeaders ghHeaders = githubApiHeaders(L"application/octet-stream");
-	HttpHeaders noAuthHeaders; // на редирект-хост (Azure/S3) НЕ передаємо Authorization/GitHub-заголовки
 
-	bool first = true;
-	std::string dummyBody;
-	for (int hop = 0; hop < MAX_REDIRECT_HOPS; hop++) {
-		DWORD status = 0; UnicodeString location;
-		const HttpHeaders &hdrs = first ? ghHeaders : noAuthHeaders;
-		// peekOnly=true - лише щоб дізнатись статус/Location, без витрати
-		// трафіку на тіло відповіді (файл може бути кілька десятків МБ)
-		bool ok = httpRequestOnce(url, hdrs, 60000, status, location,
-			false, fs::path(), 0, cancelFlag, nullptr, dummyBody, errMsg, /*peekOnly*/ true);
-		if (!ok) return false;
+	try {
+		std::unique_ptr<TNetHTTPClient> client(new TNetHTTPClient(NULL));
+		client->ConnectionTimeout = 15000;
+		client->ResponseTimeout = 60000;
+		// приватний ассет GitHub редиректить на підписаний blob-URL (Azure/S3) -
+		// керуємо редиректом вручну, щоб НЕ передати туди GitHub-заголовок
+		// Authorization (і взагалі жодних GitHub-специфічних заголовків)
+		client->HandleRedirects = false;
 
-		if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {
-			if (location.IsEmpty()) { errMsg = L"Редирект ассету без Location."; return false; }
-			url = location;
-			first = false; // усі наступні хопи - вже НЕ api.github.com
-			continue;
+		if (progressCb) progressCb(0, L"Завантаження оновлення...");
+
+		TNetHeaders hdrs = githubApiHeaders(L"application/octet-stream");
+		UnicodeString curUrl = url;
+		_di_IHTTPResponse resp;
+		int status = 0;
+		int hop = 0;
+		for (; hop < MAX_REDIRECT_HOPS; hop++) {
+			resp = client->Get(curUrl, NULL, hdrs);
+			status = resp->StatusCode;
+			if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {
+				UnicodeString location = findResponseHeader(resp, L"Location");
+				if (location.IsEmpty()) { errMsg = L"Редирект ассету без Location."; return false; }
+				curUrl = location;
+				hdrs = TNetHeaders(); // подальші хопи (не api.github.com) - без жодних заголовків
+				continue;
+			}
+			break;
 		}
-		if (status != 200) { errMsg = L"Помилка сервера при завантаженні ассету: " + UnicodeString((int)status); return false; }
+		if (hop >= MAX_REDIRECT_HOPS) { errMsg = L"Забагато редиректів при завантаженні ассету."; return false; }
+		if (status != 200) { errMsg = L"Помилка сервера при завантаженні ассету: " + UnicodeString(status); return false; }
 
-		// статус 200 підтверджено (тіло ще не читалось) - повторюємо запит
-		// тим самим URL з streamToFile=true, щоб записати тіло у файл із
-		// живим прогресом
-		DWORD status2 = 0; UnicodeString loc2;
-		return httpRequestOnce(url, hdrs, 60000, status2, loc2,
-			true, destPath, updateMs, cancelFlag, progressCb, dummyBody, errMsg);
+		std::error_code ec;
+		fs::create_directories(destPath.parent_path(), ec);
+		{
+			std::unique_ptr<TFileStream> outFile(new TFileStream(UnicodeString(destPath.c_str()), fmCreate));
+			resp->ContentStream->Position = 0;
+			outFile->CopyFrom(resp->ContentStream, 0);
+		}
+
+		if (progressCb) progressCb(100, L"Завантаження оновлення завершено (100%)");
+		return true;
 	}
-	errMsg = L"Забагато редиректів при завантаженні ассету.";
-	return false;
+	catch (Exception &e) {
+		errMsg = L"Помилка мережі: " + e.Message;
+		return false;
+	}
 }
 //---------------------------------------------------------------------------
