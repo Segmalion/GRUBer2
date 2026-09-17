@@ -2528,7 +2528,7 @@
             Margins.Top = 5
             Margins.Right = 5
             Margins.Bottom = 5
-            ActivePage = TabSheet_CurLOGS
+            ActivePage = TabSheet_FileLOGS
             Align = alClient
             MultiLine = True
             TabOrder = 0
@@ -2578,6 +2578,7 @@
                 Margins.Right = 5
                 Margins.Bottom = 5
                 Align = alClient
+                BevelOuter = bvNone
                 ColumnCollection = <
                   item
                     Value = 100.000000000000000000
@@ -2604,9 +2605,9 @@
                 TabOrder = 0
                 object ComboBox_FileLOGS: TComboBox
                   AlignWithMargins = True
-                  Left = 6
-                  Top = 6
-                  Width = 646
+                  Left = 5
+                  Top = 5
+                  Width = 648
                   Height = 38
                   Margins.Left = 5
                   Margins.Top = 5
@@ -2616,13 +2617,16 @@
                   Style = csDropDownList
                   TabOrder = 0
                   OnChange = ComboBox_FileLOGSChange
+                  ExplicitLeft = 6
+                  ExplicitTop = 6
+                  ExplicitWidth = 646
                 end
                 object RichEdit_FileLOGS: TRichEdit
                   AlignWithMargins = True
-                  Left = 6
-                  Top = 56
-                  Width = 646
-                  Height = 862
+                  Left = 5
+                  Top = 55
+                  Width = 648
+                  Height = 864
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
@@ -2638,6 +2642,10 @@
                   ScrollBars = ssBoth
                   TabOrder = 1
                   WordWrap = False
+                  ExplicitLeft = 6
+                  ExplicitTop = 56
+                  ExplicitWidth = 646
+                  ExplicitHeight = 862
                 end
               end
             end
