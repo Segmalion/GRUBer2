@@ -24,6 +24,7 @@
 
 #include "Global.h"
 #include "Users.h"
+#include "Eset.h"
 
 class TForm1 : public TForm
 {
@@ -409,9 +410,14 @@ void applySoftDefection(const SoftDefectionResult &r);
 void applyUsersDefection(const UsersDefectionResult &r);
 void applyEsetDefection(const EsetDefectionResult &r);
 void applyDefectionLabels(const DefectionResult &r);
+void applyEsetInfo(const EsetInfoResult &r);
 
 void showSoft();
 void showUsers();
 void checkDefection ();
+void checkEsetInfo();
+// Запускає checkEsetInfo() у фоновому потоці (ermm.exe може відповідати не
+// миттєво) - форма не чекає на результат, поля наповнюються по готовності.
+void checkEsetInfoAsync();
 //---------------------------------------------------------------------------
 #endif

@@ -454,6 +454,11 @@ void applyEsetDefection(const EsetDefectionResult &r) {
 	curDefection.quarantineDirs = r.quarantineDirs;
 	Form1->Button_OpenQuarantine->Enabled = !r.quarantineDirs.empty();
 }
+void applyEsetInfo(const EsetInfoResult &r) {
+	Form1->Show_LastBaseUpdate->Text = r.lastUpdateDate;
+	Form1->Show_EsetAutoUpdate->Text = r.updateSource;
+	Form1->Show_EsetLicence->Text = r.licenseStatus;
+}
 void applyDefectionLabels(const DefectionResult &r) {
 	applySoftDefection(r.soft);
 	applyUsersDefection(r.users);
@@ -497,6 +502,19 @@ void showUsers() {
 }
 void checkEsetQuarantine() {
 	applyEsetDefection(computeEsetDefection());
+}
+void checkEsetInfo() {
+	applyEsetInfo(computeEsetInfo());
+}
+void checkEsetInfoAsync() {
+	UnicodeString wait = L"Отримую дані, зачекайте...";
+	Form1->Show_LastBaseUpdate->Text = wait;
+	Form1->Show_EsetAutoUpdate->Text = wait;
+	Form1->Show_EsetLicence->Text = wait;
+	TThread::CreateAnonymousThread([]() {
+		EsetInfoResult r = computeEsetInfo();
+		TThread::Synchronize(NULL, [r]() { applyEsetInfo(r); });
+	})->Start();
 }
 void checkDefection() {
 	applyDefectionLabels(computeDefection());
@@ -668,6 +686,9 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 	printLog(">>", L"Останій граб: " + curPC.lastGrub());
 	// --- проверка нарушений
 	checkDefection();
+	// --- живий стан ESET (дата оновлення баз/джерело/ліцензія) - у фоні,
+	// щоб виклики ermm.exe не затримували старт форми
+	checkEsetInfoAsync();
 	// --- заполняем строку с именем папки граба
 	EditDirGrubName->Text = curPC.dirGrubName(curConfig.getPrefixPartition(), curConfig.getEnablePrefixPartition());
 	if (DirectoryExists(curDir.get_grubPath())) {
