@@ -6,8 +6,10 @@
 
 // Подключаем заголовочные файлы нашей логики
 #include "MainDevLister.h"
+#include "DeviceDetailsForm.h"
 //---------------------------------------------------------------------------
 USEFORM("MainDevLister.cpp", Form1);
+USEFORM("DeviceDetailsForm.cpp", FormDeviceDetails);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
@@ -75,6 +77,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->Initialize();
 		Application->MainFormOnTaskBar = true;
 		Application->CreateForm(__classid(TForm1), &Form1);
+		Application->CreateForm(__classid(TFormDeviceDetails), &FormDeviceDetails);
 		Application->Run();
 	}
 	catch (Exception &exception)

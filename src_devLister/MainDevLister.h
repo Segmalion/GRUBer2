@@ -142,6 +142,7 @@ __published:	// IDE-managed Components
 	void __fastcall TrackBar_CountErrSerialChange(TObject *Sender);
 	void __fastcall DBGrid1DrawColumnCell(TObject *Sender, const TRect &Rect, int DataCol,
           TColumn *Column, TGridDrawState State);
+	void __fastcall DBGrid1DblClick(TObject *Sender);
 	void __fastcall ComboBox_CategPCChange(TObject *Sender);
 	void __fastcall Timer1Timer(TObject *Sender);
 	void __fastcall Button_DelDeviceClick(TObject *Sender);

@@ -101,6 +101,7 @@ object Form1: TForm1
       TitleFont.Height = -21
       TitleFont.Name = 'Segoe UI'
       TitleFont.Style = []
+      OnDblClick = DBGrid1DblClick
       OnDrawColumnCell = DBGrid1DrawColumnCell
       OnTitleClick = DBGrid1TitleClick
     end

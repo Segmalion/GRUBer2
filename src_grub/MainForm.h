@@ -229,6 +229,12 @@ __published:	// IDE-managed Components
 	TGridPanel *GridPanel_FileLOGS;
 	TComboBox *ComboBox_FileLOGS;
 	TRichEdit *RichEdit_FileLOGS;
+	TLabel *Label21;
+	TEdit *Show_LastBaseUpdate;
+	TLabel *Label22;
+	TEdit *Show_EsetAutoUpdate;
+	TLabel *Label23;
+	TEdit *Show_EsetLicence;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall CheckBox_TempDirClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);

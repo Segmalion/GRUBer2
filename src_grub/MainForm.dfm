@@ -1402,7 +1402,7 @@
         Margins.Top = 6
         Margins.Right = 6
         Margins.Bottom = 6
-        ActivePage = TabSheet_Log
+        ActivePage = TabSheet_Info
         Align = alClient
         TabOrder = 1
         object TabSheet_Info: TTabSheet
@@ -1452,7 +1452,7 @@
               end
               item
                 SizeStyle = ssAbsolute
-                Value = 125.000000000000000000
+                Value = 260.000000000000000000
               end>
             TabOrder = 0
             object GroupBox_InfoARM: TGroupBox
@@ -1747,7 +1747,7 @@
               Left = 6
               Top = 406
               Width = 664
-              Height = 442
+              Height = 307
               Margins.Left = 6
               Margins.Top = 6
               Margins.Right = 6
@@ -1755,11 +1755,12 @@
               Align = alClient
               Caption = #1052#1077#1088#1077#1078#1077#1074#1077' '#1079#39#1108#1076#1085#1072#1085#1085#1103':'
               TabOrder = 2
+              ExplicitHeight = 442
               object GridPanel_NetInfo: TGridPanel
                 Left = 2
                 Top = 32
                 Width = 660
-                Height = 408
+                Height = 273
                 Margins.Left = 6
                 Margins.Top = 6
                 Margins.Right = 6
@@ -1828,14 +1829,15 @@
                     Value = 25.000000000000000000
                   end>
                 TabOrder = 0
+                ExplicitHeight = 408
                 DesignSize = (
                   660
-                  408)
+                  273)
                 object Label_NetName: TLabel
                   Left = 0
                   Top = 0
                   Width = 165
-                  Height = 102
+                  Height = 68
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -1849,9 +1851,9 @@
                 end
                 object Label_NetIP: TLabel
                   Left = 0
-                  Top = 102
+                  Top = 68
                   Width = 165
-                  Height = 102
+                  Height = 68
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -1860,14 +1862,15 @@
                   Alignment = taCenter
                   Caption = #1051#1086#1082#1072#1083#1100#1085#1072' IP:'
                   Layout = tlCenter
+                  ExplicitTop = 102
                   ExplicitWidth = 121
                   ExplicitHeight = 30
                 end
                 object Label_NetMAC: TLabel
                   Left = 0
-                  Top = 204
+                  Top = 136
                   Width = 165
-                  Height = 102
+                  Height = 69
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -1876,14 +1879,15 @@
                   Alignment = taCenter
                   Caption = 'MAC-'#1072#1076#1088#1077#1089#1072':'
                   Layout = tlCenter
+                  ExplicitTop = 204
                   ExplicitWidth = 125
                   ExplicitHeight = 30
                 end
                 object Label_NetStatus: TLabel
                   Left = 0
-                  Top = 306
+                  Top = 205
                   Width = 165
-                  Height = 102
+                  Height = 68
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -1892,12 +1896,13 @@
                   Alignment = taCenter
                   Caption = #1057#1090#1072#1090#1091#1089':'
                   Layout = tlCenter
+                  ExplicitTop = 306
                   ExplicitWidth = 67
                   ExplicitHeight = 30
                 end
                 object ShowNetName: TComboBox
                   Left = 173
-                  Top = 34
+                  Top = 17
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -1914,10 +1919,11 @@
                   ParentFont = False
                   TabOrder = 0
                   OnChange = ShowNetNameChange
+                  ExplicitTop = 34
                 end
                 object ShowNetIP: TEdit
                   Left = 173
-                  Top = 136
+                  Top = 85
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -1934,10 +1940,11 @@
                   ReadOnly = True
                   TabOrder = 1
                   Text = 'ShowNetIP'
+                  ExplicitTop = 136
                 end
                 object ShowNetMAC: TEdit
                   Left = 173
-                  Top = 238
+                  Top = 153
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -1954,10 +1961,11 @@
                   ReadOnly = True
                   TabOrder = 2
                   Text = 'ShowNetMAC'
+                  ExplicitTop = 238
                 end
                 object ShowNetStatus: TEdit
                   Left = 173
-                  Top = 340
+                  Top = 222
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -1974,15 +1982,16 @@
                   ReadOnly = True
                   TabOrder = 3
                   Text = 'ShowNetStatus'
+                  ExplicitTop = 340
                 end
               end
             end
             object GroupBox_EsetInfo: TGroupBox
               AlignWithMargins = True
               Left = 6
-              Top = 860
+              Top = 725
               Width = 664
-              Height = 113
+              Height = 248
               Margins.Left = 6
               Margins.Top = 6
               Margins.Right = 6
@@ -1990,11 +1999,13 @@
               Align = alClient
               Caption = #1040#1042#1055#1047' '#1110#1085#1092#1086':'
               TabOrder = 1
+              ExplicitTop = 860
+              ExplicitHeight = 113
               object GridPanel_EsetInfo: TGridPanel
                 Left = 2
                 Top = 32
                 Width = 660
-                Height = 79
+                Height = 214
                 Margins.Left = 6
                 Margins.Top = 6
                 Margins.Right = 6
@@ -2018,21 +2029,62 @@
                     Column = 1
                     Control = ShowEsetID
                     Row = 0
+                  end
+                  item
+                    Column = 0
+                    Control = Label21
+                    Row = 1
+                  end
+                  item
+                    Column = 1
+                    Control = Show_LastBaseUpdate
+                    Row = 1
+                  end
+                  item
+                    Column = 0
+                    Control = Label22
+                    Row = 2
+                  end
+                  item
+                    Column = 1
+                    Control = Show_EsetAutoUpdate
+                    Row = 2
+                  end
+                  item
+                    Column = 0
+                    Control = Label23
+                    Row = 3
+                  end
+                  item
+                    Column = 1
+                    Control = Show_EsetLicence
+                    Row = 3
                   end>
                 RowCollection = <
                   item
-                    Value = 100.000000000000000000
+                    SizeStyle = ssAbsolute
+                    Value = 70.000000000000000000
+                  end
+                  item
+                    Value = 33.523095275378480000
+                  end
+                  item
+                    Value = 33.317292108921780000
+                  end
+                  item
+                    Value = 33.159612615699740000
                   end>
                 TabOrder = 0
+                ExplicitHeight = 79
                 DesignSize = (
                   660
-                  79)
+                  214)
                 object Button_EsetLogsDir: TButton
                   AlignWithMargins = True
                   Left = 6
                   Top = 6
                   Width = 156
-                  Height = 67
+                  Height = 58
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -2042,10 +2094,11 @@
                   Enabled = False
                   TabOrder = 1
                   OnClick = Button_EsetLogsDirClick
+                  ExplicitHeight = 67
                 end
                 object ShowEsetID: TEdit
                   Left = 175
-                  Top = 22
+                  Top = 18
                   Width = 477
                   Height = 34
                   Margins.Left = 6
@@ -2062,6 +2115,122 @@
                   ReadOnly = True
                   TabOrder = 0
                   Text = 'ShowEsetID'
+                  ExplicitTop = 22
+                end
+                object Label21: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 75
+                  Width = 158
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Alignment = taCenter
+                  Caption = #1044#1072#1090#1072' '#1073#1072#1079':'
+                  Layout = tlCenter
+                  ExplicitWidth = 89
+                  ExplicitHeight = 30
+                end
+                object Show_LastBaseUpdate: TEdit
+                  Left = 175
+                  Top = 77
+                  Width = 478
+                  Height = 34
+                  Margins.Left = 6
+                  Margins.Top = 6
+                  Margins.Right = 6
+                  Margins.Bottom = 6
+                  Anchors = []
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -22
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  TabOrder = 2
+                  Text = 'Show_LastBaseUpdate'
+                  ExplicitTop = 90
+                end
+                object Label22: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 123
+                  Width = 158
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Alignment = taCenter
+                  Caption = #1064#1083#1103#1093' '#1086#1085#1086#1074#1083#1077#1085#1103':'
+                  Layout = tlCenter
+                  ExplicitWidth = 155
+                  ExplicitHeight = 30
+                end
+                object Show_EsetAutoUpdate: TEdit
+                  Left = 175
+                  Top = 125
+                  Width = 478
+                  Height = 34
+                  Margins.Left = 6
+                  Margins.Top = 6
+                  Margins.Right = 6
+                  Margins.Bottom = 6
+                  Anchors = []
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -22
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  TabOrder = 3
+                  Text = 'Show_EsetAutoUpdate'
+                  ExplicitLeft = 174
+                  ExplicitTop = 127
+                end
+                object Label23: TLabel
+                  AlignWithMargins = True
+                  Left = 5
+                  Top = 171
+                  Width = 158
+                  Height = 38
+                  Margins.Left = 5
+                  Margins.Top = 5
+                  Margins.Right = 5
+                  Margins.Bottom = 5
+                  Align = alClient
+                  Alignment = taCenter
+                  Caption = #1040#1082#1090#1080#1074#1072#1094#1110#1103':'
+                  Layout = tlCenter
+                  ExplicitWidth = 101
+                  ExplicitHeight = 30
+                end
+                object Show_EsetLicence: TEdit
+                  Left = 175
+                  Top = 173
+                  Width = 478
+                  Height = 34
+                  Margins.Left = 6
+                  Margins.Top = 6
+                  Margins.Right = 6
+                  Margins.Bottom = 6
+                  Anchors = []
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clWindowText
+                  Font.Height = -22
+                  Font.Name = 'Consolas'
+                  Font.Style = []
+                  ParentFont = False
+                  ReadOnly = True
+                  TabOrder = 4
+                  Text = 'Show_EsetLicence'
+                  ExplicitTop = 171
                 end
               end
             end
@@ -2617,9 +2786,6 @@
                   Style = csDropDownList
                   TabOrder = 0
                   OnChange = ComboBox_FileLOGSChange
-                  ExplicitLeft = 6
-                  ExplicitTop = 6
-                  ExplicitWidth = 646
                 end
                 object RichEdit_FileLOGS: TRichEdit
                   AlignWithMargins = True
@@ -2642,10 +2808,6 @@
                   ScrollBars = ssBoth
                   TabOrder = 1
                   WordWrap = False
-                  ExplicitLeft = 6
-                  ExplicitTop = 56
-                  ExplicitWidth = 646
-                  ExplicitHeight = 862
                 end
               end
             end

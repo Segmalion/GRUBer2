@@ -30,6 +30,7 @@
 #include "MainDevLister.h"
 #include "GetSMB.h"
 #include "GitVersion.h"
+#include "DeviceDetailsForm.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -2112,8 +2113,14 @@ void __fastcall TForm1::Button_ShowAllertClick(TObject *Sender)
 	CheckBox_SNnotNULL->Checked = false;
 	CheckBox_ShowKnowUSB->Enabled = false;
 	CheckBox_ShowKnowUSB->Checked = false;
+	// OnlyOneSN тим самим комментарем НЕ включаємо: BuildOnlyOneSNFilterCondition лишає лише
+	// ПЕРШЕ входження кожного serial_number в усьому датасеті, не розрізняючи, чи це порушення.
+	// Дочірні USB-вузли (MTP/WPD-девайси тощо) часто успадковують серійник від батьківського
+	// композитного пристрою — якщо цей серійник вже зустрівся раніше на не-порушливому рядку,
+	// саме порушливий рядок відкидається як "дубль". Тому в alert-режимі дедуп по SN вимкнено —
+	// показуємо всі рядки, що реально відповідають ComputeViolationFlags.
 	CheckBox_OnlyOneSN->Enabled = false;
-	CheckBox_OnlyOneSN->Checked = true;
+	CheckBox_OnlyOneSN->Checked = false;
 	ListBox_Filter->ClearSelection();
 
 	// Условие для этого режима больше не передаётся заранее — ApplyDBGridFilter пересчитывает
@@ -2165,6 +2172,21 @@ void __fastcall TForm1::Button_FilterContainerIDClick(TObject *Sender)
 	ApplyDBGridFilter();
 
 	printLog(L"Отображаются устройства контейнера: " + selectedContainerId);
+}
+//---------------------------------------------------------------------------
+/* Подвійний клік по рядку - вікно розширених властивостей пристрою (усі поля БД
+   + комбобокс усіх пристроїв того ж containerId). На відміну від
+   Button_FilterContainerIDClick, не чіпає активний фільтр/датасет головного грида -
+   FormDeviceDetails працює через власний TFDQuery на тому ж FDConnection1. */
+void __fastcall TForm1::DBGrid1DblClick(TObject *Sender)
+{
+	if (!FDQuery1->Active || FDQuery1->IsEmpty()) return;
+
+	UnicodeString containerId = FDQuery1->FieldByName(L"containerId")->AsString;
+	int id = FDQuery1->FieldByName(L"id")->AsInteger;
+
+	FormDeviceDetails->LoadContainer(FDConnection1, containerId, id);
+	FormDeviceDetails->ShowModal();
 }
 //---------------------------------------------------------------------------
 /* ФИЛЬТР по системным устройствам */
