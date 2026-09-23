@@ -8,6 +8,7 @@
 #include "Th_EsetDownload.h"
 #include "MainForm.h"
 
+#include "Arm.h"
 #include "Config.h"
 #include "EsetDownload.h"
 
@@ -18,6 +19,7 @@
 //---------------------------------------------------------------------------
 namespace fs = std::filesystem;
 
+extern Arm curPC;
 extern Config curConfig;
 extern std::atomic<bool> th_EsetDownload_run, stopEsetDownload;
 
@@ -39,7 +41,7 @@ static void restoreEsetDownloadUI() {
 	// TThread::Synchronize (через bool і через делегат)
 	auto restore = [&]() {
 		Form1->BtnEsetDownload->Caption = L"Завантажити базу ESET";
-		Form1->BtnEsetUpdate->Enabled = !Form1->CheckBoxEsetAutoUpdate->Checked;
+		Form1->BtnEsetUpdate->Enabled = curPC.getEsetUpdateSourceKnown() && !curPC.getEsetAutoUpdate();
 	};
 	if (GetCurrentThreadId() == MainThreadID) restore();
 	else TThread::Synchronize(NULL, restore);

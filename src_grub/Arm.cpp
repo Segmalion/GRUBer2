@@ -245,9 +245,14 @@ std::vector<UnicodeString> Arm::mStrInfoArmEset() {
 	mStr.push_back("[infoESET]");
 	mStr.push_back("dirMirror=" + eset.dirMirror);
 	mStr.push_back("autoUpdate=" + UnicodeString(eset.autoUpdate));
-	mStr.push_back("lastUpdateDate=");
-	mStr.push_back("lastUpdateUser=");
-	mStr.push_back("lastUpdateArchive=");
+	mStr.push_back("updateSourceKnown=" + UnicodeString(eset.updateSourceKnown));
+	mStr.push_back("lastUpdateDate=" + eset.lastUpdateDate);
+	mStr.push_back("lastUpdateUser=" + eset.lastUpdateUser);
+	mStr.push_back("licenseStatus=" + UnicodeString((int)eset.licenseStatus));
+	mStr.push_back("licenseDate=" + eset.licenseDate.FormatString("dd.MM.yyyy"));
+	mStr.push_back("licenseKnown=" + UnicodeString((int)eset.licenseKnown));
+	mStr.push_back("productID=" + eset.productID);
+	mStr.push_back("licenseKey=" + eset.licenseKey);
 	return mStr;
 }
 std::vector<UnicodeString> Arm::mStrInfoArmNet() {
@@ -270,6 +275,21 @@ UnicodeString Arm::lastGrub() {
 		str = str + " (" + histGr.user + ")";
 	}
 	return str;
+}
+// "dd.MM.yyyy" -> TDateTime; TDateTime(0.0), якщо не розпарсилось. Окремо від
+// StrToDateTimeSafe() (Text.cpp), бо той парсить "dd.MM.yy HH:mm" - інший
+// формат, який тут для дати ліцензії свідомо не використовується.
+static TDateTime parseDdMmYyyy(const UnicodeString &s) {
+	if (s.Length() < 10) return TDateTime(0.0);
+	int d = s.SubString(1, 2).ToIntDef(0);
+	int m = s.SubString(4, 2).ToIntDef(0);
+	int y = s.SubString(7, 4).ToIntDef(0);
+	if (d == 0 || m == 0 || y == 0) return TDateTime(0.0);
+	try {
+		return EncodeDate((unsigned short)y, (unsigned short)m, (unsigned short)d);
+	} catch (const Exception &) {
+		return TDateTime(0.0);
+	}
 }
 //чтение даных из файла
 bool Arm::readFromFile() {
@@ -307,6 +327,31 @@ bool Arm::readFromFile() {
 		inNumberPerson = findParam(file, "[infoGrubARM]", "inNumberPerson");
 		eset.autoUpdate = findParam(file, "[infoESET]", "autoUpdate").ToIntDef(1);
 		eset.dirMirror = findParam(file, "[infoESET]", "dirMirror");
+		// ПРИМІТКА: тут навмисно НЕ довіряємо старому "autoUpdate" як ознаці
+		// "джерело вже відоме", навіть якщо він є у файлі - до цієї фічі те саме
+		// поле писалось ручним чекбоксом CheckBoxEsetAutoUpdate з дефолтом
+		// Checked=True, тож "autoUpdate=1" у старому файлі часто просто
+		// UI-заглушка, а не реальне визначення (підтверджено на реальній
+		// машині: показувало "мережа/автоматично" на порожньому dirMirror).
+		// Файли, записані вже цією фічею, завжди мають ключ updateSourceKnown
+		// явно - для них ToIntDef(0) віддає справжнє збережене значення.
+		eset.updateSourceKnown = findParam(file, "[infoESET]", "updateSourceKnown").ToIntDef(0);
+		eset.lastUpdateDate = findParam(file, "[infoESET]", "lastUpdateDate");
+		eset.lastUpdateUser = findParam(file, "[infoESET]", "lastUpdateUser");
+		UnicodeString rawLicenseStatus = findParam(file, "[infoESET]", "licenseStatus");
+		eset.licenseStatus = rawLicenseStatus.ToIntDef(0);
+		UnicodeString licenseDateStr = errCheck(findParam(file, "[infoESET]", "licenseDate"));
+		if (!licenseDateStr.IsEmpty()) eset.licenseDate = parseDdMmYyyy(licenseDateStr);
+		UnicodeString rawLicenseKnown = findParam(file, "[infoESET]", "licenseKnown");
+		if (rawLicenseKnown == "ERROR") {
+			// файл ще старого формату (без цього поля) - якщо licenseStatus взагалі
+			// колись писався, довіряємо вже збереженому статусу/ключу
+			eset.licenseKnown = rawLicenseStatus != "ERROR";
+		} else {
+			eset.licenseKnown = rawLicenseKnown.ToIntDef(0);
+		}
+		eset.productID = errCheck(findParam(file, "[infoESET]", "productID"));
+		eset.licenseKey = errCheck(findParam(file, "[infoESET]", "licenseKey"));
 		// мережеві адаптери - секції [net-1], [net-2]... поки є ім'я в секції
 		netAdapters.clear();
 		for (int netIdx = 1; ; netIdx++) {
@@ -512,6 +557,13 @@ void Arm::setComent(std::vector<UnicodeString> vStr) { coment = vStr; }
 // есет
 void Arm::setEsetDir(UnicodeString str) { eset.dirMirror = str; }
 void Arm::setEsetAutoUpdate(bool i) { eset.autoUpdate = i; }
+void Arm::setEsetUpdateSourceKnown(bool i) { eset.updateSourceKnown = i; }
+void Arm::setEsetLastUpdateDate(UnicodeString str) { eset.lastUpdateDate = str; }
+void Arm::setEsetLicenseStatus(bool i) { eset.licenseStatus = i; }
+void Arm::setEsetLicenseDate(TDateTime d) { eset.licenseDate = d; }
+void Arm::setEsetLicenseKnown(bool i) { eset.licenseKnown = i; }
+void Arm::setEsetProductID(UnicodeString str) { eset.productID = str; }
+void Arm::setEsetLicenseKey(UnicodeString str) { eset.licenseKey = str; }
 // последний граб
 void Arm::setLastGrub(UnicodeString user, UnicodeString date) { histGr.date = StrToDateTimeSafe(date, TDateTime(0.0)); histGr.user = user; }
 // по докам
@@ -570,6 +622,13 @@ std::vector<NetAdapterInfo> Arm::get_netAdapters() { return netAdapters; }
 // есет
 UnicodeString Arm::getEsetDir() { return eset.dirMirror; }
 bool Arm::getEsetAutoUpdate() { return eset.autoUpdate; }
+bool Arm::getEsetUpdateSourceKnown() { return eset.updateSourceKnown; }
+UnicodeString Arm::getEsetLastUpdateDate() { return eset.lastUpdateDate; }
+bool Arm::getEsetLicenseStatus() { return eset.licenseStatus; }
+TDateTime Arm::getEsetLicenseDate() { return eset.licenseDate; }
+bool Arm::getEsetLicenseKnown() { return eset.licenseKnown; }
+UnicodeString Arm::getEsetProductID() { return eset.productID; }
+UnicodeString Arm::getEsetLicenseKey() { return eset.licenseKey; }
 // по докам
 UnicodeString Arm::getInNumberARM() { return errCheck(inNumberARM); }
 UnicodeString Arm::getInNumberHDD() { return errCheck(inNumberHDD); }

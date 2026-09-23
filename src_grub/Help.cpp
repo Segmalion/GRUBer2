@@ -309,11 +309,9 @@ void setInfoArmToForm(Arm &curPC) {
 	for (auto str : curPC.getComent()) {
 		Form1->EditComent->Lines->Add(str);
 	}
-	Form1->CheckBoxEsetAutoUpdate->Checked = curPC.getEsetAutoUpdate();
-	if (curPC.getEsetAutoUpdate())
-		Form1->StatusBar1->Panels->Items[1]->Text = L" ESET оновлюеться самостійно";
-	else Form1->StatusBar1->Panels->Items[1]->Text = L" Бази не оновлювалися";
-	Form1->EditEsetMirrorDir->Text = curPC.getEsetDir();
+	// кешовані значення з gruber_info.ini - checkEsetInfoAsync() (FormShow)
+	// оновить їх живими даними з ermm.exe трохи пізніше
+	applyEsetToForm(curPC);
 
     Form1->ShowName->Text = curPC.getDesktopName();
 	Form1->ShowSerial->Text = curPC.getSerial();
@@ -326,7 +324,6 @@ void setInfoArmToForm(Arm &curPC) {
 	if (Form1->ShowNetName->Items->Count > 0) Form1->ShowNetName->ItemIndex = 0;
 	updateNetAdapterFields();
 
-	Form1->ShowEsetID->Text = getEsetProductInstanceID();
 	Form1->Button_EsetLogsDir->Enabled = DirectoryExists(getEsetLogsDir());
 	//infoSetToFille(curPC);
 //...

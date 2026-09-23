@@ -8,6 +8,7 @@
 #include "Fille.h"
 #include "Text.h"
 #include "RunApp.h"
+#include "Help.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
@@ -145,9 +146,14 @@ void cacls(UnicodeString str)
 	// Шлях до файлу/теки обов'язково в лапках - інакше пробіли в шляху ламають
 	// розбір аргументів icacls.exe. stripTrailingSlash() - див. коментар вище.
 	UnicodeString path = stripTrailingSlash(str);
-	UnicodeString setArg = "\"" + path + L"\" /grant Users:(OI)(CI)M /grant \"Пользователи\":(OI)(CI)M /T /C";
+	// *S-1-5-32-545 - well-known SID BUILTIN\Users. Раніше тут були імена
+	// "Users"/"Пользователи" - вони залежать від локалізації ОС і не завжди
+	// резолвяться (підтверджено на реальній машині: право так і не з'являлось
+	// навіть з-під адміна). SID працює однаково на будь-якій локалізації.
+	UnicodeString setArg = "\"" + path + L"\" /grant *S-1-5-32-545:(OI)(CI)M /T /C";
 	RunApp fix(setApp, NULL, setArg);
 	fix.run(true, false);
+	if (fix.checkErr()) printLog("!!", L"icacls: не вдалось видати права на " + path + " " + fix.errorString());
 }
 //---------------------------------------------------------------------------
 // пробний запис у теку - надійніша перевірка реального доступу, ніж читання ACL

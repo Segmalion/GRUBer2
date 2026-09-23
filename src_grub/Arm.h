@@ -59,8 +59,14 @@ private:
 	// === структуры
 	struct infoEset {
 		bool autoUpdate = true;
+		bool updateSourceKnown = false; // чи хоч раз вдалось живо визначити джерело оновлень
 		UnicodeString dirMirror = "C:\\ESET\\mirror";
-		UnicodeString lastUpdateDate, lastUpdateUser, lastUpdateArchive;
+		UnicodeString lastUpdateDate, lastUpdateUser;
+		bool licenseStatus = false; // true - ліцензія активна
+		TDateTime licenseDate;      // дата закінчення ліцензії (0 - невідома/не визначено)
+		bool licenseKnown = false;  // чи хоч раз вдалось визначити статус ліцензії (ermm або реєстр)
+		UnicodeString productID;    // те саме значення, що й у ShowEsetID
+		UnicodeString licenseKey;   // ключ ліцензії (public_id з get license-info)
 	} eset;
 	struct histGrub {
         TDateTime date;
@@ -140,6 +146,13 @@ public:
 	void setComent(std::vector<UnicodeString> vStr);
 	void setEsetDir(UnicodeString str);
 	void setEsetAutoUpdate(bool i);
+	void setEsetUpdateSourceKnown(bool i);
+	void setEsetLastUpdateDate(UnicodeString str);
+	void setEsetLicenseStatus(bool i);
+	void setEsetLicenseDate(TDateTime d);
+	void setEsetLicenseKnown(bool i);
+	void setEsetProductID(UnicodeString str);
+	void setEsetLicenseKey(UnicodeString str);
 	void setLastGrub(UnicodeString date, UnicodeString user);
 	void setInNumberARM (UnicodeString str);
 	void setInNumberHDD (UnicodeString str);
@@ -178,6 +191,13 @@ public:
 
 	UnicodeString getEsetDir();
 	bool getEsetAutoUpdate();
+	bool getEsetUpdateSourceKnown();
+	UnicodeString getEsetLastUpdateDate();
+	bool getEsetLicenseStatus();
+	TDateTime getEsetLicenseDate();
+	bool getEsetLicenseKnown();
+	UnicodeString getEsetProductID();
+	UnicodeString getEsetLicenseKey();
 
 	UnicodeString getInNumberARM();
 	UnicodeString getInNumberHDD();

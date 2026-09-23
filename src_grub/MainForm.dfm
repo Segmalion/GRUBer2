@@ -1755,7 +1755,6 @@
               Align = alClient
               Caption = #1052#1077#1088#1077#1078#1077#1074#1077' '#1079#39#1108#1076#1085#1072#1085#1085#1103':'
               TabOrder = 2
-              ExplicitHeight = 442
               object GridPanel_NetInfo: TGridPanel
                 Left = 2
                 Top = 32
@@ -1829,7 +1828,6 @@
                     Value = 25.000000000000000000
                   end>
                 TabOrder = 0
-                ExplicitHeight = 408
                 DesignSize = (
                   660
                   273)
@@ -1862,7 +1860,6 @@
                   Alignment = taCenter
                   Caption = #1051#1086#1082#1072#1083#1100#1085#1072' IP:'
                   Layout = tlCenter
-                  ExplicitTop = 102
                   ExplicitWidth = 121
                   ExplicitHeight = 30
                 end
@@ -1879,7 +1876,6 @@
                   Alignment = taCenter
                   Caption = 'MAC-'#1072#1076#1088#1077#1089#1072':'
                   Layout = tlCenter
-                  ExplicitTop = 204
                   ExplicitWidth = 125
                   ExplicitHeight = 30
                 end
@@ -1896,7 +1892,6 @@
                   Alignment = taCenter
                   Caption = #1057#1090#1072#1090#1091#1089':'
                   Layout = tlCenter
-                  ExplicitTop = 306
                   ExplicitWidth = 67
                   ExplicitHeight = 30
                 end
@@ -1919,7 +1914,6 @@
                   ParentFont = False
                   TabOrder = 0
                   OnChange = ShowNetNameChange
-                  ExplicitTop = 34
                 end
                 object ShowNetIP: TEdit
                   Left = 173
@@ -1940,7 +1934,6 @@
                   ReadOnly = True
                   TabOrder = 1
                   Text = 'ShowNetIP'
-                  ExplicitTop = 136
                 end
                 object ShowNetMAC: TEdit
                   Left = 173
@@ -1961,7 +1954,6 @@
                   ReadOnly = True
                   TabOrder = 2
                   Text = 'ShowNetMAC'
-                  ExplicitTop = 238
                 end
                 object ShowNetStatus: TEdit
                   Left = 173
@@ -1982,7 +1974,6 @@
                   ReadOnly = True
                   TabOrder = 3
                   Text = 'ShowNetStatus'
-                  ExplicitTop = 340
                 end
               end
             end
@@ -1999,8 +1990,6 @@
               Align = alClient
               Caption = #1040#1042#1055#1047' '#1110#1085#1092#1086':'
               TabOrder = 1
-              ExplicitTop = 860
-              ExplicitHeight = 113
               object GridPanel_EsetInfo: TGridPanel
                 Left = 2
                 Top = 32
@@ -2042,7 +2031,7 @@
                   end
                   item
                     Column = 0
-                    Control = Label22
+                    Control = BtnEditEsetMirrorDir
                     Row = 2
                   end
                   item
@@ -2062,20 +2051,18 @@
                   end>
                 RowCollection = <
                   item
-                    SizeStyle = ssAbsolute
-                    Value = 70.000000000000000000
+                    Value = 25.512867259586540000
                   end
                   item
-                    Value = 33.523095275378480000
+                    Value = 24.716688660126060000
                   end
                   item
-                    Value = 33.317292108921780000
+                    Value = 24.882029374887650000
                   end
                   item
-                    Value = 33.159612615699740000
+                    Value = 24.888414705399750000
                   end>
                 TabOrder = 0
-                ExplicitHeight = 79
                 DesignSize = (
                   660
                   214)
@@ -2084,7 +2071,7 @@
                   Left = 6
                   Top = 6
                   Width = 156
-                  Height = 58
+                  Height = 43
                   Margins.Left = 6
                   Margins.Top = 6
                   Margins.Right = 6
@@ -2094,11 +2081,10 @@
                   Enabled = False
                   TabOrder = 1
                   OnClick = Button_EsetLogsDirClick
-                  ExplicitHeight = 67
                 end
                 object ShowEsetID: TEdit
                   Left = 175
-                  Top = 18
+                  Top = 10
                   Width = 477
                   Height = 34
                   Margins.Left = 6
@@ -2115,28 +2101,27 @@
                   ReadOnly = True
                   TabOrder = 0
                   Text = 'ShowEsetID'
-                  ExplicitTop = 22
                 end
                 object Label21: TLabel
                   AlignWithMargins = True
                   Left = 5
-                  Top = 75
+                  Top = 60
                   Width = 158
-                  Height = 38
+                  Height = 42
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
                   Align = alClient
                   Alignment = taCenter
-                  Caption = #1044#1072#1090#1072' '#1073#1072#1079':'
+                  Caption = #1044#1072#1090#1072' '#1086#1085#1086#1074#1083#1077#1085#1103':'
                   Layout = tlCenter
-                  ExplicitWidth = 89
+                  ExplicitWidth = 149
                   ExplicitHeight = 30
                 end
                 object Show_LastBaseUpdate: TEdit
                   Left = 175
-                  Top = 77
+                  Top = 64
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2153,28 +2138,25 @@
                   ReadOnly = True
                   TabOrder = 2
                   Text = 'Show_LastBaseUpdate'
-                  ExplicitTop = 90
                 end
-                object Label22: TLabel
+                object BtnEditEsetMirrorDir: TButton
                   AlignWithMargins = True
                   Left = 5
-                  Top = 123
+                  Top = 112
                   Width = 158
-                  Height = 38
+                  Height = 44
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
                   Margins.Bottom = 5
                   Align = alClient
-                  Alignment = taCenter
-                  Caption = #1064#1083#1103#1093' '#1086#1085#1086#1074#1083#1077#1085#1103':'
-                  Layout = tlCenter
-                  ExplicitWidth = 155
-                  ExplicitHeight = 30
+                  Caption = #1058#1077#1082#1072' '#1073#1072#1079':'
+                  TabOrder = 5
+                  OnClick = BtnEditEsetMirrorDirClick
                 end
                 object Show_EsetAutoUpdate: TEdit
                   Left = 175
-                  Top = 125
+                  Top = 117
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2191,15 +2173,13 @@
                   ReadOnly = True
                   TabOrder = 3
                   Text = 'Show_EsetAutoUpdate'
-                  ExplicitLeft = 174
-                  ExplicitTop = 127
                 end
                 object Label23: TLabel
                   AlignWithMargins = True
                   Left = 5
-                  Top = 171
+                  Top = 166
                   Width = 158
-                  Height = 38
+                  Height = 43
                   Margins.Left = 5
                   Margins.Top = 5
                   Margins.Right = 5
@@ -2213,7 +2193,7 @@
                 end
                 object Show_EsetLicence: TEdit
                   Left = 175
-                  Top = 173
+                  Top = 170
                   Width = 478
                   Height = 34
                   Margins.Left = 6
@@ -2230,7 +2210,6 @@
                   ReadOnly = True
                   TabOrder = 4
                   Text = 'Show_EsetLicence'
-                  ExplicitTop = 171
                 end
               end
             end
@@ -2334,8 +2313,8 @@
               AlignWithMargins = True
               Left = 6
               Top = 146
-              Width = 664
-              Height = 38
+              Width = 253
+              Height = 30
               Margins.Left = 6
               Margins.Top = 6
               Margins.Right = 6
@@ -2350,8 +2329,6 @@
               ParentFont = False
               Layout = tlBottom
               StyleElements = [seClient, seBorder]
-              ExplicitWidth = 253
-              ExplicitHeight = 30
             end
             object Grid_Users: TStringGrid
               AlignWithMargins = True
@@ -2389,8 +2366,8 @@
               AlignWithMargins = True
               Left = 6
               Top = 456
-              Width = 664
-              Height = 38
+              Width = 185
+              Height = 30
               Margins.Left = 6
               Margins.Top = 6
               Margins.Right = 6
@@ -2405,8 +2382,6 @@
               ParentFont = False
               Layout = tlBottom
               StyleElements = [seClient, seBorder]
-              ExplicitWidth = 185
-              ExplicitHeight = 30
             end
             object Memo1: TMemo
               AlignWithMargins = True
@@ -2697,7 +2672,7 @@
             Margins.Top = 5
             Margins.Right = 5
             Margins.Bottom = 5
-            ActivePage = TabSheet_FileLOGS
+            ActivePage = TabSheet_CurLOGS
             Align = alClient
             MultiLine = True
             TabOrder = 0
@@ -2772,6 +2747,7 @@
                     Value = 100.000000000000000000
                   end>
                 TabOrder = 0
+                ExplicitHeight = 227
                 object ComboBox_FileLOGS: TComboBox
                   AlignWithMargins = True
                   Left = 5
@@ -3549,11 +3525,6 @@
               end
               item
                 Column = 0
-                Control = GroupBox_SetingsESET
-                Row = 1
-              end
-              item
-                Column = 0
                 Control = GridPanel15
                 Row = 3
               end
@@ -3785,70 +3756,6 @@
                 OnClick = CheckBox_TempDirClick
               end
             end
-            object GroupBox_SetingsESET: TGroupBox
-              AlignWithMargins = True
-              Left = 6
-              Top = 446
-              Width = 664
-              Height = 169
-              Margins.Left = 6
-              Margins.Top = 6
-              Margins.Right = 6
-              Margins.Bottom = 6
-              Align = alClient
-              Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1085#1103' '#1086#1085#1086#1074#1083#1077#1085#1085#1103' ESET ('#1076#1083#1103' '#1087#1086#1090#1086#1095#1085#1086#1075#1086' '#1055#1050')'
-              TabOrder = 1
-              object EditEsetMirrorDir: TLabeledEdit
-                Left = 25
-                Top = 70
-                Width = 354
-                Height = 38
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                EditLabel.Width = 137
-                EditLabel.Height = 30
-                EditLabel.Margins.Left = 151
-                EditLabel.Margins.Top = 151
-                EditLabel.Margins.Right = 151
-                EditLabel.Margins.Bottom = 151
-                EditLabel.Caption = #1058#1077#1082#1072' '#1076#1083#1103' '#1073#1072#1079#1080':'
-                Enabled = False
-                TabOrder = 0
-                Text = 'C:\ESET\mirror'
-                OnChange = EditEsetMirrorDirChange
-              end
-              object BtnEditEsetMirrorDir: TButton
-                Left = 403
-                Top = 42
-                Width = 248
-                Height = 113
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                Caption = #1047#1084#1110#1085#1080#1090#1080' '#1090#1077#1082#1091
-                Enabled = False
-                TabOrder = 1
-                OnClick = BtnEditEsetMirrorDirClick
-              end
-              object CheckBoxEsetAutoUpdate: TCheckBox
-                Left = 25
-                Top = 120
-                Width = 354
-                Height = 31
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                Caption = #1040#1074#1090#1086'-'#1086#1085#1086#1074#1083#1077#1085#1085#1103' ('#1095#1077#1088#1077#1079' '#1084#1077#1088#1077#1078#1091')'
-                Checked = True
-                State = cbChecked
-                TabOrder = 2
-                OnClick = CheckBoxEsetAutoUpdateClick
-              end
-            end
             object GridPanel15: TGridPanel
               Left = 0
               Top = 868
@@ -3954,7 +3861,7 @@
               Margins.Bottom = 6
               Align = alClient
               Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1103' '#1055#1054
-              TabOrder = 3
+              TabOrder = 1
               object GridPanel4: TGridPanel
                 Left = 2
                 Top = 32
@@ -4358,7 +4265,6 @@
     FavoriteLinks = <>
     FileTypes = <>
     Options = [fdoPickFolders, fdoForceFileSystem, fdoPathMustExist, fdoDontAddToRecent]
-    OnFileOkClick = DirOpenEsetMirrorFileOkClick
     Left = 1073
     Top = 726
   end

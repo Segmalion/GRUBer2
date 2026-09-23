@@ -69,11 +69,6 @@ __published:	// IDE-managed Components
 	TCheckBox *CheckBoxNewGrub;
 	TCheckBox *CheckBoxLicense;
 	TButton *BtnEditStructures;
-	TGroupBox *GroupBox_SetingsESET;
-	TLabeledEdit *EditEsetMirrorDir;
-	TButton *BtnEditEsetMirrorDir;
-	TCheckBox *CheckBoxEsetAutoUpdate;
-	TFileOpenDialog *DirOpenEsetMirror;
 	TGridPanel *GridPanel_Soft;
 	TGroupBox *GroupBox_AppInfo;
 	TGridPanel *GridPanel9;
@@ -232,10 +227,11 @@ __published:	// IDE-managed Components
 	TRichEdit *RichEdit_FileLOGS;
 	TLabel *Label21;
 	TEdit *Show_LastBaseUpdate;
-	TLabel *Label22;
+	TButton *BtnEditEsetMirrorDir;
 	TEdit *Show_EsetAutoUpdate;
 	TLabel *Label23;
 	TEdit *Show_EsetLicence;
+	TFileOpenDialog *DirOpenEsetMirror;
 	void __fastcall CheckBoxDebugClick(TObject *Sender);
 	void __fastcall CheckBox_TempDirClick(TObject *Sender);
 	void __fastcall BtnGruberRunClick(TObject *Sender);
@@ -259,12 +255,9 @@ __published:	// IDE-managed Components
 	void __fastcall CheckBoxOldGrubClick(TObject *Sender);
 	void __fastcall CheckBoxNewGrubClick(TObject *Sender);
 	void __fastcall CheckBoxLicenseClick(TObject *Sender);
-	void __fastcall CheckBoxEsetAutoUpdateClick(TObject *Sender);
-	void __fastcall EditEsetMirrorDirChange(TObject *Sender);
 	void __fastcall BtnEsetUpdateClick(TObject *Sender);
 	void __fastcall BtnEsetDownloadClick(TObject *Sender);
 	void __fastcall BtnEditEsetMirrorDirClick(TObject *Sender);
-	void __fastcall DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose);
 	void __fastcall BtnDevListerOpenClick(TObject *Sender);
 	void __fastcall BtnKiberConsolOpenClick(TObject *Sender);
 	void __fastcall BtnLicenseClick(TObject *Sender);
@@ -357,6 +350,7 @@ public:		// User declarations
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;
 
+class Arm;
 std::vector<UnicodeString> fileInfoGrub();
 void changeEditDirColor();
 // оновлює ShowNetIP/ShowNetMAC/ShowNetStatus за адаптером, обраним в ShowNetName
@@ -411,6 +405,10 @@ void applyUsersDefection(const UsersDefectionResult &r);
 void applyEsetDefection(const EsetDefectionResult &r);
 void applyDefectionLabels(const DefectionResult &r);
 void applyEsetInfo(const EsetInfoResult &r);
+// Пише 3 поля Show_*/BtnEsetUpdate/статус-бар з поточного curPC.eset. live,
+// якщо переданий, дає причину невдачі для ще не визначеного джерела оновлень
+// (nullptr - стартове наповнення з кешу, ще без спроби живої перевірки).
+void applyEsetToForm(Arm &curPC, const EsetInfoResult *live = nullptr);
 
 void showSoft();
 void showUsers();

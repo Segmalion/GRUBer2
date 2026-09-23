@@ -454,10 +454,88 @@ void applyEsetDefection(const EsetDefectionResult &r) {
 	curDefection.quarantineDirs = r.quarantineDirs;
 	Form1->Button_OpenQuarantine->Enabled = !r.quarantineDirs.empty();
 }
+// "dd.MM.yyyy HH:mm" (той самий формат, що пише formatErmmDate()/registryGetUpdateDate()/
+// BtnEsetUpdateClick) -> TDateTime; TDateTime(0.0), якщо не розпарсилось.
+static TDateTime parseLastUpdateDate(const UnicodeString &s)
+{
+	if (s.Length() < 16) return TDateTime(0.0);
+	int day = s.SubString(1, 2).ToIntDef(0);
+	int month = s.SubString(4, 2).ToIntDef(0);
+	int year = s.SubString(7, 4).ToIntDef(0);
+	int hour = s.SubString(12, 2).ToIntDef(0);
+	int minute = s.SubString(15, 2).ToIntDef(0);
+	if (day == 0 || month == 0 || year == 0) return TDateTime(0.0);
+	try {
+		return EncodeDate((unsigned short)year, (unsigned short)month, (unsigned short)day)
+			+ EncodeTime((unsigned short)hour, (unsigned short)minute, 0, 0);
+	} catch (const Exception &) {
+		return TDateTime(0.0);
+	}
+}
+
+void applyEsetToForm(Arm &curPC, const EsetInfoResult *live) {
+	UnicodeString notFoundReason = (live && !live->esetFound) ? UnicodeString(L"Не знайдено") : UnicodeString(L"Не вдалося визначити");
+
+	Form1->Show_LastBaseUpdate->Text = curPC.getEsetLastUpdateDate().IsEmpty()
+		? notFoundReason : curPC.getEsetLastUpdateDate();
+
+	TDateTime lastUpdate = parseLastUpdateDate(curPC.getEsetLastUpdateDate());
+	if (lastUpdate == TDateTime(0.0)) {
+		Form1->Show_LastBaseUpdate->Color = clWindow;
+	} else {
+		double daysOld = double(Now()) - double(lastUpdate);
+		if (daysOld > 30) Form1->Show_LastBaseUpdate->Color = (TColor)0x00A295FE;      // червоний
+		else if (daysOld >= 7) Form1->Show_LastBaseUpdate->Color = (TColor)0x00C4F9FD; // блідо-жовтий
+		else Form1->Show_LastBaseUpdate->Color = (TColor)0x00C9F6E1;                   // зелений
+	}
+
+	if (curPC.getEsetUpdateSourceKnown()) {
+		Form1->Show_EsetAutoUpdate->Text = curPC.getEsetAutoUpdate()
+			? UnicodeString(L"Автоматично / мережа") : curPC.getEsetDir();
+	} else {
+		UnicodeString reason = live ? live->updateSourceFailReason : UnicodeString();
+		Form1->Show_EsetAutoUpdate->Text = reason.IsEmpty() ? notFoundReason : reason;
+	}
+
+	UnicodeString licenseText;
+	if (!curPC.getEsetLicenseKnown()) {
+		licenseText = L"Не визначено";
+		Form1->Show_EsetLicence->Color = clWindow;
+	} else if (curPC.getEsetLicenseStatus()) {
+		licenseText = (curPC.getEsetLicenseDate() == TDateTime(0.0))
+			? UnicodeString(L"Активно")
+			: (UnicodeString(L"Активно до ") + curPC.getEsetLicenseDate().FormatString("dd.MM.yyyy"));
+		Form1->Show_EsetLicence->Color = (TColor)0x00C9F6E1; // зелений
+	} else {
+		licenseText = L"Не активно";
+		Form1->Show_EsetLicence->Color = (TColor)0x00A295FE; // червоний
+	}
+	if (!curPC.getEsetLicenseKey().IsEmpty()) licenseText += L" (" + curPC.getEsetLicenseKey() + L")";
+	Form1->Show_EsetLicence->Text = licenseText;
+
+	Form1->ShowEsetID->Text = curPC.getEsetProductID().IsEmpty()
+		? UnicodeString(L"Не знайдено") : curPC.getEsetProductID();
+
+	Form1->BtnEsetUpdate->Enabled = curPC.getEsetUpdateSourceKnown() && !curPC.getEsetAutoUpdate();
+	Form1->StatusBar1->Panels->Items[1]->Text = curPC.getEsetAutoUpdate()
+		? UnicodeString(L" ESET оновлюеться самостійно") : UnicodeString(L" Бази не оновлювалися");
+}
 void applyEsetInfo(const EsetInfoResult &r) {
-	Form1->Show_LastBaseUpdate->Text = r.lastUpdateDate;
-	Form1->Show_EsetAutoUpdate->Text = r.updateSource;
-	Form1->Show_EsetLicence->Text = r.licenseStatus;
+	if (r.hasUpdateDate) curPC.setEsetLastUpdateDate(r.lastUpdateDate);
+	if (r.hasUpdateSource) {
+		curPC.setEsetDir(r.dirMirror);
+		curPC.setEsetAutoUpdate(r.autoUpdate);
+		curPC.setEsetUpdateSourceKnown(true);
+	}
+	if (r.hasLicenseStatus) {
+		curPC.setEsetLicenseStatus(r.licenseActive);
+		curPC.setEsetLicenseDate(r.licenseDate);
+		curPC.setEsetLicenseKey(r.licenseKey);
+		curPC.setEsetLicenseKnown(true);
+	}
+	if (r.hasProductID) curPC.setEsetProductID(r.productID);
+	applyEsetToForm(curPC, &r);
+	if (gruberStart) infoSetToFille(curPC);
 }
 void applyDefectionLabels(const DefectionResult &r) {
 	applySoftDefection(r.soft);
@@ -507,10 +585,14 @@ void checkEsetInfo() {
 	applyEsetInfo(computeEsetInfo());
 }
 void checkEsetInfoAsync() {
+	// setInfoArmToForm() уже показав кешовані значення з gruber_info.ini (якщо
+	// вони є) - плейсхолдер "зачекайте" лише для полів, де кешу ще нема, щоб не
+	// затирати вже показане кешоване значення на час живої перевірки.
 	UnicodeString wait = L"Отримую дані, зачекайте...";
-	Form1->Show_LastBaseUpdate->Text = wait;
-	Form1->Show_EsetAutoUpdate->Text = wait;
-	Form1->Show_EsetLicence->Text = wait;
+	if (curPC.getEsetLastUpdateDate().IsEmpty()) Form1->Show_LastBaseUpdate->Text = wait;
+	if (!curPC.getEsetUpdateSourceKnown()) Form1->Show_EsetAutoUpdate->Text = wait;
+	if (!curPC.getEsetLicenseKnown()) Form1->Show_EsetLicence->Text = wait;
+	if (curPC.getEsetProductID().IsEmpty()) Form1->ShowEsetID->Text = wait;
 	TThread::CreateAnonymousThread([]() {
 		EsetInfoResult r = computeEsetInfo();
 		TThread::Synchronize(NULL, [r]() { applyEsetInfo(r); });
@@ -621,6 +703,10 @@ void __fastcall TForm1::FormShow(TObject *Sender)
 		Button_RestartAssAdmin->Enabled = false;
 		BtnClearPC->Enabled = true;
 		admMode = "AdminMode";
+		// лікуємо права на теку GRUBer-а - і для щойно створеної, і для вже
+		// наявної з попередніх версій/помилок, де Users міг лишитись без
+		// запису (icacls з /T рекурсивно чіпляє все, що вже лежить всередині)
+		ensureDirWithAccess("C:\\ProgramData\\GRUBer");
 	} else {
 		printLogDebug(L"Запущено без прав Адміністратора!");
 		int number = Form1->Edit_NumberARM->Value;
@@ -832,15 +918,6 @@ void __fastcall TForm1::Button_RestartAssAdminClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 /* Обновление ESET */
-void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
-{
-	DirOpenEsetMirror->DefaultFolder = EditEsetMirrorDir->Text;
-	DirOpenEsetMirror->Execute();
-}
-void __fastcall TForm1::DirOpenEsetMirrorFileOkClick(TObject *Sender, bool &CanClose)
-{
-	EditEsetMirrorDir->Text = DirOpenEsetMirror->FileName;
-}
 void __fastcall TForm1::CheckBox_ShowEsetUpdateClick(TObject *Sender)
 {
 	curConfig.setShowEsetUpd(CheckBox_ShowEsetUpdate->Checked);
@@ -886,7 +963,7 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	UnicodeString esetUpdDirStr = esetUpdDir.wstring().c_str();
 	ensureDirWithAccess(esetUpdDirStr);
 	if (!warnIfNoAccess(esetUpdDirStr)) {
-		BtnEsetUpdate->Enabled = true;
+		BtnEsetUpdate->Enabled = curPC.getEsetUpdateSourceKnown() && !curPC.getEsetAutoUpdate();
 		StatusBar1->Panels->Items[1]->Text = L" Немає доступу до теки ESET mirror!";
 		return;
 	}
@@ -898,7 +975,7 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 		std::error_code ec;
 		fs::remove_all(esetUpdDir, ec);
 		if (ec) {
-			BtnEsetUpdate->Enabled = true;
+			BtnEsetUpdate->Enabled = curPC.getEsetUpdateSourceKnown() && !curPC.getEsetAutoUpdate();
 			StatusBar1->Panels->Items[1]->Text = L" Не вдалось очистити стару теку ESET mirror (немає прав)!";
 			printLog("!!", L"ESET-Update: не вдалось видалити стару теку " + esetUpdDirStr + " - " + UnicodeString(ec.message().c_str()));
 			return;
@@ -928,17 +1005,24 @@ void __fastcall TForm1::BtnEsetUpdateClick(TObject *Sender)
 	if (esetBaseUnpack.checkErr()){
 		//ошибочка вышла...
 		printLog("!!", L"ESET-Update: Щось пішло НЕ так...");
-		BtnEsetUpdate->Enabled = true;
+		BtnEsetUpdate->Enabled = curPC.getEsetUpdateSourceKnown() && !curPC.getEsetAutoUpdate();
 		return;
 	}
 	printLog("OK", L"ESET-Update: Бази оновленно!");
-    BtnEsetUpdate->Enabled = true;
 	StatusBar1->Panels->Items[1]->Text = L" Бази оновленно!";
 	if (FileExists("c:\\Program Files\\ESET\\ESET Security\\ermm.exe")) {
 		RunApp esetBaseUpdate {"c:\\Program Files\\ESET\\ESET Security\\ermm.exe",
 			NULL, "start update"};
 		esetBaseUpdate.run();
 	}
+	// ermm "start update" лише запускає оновлення в сервісі ESET асинхронно -
+	// реальний результат прийде тільки з наступним checkEsetInfoAsync(), тож
+	// тут відзначаємо "оновлено щойно" оптимістично, одразу в UI та в кеш.
+	curPC.setEsetLastUpdateDate(Now().FormatString("dd.MM.yyyy HH:mm"));
+	if (gruberStart) infoSetToFille(curPC);
+	// applyEsetToForm() - а не пряме присвоєння Show_LastBaseUpdate->Text -
+	// щоб заразом перерахувався і фон поля (вік дати змінився на "щойно").
+	applyEsetToForm(curPC);
 }
 // === завантаження баз ESET (тягне update_full.zip, сортує й пакує в
 // update_x64.* - те, що потім розпаковує BtnEsetUpdateClick вище).
@@ -958,6 +1042,21 @@ void __fastcall TForm1::BtnEsetDownloadClick(TObject *Sender)
 	BtnEsetDownload->Caption = L"Зупинити завантаження";
 	Th_EsetDownload *Thr = new Th_EsetDownload(true);
 	Thr->Resume();
+}
+// === ручне вказання теки-дзеркала ESET, коли автовизначення (ermm/реєстр) не
+// спрацювало ні разу - єдиний спосіб для техніка сказати GRUBer, звідки саме
+// ESET реально бере бази. Діалог приймає лише вже наявні теки (fdoPathMustExist).
+void __fastcall TForm1::BtnEditEsetMirrorDirClick(TObject *Sender)
+{
+	DirOpenEsetMirror->DefaultFolder = curPC.getEsetDir();
+	if (!DirOpenEsetMirror->Execute()) return;
+	UnicodeString dir = DirOpenEsetMirror->FileName;
+	if (!DirectoryExists(dir)) return; // подвійна страховка понад fdoPathMustExist
+	curPC.setEsetDir(dir);
+	curPC.setEsetAutoUpdate(false);
+	curPC.setEsetUpdateSourceKnown(true);
+	applyEsetToForm(curPC);
+	if (gruberStart) infoSetToFille(curPC);
 }
 //---------------------------------------------------------------------------
 /* Изменение полей */
@@ -1054,11 +1153,6 @@ void __fastcall TForm1::EditDirGrubNameChange(TObject *Sender)
 void __fastcall TForm1::EditGrubUserChange(TObject *Sender)
 {
 	curConfig.setUser(Form1->EditGrubUser->Text);
-}
-void __fastcall TForm1::EditEsetMirrorDirChange(TObject *Sender)
-{
-	curPC.setEsetDir(Form1->EditEsetMirrorDir->Text);
-	if(gruberStart) infoSetToFille(curPC);
 }
 /* Изменение полей на GRUBer+*/
 void __fastcall TForm1::Edit_InNumberARMChange(TObject *Sender)
@@ -1198,18 +1292,6 @@ void __fastcall TForm1::CheckBoxNewGrubClick(TObject *Sender)
 void __fastcall TForm1::CheckBoxLicenseClick(TObject *Sender)
 {
 	curConfig.setLicense(CheckBoxLicense->Checked);
-}
-void __fastcall TForm1::CheckBoxEsetAutoUpdateClick(TObject *Sender)
-{
-	bool i = Form1->CheckBoxEsetAutoUpdate->Checked;
-	if(Form1->CheckBoxEsetAutoUpdate->Checked)
-		StatusBar1->Panels->Items[1]->Text = L" ESET оновлюеться самостійно";
-	else StatusBar1->Panels->Items[1]->Text = L" Бази не оновлювалися";
-	Form1->EditEsetMirrorDir->Enabled = !i;
-	Form1->BtnEditEsetMirrorDir->Enabled = !i;
-	Form1->BtnEsetUpdate->Enabled = !i;
-	curPC.setEsetAutoUpdate(i);
-	if(gruberStart) infoSetToFille(curPC);
 }
 void __fastcall TForm1::ComboBox_DefStructurChange(TObject *Sender)
 {
