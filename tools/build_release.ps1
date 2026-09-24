@@ -104,7 +104,9 @@ if ($Publish) {
         # першій вбудованій "). Тому текст пишемо у файл і передаємо
         # --notes-file - це єдиний спосіб, не залежний від argv-квотування.
         $notesFile = Join-Path $ghStageDir "notes.txt"
-        [System.IO.File]::WriteAllText($notesFile, $releaseNotes, [System.Text.Encoding]::UTF8)
+        # UTF-8 без BOM: [Text.Encoding]::UTF8 пише BOM, і gh передає його в
+        # body релізу як є - зайвий символ на початку "Що нового" в GRUBer.exe.
+        [System.IO.File]::WriteAllText($notesFile, $releaseNotes, (New-Object System.Text.UTF8Encoding $false))
         & gh release create $commit --repo $ghRepo --title $releaseTitle --notes-file $notesFile @ghAssets
         $ghExit = $LASTEXITCODE
         Remove-Item -LiteralPath $ghStageDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -127,9 +129,12 @@ if ($Publish) {
             draft            = $false
             prerelease       = $false
         } | ConvertTo-Json
+        # PowerShell 5.1 кодує рядковий -Body як ISO-8859-1 - кирилиця в notes
+        # перетворилась би на "?". Передаємо байти UTF-8 (без BOM) явно.
+        $bodyBytes = (New-Object System.Text.UTF8Encoding $false).GetBytes($body)
         $release = Invoke-RestMethod -Method Post `
             -Uri "https://api.github.com/repos/$ghRepo/releases" `
-            -Headers $headers -Body $body -ContentType "application/json"
+            -Headers $headers -Body $bodyBytes -ContentType "application/json; charset=utf-8"
 
         foreach ($asset in $assets) {
             $name = [System.IO.Path]::GetFileName($asset)
