@@ -3527,11 +3527,6 @@
                 Column = 0
                 Control = GridPanel15
                 Row = 3
-              end
-              item
-                Column = 0
-                Control = GroupBox1
-                Row = 2
               end>
             RowCollection = <
               item
@@ -3849,94 +3844,6 @@
                 OnClick = BtnSaveSetteingsClick
               end
             end
-            object GroupBox1: TGroupBox
-              AlignWithMargins = True
-              Left = 6
-              Top = 627
-              Width = 664
-              Height = 235
-              Margins.Left = 6
-              Margins.Top = 6
-              Margins.Right = 6
-              Margins.Bottom = 6
-              Align = alClient
-              Caption = #1053#1072#1083#1072#1096#1090#1091#1074#1072#1085#1103' '#1055#1054
-              TabOrder = 1
-              object GridPanel4: TGridPanel
-                Left = 2
-                Top = 32
-                Width = 660
-                Height = 201
-                Margins.Left = 6
-                Margins.Top = 6
-                Margins.Right = 6
-                Margins.Bottom = 6
-                Align = alClient
-                BevelOuter = bvNone
-                ColumnCollection = <
-                  item
-                    Value = 30.747922437673130000
-                  end
-                  item
-                    Value = 69.252077562326870000
-                  end>
-                ControlCollection = <
-                  item
-                    Column = 0
-                    Control = Label12
-                    Row = 0
-                  end
-                  item
-                    Column = 1
-                    Control = ComboBox_ThemeChange
-                    Row = 0
-                  end>
-                RowCollection = <
-                  item
-                    SizeStyle = ssAbsolute
-                    Value = 48.000000000000000000
-                  end
-                  item
-                    Value = 100.000000000000000000
-                  end>
-                TabOrder = 0
-                object Label12: TLabel
-                  AlignWithMargins = True
-                  Left = 6
-                  Top = 6
-                  Width = 191
-                  Height = 36
-                  Margins.Left = 6
-                  Margins.Top = 6
-                  Margins.Right = 6
-                  Margins.Bottom = 6
-                  Align = alClient
-                  Caption = #1058#1077#1084#1072' '#1074#1110#1082#1085#1072':'
-                  ExplicitWidth = 108
-                  ExplicitHeight = 30
-                end
-                object ComboBox_ThemeChange: TComboBox
-                  AlignWithMargins = True
-                  Left = 209
-                  Top = 6
-                  Width = 445
-                  Height = 38
-                  Margins.Left = 6
-                  Margins.Top = 6
-                  Margins.Right = 6
-                  Margins.Bottom = 6
-                  Align = alClient
-                  Style = csDropDownList
-                  Enabled = False
-                  ItemIndex = 0
-                  TabOrder = 0
-                  Text = #1057#1074#1110#1090#1083#1072' '#1090#1077#1084#1072
-                  Items.Strings = (
-                    #1057#1074#1110#1090#1083#1072' '#1090#1077#1084#1072
-                    #1058#1077#1084#1085#1072' '#1090#1077#1084#1072)
-                end
-              end
-            end
           end
         end
       end
@@ -4224,6 +4131,7 @@
           Margins.Bottom = 5
           Align = alClient
           Caption = '[WIP] BtnJobs'
+          Enabled = False
           TabOrder = 10
         end
       end

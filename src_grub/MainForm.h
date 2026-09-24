@@ -198,10 +198,6 @@ __published:	// IDE-managed Components
 	TEdit *ShowEsetID;
 	TButton *Button_CheckDefection;
 	TMenuItem *Gruber_USB;
-	TGroupBox *GroupBox1;
-	TGridPanel *GridPanel4;
-	TLabel *Label12;
-	TComboBox *ComboBox_ThemeChange;
 	TGroupBox *GroupBox_SPZ;
 	TCheckListBox *CheckListBox_SPZ;
 	TComboBox *ComboBox_PoliticInstall;
